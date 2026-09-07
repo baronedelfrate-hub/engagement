@@ -25,7 +25,7 @@ export const PendenciasProvider = ({ children }) => {
         .select(`
           *,
           empresa:empresas(id, razao_social, nome_fantasia),
-          responsavel:users(id, nome, email)
+          responsavel:users!pendencias_contabeis_responsavel_id_fkey(id, nome, email)
         `)
         .order('created_at', { ascending: false });
 
@@ -78,7 +78,7 @@ export const PendenciasProvider = ({ children }) => {
         .select(`
           *,
           empresa:empresas(id, razao_social, nome_fantasia),
-          responsavel:users(id, nome, email)
+          responsavel:users!pendencias_contabeis_responsavel_id_fkey(id, nome, email)
         `)
         .eq('id', id)
         .single();

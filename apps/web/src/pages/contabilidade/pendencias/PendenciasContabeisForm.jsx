@@ -92,21 +92,21 @@ export default function PendenciasContabeisForm() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-800">{id ? "Editar Pendência" : "Nova Pendência Contábil"}</h2>
+        <h2 className="text-xl font-semibold text-foreground">{id ? "Editar Pendência" : "Nova Pendência Contábil"}</h2>
       </div>
 
       <form onSubmit={handleSave}>
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="bg-slate-50 border-b border-slate-100">
-            <CardTitle className="text-lg text-slate-800">Detalhes da Pendência</CardTitle>
+        <Card className="border-border shadow-sm">
+          <CardHeader className="bg-muted border-b border-border">
+            <CardTitle className="text-lg text-foreground">Detalhes da Pendência</CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Empresa *</Label>
+                <Label className="text-foreground">Empresa *</Label>
                 <Select value={formData.empresa_id} onValueChange={(v) => handleChange('empresa_id', v)} required>
-                  <SelectTrigger className="bg-white text-slate-900"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome_fantasia || e.razao_social}</SelectItem>)}
                   </SelectContent>
@@ -114,12 +114,12 @@ export default function PendenciasContabeisForm() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Competência (Mês/Ano) *</Label>
+                <Label className="text-foreground">Competência (Mês/Ano) *</Label>
                 <Input 
                   type="month" 
                   value={formData.competencia}
                   onChange={(e) => handleChange('competencia', e.target.value)}
-                  className="bg-white text-slate-900"
+                  className="bg-background text-foreground"
                   required
                 />
               </div>
@@ -127,9 +127,9 @@ export default function PendenciasContabeisForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Tipo de Pendência *</Label>
+                <Label className="text-foreground">Tipo de Pendência *</Label>
                 <Select value={formData.tipo} onValueChange={(v) => handleChange('tipo', v)} required>
-                  <SelectTrigger className="bg-white text-slate-900"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {getTipoOptions().map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                   </SelectContent>
@@ -137,11 +137,11 @@ export default function PendenciasContabeisForm() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Origem (Doc/Área) *</Label>
+                <Label className="text-foreground">Origem (Doc/Área) *</Label>
                 <Input 
                   value={formData.origem}
                   onChange={(e) => handleChange('origem', e.target.value)}
-                  className="bg-white text-slate-900"
+                  className="bg-background text-foreground"
                   placeholder="Ex: Banco Itaú, NF 1234..."
                   required
                 />
@@ -149,11 +149,11 @@ export default function PendenciasContabeisForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Descrição Detalhada *</Label>
+              <Label className="text-foreground">Descrição Detalhada *</Label>
               <Textarea 
                 value={formData.descricao}
                 onChange={(e) => handleChange('descricao', e.target.value)}
-                className="min-h-[100px] bg-white text-slate-900"
+                className="min-h-[100px] bg-background text-foreground"
                 placeholder="Descreva o problema ou solicitação..."
                 required
               />
@@ -161,9 +161,9 @@ export default function PendenciasContabeisForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Responsável</Label>
+                <Label className="text-foreground">Responsável</Label>
                 <Select value={formData.responsavel_id} onValueChange={(v) => handleChange('responsavel_id', v)}>
-                  <SelectTrigger className="bg-white text-slate-900"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Não atribuído</SelectItem>
                     {users.map(u => <SelectItem key={u.id} value={u.id}>{u.nome || u.email}</SelectItem>)}
@@ -172,20 +172,20 @@ export default function PendenciasContabeisForm() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Prazo de Resolução *</Label>
+                <Label className="text-foreground">Prazo de Resolução *</Label>
                 <Input 
                   type="date" 
                   value={formData.prazo}
                   onChange={(e) => handleChange('prazo', e.target.value)}
-                  className="bg-white text-slate-900"
+                  className="bg-background text-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Status *</Label>
+                <Label className="text-foreground">Status *</Label>
                 <Select value={formData.status} onValueChange={(v) => handleChange('status', v)} required>
-                  <SelectTrigger className="bg-white text-slate-900"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectTrigger className="bg-background text-foreground"><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
                     {getStatusOptions().map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
@@ -194,17 +194,17 @@ export default function PendenciasContabeisForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Observações Internas</Label>
+              <Label className="text-foreground">Observações Internas</Label>
               <Textarea 
                 value={formData.observacoes}
                 onChange={(e) => handleChange('observacoes', e.target.value)}
-                className="min-h-[80px] bg-white text-slate-900"
+                className="min-h-[80px] bg-background text-foreground"
                 placeholder="Anotações para a equipe..."
               />
             </div>
 
           </CardContent>
-          <CardFooter className="bg-slate-50 border-t border-slate-100 p-4 flex justify-between">
+          <CardFooter className="bg-muted border-t border-border p-4 flex justify-between">
             <Button type="button" variant="outline" onClick={() => navigate('/contabilidade/pendencias')}>
               <ArrowLeft className="w-4 h-4 mr-2" /> Cancelar
             </Button>

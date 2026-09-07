@@ -99,12 +99,12 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
     <div className="space-y-6">
       
       {/* FILTER BAR */}
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4 flex flex-wrap gap-4 items-end">
           <div className="w-full md:w-64 space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Busca Livre</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Busca Livre</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Descrição ou origem..." 
                 value={filters.search}
@@ -115,7 +115,7 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
           </div>
 
           <div className="w-full md:w-56 space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Empresa</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Empresa</label>
             <Select value={filters.empresa_id} onValueChange={(v) => setFilters(prev => ({ ...prev, empresa_id: v }))}>
               <SelectTrigger><SelectValue placeholder="Todas as Empresas" /></SelectTrigger>
               <SelectContent>
@@ -128,7 +128,7 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
           </div>
 
           <div className="w-full md:w-40 space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Competência</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Competência</label>
             <Input 
               type="month" 
               value={filters.competencia}
@@ -137,7 +137,7 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
           </div>
 
           <div className="w-full md:w-40 space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Tipo</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Tipo</label>
             <Select value={filters.tipo} onValueChange={(v) => setFilters(prev => ({ ...prev, tipo: v }))}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
@@ -150,7 +150,7 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
           </div>
 
           <div className="w-full md:w-40 space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase">Status</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase">Status</label>
             <Select value={filters.status} onValueChange={(v) => setFilters(prev => ({ ...prev, status: v }))}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
@@ -162,7 +162,7 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
             </Select>
           </div>
 
-          <Button variant="outline" onClick={handleSync} disabled={syncing} className="ml-auto text-blue-600 border-blue-200 hover:bg-blue-50">
+          <Button variant="outline" onClick={handleSync} disabled={syncing} className="ml-auto text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-950/30">
             {syncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
             Sincronizar Módulos
           </Button>
@@ -171,13 +171,13 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
 
       {/* BULK ACTIONS TOOLBAR */}
       {selectedIds.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-800 ml-2">{selectedIds.length} documento(s) selecionado(s)</span>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between dark:bg-blue-950/30 dark:border-blue-800">
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-400 ml-2">{selectedIds.length} documento(s) selecionado(s)</span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" className="bg-white" onClick={() => openBulkAction('enviar', 'Enviar Lote à Contabilidade')}>
+            <Button size="sm" variant="outline" className="bg-background" onClick={() => openBulkAction('enviar', 'Enviar Lote à Contabilidade')}>
               <Send className="w-4 h-4 mr-2" /> Enviar
             </Button>
-            <Button size="sm" variant="outline" className="bg-white" onClick={() => openBulkAction('conferir', 'Conferir Lote')}>
+            <Button size="sm" variant="outline" className="bg-background" onClick={() => openBulkAction('conferir', 'Conferir Lote')}>
               <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Conferir
             </Button>
           </div>
@@ -185,10 +185,10 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
       )}
 
       {/* TABLE */}
-      <Card className="border-slate-200 shadow-sm overflow-hidden">
+      <Card className="border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-muted">
               <TableRow>
                 <TableHead className="w-12 text-center">
                   <Checkbox 
@@ -206,12 +206,12 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-12 text-slate-500"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />Carregando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />Carregando...</TableCell></TableRow>
               ) : documents.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-12 text-slate-500">Nenhum documento encontrado.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground">Nenhum documento encontrado.</TableCell></TableRow>
               ) : (
                 documents.map((doc) => (
-                  <TableRow key={doc.id} className="hover:bg-slate-50">
+                  <TableRow key={doc.id} className="hover:bg-muted">
                     <TableCell className="text-center">
                       <Checkbox 
                         checked={selectedIds.includes(doc.id)}
@@ -220,28 +220,28 @@ export default function DocumentosContabilidadeList({ filters, setFilters, empre
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="text-slate-400">{getDocumentTypeIcon(doc.tipo)}</div>
+                        <div className="text-muted-foreground">{getDocumentTypeIcon(doc.tipo)}</div>
                         <div>
-                          <p className="font-medium text-slate-800 text-sm">{doc.tipo}</p>
-                          <p className="text-xs text-slate-500">{doc.origem}</p>
+                          <p className="font-medium text-foreground text-sm">{doc.tipo}</p>
+                          <p className="text-xs text-muted-foreground">{doc.origem}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate" title={doc.descricao}>{doc.descricao}</TableCell>
-                    <TableCell className="font-medium text-slate-700">{formatCompetencia(doc.competencia)}</TableCell>
+                    <TableCell className="font-medium text-foreground">{formatCompetencia(doc.competencia)}</TableCell>
                     <TableCell><Badge className={getStatusColor(doc.status)}>{doc.status}</Badge></TableCell>
-                    <TableCell className="text-slate-600 text-sm">{doc.data_envio ? format(new Date(doc.data_envio), 'dd/MM/yyyy') : '-'}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{doc.data_envio ? format(new Date(doc.data_envio), 'dd/MM/yyyy') : '-'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
                         {doc.arquivo_url && (
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-emerald-600" title="Baixar" onClick={() => window.open(doc.arquivo_url, '_blank')}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" title="Baixar" onClick={() => window.open(doc.arquivo_url, '_blank')}>
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600" title="Ver Detalhes" onClick={() => navigate(`/contabilidade/documentos/${doc.id}`)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600" title="Ver Detalhes" onClick={() => navigate(`/contabilidade/documentos/${doc.id}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100" title="Editar" onClick={() => navigate(`/contabilidade/documentos/${doc.id}/editar`)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted" title="Editar" onClick={() => navigate(`/contabilidade/documentos/${doc.id}/editar`)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>

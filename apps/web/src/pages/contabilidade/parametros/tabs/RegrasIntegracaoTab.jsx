@@ -15,7 +15,7 @@ export default function RegrasIntegracaoTab() {
           <Plus className="w-4 h-4 mr-2" /> Nova Regra
         </Button>
       </div>
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -42,7 +42,7 @@ export default function RegrasIntegracaoTab() {
               </TableRow>
             ))}
             {data.regras.length === 0 && (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">Nenhuma regra configurada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma regra configurada.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

@@ -29,18 +29,18 @@ export default function DREBalanceteFilters() {
   };
 
   return (
-    <Card className="border-slate-200 shadow-sm mb-6">
+    <Card className="border-border shadow-sm mb-6">
       <CardContent className="p-4 space-y-4">
-        <div className="flex items-center gap-2 mb-2 text-slate-800 font-semibold border-b border-slate-100 pb-2">
+        <div className="flex items-center gap-2 mb-2 text-foreground font-semibold border-b border-border pb-2">
           <Filter className="w-5 h-5 text-blue-600" />
           <span>Filtros de Relatório</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="space-y-1">
-            <Label className="text-xs uppercase text-slate-500 font-bold">Empresa</Label>
+            <Label className="text-xs uppercase text-muted-foreground font-bold">Empresa</Label>
             <Select value={filters.empresa_id} onValueChange={(v) => handleFilterChange('empresa_id', v)}>
-              <SelectTrigger className="bg-white"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectTrigger className="bg-background"><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome_fantasia || e.razao_social}</SelectItem>)}
@@ -49,22 +49,22 @@ export default function DREBalanceteFilters() {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs uppercase text-slate-500 font-bold">Competência</Label>
+            <Label className="text-xs uppercase text-muted-foreground font-bold">Competência</Label>
             <Input 
               type="month" 
               value={filters.competencia} 
               onChange={(e) => handleFilterChange('competencia', e.target.value)}
-              className="bg-white"
+              className="bg-background"
             />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs uppercase text-slate-500 font-bold">Comparação (Opcional)</Label>
+            <Label className="text-xs uppercase text-muted-foreground font-bold">Comparação (Opcional)</Label>
             <Input 
               type="month" 
               value={filters.comparacao} 
               onChange={(e) => handleFilterChange('comparacao', e.target.value)}
-              className="bg-white"
+              className="bg-background"
             />
           </div>
 
@@ -86,7 +86,7 @@ export default function DREBalanceteFilters() {
               checked={filters.mostrarDetalhes} 
               onCheckedChange={(c) => handleFilterChange('mostrarDetalhes', c)} 
             />
-            <Label htmlFor="detalhes" className="text-sm text-slate-700 cursor-pointer">Mostrar Detalhes (Subcontas)</Label>
+            <Label htmlFor="detalhes" className="text-sm text-foreground cursor-pointer">Mostrar Detalhes (Subcontas)</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -94,7 +94,7 @@ export default function DREBalanceteFilters() {
               checked={filters.mostrarVariacao} 
               onCheckedChange={(c) => handleFilterChange('mostrarVariacao', c)} 
             />
-            <Label htmlFor="variacao" className="text-sm text-slate-700 cursor-pointer">Mostrar Variação (R$)</Label>
+            <Label htmlFor="variacao" className="text-sm text-foreground cursor-pointer">Mostrar Variação (R$)</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -102,7 +102,7 @@ export default function DREBalanceteFilters() {
               checked={filters.mostrarPercentual} 
               onCheckedChange={(c) => handleFilterChange('mostrarPercentual', c)} 
             />
-            <Label htmlFor="percentual" className="text-sm text-slate-700 cursor-pointer">Mostrar Percentual (%)</Label>
+            <Label htmlFor="percentual" className="text-sm text-foreground cursor-pointer">Mostrar Percentual (%)</Label>
           </div>
         </div>
       </CardContent>

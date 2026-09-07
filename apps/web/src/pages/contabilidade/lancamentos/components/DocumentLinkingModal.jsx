@@ -47,7 +47,7 @@ export default function DocumentLinkingModal({ open, onOpenChange, onLink }) {
           
           <div className="mt-4 mb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Buscar por número ou nome..." 
                 value={searchTerm}
@@ -57,14 +57,14 @@ export default function DocumentLinkingModal({ open, onOpenChange, onLink }) {
             </div>
           </div>
 
-          <div className="border border-slate-200 rounded-md overflow-hidden max-h-[300px] overflow-y-auto">
+          <div className="border border-border rounded-md overflow-hidden max-h-[300px] overflow-y-auto">
             {filteredDocs.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 text-sm">
+              <div className="p-8 text-center text-muted-foreground text-sm">
                 Nenhum documento encontrado.
               </div>
             ) : (
               <table className="w-full text-sm text-left">
-                <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                <thead className="bg-muted text-muted-foreground font-medium border-b border-border">
                   <tr>
                     <th className="px-4 py-2">Número</th>
                     <th className="px-4 py-2">{activeTab === 'recebimento' ? 'Cliente' : 'Fornecedor/Desc'}</th>
@@ -75,11 +75,11 @@ export default function DocumentLinkingModal({ open, onOpenChange, onLink }) {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredDocs.map(doc => (
-                    <tr key={doc.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-2 font-medium text-slate-800">{doc.numero}</td>
-                      <td className="px-4 py-2 text-slate-600">{doc.fornecedor || doc.cliente || doc.descricao}</td>
-                      <td className="px-4 py-2 text-slate-600">{doc.data}</td>
-                      <td className="px-4 py-2 text-right text-slate-800">
+                    <tr key={doc.id} className="hover:bg-muted">
+                      <td className="px-4 py-2 font-medium text-foreground">{doc.numero}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{doc.fornecedor || doc.cliente || doc.descricao}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{doc.data}</td>
+                      <td className="px-4 py-2 text-right text-foreground">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(doc.valor)}
                       </td>
                       <td className="px-4 py-2 text-center">

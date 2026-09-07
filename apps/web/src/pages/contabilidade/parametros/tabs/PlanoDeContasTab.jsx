@@ -33,12 +33,12 @@ export default function PlanoDeContasTab() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="relative w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar conta..." 
             value={search} 
             onChange={e => setSearch(e.target.value)} 
-            className="pl-8 bg-white"
+            className="pl-8 bg-background"
           />
         </div>
         <Button onClick={() => openModal()} className="bg-blue-600 hover:bg-blue-700">
@@ -46,7 +46,7 @@ export default function PlanoDeContasTab() {
         </Button>
       </div>
 
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -66,7 +66,7 @@ export default function PlanoDeContasTab() {
                 <TableCell>{conta.tipo}</TableCell>
                 <TableCell>{conta.natureza}</TableCell>
                 <TableCell>
-                  <Badge variant={conta.ativa ? 'default' : 'secondary'} className={conta.ativa ? 'bg-green-100 text-green-800' : ''}>
+                  <Badge variant={conta.ativa ? 'default' : 'secondary'} className={conta.ativa ? 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400' : ''}>
                     {conta.ativa ? 'Ativa' : 'Inativa'}
                   </Badge>
                 </TableCell>
@@ -77,7 +77,7 @@ export default function PlanoDeContasTab() {
               </TableRow>
             ))}
             {filteredData.length === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-slate-500">Nenhuma conta encontrada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma conta encontrada.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

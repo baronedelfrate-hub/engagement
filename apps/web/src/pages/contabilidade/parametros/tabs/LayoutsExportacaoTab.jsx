@@ -15,7 +15,7 @@ export default function LayoutsExportacaoTab() {
           <Plus className="w-4 h-4 mr-2" /> Novo Layout
         </Button>
       </div>
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -42,7 +42,7 @@ export default function LayoutsExportacaoTab() {
               </TableRow>
             ))}
             {data.layouts.length === 0 && (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">Nenhum layout encontrado.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum layout encontrado.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

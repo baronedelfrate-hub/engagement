@@ -15,7 +15,7 @@ export default function HistoricosPadraoTab() {
           <Plus className="w-4 h-4 mr-2" /> Adicionar Histórico
         </Button>
       </div>
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>

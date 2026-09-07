@@ -16,7 +16,7 @@ export default function VinculacaoFinanceiroContabilTab() {
         </Button>
       </div>
 
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -45,7 +45,7 @@ export default function VinculacaoFinanceiroContabilTab() {
               </TableRow>
             ))}
             {data.vinculacoes.length === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-slate-500">Nenhuma vinculação encontrada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma vinculação encontrada.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

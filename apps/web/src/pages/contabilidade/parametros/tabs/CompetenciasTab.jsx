@@ -11,10 +11,10 @@ export default function CompetenciasTab() {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'aberta': return 'bg-emerald-100 text-emerald-800';
-      case 'fechada': return 'bg-amber-100 text-amber-800';
-      case 'bloqueada': return 'bg-red-100 text-red-800';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'aberta': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400';
+      case 'fechada': return 'bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400';
+      case 'bloqueada': return 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-400';
+      default: return 'bg-muted text-foreground';
     }
   };
 
@@ -25,7 +25,7 @@ export default function CompetenciasTab() {
           <Plus className="w-4 h-4 mr-2" /> Nova Competência
         </Button>
       </div>
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -51,7 +51,7 @@ export default function CompetenciasTab() {
               </TableRow>
             ))}
             {data.competencias.length === 0 && (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">Nenhuma competência registrada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma competência registrada.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

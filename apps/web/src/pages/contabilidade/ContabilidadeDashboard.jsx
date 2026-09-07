@@ -32,32 +32,32 @@ export default function ContabilidadeDashboard() {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50/50 pb-24">
+    <div className="relative min-h-screen bg-muted/50 pb-24">
       <Helmet><title>Dashboard Contábil | ERP Platform</title></Helmet>
       
       {/* STICKY FILTER BAR */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm px-6 py-4 mb-6">
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border shadow-sm px-6 py-4 mb-6">
         <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
+          <div className="flex items-center gap-2 text-foreground font-semibold">
             <Briefcase className="w-5 h-5 text-blue-600" />
             <span>Filtros do Dashboard</span>
           </div>
           
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div className="flex flex-col w-full md:w-40">
-              <span className="text-[10px] uppercase font-bold text-slate-500 mb-1">Período (MM/YYYY)</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Período (MM/YYYY)</span>
               <Input 
                 value={filtros.periodo}
                 onChange={(e) => handleFilterChange('periodo', e.target.value)}
                 placeholder="MM/YYYY"
-                className="h-9 bg-white"
+                className="h-9 bg-background"
               />
             </div>
             
             <div className="flex flex-col w-full md:w-56">
-              <span className="text-[10px] uppercase font-bold text-slate-500 mb-1">Empresa</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Empresa</span>
               <Select value={filtros.empresa_id} onValueChange={(v) => handleFilterChange('empresa_id', v)}>
-                <SelectTrigger className="h-9 bg-white"><SelectValue placeholder="Todas as Empresas" /></SelectTrigger>
+                <SelectTrigger className="h-9 bg-background"><SelectValue placeholder="Todas as Empresas" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as Empresas</SelectItem>
                   {empresas.map(e => (
@@ -68,9 +68,9 @@ export default function ContabilidadeDashboard() {
             </div>
 
             <div className="flex flex-col w-full md:w-40">
-              <span className="text-[10px] uppercase font-bold text-slate-500 mb-1">Status</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Status</span>
               <Select value={filtros.status} onValueChange={(v) => handleFilterChange('status', v)}>
-                <SelectTrigger className="h-9 bg-white"><SelectValue placeholder="Todos" /></SelectTrigger>
+                <SelectTrigger className="h-9 bg-background"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Todos">Todos</SelectItem>
                   <SelectItem value="Pendente">Pendente</SelectItem>

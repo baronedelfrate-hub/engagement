@@ -41,19 +41,19 @@ export default function DREBalanceteActions() {
 
   return (
     <div className="flex flex-wrap items-center gap-3 print:hidden mt-6">
-      <Button variant="outline" className="bg-white" onClick={() => setExportModalOpen(true)}>
+      <Button variant="outline" className="bg-background" onClick={() => setExportModalOpen(true)}>
         <Download className="w-4 h-4 mr-2" /> Exportar Relatório
       </Button>
 
-      <Button variant="outline" className="bg-white" onClick={handlePrint}>
+      <Button variant="outline" className="bg-background" onClick={handlePrint}>
         <Printer className="w-4 h-4 mr-2" /> Imprimir
       </Button>
 
-      <Button variant="outline" className="bg-white" onClick={refreshData} disabled={loading}>
+      <Button variant="outline" className="bg-background" onClick={refreshData} disabled={loading}>
         <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Atualizar Dados
       </Button>
 
-      <Button variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 ml-auto" onClick={handleSeedData}>
+      <Button variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50 ml-auto" onClick={handleSeedData}>
         <Upload className="w-4 h-4 mr-2" /> Inserir Dados Exemplo
       </Button>
 

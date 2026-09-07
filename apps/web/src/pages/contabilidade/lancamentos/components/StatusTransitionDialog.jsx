@@ -43,20 +43,20 @@ export default function StatusTransitionDialog({ open, onOpenChange, currentStat
         </DialogHeader>
         
         <div className="py-4 space-y-4">
-          <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-lg border border-slate-100">
+          <div className="flex items-center gap-3 bg-muted p-3 rounded-lg border border-border">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">De:</span>
+              <span className="text-sm text-muted-foreground">De:</span>
               <Badge className={getStatusColor(currentStatus)}>{currentStatus}</Badge>
             </div>
-            <div className="text-slate-400">→</div>
+            <div className="text-muted-foreground">→</div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">Para:</span>
+              <span className="text-sm text-muted-foreground">Para:</span>
               <Badge className={getStatusColor(newStatus)}>{newStatus}</Badge>
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Observações (Opcional)</label>
+            <label className="text-sm font-medium text-foreground">Observações (Opcional)</label>
             <Textarea 
               placeholder="Adicione um comentário ou justificativa..." 
               value={notes}

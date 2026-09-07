@@ -15,7 +15,7 @@ export default function CentrosCustoTab() {
           <Plus className="w-4 h-4 mr-2" /> Novo Centro de Custo
         </Button>
       </div>
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -37,7 +37,7 @@ export default function CentrosCustoTab() {
               </TableRow>
             ))}
             {data.centrosCusto.length === 0 && (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-slate-500">Nenhum centro de custo encontrado.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Nenhum centro de custo encontrado.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

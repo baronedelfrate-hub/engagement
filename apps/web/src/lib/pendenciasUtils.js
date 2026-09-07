@@ -4,12 +4,12 @@ import { AlertCircle, Clock, CheckCircle2, XCircle, FileText, AlertTriangle, Set
 
 export const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
-    case 'aberta': return 'bg-red-100 text-red-800 border-red-200';
-    case 'em tratamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'aguardando cliente': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'resolvida': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'cancelada': return 'bg-slate-100 text-slate-800 border-slate-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'aberta': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    case 'em tratamento': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'aguardando cliente': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'resolvida': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800';
+    case 'cancelada': return 'bg-muted text-foreground border-border';
+    default: return 'bg-muted text-foreground border-border';
   }
 };
 
@@ -30,13 +30,13 @@ export const getStatusIcon = (status, className = "w-4 h-4") => {
 
 export const getTipoColor = (tipo) => {
   switch (tipo?.toLowerCase()) {
-    case 'documento faltante': return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'nota divergente': return 'bg-red-100 text-red-800 border-red-200';
-    case 'conciliação pendente': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'imposto divergente': return 'bg-purple-100 text-purple-800 border-purple-200';
-    case 'ajuste contábil': return 'bg-teal-100 text-teal-800 border-teal-200';
-    case 'classificação incorreta': return 'bg-pink-100 text-pink-800 border-pink-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'documento faltante': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800';
+    case 'nota divergente': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    case 'conciliação pendente': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'imposto divergente': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800';
+    case 'ajuste contábil': return 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-800';
+    case 'classificação incorreta': return 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-800';
+    default: return 'bg-muted text-foreground border-border';
   }
 };
 

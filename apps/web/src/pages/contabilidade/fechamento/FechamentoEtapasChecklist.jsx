@@ -49,7 +49,7 @@ export default function FechamentoEtapasChecklist({ etapas, onToggleStep, readOn
         const link = getModuleLink(etapa.numero_etapa);
 
         return (
-          <Card key={etapa.id} className={`border-l-4 overflow-hidden transition-all duration-200 ${etapa.concluida ? 'border-l-emerald-500 bg-slate-50' : 'border-l-slate-300 hover:border-l-blue-400'}`}>
+          <Card key={etapa.id} className={`border-l-4 overflow-hidden transition-all duration-200 ${etapa.concluida ? 'border-l-emerald-500 bg-muted' : 'border-l-border hover:border-l-blue-400'}`}>
             <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               
               <div className="flex-shrink-0 pt-1">
@@ -57,12 +57,12 @@ export default function FechamentoEtapasChecklist({ etapas, onToggleStep, readOn
                   type="button"
                   onClick={() => handleCheckboxClick(etapa, etapa.concluida)}
                   disabled={readOnly}
-                  className={`rounded-full transition-colors ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-slate-200'}`}
+                  className={`rounded-full transition-colors ${readOnly ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted'}`}
                 >
                   {etapa.concluida ? (
                     <CheckCircle2 className="w-8 h-8 text-emerald-500" />
                   ) : (
-                    <Circle className="w-8 h-8 text-slate-300" />
+                    <Circle className="w-8 h-8 text-muted-foreground" />
                   )}
                 </button>
               </div>
@@ -72,14 +72,14 @@ export default function FechamentoEtapasChecklist({ etapas, onToggleStep, readOn
                   <Badge className={`${stepColorClass} uppercase text-[10px] tracking-wider`}>
                     Passo {etapa.numero_etapa}
                   </Badge>
-                  <h4 className={`font-semibold ${etapa.concluida ? 'text-slate-500 line-through' : 'text-slate-800'}`}>
+                  <h4 className={`font-semibold ${etapa.concluida ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                     {etapa.nome_etapa}
                   </h4>
                 </div>
-                <p className="text-sm text-slate-500">{etapa.descricao}</p>
+                <p className="text-sm text-muted-foreground">{etapa.descricao}</p>
                 
                 {/* Expandable Notes / Meta info */}
-                <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center gap-4 pt-2 text-xs text-muted-foreground">
                   {etapa.prazo && (
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" /> Prazo: {formatDate(etapa.prazo)}
@@ -116,7 +116,7 @@ export default function FechamentoEtapasChecklist({ etapas, onToggleStep, readOn
           </DialogHeader>
           
           <div className="py-4">
-            <label className="text-sm font-medium text-slate-700 mb-2 block">Observações (Opcional)</label>
+            <label className="text-sm font-medium text-foreground mb-2 block">Observações (Opcional)</label>
             <Input 
               placeholder="Adicione uma nota sobre esta ação..."
               value={confirmDialog.etapa ? (observacoes[confirmDialog.etapa.id] || '') : ''}

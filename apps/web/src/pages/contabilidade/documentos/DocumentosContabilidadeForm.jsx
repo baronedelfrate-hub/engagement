@@ -130,18 +130,18 @@ export default function DocumentosContabilidadeForm() {
         ]}
       />
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <form onSubmit={handleSubmit}>
-          <CardHeader className="bg-slate-50 border-b border-slate-100">
-            <CardTitle className="text-lg text-slate-800">Dados do Documento</CardTitle>
+          <CardHeader className="bg-muted border-b border-border">
+            <CardTitle className="text-lg text-foreground">Dados do Documento</CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Empresa *</Label>
+                <Label className="text-foreground">Empresa *</Label>
                 <Select value={formData.empresa_id} onValueChange={(v) => handleChange('empresa_id', v)}>
-                  <SelectTrigger className="bg-white"><SelectValue placeholder="Selecione a Empresa" /></SelectTrigger>
+                  <SelectTrigger className="bg-background"><SelectValue placeholder="Selecione a Empresa" /></SelectTrigger>
                   <SelectContent>
                     {empresas.map(e => (
                       <SelectItem key={e.id} value={e.id}>{e.nome_fantasia || e.razao_social}</SelectItem>
@@ -151,19 +151,19 @@ export default function DocumentosContabilidadeForm() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Competência (Mês/Ano) *</Label>
+                <Label className="text-foreground">Competência (Mês/Ano) *</Label>
                 <Input 
                   type="month" 
                   value={formData.competencia}
                   onChange={(e) => handleChange('competencia', e.target.value)}
-                  className="bg-white"
+                  className="bg-background"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Tipo de Documento *</Label>
+                <Label className="text-foreground">Tipo de Documento *</Label>
                 <Select value={formData.tipo} onValueChange={(v) => handleChange('tipo', v)}>
-                  <SelectTrigger className="bg-white"><SelectValue placeholder="Selecione o Tipo" /></SelectTrigger>
+                  <SelectTrigger className="bg-background"><SelectValue placeholder="Selecione o Tipo" /></SelectTrigger>
                   <SelectContent>
                     {DOCUMENT_TYPES.map(t => (
                       <SelectItem key={t} value={t}>{t}</SelectItem>
@@ -173,28 +173,28 @@ export default function DocumentosContabilidadeForm() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-700">Origem *</Label>
+                <Label className="text-foreground">Origem *</Label>
                 <Input 
                   value={formData.origem}
                   onChange={(e) => handleChange('origem', e.target.value)}
-                  className="bg-white"
+                  className="bg-background"
                   placeholder="Ex: Departamento RH, Sistema ERP..."
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Descrição / Título do Documento *</Label>
+              <Label className="text-foreground">Descrição / Título do Documento *</Label>
               <Input 
                 value={formData.descricao}
                 onChange={(e) => handleChange('descricao', e.target.value)}
-                className="bg-white"
+                className="bg-background"
                 placeholder="Descreva o documento..."
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Arquivo Anexo {id ? '' : '*'}</Label>
+              <Label className="text-foreground">Arquivo Anexo {id ? '' : '*'}</Label>
               <FileUploader 
                 type="documento"
                 currentUrl={formData.arquivo_url}
@@ -203,17 +203,17 @@ export default function DocumentosContabilidadeForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Observações Extras</Label>
+              <Label className="text-foreground">Observações Extras</Label>
               <Textarea 
                 value={formData.observacoes}
                 onChange={(e) => handleChange('observacoes', e.target.value)}
-                className="min-h-[100px] bg-white"
+                className="min-h-[100px] bg-background"
                 placeholder="Notas para a contabilidade..."
               />
             </div>
 
           </CardContent>
-          <CardFooter className="bg-slate-50 border-t border-slate-100 p-4 flex justify-between">
+          <CardFooter className="bg-muted border-t border-border p-4 flex justify-between">
             <Button type="button" variant="outline" onClick={() => navigate('/contabilidade/documentos')}>
               <ArrowLeft className="w-4 h-4 mr-2" /> Cancelar
             </Button>

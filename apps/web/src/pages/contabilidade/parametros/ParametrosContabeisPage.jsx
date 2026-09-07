@@ -21,17 +21,17 @@ function ParametrosContabeisContent() {
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-24">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-background p-6 rounded-lg border border-border shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Settings className="w-6 h-6 text-blue-600" />
             Parâmetros Contábeis
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Configure regras, planos de contas e parametrizações gerais do módulo contábil.</p>
+          <p className="text-sm text-muted-foreground mt-1">Configure regras, planos de contas e parametrizações gerais do módulo contábil.</p>
         </div>
         <div className="flex items-center gap-3">
           <Select value={empresaId} onValueChange={setEmpresaId}>
-            <SelectTrigger className="w-[250px] bg-white">
+            <SelectTrigger className="w-[250px] bg-background">
               <SelectValue placeholder="Selecione a Empresa" />
             </SelectTrigger>
             <SelectContent>
@@ -41,7 +41,7 @@ function ParametrosContabeisContent() {
               ))}
             </SelectContent>
           </Select>
-          <div className="h-8 w-px bg-slate-200 mx-1"></div>
+          <div className="h-8 w-px bg-border mx-1"></div>
           <Button variant="outline" size="sm" className="hidden lg:flex" title="Restaurar Padrões">
             <RotateCcw className="w-4 h-4 mr-2" /> Restaurar
           </Button>
@@ -58,15 +58,15 @@ function ParametrosContabeisContent() {
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
       ) : (
         <Tabs defaultValue="plano-contas" className="w-full">
-          <TabsList className="bg-white border border-slate-200 p-1 flex flex-wrap h-auto gap-1 mb-6 rounded-lg">
-            <TabsTrigger value="plano-contas" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Plano de Contas</TabsTrigger>
-            <TabsTrigger value="vinculacao" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Vinculação</TabsTrigger>
-            <TabsTrigger value="centros-custo" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Centros de Custo</TabsTrigger>
-            <TabsTrigger value="historicos" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Históricos Padrão</TabsTrigger>
-            <TabsTrigger value="competencias" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Competências</TabsTrigger>
-            <TabsTrigger value="layouts" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Layouts Exportação</TabsTrigger>
-            <TabsTrigger value="fechamento" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Fechamento</TabsTrigger>
-            <TabsTrigger value="integracao" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">Integração</TabsTrigger>
+          <TabsList className="bg-background border border-border p-1 flex flex-wrap h-auto gap-1 mb-6 rounded-lg">
+            <TabsTrigger value="plano-contas" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Plano de Contas</TabsTrigger>
+            <TabsTrigger value="vinculacao" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Vinculação</TabsTrigger>
+            <TabsTrigger value="centros-custo" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Centros de Custo</TabsTrigger>
+            <TabsTrigger value="historicos" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Históricos Padrão</TabsTrigger>
+            <TabsTrigger value="competencias" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Competências</TabsTrigger>
+            <TabsTrigger value="layouts" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Layouts Exportação</TabsTrigger>
+            <TabsTrigger value="fechamento" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Fechamento</TabsTrigger>
+            <TabsTrigger value="integracao" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">Integração</TabsTrigger>
           </TabsList>
 
           <TabsContent value="plano-contas"><PlanoDeContasTab /></TabsContent>

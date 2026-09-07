@@ -71,7 +71,7 @@ export default function LancamentosContabeisDetail() {
           <Button variant="outline" size="sm" onClick={() => navigate('/contabilidade/lancamentos')}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </Button>
-          <h2 className="text-xl font-semibold text-slate-800">Detalhes do Lançamento</h2>
+          <h2 className="text-xl font-semibold text-foreground">Detalhes do Lançamento</h2>
         </div>
         <div className="flex items-center gap-2">
           <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
@@ -91,57 +91,57 @@ export default function LancamentosContabeisDetail() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* INFO COLUMN */}
         <div className="xl:col-span-2 space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 flex flex-row items-start justify-between">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border flex flex-row items-start justify-between">
               <div>
-                <CardTitle className="text-lg text-slate-800">{doc.historico}</CardTitle>
-                <p className="text-sm text-slate-500 mt-1">{doc.empresa?.nome_fantasia || doc.empresa?.razao_social}</p>
+                <CardTitle className="text-lg text-foreground">{doc.historico}</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">{doc.empresa?.nome_fantasia || doc.empresa?.razao_social}</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-slate-800">{formatCurrency(doc.valor)}</p>
-                <p className="text-sm text-slate-500">{format(new Date(doc.data), 'dd/MM/yyyy')} (Ref: {formatCompetencia(doc.competencia)})</p>
+                <p className="text-2xl font-bold text-foreground">{formatCurrency(doc.valor)}</p>
+                <p className="text-sm text-muted-foreground">{format(new Date(doc.data), 'dd/MM/yyyy')} (Ref: {formatCompetencia(doc.competencia)})</p>
               </div>
             </CardHeader>
             <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                <p className="text-xs uppercase font-bold text-blue-700 mb-1">Conta Débito (D)</p>
-                <p className="text-base font-semibold text-slate-800">{doc.conta_debito?.codigo}</p>
-                <p className="text-sm text-slate-600">{doc.conta_debito?.nome}</p>
+              <div className="bg-blue-50/50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-100 dark:border-blue-900">
+                <p className="text-xs uppercase font-bold text-blue-700 dark:text-blue-400 mb-1">Conta Débito (D)</p>
+                <p className="text-base font-semibold text-foreground">{doc.conta_debito?.codigo}</p>
+                <p className="text-sm text-muted-foreground">{doc.conta_debito?.nome}</p>
               </div>
               
-              <div className="bg-emerald-50/50 p-4 rounded-lg border border-emerald-100">
-                <p className="text-xs uppercase font-bold text-emerald-700 mb-1">Conta Crédito (C)</p>
-                <p className="text-base font-semibold text-slate-800">{doc.conta_credito?.codigo}</p>
-                <p className="text-sm text-slate-600">{doc.conta_credito?.nome}</p>
+              <div className="bg-emerald-50/50 dark:bg-emerald-950/20 p-4 rounded-lg border border-emerald-100 dark:border-emerald-900">
+                <p className="text-xs uppercase font-bold text-emerald-700 dark:text-emerald-400 mb-1">Conta Crédito (C)</p>
+                <p className="text-base font-semibold text-foreground">{doc.conta_credito?.codigo}</p>
+                <p className="text-sm text-muted-foreground">{doc.conta_credito?.nome}</p>
               </div>
 
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Origem do Lançamento</p>
-                <div className="flex items-center gap-2 text-sm text-slate-800 font-medium">
-                  {getOrigemIcon(doc.origem, "w-4 h-4 text-slate-500")}
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Origem do Lançamento</p>
+                <div className="flex items-center gap-2 text-sm text-foreground font-medium">
+                  {getOrigemIcon(doc.origem, "w-4 h-4 text-muted-foreground")}
                   {doc.origem}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Centro de Custo</p>
-                <p className="text-sm text-slate-800 font-medium">
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Centro de Custo</p>
+                <p className="text-sm text-foreground font-medium">
                   {doc.centro_custo ? `${doc.centro_custo.codigo} - ${doc.centro_custo.nome}` : '-'}
                 </p>
               </div>
 
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Documento Vinculado</p>
-                <p className="text-sm text-slate-800 font-medium flex items-center gap-2">
-                  <LinkIcon className="w-4 h-4 text-slate-400" />
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Documento Vinculado</p>
+                <p className="text-sm text-foreground font-medium flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4 text-muted-foreground" />
                   {doc.documento_vinculado || 'Nenhum'}
                 </p>
               </div>
 
               {doc.observacoes && (
-                <div className="col-span-full pt-4 border-t border-slate-100">
-                  <p className="text-xs uppercase font-semibold text-slate-500 mb-2">Observações</p>
-                  <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-md border border-slate-100">{doc.observacoes}</p>
+                <div className="col-span-full pt-4 border-t border-border">
+                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-2">Observações</p>
+                  <p className="text-sm text-foreground bg-muted p-3 rounded-md border border-border">{doc.observacoes}</p>
                 </div>
               )}
             </CardContent>
@@ -150,15 +150,15 @@ export default function LancamentosContabeisDetail() {
 
         {/* SIDEBAR: Actions & History */}
         <div className="space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
-              <CardTitle className="text-base text-slate-800">Ações de Fluxo</CardTitle>
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border py-4">
+              <CardTitle className="text-base text-foreground">Ações de Fluxo</CardTitle>
             </CardHeader>
             <CardContent className="p-4 flex flex-col gap-3">
               {canChangeStatus(doc.status, 'Pendente') && (
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start border-blue-200 text-blue-700 hover:bg-blue-50"
+                  className="w-full justify-start border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/30"
                   onClick={() => setStatusModal({ open: true, newStatus: 'Pendente' })}
                 >
                   <Send className="w-4 h-4 mr-3" /> Submeter p/ Revisão
@@ -167,7 +167,7 @@ export default function LancamentosContabeisDetail() {
               {canChangeStatus(doc.status, 'Conferido') && (
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  className="w-full justify-start border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
                   onClick={() => setStatusModal({ open: true, newStatus: 'Conferido' })}
                 >
                   <CheckCircle className="w-4 h-4 mr-3" /> Aprovar Lançamento
@@ -176,7 +176,7 @@ export default function LancamentosContabeisDetail() {
               {canChangeStatus(doc.status, 'Exportado') && (
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                  className="w-full justify-start border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/30"
                   onClick={() => setStatusModal({ open: true, newStatus: 'Exportado' })}
                 >
                   <UploadCloud className="w-4 h-4 mr-3" /> Exportar Lançamento
@@ -185,7 +185,7 @@ export default function LancamentosContabeisDetail() {
               {(doc.status === 'Pendente' || doc.status === 'Conferido') && (
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start border-slate-200 text-slate-700 hover:bg-slate-50 mt-4"
+                  className="w-full justify-start border-border text-foreground hover:bg-muted mt-4"
                   onClick={() => setStatusModal({ open: true, newStatus: 'Rascunho' })}
                 >
                   <History className="w-4 h-4 mr-3" /> Reverter Status
@@ -194,35 +194,35 @@ export default function LancamentosContabeisDetail() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
-              <CardTitle className="text-base text-slate-800 flex items-center gap-2">
-                <History className="w-5 h-5 text-slate-500" /> Histórico
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border py-4">
+              <CardTitle className="text-base text-foreground flex items-center gap-2">
+                <History className="w-5 h-5 text-muted-foreground" /> Histórico
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[300px]">
                 <div className="p-5 space-y-4">
                   {historico.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center">Nenhum histórico.</p>
+                    <p className="text-sm text-muted-foreground text-center">Nenhum histórico.</p>
                   ) : (
                     historico.map((hist) => (
-                      <div key={hist.id} className="relative pl-6 pb-4 border-l-2 border-slate-200 last:border-0 last:pb-0">
-                        <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-400" />
+                      <div key={hist.id} className="relative pl-6 pb-4 border-l-2 border-border last:border-0 last:pb-0">
+                        <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-muted-foreground" />
                         <div className="flex justify-between items-start mb-1">
-                          <p className="text-sm font-semibold text-slate-800">{hist.acao}</p>
-                          <span className="text-[10px] text-slate-500 whitespace-nowrap ml-2">
+                          <p className="text-sm font-semibold text-foreground">{hist.acao}</p>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                             {format(new Date(hist.data_acao), 'dd/MM HH:mm')}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mb-1">Por: {hist.usuario?.nome || hist.usuario?.email || 'Sistema'}</p>
+                        <p className="text-xs text-muted-foreground mb-1">Por: {hist.usuario?.nome || hist.usuario?.email || 'Sistema'}</p>
                         {hist.status_novo && (
                           <p className="text-xs mt-1">
-                            Status: <span className="font-medium text-slate-700">{hist.status_novo}</span>
+                            Status: <span className="font-medium text-foreground">{hist.status_novo}</span>
                           </p>
                         )}
                         {hist.observacoes && (
-                          <p className="text-xs text-slate-500 italic bg-slate-50 p-2 rounded mt-1 border border-slate-100">"{hist.observacoes}"</p>
+                          <p className="text-xs text-muted-foreground italic bg-muted p-2 rounded mt-1 border border-border">"{hist.observacoes}"</p>
                         )}
                       </div>
                     ))

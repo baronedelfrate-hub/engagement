@@ -5,11 +5,11 @@ import { ptBR } from 'date-fns/locale';
 
 export function getStatusColor(status) {
   switch (status?.toLowerCase()) {
-    case 'rascunho': return 'bg-slate-100 text-slate-800 border-slate-200';
-    case 'pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'conferido': return 'bg-green-100 text-green-800 border-green-200';
-    case 'exportado': return 'bg-blue-100 text-blue-800 border-blue-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'rascunho': return 'bg-muted text-foreground border-border';
+    case 'pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'conferido': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800';
+    case 'exportado': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    default: return 'bg-muted text-foreground border-border';
   }
 }
 

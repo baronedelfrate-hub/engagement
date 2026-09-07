@@ -79,7 +79,7 @@ export default function PendenciasVinculosModal({ open, onOpenChange, pendenciaI
 
           <div className="mt-4 mb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input 
                 placeholder="Buscar registros..." 
                 value={searchTerm}
@@ -89,24 +89,24 @@ export default function PendenciasVinculosModal({ open, onOpenChange, pendenciaI
             </div>
           </div>
 
-          <div className="flex-1 border border-slate-200 rounded-md overflow-y-auto">
+          <div className="flex-1 border border-border rounded-md overflow-y-auto">
             {loading ? (
-              <div className="p-8 text-center text-slate-500">Carregando...</div>
+              <div className="p-8 text-center text-muted-foreground">Carregando...</div>
             ) : filteredItems.length === 0 ? (
-              <div className="p-8 text-center text-slate-500">Nenhum registro encontrado.</div>
+              <div className="p-8 text-center text-muted-foreground">Nenhum registro encontrado.</div>
             ) : (
               <div className="divide-y divide-slate-100">
                 {filteredItems.map(item => (
-                  <div key={item.id} className="flex items-center gap-4 p-3 hover:bg-slate-50">
+                  <div key={item.id} className="flex items-center gap-4 p-3 hover:bg-muted">
                     <Checkbox 
                       checked={selectedItems.includes(item.id)}
                       onCheckedChange={() => handleToggleSelect(item.id)}
                     />
                     <div className="flex-1 text-sm">
-                      {activeTab === 'documentos' && <><span className="font-medium text-slate-800">{item.numero || 'S/N'}</span> - {item.descricao}</>}
-                      {activeTab === 'nf' && <><span className="font-medium text-slate-800">NF {item.numero}</span> - R$ {item.valor_total}</>}
-                      {activeTab === 'lancamentos' && <><span className="font-medium text-slate-800">{item.data}</span> - {item.descricao}</>}
-                      {activeTab === 'fechamentos' && <><span className="font-medium text-slate-800">Período {item.periodo}</span> - {item.status}</>}
+                      {activeTab === 'documentos' && <><span className="font-medium text-foreground">{item.numero || 'S/N'}</span> - {item.descricao}</>}
+                      {activeTab === 'nf' && <><span className="font-medium text-foreground">NF {item.numero}</span> - R$ {item.valor_total}</>}
+                      {activeTab === 'lancamentos' && <><span className="font-medium text-foreground">{item.data}</span> - {item.descricao}</>}
+                      {activeTab === 'fechamentos' && <><span className="font-medium text-foreground">Período {item.periodo}</span> - {item.status}</>}
                     </div>
                   </div>
                 ))}

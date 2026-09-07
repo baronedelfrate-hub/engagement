@@ -127,14 +127,14 @@ export default function LancamentosContabeisForm() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-slate-800">{id ? "Editar Lançamento" : "Novo Lançamento Contábil"}</h2>
+        <h2 className="text-xl font-semibold text-foreground">{id ? "Editar Lançamento" : "Novo Lançamento Contábil"}</h2>
         <Badge className={getStatusColor(formData.status)}>{formData.status}</Badge>
       </div>
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="bg-slate-50 border-b border-slate-100 flex flex-row items-center justify-between">
-          <CardTitle className="text-lg text-slate-800">Dados do Lançamento</CardTitle>
-          <Button variant="outline" size="sm" className="bg-white" onClick={() => setShowLinkModal(true)}>
+      <Card className="border-border shadow-sm">
+        <CardHeader className="bg-muted border-b border-border flex flex-row items-center justify-between">
+          <CardTitle className="text-lg text-foreground">Dados do Lançamento</CardTitle>
+          <Button variant="outline" size="sm" className="bg-background" onClick={() => setShowLinkModal(true)}>
             <LinkIcon className="w-4 h-4 mr-2" /> Vincular Origem
           </Button>
         </CardHeader>
@@ -142,9 +142,9 @@ export default function LancamentosContabeisForm() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <Label className="text-slate-700">Empresa *</Label>
+              <Label className="text-foreground">Empresa *</Label>
               <Select value={formData.empresa_id} onValueChange={(v) => handleChange('empresa_id', v)}>
-                <SelectTrigger className="bg-white"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger className="bg-background"><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome_fantasia || e.razao_social}</SelectItem>)}
                 </SelectContent>
@@ -152,41 +152,41 @@ export default function LancamentosContabeisForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Data do Lançamento *</Label>
+              <Label className="text-foreground">Data do Lançamento *</Label>
               <Input 
                 type="date" 
                 value={formData.data}
                 onChange={(e) => handleChange('data', e.target.value)}
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Competência (Mês/Ano) *</Label>
+              <Label className="text-foreground">Competência (Mês/Ano) *</Label>
               <Input 
                 type="month" 
                 value={formData.competencia}
                 onChange={(e) => handleChange('competencia', e.target.value)}
-                className="bg-white"
+                className="bg-background"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-700">Histórico do Lançamento *</Label>
+            <Label className="text-foreground">Histórico do Lançamento *</Label>
             <Textarea 
               value={formData.historico}
               onChange={(e) => handleChange('historico', e.target.value)}
-              className="min-h-[80px] bg-white"
+              className="min-h-[80px] bg-background"
               placeholder="Descreva o motivo do lançamento..."
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted p-4 rounded-lg border border-border">
             <div className="space-y-2">
-              <Label className="text-slate-700 font-semibold text-blue-700">Conta Débito (D) *</Label>
+              <Label className="text-foreground font-semibold text-blue-700 dark:text-blue-400">Conta Débito (D) *</Label>
               <Select value={formData.conta_debito_id} onValueChange={(v) => handleChange('conta_debito_id', v)}>
-                <SelectTrigger className="bg-white border-blue-200"><SelectValue placeholder="Selecione Conta a Debitar" /></SelectTrigger>
+                <SelectTrigger className="bg-background border-blue-200 dark:border-blue-800"><SelectValue placeholder="Selecione Conta a Debitar" /></SelectTrigger>
                 <SelectContent>
                   {contas.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
                 </SelectContent>
@@ -194,9 +194,9 @@ export default function LancamentosContabeisForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700 font-semibold text-emerald-700">Conta Crédito (C) *</Label>
+              <Label className="text-foreground font-semibold text-emerald-700 dark:text-emerald-400">Conta Crédito (C) *</Label>
               <Select value={formData.conta_credito_id} onValueChange={(v) => handleChange('conta_credito_id', v)}>
-                <SelectTrigger className="bg-white border-emerald-200"><SelectValue placeholder="Selecione Conta a Creditar" /></SelectTrigger>
+                <SelectTrigger className="bg-background border-emerald-200 dark:border-emerald-800"><SelectValue placeholder="Selecione Conta a Creditar" /></SelectTrigger>
                 <SelectContent>
                   {contas.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
                 </SelectContent>
@@ -206,22 +206,22 @@ export default function LancamentosContabeisForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <Label className="text-slate-700">Valor (R$) *</Label>
+              <Label className="text-foreground">Valor (R$) *</Label>
               <Input 
                 type="number" 
                 step="0.01"
                 min="0"
                 value={formData.valor}
                 onChange={(e) => handleChange('valor', e.target.value)}
-                className="bg-white font-medium"
+                className="bg-background font-medium"
                 placeholder="0.00"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Origem *</Label>
+              <Label className="text-foreground">Origem *</Label>
               <Select value={formData.origem} onValueChange={(v) => handleChange('origem', v)}>
-                <SelectTrigger className="bg-white"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectTrigger className="bg-background"><SelectValue placeholder="Selecione" /></SelectTrigger>
                 <SelectContent>
                   {['NF', 'Pagamento', 'Recebimento', 'Folha', 'Ajuste Manual', 'Outro'].map(o => (
                     <SelectItem key={o} value={o}>{o}</SelectItem>
@@ -231,9 +231,9 @@ export default function LancamentosContabeisForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Centro de Custo</Label>
+              <Label className="text-foreground">Centro de Custo</Label>
               <Select value={formData.centro_custo_id} onValueChange={(v) => handleChange('centro_custo_id', v)}>
-                <SelectTrigger className="bg-white"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                <SelectTrigger className="bg-background"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
                   {centrosCusto.map(cc => <SelectItem key={cc.id} value={cc.id}>{cc.codigo} - {cc.nome}</SelectItem>)}
@@ -244,28 +244,28 @@ export default function LancamentosContabeisForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-slate-700">Documento Vinculado</Label>
+              <Label className="text-foreground">Documento Vinculado</Label>
               <Input 
                 value={formData.documento_vinculado}
                 onChange={(e) => handleChange('documento_vinculado', e.target.value)}
-                className="bg-white"
+                className="bg-background"
                 placeholder="Ex: NF 12345"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-700">Observações Internas</Label>
+            <Label className="text-foreground">Observações Internas</Label>
             <Textarea 
               value={formData.observacoes}
               onChange={(e) => handleChange('observacoes', e.target.value)}
-              className="min-h-[80px] bg-white"
+              className="min-h-[80px] bg-background"
               placeholder="Notas apenas para equipe contábil..."
             />
           </div>
 
         </CardContent>
-        <CardFooter className="bg-slate-50 border-t border-slate-100 p-4 flex justify-between">
+        <CardFooter className="bg-muted border-t border-border p-4 flex justify-between">
           <Button type="button" variant="outline" onClick={() => navigate('/contabilidade/lancamentos')}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </Button>
@@ -276,7 +276,7 @@ export default function LancamentosContabeisForm() {
               variant="outline" 
               onClick={() => handleSave(false)} 
               disabled={saving || (formData.status !== 'Rascunho' && formData.status !== 'Pendente')}
-              className="bg-white"
+              className="bg-background"
             >
               <Save className="w-4 h-4 mr-2" /> Salvar Rascunho
             </Button>

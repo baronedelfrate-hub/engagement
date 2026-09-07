@@ -73,50 +73,50 @@ export default function FechamentoMensalList() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card className="bg-white border-slate-200">
+        <Card className="bg-background border-border">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-slate-100 rounded-lg text-slate-600"><CalendarCheck className="w-6 h-6" /></div>
-            <div><p className="text-sm font-medium text-slate-500">Total</p><h3 className="text-2xl font-bold text-slate-800">{total}</h3></div>
+            <div className="p-3 bg-muted rounded-lg text-muted-foreground"><CalendarCheck className="w-6 h-6" /></div>
+            <div><p className="text-sm font-medium text-muted-foreground">Total</p><h3 className="text-2xl font-bold text-foreground">{total}</h3></div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-slate-200">
+        <Card className="bg-background border-border">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-emerald-100 rounded-lg text-emerald-600"><CheckCircle2 className="w-6 h-6" /></div>
-            <div><p className="text-sm font-medium text-slate-500">Concluídos</p><h3 className="text-2xl font-bold text-slate-800">{concluidos}</h3></div>
+            <div className="p-3 bg-emerald-100 dark:bg-emerald-950/30 rounded-lg text-emerald-600 dark:text-emerald-400"><CheckCircle2 className="w-6 h-6" /></div>
+            <div><p className="text-sm font-medium text-muted-foreground">Concluídos</p><h3 className="text-2xl font-bold text-foreground">{concluidos}</h3></div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-slate-200">
+        <Card className="bg-background border-border">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-yellow-100 rounded-lg text-yellow-600"><Clock className="w-6 h-6" /></div>
-            <div><p className="text-sm font-medium text-slate-500">Em Andamento</p><h3 className="text-2xl font-bold text-slate-800">{emAndamento}</h3></div>
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-950/30 rounded-lg text-yellow-600 dark:text-yellow-400"><Clock className="w-6 h-6" /></div>
+            <div><p className="text-sm font-medium text-muted-foreground">Em Andamento</p><h3 className="text-2xl font-bold text-foreground">{emAndamento}</h3></div>
           </CardContent>
         </Card>
-        <Card className="bg-white border-slate-200">
+        <Card className="bg-background border-border">
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-lg text-blue-600"><AlertCircle className="w-6 h-6" /></div>
-            <div><p className="text-sm font-medium text-slate-500">Aguardando Contab.</p><h3 className="text-2xl font-bold text-slate-800">{aguardando}</h3></div>
+            <div className="p-3 bg-blue-100 dark:bg-blue-950/30 rounded-lg text-blue-600 dark:text-blue-400"><AlertCircle className="w-6 h-6" /></div>
+            <div><p className="text-sm font-medium text-muted-foreground">Aguardando Contab.</p><h3 className="text-2xl font-bold text-foreground">{aguardando}</h3></div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
-          <CardTitle className="text-lg font-semibold text-slate-800">Lista de Fechamentos</CardTitle>
+      <Card className="border-border shadow-sm">
+        <CardHeader className="p-4 border-b border-border bg-muted/50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <CardTitle className="text-lg font-semibold text-foreground">Lista de Fechamentos</CardTitle>
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <Input 
               placeholder="Buscar..." 
               value={search} onChange={(e) => setSearch(e.target.value)} 
-              className="w-full md:w-48 bg-white h-9" 
+              className="w-full md:w-48 bg-background h-9" 
             />
             <Select value={filterEmpresa} onValueChange={setFilterEmpresa}>
-              <SelectTrigger className="w-full md:w-48 bg-white h-9"><SelectValue placeholder="Empresa" /></SelectTrigger>
+              <SelectTrigger className="w-full md:w-48 bg-background h-9"><SelectValue placeholder="Empresa" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as Empresas</SelectItem>
                 {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome_fantasia || e.razao_social}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full md:w-40 bg-white h-9"><SelectValue placeholder="Status" /></SelectTrigger>
+              <SelectTrigger className="w-full md:w-40 bg-background h-9"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os Status</SelectItem>
                 <SelectItem value="Em aberto">Em aberto</SelectItem>
@@ -129,7 +129,7 @@ export default function FechamentoMensalList() {
         </CardHeader>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-muted">
               <TableRow>
                 <TableHead>Empresa</TableHead>
                 <TableHead>Competência</TableHead>
@@ -149,20 +149,20 @@ export default function FechamentoMensalList() {
                 </TableRow>
               ) : filteredData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-slate-500">
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                     Nenhum fechamento encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredData.map((item) => (
-                  <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <TableCell className="font-medium text-slate-800">{item.empresa?.nome_fantasia || 'N/A'}</TableCell>
+                  <TableRow key={item.id} className="hover:bg-muted transition-colors">
+                    <TableCell className="font-medium text-foreground">{item.empresa?.nome_fantasia || 'N/A'}</TableCell>
                     <TableCell>{formatCompetencia(item.competencia)}</TableCell>
                     <TableCell><Badge className={getStatusColor(item.status)}>{item.status}</Badge></TableCell>
                     <TableCell className="w-[150px]">
                       <div className="flex items-center gap-2">
                         <Progress value={item.progresso || 0} className="h-2 flex-1" />
-                        <span className="text-xs font-medium text-slate-500 w-8">{item.progresso || 0}%</span>
+                        <span className="text-xs font-medium text-muted-foreground w-8">{item.progresso || 0}%</span>
                       </div>
                     </TableCell>
                     <TableCell>{item.responsavel?.nome || '-'}</TableCell>
@@ -173,9 +173,9 @@ export default function FechamentoMensalList() {
                           <Eye className="w-4 h-4 text-blue-600" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => navigate(`/contabilidade/fechamento/${item.id}/editar`)} title="Editar">
-                          <Edit className="w-4 h-4 text-slate-600" />
+                          <Edit className="w-4 h-4 text-muted-foreground" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50" title="Excluir">
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30" title="Excluir">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

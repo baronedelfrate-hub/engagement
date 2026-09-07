@@ -120,74 +120,74 @@ export default function DocumentosContabilidadeDetail() {
         
         {/* INFO COLUMN */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 flex flex-row items-start justify-between">
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border flex flex-row items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-white border border-slate-200 rounded-lg text-blue-600">
+                <div className="p-3 bg-background border border-border rounded-lg text-blue-600">
                   {getDocumentTypeIcon(doc.tipo, "w-6 h-6")}
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-800">{doc.descricao}</CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">{doc.empresas?.nome_fantasia || doc.empresas?.razao_social}</p>
+                  <CardTitle className="text-xl text-foreground">{doc.descricao}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">{doc.empresas?.nome_fantasia || doc.empresas?.razao_social}</p>
                 </div>
               </div>
               <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
             </CardHeader>
             <CardContent className="p-6 grid grid-cols-2 sm:grid-cols-4 gap-6">
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Tipo</p>
-                <p className="text-sm text-slate-800 font-medium">{doc.tipo}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Tipo</p>
+                <p className="text-sm text-foreground font-medium">{doc.tipo}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Competência</p>
-                <p className="text-sm text-slate-800 font-medium">{formatCompetencia(doc.competencia)}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Competência</p>
+                <p className="text-sm text-foreground font-medium">{formatCompetencia(doc.competencia)}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Origem</p>
-                <p className="text-sm text-slate-800 font-medium">{doc.origem}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Origem</p>
+                <p className="text-sm text-foreground font-medium">{doc.origem}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Inclusão</p>
-                <p className="text-sm text-slate-800 font-medium">{doc.data_inclusao ? format(new Date(doc.data_inclusao), 'dd/MM/yyyy') : '-'}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Inclusão</p>
+                <p className="text-sm text-foreground font-medium">{doc.data_inclusao ? format(new Date(doc.data_inclusao), 'dd/MM/yyyy') : '-'}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Envio</p>
-                <p className="text-sm text-slate-800 font-medium">{doc.data_envio ? format(new Date(doc.data_envio), 'dd/MM/yyyy') : '-'}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Envio</p>
+                <p className="text-sm text-foreground font-medium">{doc.data_envio ? format(new Date(doc.data_envio), 'dd/MM/yyyy') : '-'}</p>
               </div>
               <div>
-                <p className="text-xs uppercase font-semibold text-slate-500 mb-1">Conferência</p>
-                <p className="text-sm text-slate-800 font-medium">{doc.data_conferencia ? format(new Date(doc.data_conferencia), 'dd/MM/yyyy') : '-'}</p>
+                <p className="text-xs uppercase font-semibold text-muted-foreground mb-1">Conferência</p>
+                <p className="text-sm text-foreground font-medium">{doc.data_conferencia ? format(new Date(doc.data_conferencia), 'dd/MM/yyyy') : '-'}</p>
               </div>
               
               {doc.observacoes && (
-                <div className="col-span-full pt-4 border-t border-slate-100">
-                  <p className="text-xs uppercase font-semibold text-slate-500 mb-2">Observações</p>
-                  <p className="text-sm text-slate-700 bg-slate-50 p-3 rounded-md border border-slate-100">{doc.observacoes}</p>
+                <div className="col-span-full pt-4 border-t border-border">
+                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-2">Observações</p>
+                  <p className="text-sm text-foreground bg-muted p-3 rounded-md border border-border">{doc.observacoes}</p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* ARQUIVO ANEXO */}
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
-              <CardTitle className="text-base text-slate-800 flex items-center gap-2">
-                <FileIcon className="w-5 h-5 text-slate-500" /> Arquivo Anexo
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border py-4">
+              <CardTitle className="text-base text-foreground flex items-center gap-2">
+                <FileIcon className="w-5 h-5 text-muted-foreground" /> Arquivo Anexo
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] border-2 border-dashed border-slate-200 m-6 rounded-lg bg-slate-50/50">
+            <CardContent className="p-6 flex flex-col items-center justify-center min-h-[200px] border-2 border-dashed border-border m-6 rounded-lg bg-muted/50">
               {doc.arquivo_url ? (
                 <div className="text-center space-y-4">
-                  <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mx-auto">
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto">
                     <FileText className="w-8 h-8" />
                   </div>
-                  <p className="text-sm font-medium text-slate-700">Documento disponível para visualização</p>
+                  <p className="text-sm font-medium text-foreground">Documento disponível para visualização</p>
                   <Button onClick={() => window.open(doc.arquivo_url, '_blank')} className="bg-blue-600 hover:bg-blue-700">
                     <Download className="w-4 h-4 mr-2" /> Baixar / Visualizar
                   </Button>
                 </div>
               ) : (
-                <div className="text-center text-slate-500">
+                <div className="text-center text-muted-foreground">
                   <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                   <p>Nenhum arquivo anexado a este registro.</p>
                 </div>
@@ -198,35 +198,35 @@ export default function DocumentosContabilidadeDetail() {
 
         {/* SIDEBAR: Actions & History */}
         <div className="space-y-6">
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
-              <CardTitle className="text-base text-slate-800">Ações de Status</CardTitle>
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border py-4">
+              <CardTitle className="text-base text-foreground">Ações de Status</CardTitle>
             </CardHeader>
             <CardContent className="p-4 flex flex-col gap-3">
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-blue-200 text-blue-700 hover:bg-blue-50"
+                className="w-full justify-start border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/30"
                 onClick={() => openAction('enviar', 'Enviar à Contabilidade', 'Confirmar o envio deste documento.')}
               >
                 <Send className="w-4 h-4 mr-3" /> Marcar como Enviado
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                className="w-full justify-start border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
                 onClick={() => openAction('conferir', 'Conferir Documento', 'Confirmar que o documento foi validado e contabilizado.')}
               >
                 <CheckCircle className="w-4 h-4 mr-3" /> Marcar como Conferido
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-orange-200 text-orange-700 hover:bg-orange-50"
+                className="w-full justify-start border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950/30"
                 onClick={() => openAction('ajustar', 'Solicitar Ajuste', 'Notificar pendência ou correção necessária.')}
               >
                 <AlertCircle className="w-4 h-4 mr-3" /> Solicitar Ajuste
               </Button>
               <Button 
                 variant="outline" 
-                className="w-full justify-start border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                className="w-full justify-start border-yellow-200 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-950/30"
                 onClick={() => openAction('separar', 'Marcar Separado', 'Marcar que o documento está separado para envio futuro.')}
               >
                 <FileIcon className="w-4 h-4 mr-3" /> Marcar Separado
@@ -234,30 +234,30 @@ export default function DocumentosContabilidadeDetail() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm">
-            <CardHeader className="bg-slate-50 border-b border-slate-100 py-4">
-              <CardTitle className="text-base text-slate-800 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-slate-500" /> Histórico
+          <Card className="border-border shadow-sm">
+            <CardHeader className="bg-muted border-b border-border py-4">
+              <CardTitle className="text-base text-foreground flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-muted-foreground" /> Histórico
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[400px]">
                 <div className="p-5 space-y-4">
                   {historico.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center">Nenhum histórico registrado.</p>
+                    <p className="text-sm text-muted-foreground text-center">Nenhum histórico registrado.</p>
                   ) : (
                     historico.map((hist) => (
-                      <div key={hist.id} className="relative pl-6 pb-4 border-l-2 border-slate-200 last:border-0 last:pb-0">
+                      <div key={hist.id} className="relative pl-6 pb-4 border-l-2 border-border last:border-0 last:pb-0">
                         <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-blue-500" />
                         <div className="flex justify-between items-start mb-1">
-                          <p className="text-sm font-semibold text-slate-800">{hist.acao}</p>
-                          <span className="text-[10px] text-slate-500 whitespace-nowrap ml-2">
+                          <p className="text-sm font-semibold text-foreground">{hist.acao}</p>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                             {format(new Date(hist.data_acao), 'dd/MM HH:mm')}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mb-1">Por: {hist.users?.nome || 'Sistema'}</p>
+                        <p className="text-xs text-muted-foreground mb-1">Por: {hist.users?.nome || 'Sistema'}</p>
                         {hist.observacoes && (
-                          <p className="text-xs text-slate-500 italic bg-slate-50 p-2 rounded mt-1">"{hist.observacoes}"</p>
+                          <p className="text-xs text-muted-foreground italic bg-muted p-2 rounded mt-1">"{hist.observacoes}"</p>
                         )}
                       </div>
                     ))

@@ -89,13 +89,13 @@ export default function FechamentoMensalForm() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{isEditing ? 'Editar Fechamento Mensal' : 'Abrir Novo Fechamento Mensal'}</h1>
-          <p className="text-sm text-slate-500">Configure os parâmetros base para o processo de fechamento.</p>
+          <h1 className="text-2xl font-bold text-foreground">{isEditing ? 'Editar Fechamento Mensal' : 'Abrir Novo Fechamento Mensal'}</h1>
+          <p className="text-sm text-muted-foreground">Configure os parâmetros base para o processo de fechamento.</p>
         </div>
       </div>
 
-      <Card className="border-slate-200 shadow-sm">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <Card className="border-border shadow-sm">
+        <CardHeader className="bg-muted/50 border-b border-border">
           <CardTitle className="text-lg flex items-center gap-2">
             <CalendarCheck className="w-5 h-5 text-blue-600" />
             Dados do Fechamento
@@ -105,9 +105,9 @@ export default function FechamentoMensalForm() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-slate-700">Empresa <span className="text-red-500">*</span></Label>
+              <Label className="text-foreground">Empresa <span className="text-red-500">*</span></Label>
               <Select value={formData.empresa_id} onValueChange={(v) => handleChange('empresa_id', v)}>
-                <SelectTrigger className={`bg-white ${errors.empresa_id ? 'border-red-500' : ''}`}>
+                <SelectTrigger className={`bg-background ${errors.empresa_id ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -118,20 +118,20 @@ export default function FechamentoMensalForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Competência (MM/YYYY) <span className="text-red-500">*</span></Label>
+              <Label className="text-foreground">Competência (MM/YYYY) <span className="text-red-500">*</span></Label>
               <Input 
                 type="month" 
                 value={formData.competencia} 
                 onChange={(e) => handleChange('competencia', e.target.value)}
-                className={`bg-white ${errors.competencia ? 'border-red-500' : ''}`}
+                className={`bg-background ${errors.competencia ? 'border-red-500' : ''}`}
               />
               {errors.competencia && <p className="text-xs text-red-500">{errors.competencia}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Responsável <span className="text-red-500">*</span></Label>
+              <Label className="text-foreground">Responsável <span className="text-red-500">*</span></Label>
               <Select value={formData.responsavel_id} onValueChange={(v) => handleChange('responsavel_id', v)}>
-                <SelectTrigger className={`bg-white ${errors.responsavel_id ? 'border-red-500' : ''}`}>
+                <SelectTrigger className={`bg-background ${errors.responsavel_id ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Selecione o responsável" />
                 </SelectTrigger>
                 <SelectContent>
@@ -142,9 +142,9 @@ export default function FechamentoMensalForm() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-slate-700">Status Inicial <span className="text-red-500">*</span></Label>
+              <Label className="text-foreground">Status Inicial <span className="text-red-500">*</span></Label>
               <Select value={formData.status} onValueChange={(v) => handleChange('status', v)}>
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -158,18 +158,18 @@ export default function FechamentoMensalForm() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-700">Observações Gerais</Label>
+            <Label className="text-foreground">Observações Gerais</Label>
             <Textarea 
               rows={4}
               value={formData.observacoes_gerais}
               onChange={(e) => handleChange('observacoes_gerais', e.target.value)}
               placeholder="Notas ou instruções gerais para este fechamento..."
-              className="bg-white resize-none"
+              className="bg-background resize-none"
             />
           </div>
 
         </CardContent>
-        <CardFooter className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+        <CardFooter className="p-6 bg-muted border-t border-border flex justify-end gap-3">
           <Button variant="outline" onClick={() => navigate('/contabilidade/fechamento')}>Cancelar</Button>
           <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700">
             {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}

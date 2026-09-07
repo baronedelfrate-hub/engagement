@@ -16,7 +16,7 @@ export default function FechamentoParametrosTab() {
         <Card>
           <CardHeader><CardTitle className="text-base">Datas e Prazos</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-slate-500">Configuração de tolerâncias para o fechamento mensal.</p>
+            <p className="text-sm text-muted-foreground">Configuração de tolerâncias para o fechamento mensal.</p>
             {/* Campos placeholder */}
           </CardContent>
         </Card>
@@ -24,14 +24,14 @@ export default function FechamentoParametrosTab() {
         <Card>
           <CardHeader><CardTitle className="text-base">Validações Automáticas</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-             <p className="text-sm text-slate-500">Regras de bloqueio caso existam pendências.</p>
+             <p className="text-sm text-muted-foreground">Regras de bloqueio caso existam pendências.</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader><CardTitle className="text-base">Contas Padrão</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-             <p className="text-sm text-slate-500">Definição das contas de Lucros/Prejuízos acumulados.</p>
+             <p className="text-sm text-muted-foreground">Definição das contas de Lucros/Prejuízos acumulados.</p>
           </CardContent>
         </Card>
       </div>

@@ -66,7 +66,7 @@ const SetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
       <Helmet>
         <title>Configurar Senha | ERP Platform</title>
       </Helmet>
@@ -76,7 +76,7 @@ const SetPassword = () => {
           <EngagementLogo height={60} />
         </div>
 
-        <Card className="border-slate-200 dark:border-slate-800 shadow-lg">
+        <Card className="border-border dark:border-border shadow-lg">
           <CardHeader className="space-y-1 pb-6 text-center">
             <CardTitle className="text-2xl font-bold tracking-tight">Bem-vindo(a)!</CardTitle>
             <CardDescription className="text-muted-foreground">

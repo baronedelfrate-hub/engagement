@@ -35,7 +35,7 @@ export default function AdminDashboard() {
       description: 'Gerencie bases de dados e parâmetros do módulo fiscal.',
       icon: MapPin,
       color: 'text-emerald-500',
-      bgColor: 'bg-emerald-50',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
       links: [
         { name: 'Municípios IBGE (Setup)', url: '/admin/fiscal-municipios-setup', primary: true },
         { name: 'Migração de Municípios', url: '/admin/fiscal-municipios-migration' }
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
       description: 'Ferramentas para manutenção e setup do banco Supabase.',
       icon: Database,
       color: 'text-blue-500',
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-blue-50 dark:bg-blue-950/30',
       links: [
         { name: 'Testar Conexão', url: '/admin/database-test' },
         { name: 'Setup do Supabase', url: '/admin/supabase-setup' },
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       description: 'Controle de contas, times e acessos ao sistema.',
       icon: Users,
       color: 'text-indigo-500',
-      bgColor: 'bg-indigo-50',
+      bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
       links: [
         { name: 'Lista de Usuários', url: '/admin/usuarios', primary: true },
         { name: 'Times e Grupos', url: '/admin/times' }
@@ -69,7 +69,7 @@ export default function AdminDashboard() {
       description: 'Defina o que cada usuário pode acessar e fazer.',
       icon: ShieldCheck,
       color: 'text-purple-500',
-      bgColor: 'bg-purple-50',
+      bgColor: 'bg-purple-50 dark:bg-purple-950/30',
       links: [
         { name: 'Gerenciar Cargos', url: '/admin/roles' },
         { name: 'Permissões do Sistema', url: '/admin/permissoes' }
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
       description: 'Monitore sessões e eventos de segurança do ERP.',
       icon: Lock,
       color: 'text-red-500',
-      bgColor: 'bg-red-50',
+      bgColor: 'bg-red-50 dark:bg-red-950/30',
       links: [
         { name: 'Config. de Segurança', url: '/admin/seguranca' },
         { name: 'Logs de Auditoria', url: '/admin/logs' },
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
       description: 'Personalize a interface visual da plataforma.',
       icon: Palette,
       color: 'text-orange-500',
-      bgColor: 'bg-orange-50',
+      bgColor: 'bg-orange-50 dark:bg-orange-950/30',
       links: [
         { name: 'Configurações de Tema', url: '/configuracoes/temas', primary: true }
       ]

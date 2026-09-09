@@ -157,11 +157,11 @@ const SupabaseSetup = () => {
                     <div key={table} className="flex items-center justify-between p-3 border rounded-lg bg-card hover:bg-muted/50 transition-colors">
                         <span className="font-mono text-sm">{table}</span>
                         {tableStatus[table] ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1">
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800 gap-1">
                                 <CheckCircle2 className="h-3 w-3" /> Existe
                             </Badge>
                         ) : (
-                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1">
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800 gap-1">
                                 <XCircle className="h-3 w-3" /> Ausente
                             </Badge>
                         )}
@@ -206,17 +206,17 @@ const SupabaseSetup = () => {
                 </CardContent>
             </Card>
 
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-blue-800 flex items-center gap-2 text-base">
+                    <CardTitle className="text-blue-800 dark:text-blue-400 flex items-center gap-2 text-base">
                         <FileCode className="h-4 w-4" /> Script SQL
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-blue-700 mb-4">
+                    <p className="text-sm text-blue-700 dark:text-blue-400 mb-4">
                         Se a inicialização automática falhar, utilize o arquivo SQL gerado em <code>src/lib/supabase_bpo_init.sql</code>.
                     </p>
-                    <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-100">
+                    <Button variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/50">
                         Copiar SQL para Clipboard
                     </Button>
                 </CardContent>

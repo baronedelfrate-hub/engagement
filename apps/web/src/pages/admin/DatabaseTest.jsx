@@ -104,7 +104,7 @@ const DatabaseTest = () => {
                                     <div className="text-center text-green-600 animate-in zoom-in-50 duration-300">
                                         <CheckCircle2 className="h-20 w-20 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold">Banco Conectado!</h3>
-                                        <p className="text-green-700/80 mt-2">A comunicação com a API de dados está funcionando corretamente.</p>
+                                        <p className="text-green-700/80 dark:text-green-400/80 mt-2">A comunicação com a API de dados está funcionando corretamente.</p>
                                     </div>
                                 )}
 
@@ -113,7 +113,7 @@ const DatabaseTest = () => {
                                         <XCircle className="h-20 w-20 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold">Falha na Conexão com Banco</h3>
                                         
-                                        <Alert variant="destructive" className="mt-6 text-left border-red-200 bg-red-50">
+                                        <Alert variant="destructive" className="mt-6 text-left border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
                                             <WifiOff className="h-4 w-4" />
                                             <AlertTitle>Detalhes do Erro</AlertTitle>
                                             <AlertDescription className="font-mono text-xs mt-2 p-2 bg-background/50 rounded overflow-auto max-h-[100px] break-words">
@@ -169,12 +169,12 @@ const DatabaseTest = () => {
                                     <div className="text-center text-green-600 animate-in zoom-in-50 duration-300 w-full">
                                         <CheckCircle2 className="h-20 w-20 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold">Storage Acessível!</h3>
-                                        <p className="text-green-700/80 mt-2">{storageResult?.message}</p>
+                                        <p className="text-green-700/80 dark:text-green-400/80 mt-2">{storageResult?.message}</p>
                                         
                                         {storageResult?.buckets && storageResult.buckets.length > 0 && (
-                                            <div className="mt-6 text-left w-full max-w-md mx-auto bg-green-50 p-4 rounded-lg border border-green-100">
-                                                <p className="text-sm font-semibold text-green-800 mb-2">Buckets encontrados ({storageResult.buckets.length}):</p>
-                                                <ul className="text-xs font-mono text-green-700 space-y-1 list-disc pl-5">
+                                            <div className="mt-6 text-left w-full max-w-md mx-auto bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-green-100 dark:border-green-900">
+                                                <p className="text-sm font-semibold text-green-800 dark:text-green-400 mb-2">Buckets encontrados ({storageResult.buckets.length}):</p>
+                                                <ul className="text-xs font-mono text-green-700 dark:text-green-400 space-y-1 list-disc pl-5">
                                                     {storageResult.buckets.map((b, i) => <li key={i}>{b}</li>)}
                                                 </ul>
                                             </div>
@@ -187,13 +187,13 @@ const DatabaseTest = () => {
                                         <XCircle className="h-20 w-20 mx-auto mb-4" />
                                         <h3 className="text-xl font-bold">Falha no Storage</h3>
                                         
-                                        <Alert variant="destructive" className="mt-6 text-left border-red-200 bg-red-50">
+                                        <Alert variant="destructive" className="mt-6 text-left border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30">
                                             <WifiOff className="h-4 w-4" />
                                             <AlertTitle>Detalhes do Erro</AlertTitle>
                                             <div className="mt-2 space-y-2">
                                                 <p className="font-medium text-sm">{storageResult?.error}</p>
                                                 {storageResult?.details && (
-                                                    <pre className="font-mono text-xs p-2 bg-background/60 rounded overflow-auto max-h-[120px] whitespace-pre-wrap text-red-900 border border-red-100">
+                                                    <pre className="font-mono text-xs p-2 bg-background/60 rounded overflow-auto max-h-[120px] whitespace-pre-wrap text-red-900 dark:text-red-400 border border-red-100 dark:border-red-900">
                                                         {storageResult.details}
                                                     </pre>
                                                 )}

@@ -236,7 +236,7 @@ const UsuariosForm = ({ mode, userId }) => {
                 {companiesLoading ? (
                   <Skeleton className="h-10 w-full" />
                 ) : companies.length === 0 ? (
-                  <div className="flex items-center p-2 rounded border border-yellow-200 bg-yellow-50 text-yellow-800 text-sm">
+                  <div className="flex items-center p-2 rounded border border-yellow-200 bg-yellow-50 text-yellow-800 text-sm dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400">
                     <AlertCircle className="h-4 w-4 mr-2" />
                     Nenhuma empresa encontrada
                   </div>

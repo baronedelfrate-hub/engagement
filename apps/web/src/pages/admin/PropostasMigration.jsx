@@ -117,9 +117,9 @@ const PropostasMigration = () => {
                     <div className="text-sm font-medium text-muted-foreground mb-1">Total de Linhas</div>
                     <div className="text-2xl font-bold text-foreground">{stats.total}</div>
                   </div>
-                  <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-                    <div className="text-sm font-medium text-emerald-600 mb-1">Status Válidos</div>
-                    <div className="text-2xl font-bold text-emerald-700">{stats.valid}</div>
+                  <div className="bg-emerald-50 dark:bg-emerald-950/30 p-4 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                    <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-1">Status Válidos</div>
+                    <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{stats.valid}</div>
                   </div>
                   <div className={`p-4 rounded-lg border ${stats.invalid > 0 ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900' : 'bg-muted border-border'}`}>
                     <div className={`text-sm font-medium mb-1 ${stats.invalid > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`}>Status Inválidos</div>
@@ -153,14 +153,14 @@ const PropostasMigration = () => {
                 </div>
               </>
             ) : (
-              <div className="py-8 text-center text-red-500">Erro ao carregar estatísticas.</div>
+              <div className="py-8 text-center text-red-500 dark:text-red-400">Erro ao carregar estatísticas.</div>
             )}
           </CardContent>
           <CardFooter className="bg-muted border-t flex justify-between">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-muted-foreground">Status da Constraint:</span>
               {hasConstraint ? (
-                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100"><CheckCircle2 className="h-3 w-3 mr-1"/> Ativada</Badge>
+                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/30"><CheckCircle2 className="h-3 w-3 mr-1"/> Ativada</Badge>
               ) : (
                 <Badge variant="destructive"><AlertTriangle className="h-3 w-3 mr-1"/> Ausente</Badge>
               )}

@@ -146,17 +146,17 @@ const SchemaInitializer = () => {
                             {validationResults && (
                                 <div className="space-y-4 pt-2">
                                     <div className="grid grid-cols-2 gap-4 text-center">
-                                        <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                                        <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded-lg border border-green-100 dark:border-green-900">
                                             <div className="text-2xl font-bold text-green-600">
                                                 {validationResults.existing.length}
                                             </div>
-                                            <div className="text-xs text-green-700 font-medium">Encontradas</div>
+                                            <div className="text-xs text-green-700 dark:text-green-400 font-medium">Encontradas</div>
                                         </div>
-                                        <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                                        <div className="bg-red-50 dark:bg-red-950/30 p-3 rounded-lg border border-red-100 dark:border-red-900">
                                             <div className="text-2xl font-bold text-red-600">
                                                 {validationResults.missing.length}
                                             </div>
-                                            <div className="text-xs text-red-700 font-medium">Ausentes</div>
+                                            <div className="text-xs text-red-700 dark:text-red-400 font-medium">Ausentes</div>
                                         </div>
                                     </div>
 
@@ -166,7 +166,7 @@ const SchemaInitializer = () => {
                                                 <h4 className="text-xs font-bold text-red-600 mb-2 uppercase tracking-wider">Tabelas Ausentes</h4>
                                                 <div className="space-y-1">
                                                     {validationResults.missing.map(table => (
-                                                        <div key={table} className="text-xs flex items-center gap-2 text-red-500 font-mono bg-red-50/50 p-1 rounded">
+                                                        <div key={table} className="text-xs flex items-center gap-2 text-red-500 dark:text-red-400 font-mono bg-red-50/50 dark:bg-red-950/20 p-1 rounded">
                                                             <XCircle className="h-3 w-3" /> {table}
                                                         </div>
                                                     ))}
@@ -181,7 +181,7 @@ const SchemaInitializer = () => {
                                             ) : (
                                                 <div className="space-y-1">
                                                     {validationResults.existing.map(table => (
-                                                        <div key={table} className="text-xs flex items-center gap-2 text-green-600 font-mono bg-green-50/50 p-1 rounded">
+                                                        <div key={table} className="text-xs flex items-center gap-2 text-green-600 dark:text-green-400 font-mono bg-green-50/50 dark:bg-green-950/20 p-1 rounded">
                                                             <CheckCircle2 className="h-3 w-3" /> {table}
                                                         </div>
                                                     ))}
@@ -250,10 +250,10 @@ const SchemaInitializer = () => {
                                 </Button>
                             </div>
                             
-                            <Alert variant="warning" className="bg-amber-50 border-amber-200">
+                            <Alert variant="warning" className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
                                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                                <AlertTitle className="text-amber-800">Nota Importante</AlertTitle>
-                                <AlertDescription className="text-amber-700 text-xs">
+                                <AlertTitle className="text-amber-800 dark:text-amber-400">Nota Importante</AlertTitle>
+                                <AlertDescription className="text-amber-700 dark:text-amber-500 text-xs">
                                     A execução automática pode falhar dependendo das permissões do seu usuário Supabase. 
                                     Se falhar, copie o SQL abaixo e execute no "SQL Editor" do painel do Supabase.
                                 </AlertDescription>

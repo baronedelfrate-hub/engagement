@@ -36,8 +36,8 @@ function SessoesAtivas() {
               <Card key={session.id}>
                   <CardContent className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                              <ShieldAlert className="h-5 w-5 text-green-600" />
+                          <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-950/30 flex items-center justify-center">
+                              <ShieldAlert className="h-5 w-5 text-green-600 dark:text-green-400" />
                           </div>
                           <div>
                               <p className="font-medium text-foreground">{session.user}</p>

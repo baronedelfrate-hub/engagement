@@ -101,7 +101,7 @@ export default function FiscalMunicipiosMigration() {
           </CardHeader>
           <CardContent className="space-y-6">
             
-            <div className={`p-4 rounded-lg flex items-start gap-3 border ${isFullDataset ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20' : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20'}`}>
+            <div className={`p-4 rounded-lg flex items-start gap-3 border ${isFullDataset ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800' : 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800'}`}>
               {isFullDataset ? (
                 <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5" />
               ) : (

@@ -68,8 +68,8 @@ function FeriasList() {
         header: 'Status', 
         render: (item) => (
             <span className={`px-2 py-1 rounded-full text-xs font-bold 
-                ${item.status === 'Aprovado' ? 'bg-green-100 text-green-700' : 
-                  item.status === 'Rejeitado' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                ${item.status === 'Aprovado' ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' :
+                  item.status === 'Rejeitado' ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400'}`}>
                 {item.status}
             </span>
         ) 
@@ -81,7 +81,7 @@ function FeriasList() {
                 <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-green-600" onClick={() => changeStatus(item, 'Aprovado')} title="Aprovar"><Check className="h-4 w-4" /></Button>
                 <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600" onClick={() => changeStatus(item, 'Rejeitado')} title="Rejeitar"><XIcon className="h-4 w-4" /></Button>
             </div>
-        ) : <span className="text-xs text-slate-400">Finalizado</span>
+        ) : <span className="text-xs text-muted-foreground">Finalizado</span>
     }
   ];
 
@@ -120,11 +120,11 @@ function FeriasList() {
                 {scheduledVacations.length > 0 ? scheduledVacations.map(f => (
                     <div key={f.id} className="border-b pb-2">
                         <div className="font-medium text-sm">{getUserName(f.usuario_id)}</div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted-foreground">
                             {new Date(f.data_inicio).toLocaleDateString()} até {new Date(f.data_fim).toLocaleDateString()}
                         </div>
                     </div>
-                )) : <p className="text-center text-slate-500">Nenhuma férias agendada.</p>}
+                )) : <p className="text-center text-muted-foreground">Nenhuma férias agendada.</p>}
             </div>
         </DialogContent>
       </Dialog>

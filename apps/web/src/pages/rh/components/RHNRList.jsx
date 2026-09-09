@@ -54,13 +54,13 @@ const RHNRList = ({ funcionarioId }) => {
         {items.map(item => {
             const status = calculateExamStatus(item.data_validade);
             return (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-white dark:bg-slate-950">
+                <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-background">
                     <div>
                         <div className="flex items-center gap-2">
                             <p className="font-medium">{item.nr_numero}</p>
                             <Badge className={getAlertColor(status)} variant="outline">{status}</Badge>
                         </div>
-                        <p className="text-xs text-gray-500">Validade: {new Date(item.data_validade).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground">Validade: {new Date(item.data_validade).toLocaleDateString()}</p>
                     </div>
                     <div className="flex gap-2">
                         {item.arquivo_url && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>}

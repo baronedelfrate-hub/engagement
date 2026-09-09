@@ -53,10 +53,10 @@ const RHHoleritesList = ({ funcionarioId }) => {
       </div>
       <div className="grid gap-2">
         {items.map(item => (
-            <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-white dark:bg-slate-950">
+            <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-background">
                 <div>
                     <p className="font-medium">{item.mes_ano}</p>
-                    <p className="text-xs text-gray-500">Líquido: R$ {Number(item.valor_liquido).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">Líquido: R$ {Number(item.valor_liquido).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-2">
                     {item.arquivo_url && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>}

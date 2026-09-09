@@ -78,7 +78,7 @@ const RHDashboard = () => {
                 <QuickAccessCard title="Medicina" icon={Activity} path="/rh/medicina-ocupacional" color="text-purple-500" />
                 <QuickAccessCard title="Desempenho" icon={TrendingUp} path="/rh/desempenho" color="text-orange-500" />
                 <QuickAccessCard title="Políticas" icon={BookOpen} path="/rh/politicas-manuais" color="text-indigo-500" />
-                <QuickAccessCard title="Cargos" icon={Briefcase} path="/rh/descricao-cargos" color="text-slate-500" />
+                <QuickAccessCard title="Cargos" icon={Briefcase} path="/rh/descricao-cargos" color="text-muted-foreground" />
                 <QuickAccessCard title="Organogramas" icon={GitFork} path="/rh/organogramas" color="text-cyan-500" />
             </div>
 
@@ -112,7 +112,7 @@ const RHDashboard = () => {
                                         <p className="font-medium cursor-pointer hover:underline">{h.nome_completo}</p>
                                         <p className="text-xs text-muted-foreground">{new Date(h.data_admissao).toLocaleDateString()}</p>
                                     </div>
-                                    <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Novo</div>
+                                    <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded dark:bg-green-950/30 dark:text-green-400">Novo</div>
                                 </div>
                             ))}
                         </div>

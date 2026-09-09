@@ -82,10 +82,10 @@ const RHDocumentosList = ({ funcionarioId, tipo }) => {
 
       <div className="grid gap-2">
         {docs.map(doc => (
-          <div key={doc.id} className="flex items-center justify-between p-3 border rounded bg-white dark:bg-slate-950">
+          <div key={doc.id} className="flex items-center justify-between p-3 border rounded bg-background">
             <div>
               <p className="font-medium">{doc.nome_arquivo}</p>
-              <p className="text-xs text-gray-500">{new Date(doc.data_upload).toLocaleDateString()}</p>
+              <p className="text-xs text-muted-foreground">{new Date(doc.data_upload).toLocaleDateString()}</p>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" onClick={() => window.open(doc.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>
@@ -93,7 +93,7 @@ const RHDocumentosList = ({ funcionarioId, tipo }) => {
             </div>
           </div>
         ))}
-        {docs.length === 0 && <p className="text-gray-500 text-sm">Nenhum documento.</p>}
+        {docs.length === 0 && <p className="text-muted-foreground text-sm">Nenhum documento.</p>}
       </div>
     </div>
   );

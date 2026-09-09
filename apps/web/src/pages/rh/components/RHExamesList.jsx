@@ -70,13 +70,13 @@ const RHExamesList = ({ funcionarioId }) => {
         {items.map(item => {
             const status = calculateExamStatus(item.proxima_data);
             return (
-                <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-white dark:bg-slate-950">
+                <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-background">
                     <div>
                         <div className="flex items-center gap-2">
                             <p className="font-medium">{item.tipo_exame}</p>
                             <Badge className={getAlertColor(status)} variant="outline">{status}</Badge>
                         </div>
-                        <p className="text-xs text-gray-500">Realizado: {new Date(item.data_exame).toLocaleDateString()} | Vencimento: {item.proxima_data ? new Date(item.proxima_data).toLocaleDateString() : '-'}</p>
+                        <p className="text-xs text-muted-foreground">Realizado: {new Date(item.data_exame).toLocaleDateString()} | Vencimento: {item.proxima_data ? new Date(item.proxima_data).toLocaleDateString() : '-'}</p>
                     </div>
                     <div className="flex gap-2">
                         {item.arquivo_url && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>}

@@ -58,13 +58,13 @@ const RHFeriasList = ({ funcionarioId }) => {
       </div>
       <div className="grid gap-2">
         {items.map(item => (
-            <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-white dark:bg-slate-950">
+            <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-background">
                 <div>
                     <div className="flex items-center gap-2">
                         <p className="font-medium">{new Date(item.data_inicio).toLocaleDateString()} a {new Date(item.data_fim).toLocaleDateString()}</p>
                         <Badge variant="outline">{item.status}</Badge>
                     </div>
-                    <p className="text-xs text-gray-500">{item.dias_gozados} dias</p>
+                    <p className="text-xs text-muted-foreground">{item.dias_gozados} dias</p>
                 </div>
                 <div className="flex gap-2">
                     {item.arquivo_comprovante && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_comprovante, '_blank')}><Download className="h-4 w-4"/></Button>}

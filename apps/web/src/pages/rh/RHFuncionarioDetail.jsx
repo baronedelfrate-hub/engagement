@@ -54,12 +54,12 @@ const RHFuncionarioDetail = () => {
         <Card className="md:col-span-3">
           <CardHeader><CardTitle className="text-2xl">{employee.nome_completo}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             <div><p className="text-sm text-gray-500">CPF</p><p className="font-medium">{formatCPF(employee.cpf)}</p></div>
-             <div><p className="text-sm text-gray-500">Cargo</p><p className="font-medium">{employee.cargo?.nome || '-'}</p></div>
-             <div><p className="text-sm text-gray-500">Departamento</p><p className="font-medium">{employee.departamento?.nome || '-'}</p></div>
-             <div><p className="text-sm text-gray-500">Admissão</p><p className="font-medium">{new Date(employee.data_admissao).toLocaleDateString()}</p></div>
-             <div><p className="text-sm text-gray-500">Status</p><p className="font-medium">{employee.status}</p></div>
-             <div><p className="text-sm text-gray-500">Salário</p><p className="font-medium">R$ {Number(employee.salario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p></div>
+             <div><p className="text-sm text-muted-foreground">CPF</p><p className="font-medium">{formatCPF(employee.cpf)}</p></div>
+             <div><p className="text-sm text-muted-foreground">Cargo</p><p className="font-medium">{employee.cargo?.nome || '-'}</p></div>
+             <div><p className="text-sm text-muted-foreground">Departamento</p><p className="font-medium">{employee.departamento?.nome || '-'}</p></div>
+             <div><p className="text-sm text-muted-foreground">Admissão</p><p className="font-medium">{new Date(employee.data_admissao).toLocaleDateString()}</p></div>
+             <div><p className="text-sm text-muted-foreground">Status</p><p className="font-medium">{employee.status}</p></div>
+             <div><p className="text-sm text-muted-foreground">Salário</p><p className="font-medium">R$ {Number(employee.salario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p></div>
           </CardContent>
         </Card>
       </div>

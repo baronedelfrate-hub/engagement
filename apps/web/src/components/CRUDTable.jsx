@@ -76,17 +76,17 @@ const CRUDTable = ({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-           {title && <h2 className="text-2xl font-bold tracking-tight text-white">{title}</h2>}
-           {loading && <Loader2 className="h-5 w-5 animate-spin text-slate-400" />}
+           {title && <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>}
+           {loading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               placeholder={searchPlaceholder}
               value={searchTerm}
               onChange={handleSearch}
-              className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-md text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-md text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           {onCreate && (
@@ -97,17 +97,17 @@ const CRUDTable = ({
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <div className="rounded-lg border border-border bg-background overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-slate-200 hover:bg-slate-50">
+            <TableRow className="border-b border-border hover:bg-muted">
               {columns.map((col) => (
-                <TableHead 
+                <TableHead
                   key={col.accessorKey || col.header}
                   className={cn(
-                    "text-black font-semibold bg-slate-50", 
-                    col.className, 
-                    col.sortable && "cursor-pointer select-none hover:text-black/80"
+                    "text-foreground font-semibold bg-muted",
+                    col.className,
+                    col.sortable && "cursor-pointer select-none hover:text-foreground/80"
                   )}
                   onClick={() => handleSort(col)}
                 >
@@ -117,27 +117,27 @@ const CRUDTable = ({
                   </div>
                 </TableHead>
               ))}
-              <TableHead className="text-black font-semibold bg-slate-50 w-[80px] text-right">Ações</TableHead>
+              <TableHead className="text-foreground font-semibold bg-muted w-[80px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i} className="border-b border-slate-200">
+                <TableRow key={i} className="border-b border-border">
                    {columns.map((col, j) => (
-                     <TableCell key={j} className="text-black">
-                        <div className="h-4 w-full bg-slate-200 animate-pulse rounded" />
+                     <TableCell key={j} className="text-foreground">
+                        <div className="h-4 w-full bg-muted animate-pulse rounded" />
                      </TableCell>
                    ))}
-                   <TableCell className="text-black"><div className="h-8 w-8 bg-slate-200 animate-pulse rounded-full ml-auto" /></TableCell>
+                   <TableCell className="text-foreground"><div className="h-8 w-8 bg-muted animate-pulse rounded-full ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : data.length === 0 ? (
-              <TableRow className="border-b border-slate-200">
-                <TableCell colSpan={columns.length + 1} className="text-black text-center py-8">
+              <TableRow className="border-b border-border">
+                <TableCell colSpan={columns.length + 1} className="text-foreground text-center py-8">
                     <div className="flex flex-col items-center justify-center">
-                        <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                          <FileText className="h-6 w-6 text-slate-400" />
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                          <FileText className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <p>{emptyMessage}</p>
                     </div>
@@ -145,16 +145,16 @@ const CRUDTable = ({
               </TableRow>
             ) : (
               data.map((row) => (
-                <TableRow key={row.id} className="border-b border-slate-200 hover:bg-slate-50">
+                <TableRow key={row.id} className="border-b border-border hover:bg-muted">
                   {columns.map((col) => (
-                    <TableCell key={col.accessorKey || col.header} className={cn("text-black", col.className)}>
+                    <TableCell key={col.accessorKey || col.header} className={cn("text-foreground", col.className)}>
                       {col.cell ? col.cell({ row }) : row[col.accessorKey]}
                     </TableCell>
                   ))}
-                  <TableCell className="text-black text-right">
+                  <TableCell className="text-foreground text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-slate-200 text-slate-500">
+                        <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-muted text-muted-foreground">
                           <span className="sr-only">Abrir menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
@@ -167,7 +167,7 @@ const CRUDTable = ({
                           </DropdownMenuItem>
                         )}
                         {onDelete && (
-                          <DropdownMenuItem onClick={() => setDeleteId(row.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+                          <DropdownMenuItem onClick={() => setDeleteId(row.id)} className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:text-red-400 dark:focus:text-red-400 dark:focus:bg-red-950/30">
                             <Trash2 className="mr-2 h-4 w-4" /> Excluir
                           </DropdownMenuItem>
                         )}
@@ -184,14 +184,14 @@ const CRUDTable = ({
       {/* Pagination */}
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between px-2 pt-2">
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-muted-foreground">
             Página {pagination.page} de {pagination.totalPages} ({pagination.total} registros)
           </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 bg-slate-900 border-slate-800 text-white hover:bg-slate-800"
+              className="h-8 w-8"
               onClick={() => onPageChange(1)}
               disabled={pagination.page <= 1 || loading}
             >
@@ -200,7 +200,7 @@ const CRUDTable = ({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 bg-slate-900 border-slate-800 text-white hover:bg-slate-800"
+              className="h-8 w-8"
               onClick={() => onPageChange(pagination.page - 1)}
               disabled={pagination.page <= 1 || loading}
             >
@@ -209,7 +209,7 @@ const CRUDTable = ({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 bg-slate-900 border-slate-800 text-white hover:bg-slate-800"
+              className="h-8 w-8"
               onClick={() => onPageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.totalPages || loading}
             >
@@ -218,7 +218,7 @@ const CRUDTable = ({
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 bg-slate-900 border-slate-800 text-white hover:bg-slate-800"
+              className="h-8 w-8"
               onClick={() => onPageChange(pagination.totalPages)}
               disabled={pagination.page >= pagination.totalPages || loading}
             >

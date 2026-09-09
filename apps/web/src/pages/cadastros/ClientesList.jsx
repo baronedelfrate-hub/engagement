@@ -83,30 +83,30 @@ const ClientesList = () => {
       header: 'Nome / Razão Social', 
       accessorKey: 'nome', 
       sortable: true,
-      cell: ({ row }) => <span className="text-slate-900 font-medium">{row.nome}</span>
+      cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>
     },
     { 
       header: 'CNPJ / CPF', 
       accessorKey: 'cnpj_cpf', 
       sortable: true,
-      cell: ({ row }) => <span className="text-slate-700 font-mono">{row.cnpj_cpf}</span>
+      cell: ({ row }) => <span className="text-foreground font-mono">{row.cnpj_cpf}</span>
     },
     { 
       header: 'Email', 
       accessorKey: 'email', 
       sortable: true,
-      cell: ({ row }) => <span className="text-slate-700">{row.email}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.email}</span>
     },
     { 
       header: 'Telefone', 
       accessorKey: 'telefone',
-      cell: ({ row }) => <span className="text-slate-700">{row.telefone}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.telefone}</span>
     },
     { 
         header: 'Status', 
         accessorKey: 'status',
         cell: ({ row }) => (
-            <Badge variant={row.status === 'ativo' ? 'success' : 'secondary'} className={row.status === 'ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+            <Badge variant={row.status === 'ativo' ? 'success' : 'secondary'} className={row.status === 'ativo' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
                 {row.status === 'ativo' ? 'Ativo' : 'Inativo'}
             </Badge>
         )
@@ -114,9 +114,9 @@ const ClientesList = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       <CRUDTable
-        title={<span className="text-slate-900 dark:text-white">Gerenciamento de Clientes</span>}
+        title={<span className="text-foreground dark:text-white">Gerenciamento de Clientes</span>}
         columns={columns}
         data={data}
         loading={loading}

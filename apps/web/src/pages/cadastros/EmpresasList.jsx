@@ -66,13 +66,13 @@ const EmpresasList = () => {
       header: 'Razão Social / Fantasia', 
       accessorKey: 'razao_social',
       cell: ({ row }) => (
-        <div className="flex items-center gap-3 text-black">
-            <div className="h-10 w-10 rounded bg-blue-50 flex items-center justify-center text-blue-700 font-bold shrink-0 border border-blue-100">
+        <div className="flex items-center gap-3 text-foreground">
+            <div className="h-10 w-10 rounded bg-blue-50 flex items-center justify-center text-blue-700 font-bold shrink-0 border border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800">
                {row.logo ? <img src={row.logo} alt="Logo" className="h-10 w-10 rounded object-cover"/> : <Building2 className="h-5 w-5" />}
             </div>
             <div>
-              <p className="font-medium text-black">{row.nome_fantasia || row.razao_social}</p>
-              <p className="text-xs text-slate-500">{row.razao_social}</p>
+              <p className="font-medium text-foreground">{row.nome_fantasia || row.razao_social}</p>
+              <p className="text-xs text-muted-foreground">{row.razao_social}</p>
             </div>
         </div>
       )
@@ -80,14 +80,14 @@ const EmpresasList = () => {
     { 
       header: 'CNPJ', 
       accessorKey: 'cnpj',
-      cell: ({ row }) => <span className="text-black font-mono">{row.cnpj}</span>
+      cell: ({ row }) => <span className="text-foreground font-mono">{row.cnpj}</span>
     },
     { 
       header: 'Cidade/UF', 
       accessorKey: 'cidade',
       cell: ({ row }) => (
-        <div className="flex items-center text-black">
-            <MapPin className="h-3 w-3 mr-1 text-slate-400" /> {row.cidade} {row.estado ? `- ${row.estado}` : ''}
+        <div className="flex items-center text-foreground">
+            <MapPin className="h-3 w-3 mr-1 text-muted-foreground" /> {row.cidade} {row.estado ? `- ${row.estado}` : ''}
         </div>
       )
     },
@@ -95,9 +95,9 @@ const EmpresasList = () => {
       header: 'Contato', 
       accessorKey: 'email',
       cell: ({ row }) => (
-        <div className="flex flex-col text-xs text-black">
+        <div className="flex flex-col text-xs text-foreground">
             <span>{row.email}</span>
-            <span className="text-slate-500">{row.telefone}</span>
+            <span className="text-muted-foreground">{row.telefone}</span>
         </div>
       )
     },
@@ -105,7 +105,7 @@ const EmpresasList = () => {
       header: 'Status', 
       accessorKey: 'ativo',
       cell: ({ row }) => (
-        <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+        <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
           {row.ativo ? 'Ativo' : 'Inativo'}
         </Badge>
       )
@@ -115,9 +115,9 @@ const EmpresasList = () => {
   return (
     <>
       <Helmet><title>Cadastro de Empresas | ERP</title></Helmet>
-      <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50">
+      <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
         <CRUDTable 
-          title={<span className="text-slate-900">Empresas</span>}
+          title={<span className="text-foreground">Empresas</span>}
           columns={columns}
           data={filteredData}
           loading={loading}

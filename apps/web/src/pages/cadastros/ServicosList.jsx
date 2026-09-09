@@ -95,7 +95,7 @@ const ServicosList = () => {
         cell: ({ row }) => {
             const isActive = row.status === 'ativo' || row.ativo;
             return (
-              <Badge variant={isActive ? 'success' : 'secondary'} className={isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+              <Badge variant={isActive ? 'success' : 'secondary'} className={isActive ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
                   {isActive ? 'Ativo' : 'Inativo'}
               </Badge>
             )

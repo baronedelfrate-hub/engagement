@@ -300,7 +300,7 @@ const ProdutosForm = () => {
                     (typeof formData.tipo === 'string' && (formData.tipo.toLowerCase().includes('serviço') || formData.tipo.toLowerCase().includes('assinatura')));
 
   return (
-    <div className="p-8 max-w-6xl mx-auto pb-20 text-slate-900 dark:text-slate-100">
+    <div className="p-8 max-w-6xl mx-auto pb-20 text-foreground">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate('/cadastros/produtos')}>
@@ -308,7 +308,7 @@ const ProdutosForm = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{id ? "Editar Produto" : "Novo Produto"}</h1>
-            <p className="text-sm text-slate-500">{formData.nome || 'Preencha os dados do produto'}</p>
+            <p className="text-sm text-muted-foreground">{formData.nome || 'Preencha os dados do produto'}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -496,7 +496,7 @@ const ProdutosForm = () => {
 
         <TabsContent value="prices" className="space-y-6 bg-card p-6 rounded-lg border shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4 border p-5 rounded-lg bg-slate-50/50 dark:bg-slate-900/20">
+            <div className="space-y-4 border p-5 rounded-lg bg-muted/50">
               <h3 className="font-semibold text-lg border-b pb-2">Custos</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -509,11 +509,11 @@ const ProdutosForm = () => {
                 </div>
                 <div className="space-y-2 opacity-70">
                    <Label>Último Custo (R$)</Label>
-                   <Input value={formData.ultimo_custo || 0} readOnly disabled className="bg-muted text-slate-500" />
+                   <Input value={formData.ultimo_custo || 0} readOnly disabled className="bg-muted text-muted-foreground" />
                 </div>
                 <div className="space-y-2 opacity-70">
                    <Label>Custo Médio (R$)</Label>
-                   <Input value={formData.custo_medio || 0} readOnly disabled className="bg-muted text-slate-500" />
+                   <Input value={formData.custo_medio || 0} readOnly disabled className="bg-muted text-muted-foreground" />
                 </div>
               </div>
             </div>
@@ -527,11 +527,11 @@ const ProdutosForm = () => {
                 </div>
                 <div className="space-y-2">
                    <Label>Margem Lucro (%)</Label>
-                   <Input value={formData.margem.toFixed(2)} readOnly disabled className="bg-white/50 dark:bg-black/50 font-mono text-slate-500" />
+                   <Input value={formData.margem.toFixed(2)} readOnly disabled className="bg-background/50 dark:bg-black/50 font-mono text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
                    <Label>Markup (%)</Label>
-                   <Input value={formData.markup.toFixed(2)} readOnly disabled className="bg-white/50 dark:bg-black/50 font-mono text-slate-500" />
+                   <Input value={formData.markup.toFixed(2)} readOnly disabled className="bg-background/50 dark:bg-black/50 font-mono text-muted-foreground" />
                 </div>
               </div>
               
@@ -579,8 +579,8 @@ const ProdutosForm = () => {
                     </div>
                 </div>
                 
-                <div className="space-y-4 p-5 border rounded-lg bg-slate-50 dark:bg-slate-900/30">
-                    <h4 className="font-medium text-sm text-slate-500 uppercase tracking-wider mb-2">Controles Adicionais</h4>
+                <div className="space-y-4 p-5 border rounded-lg bg-muted">
+                    <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Controles Adicionais</h4>
                     <div className="flex items-center space-x-2">
                         <Checkbox id="controle_lote" checked={formData.controle_lote} onCheckedChange={(c) => setFormData(p => ({...p, controle_lote: c}))} />
                         <Label htmlFor="controle_lote">Exigir Lote nas movimentações (Entrada/Saída)</Label>
@@ -680,24 +680,24 @@ const ProdutosForm = () => {
                 </div>
               </div>
               <div className="space-y-6 bg-muted/20 p-5 rounded-lg border">
-                <h4 className="font-medium text-sm text-slate-500 uppercase tracking-wider mb-2">Histórico de Compras</h4>
+                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Histórico de Compras</h4>
                 <div className="space-y-2">
                     <Label>Último Fornecedor a fornecer o item</Label>
-                    <Input value={formData.ultimo_fornecedor || 'Nenhum registro'} readOnly className="bg-muted text-slate-500" />
+                    <Input value={formData.ultimo_fornecedor || 'Nenhum registro'} readOnly className="bg-muted text-muted-foreground" />
                 </div>
-                <p className="text-xs text-slate-500 mt-4 italic">O histórico é atualizado automaticamente ao dar entrada em notas fiscais de compra vinculadas a este produto.</p>
+                <p className="text-xs text-muted-foreground mt-4 italic">O histórico é atualizado automaticamente ao dar entrada em notas fiscais de compra vinculadas a este produto.</p>
               </div>
            </div>
         </TabsContent>
 
         <TabsContent value="commercial" className="space-y-4 bg-card p-6 rounded-lg border shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               <div className="space-y-4 border p-5 rounded-lg bg-slate-50 dark:bg-slate-900/30">
+               <div className="space-y-4 border p-5 rounded-lg bg-muted">
                   <div className="flex items-center space-x-2">
                      <Checkbox id="comissionavel" checked={formData.comissionavel} onCheckedChange={(c) => setFormData(p => ({...p, comissionavel: c}))} />
                      <Label htmlFor="comissionavel" className="font-medium">Produto Comissionável</Label>
                   </div>
-                  <p className="text-sm text-slate-500 ml-6">Marque se as vendas deste produto geram comissão para os vendedores.</p>
+                  <p className="text-sm text-muted-foreground ml-6">Marque se as vendas deste produto geram comissão para os vendedores.</p>
                   
                   {formData.comissionavel && (
                      <div className="space-y-2 ml-6 mt-4 animate-in fade-in">
@@ -707,7 +707,7 @@ const ProdutosForm = () => {
                   )}
                </div>
 
-               <div className="space-y-4 border p-5 rounded-lg bg-slate-50 dark:bg-slate-900/30">
+               <div className="space-y-4 border p-5 rounded-lg bg-muted">
                   <div className="flex items-center space-x-2">
                      <Checkbox id="vendavel_online" checked={formData.vendavel_online} onCheckedChange={(c) => setFormData(p => ({...p, vendavel_online: c}))} />
                      <Label htmlFor="vendavel_online" className="font-medium">Disponível para Venda Online (E-commerce)</Label>
@@ -727,7 +727,7 @@ const ProdutosForm = () => {
              <div className="space-y-2">
                  <Label>Descrição Curta (Aparece em Notas Fiscais e Recibos)</Label>
                  <Textarea name="descricao_curta" value={formData.descricao_curta} onChange={handleChange} maxLength={255} className="h-20 resize-none" />
-                 <p className="text-xs text-right text-slate-500">{formData.descricao_curta?.length || 0}/255 caracteres</p>
+                 <p className="text-xs text-right text-muted-foreground">{formData.descricao_curta?.length || 0}/255 caracteres</p>
              </div>
              
              <div className="space-y-2">
@@ -739,7 +739,7 @@ const ProdutosForm = () => {
                 <div className="space-y-4">
                     <div>
                       <h3 className="font-medium text-lg">Foto do Produto</h3>
-                      <p className="text-sm text-slate-500 mb-4">Adicione uma imagem principal para o produto (Máx 5MB)</p>
+                      <p className="text-sm text-muted-foreground mb-4">Adicione uma imagem principal para o produto (Máx 5MB)</p>
                     </div>
                     <FileUploader 
                        type="image"
@@ -752,7 +752,7 @@ const ProdutosForm = () => {
                 <div className="space-y-4">
                      <div>
                        <h3 className="font-medium text-lg">Manuais e Documentos</h3>
-                       <p className="text-sm text-slate-500 mb-4">Fichas técnicas, manuais de uso ou laudos (Máx 10MB/arquivo)</p>
+                       <p className="text-sm text-muted-foreground mb-4">Fichas técnicas, manuais de uso ou laudos (Máx 10MB/arquivo)</p>
                      </div>
                      <FileUploader 
                        type="documento"
@@ -763,10 +763,10 @@ const ProdutosForm = () => {
                     {formData.documentos && formData.documentos.length > 0 && (
                         <div className="mt-4 space-y-2 max-h-[300px] overflow-y-auto pr-2">
                             {formData.documentos.map((doc, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-slate-50 dark:bg-slate-900/50 text-sm group hover:border-primary/50 transition-colors">
+                                <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-muted text-sm group hover:border-primary/50 transition-colors">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="p-2 bg-slate-200 dark:bg-slate-800 rounded-md">
-                                          <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                        <div className="p-2 bg-muted rounded-md">
+                                          <FileText className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
                                         </div>
                                         <div className="truncate flex flex-col">
                                           <span className="font-medium truncate" title={doc.name}>{doc.name || 'Documento Anexado'}</span>

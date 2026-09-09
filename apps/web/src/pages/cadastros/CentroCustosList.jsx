@@ -23,24 +23,24 @@ const CentroCustosList = () => {
       header: 'Código', 
       accessorKey: 'codigo', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black font-mono">{row.codigo}</span>
+      cell: ({ row }) => <span className="text-foreground font-mono">{row.codigo}</span>
     },
     { 
       header: 'Nome', 
       accessorKey: 'nome', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black font-medium">{row.nome}</span>
+      cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>
     },
     { 
       header: 'Descrição', 
       accessorKey: 'descricao',
-      cell: ({ row }) => <span className="text-black">{row.descricao}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.descricao}</span>
     },
     { 
         header: 'Ativo', 
         accessorKey: 'ativo',
         cell: ({ row }) => (
-            <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+            <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
                 {row.ativo ? 'Sim' : 'Não'}
             </Badge>
         )
@@ -48,9 +48,9 @@ const CentroCustosList = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       <CRUDTable
-        title={<span className="text-slate-900">Centros de Custo</span>}
+        title={<span className="text-foreground">Centros de Custo</span>}
         columns={columns}
         data={data}
         loading={loading}

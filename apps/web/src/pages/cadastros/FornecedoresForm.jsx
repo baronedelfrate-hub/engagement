@@ -148,7 +148,7 @@ const FornecedoresForm = () => {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
+    <div className="p-8 max-w-5xl mx-auto space-y-6 text-foreground">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => navigate('/cadastros/fornecedores')}>

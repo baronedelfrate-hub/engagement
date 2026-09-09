@@ -111,14 +111,14 @@ const ProdutosList = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 min-h-screen bg-slate-50">
+    <div className="p-8 max-w-7xl mx-auto space-y-6 min-h-screen bg-muted">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2 text-slate-900">
+          <h1 className="text-3xl font-bold flex items-center gap-2 text-foreground">
             <Package className="h-8 w-8 text-blue-600" />
             Produtos e Serviços
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             Gerencie seu catálogo de produtos, estoques e serviços.
           </p>
         </div>
@@ -127,13 +127,13 @@ const ProdutosList = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 space-y-4">
+      <div className="bg-background rounded-lg border border-border shadow-sm p-4 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por nome, código ou EAN..."
-              className="pl-9 text-black bg-white border-slate-300"
+              className="pl-9 text-foreground bg-background border-border"
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
             />
@@ -143,10 +143,10 @@ const ProdutosList = () => {
             value={filters.tipo} 
             onValueChange={(val) => setFilters(prev => ({ ...prev, tipo: val }))}
           >
-            <SelectTrigger className="bg-white text-black border-slate-300">
+            <SelectTrigger className="bg-background text-foreground border-border">
               <SelectValue placeholder="Tipo de Produto" />
             </SelectTrigger>
-            <SelectContent className="bg-white text-black">
+            <SelectContent className="bg-background text-foreground">
               <SelectItem value="all">Todos os Tipos</SelectItem>
               {tiposList.map(t => (
                 <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
@@ -161,10 +161,10 @@ const ProdutosList = () => {
             value={filters.status} 
             onValueChange={(val) => setFilters(prev => ({ ...prev, status: val }))}
           >
-            <SelectTrigger className="bg-white text-black border-slate-300">
+            <SelectTrigger className="bg-background text-foreground border-border">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent className="bg-white text-black">
+            <SelectContent className="bg-background text-foreground">
               <SelectItem value="all">Todos os Status</SelectItem>
               <SelectItem value="Ativo">Ativo</SelectItem>
               <SelectItem value="Inativo">Inativo</SelectItem>
@@ -175,10 +175,10 @@ const ProdutosList = () => {
             value={filters.categoria} 
             onValueChange={(val) => setFilters(prev => ({ ...prev, categoria: val }))}
           >
-            <SelectTrigger className="bg-white text-black border-slate-300">
+            <SelectTrigger className="bg-background text-foreground border-border">
               <SelectValue placeholder="Categoria" />
             </SelectTrigger>
-            <SelectContent className="bg-white text-black">
+            <SelectContent className="bg-background text-foreground">
               <SelectItem value="all">Todas as Categorias</SelectItem>
               {categories.map((cat, idx) => (
                 <SelectItem key={idx} value={cat}>{cat}</SelectItem>
@@ -187,18 +187,18 @@ const ProdutosList = () => {
           </Select>
         </div>
 
-        <div className="rounded-md border border-slate-200 overflow-hidden bg-white">
+        <div className="rounded-md border border-border overflow-hidden bg-background">
           <Table>
-            <TableHeader className="bg-slate-50">
-              <TableRow className="border-b border-slate-200">
-                <TableHead className="text-black font-semibold">Produto</TableHead>
-                <TableHead className="text-black font-semibold">Código Interno</TableHead>
-                <TableHead className="text-black font-semibold">Tipo</TableHead>
-                <TableHead className="text-black font-semibold">Categoria</TableHead>
-                <TableHead className="text-right text-black font-semibold">Preço Venda</TableHead>
-                <TableHead className="text-right text-black font-semibold">Estoque</TableHead>
-                <TableHead className="text-center text-black font-semibold">Status</TableHead>
-                <TableHead className="text-right text-black font-semibold">Ações</TableHead>
+            <TableHeader className="bg-muted">
+              <TableRow className="border-b border-border">
+                <TableHead className="text-foreground font-semibold">Produto</TableHead>
+                <TableHead className="text-foreground font-semibold">Código Interno</TableHead>
+                <TableHead className="text-foreground font-semibold">Tipo</TableHead>
+                <TableHead className="text-foreground font-semibold">Categoria</TableHead>
+                <TableHead className="text-right text-foreground font-semibold">Preço Venda</TableHead>
+                <TableHead className="text-right text-foreground font-semibold">Estoque</TableHead>
+                <TableHead className="text-center text-foreground font-semibold">Status</TableHead>
+                <TableHead className="text-right text-foreground font-semibold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -210,47 +210,47 @@ const ProdutosList = () => {
                 </TableRow>
               ) : data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-slate-500">
+                  <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
                     Nenhum produto encontrado.
                   </TableCell>
                 </TableRow>
               ) : (
                 data.map((item) => (
-                  <TableRow key={item.id} className="border-b border-slate-200 hover:bg-slate-50">
-                    <TableCell className="font-medium text-black">
+                  <TableRow key={item.id} className="border-b border-border hover:bg-muted">
+                    <TableCell className="font-medium text-foreground">
                       <div className="flex flex-col">
                         <span>{item.nome}</span>
                         {item.codigo_barras && (
-                          <span className="text-xs text-slate-500 font-normal">EAN: {item.codigo_barras}</span>
+                          <span className="text-xs text-muted-foreground font-normal">EAN: {item.codigo_barras}</span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-black">{item.codigo_interno || '-'}</TableCell>
-                    <TableCell className="text-black">{getTipoName(item.tipo)}</TableCell>
-                    <TableCell className="text-black">{item.categoria || '-'}</TableCell>
-                    <TableCell className="text-right font-medium text-black">
+                    <TableCell className="text-foreground">{item.codigo_interno || '-'}</TableCell>
+                    <TableCell className="text-foreground">{getTipoName(item.tipo)}</TableCell>
+                    <TableCell className="text-foreground">{item.categoria || '-'}</TableCell>
+                    <TableCell className="text-right font-medium text-foreground">
                       {formatCurrency(item.preco_venda)}
                     </TableCell>
-                    <TableCell className="text-right text-black">
+                    <TableCell className="text-right text-foreground">
                       {item.controla_estoque ? (
                         <span className={item.estoque_atual <= (item.estoque_minimo || 0) ? "text-red-600 font-bold" : ""}>
                           {item.estoque_atual} {item.unidade_medida}
                         </span>
                       ) : (
-                        <span className="text-slate-400">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={item.status === 'Ativo' ? 'success' : 'secondary'} className={item.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+                      <Badge variant={item.status === 'Ativo' ? 'success' : 'secondary'} className={item.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
                         {item.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-black">
+                    <TableCell className="text-right text-foreground">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => navigate(`/cadastros/produtos/${item.id}`)}>
+                        <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-950/30" onClick={() => navigate(`/cadastros/produtos/${item.id}`)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setDeleteId(item.id)}>
+                        <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30" onClick={() => setDeleteId(item.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -264,15 +264,15 @@ const ProdutosList = () => {
       </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent className="bg-white border-slate-200">
+        <AlertDialogContent className="bg-background border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-black">Tem certeza?</AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-600">
+            <AlertDialogTitle className="text-foreground">Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               Esta ação não pode ser desfeita. O produto será permanentemente excluído do sistema.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-slate-300 text-black">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="border-border text-foreground">Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 text-white hover:bg-red-700">
               Excluir
             </AlertDialogAction>

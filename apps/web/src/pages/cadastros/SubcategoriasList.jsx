@@ -81,7 +81,7 @@ function SubcategoriasList() {
     { 
       header: 'Nome', 
       accessor: 'nome',
-      render: (row) => <span className="text-black font-medium">{row.nome}</span>
+      render: (row) => <span className="text-foreground font-medium">{row.nome}</span>
     },
     { 
       header: 'Categoria Pai', 
@@ -89,13 +89,13 @@ function SubcategoriasList() {
       render: (row) => row.categorias?.nome ? (
         <span className="text-blue-600 font-medium">{row.categorias.nome}</span>
       ) : (
-        <span className="text-slate-500 italic">N/A</span>
+        <span className="text-muted-foreground italic">N/A</span>
       )
     },
     { 
       header: 'Descrição', 
       accessor: 'descricao',
-      render: (row) => <span className="text-black">{row.descricao || '-'}</span>
+      render: (row) => <span className="text-foreground">{row.descricao || '-'}</span>
     },
     {
       header: 'Ações',
@@ -104,15 +104,15 @@ function SubcategoriasList() {
         <div className="flex gap-2 justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0 text-slate-500 hover:text-black hover:bg-slate-100">
+              <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-slate-200 text-black">
-              <DropdownMenuItem onClick={() => handleEdit(row.id)} className="cursor-pointer hover:bg-slate-50">
+            <DropdownMenuContent align="end" className="bg-background border-border text-foreground">
+              <DropdownMenuItem onClick={() => handleEdit(row.id)} className="cursor-pointer hover:bg-muted">
                 <Pencil className="mr-2 h-4 w-4" /> Editar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(row.id)} className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700">
+              <DropdownMenuItem onClick={() => handleDelete(row.id)} className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300">
                 <Trash className="mr-2 h-4 w-4" /> Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -123,15 +123,15 @@ function SubcategoriasList() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-muted p-8">
       <Helmet>
         <title>Subcategorias - ERP Platform</title>
         <meta name="description" content="Manage and view all subcategories" />
       </Helmet>
 
       <PageHeader
-        title={<span className="text-slate-900">Subcategorias</span>}
-        description={<span className="text-slate-500">Gerencie suas subcategorias</span>}
+        title={<span className="text-foreground">Subcategorias</span>}
+        description={<span className="text-muted-foreground">Gerencie suas subcategorias</span>}
         action={
           <Button onClick={() => navigate('/cadastros/subcategorias/novo')} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
             <Plus className="h-4 w-4" />
@@ -141,21 +141,21 @@ function SubcategoriasList() {
       />
 
       <div className="mb-6 relative">
-         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
          <Input
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Buscar por nome ou categoria pai..."
-          className="pl-9 bg-white border-slate-300 text-black placeholder:text-slate-500"
+          className="pl-9 bg-background border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <div className="rounded-lg border border-border bg-background overflow-hidden">
         <DataTable
           data={filteredSubcategorias}
           columns={columns}
           loading={loading}
-          emptyMessage={<span className="text-slate-500">Nenhuma subcategoria encontrada</span>}
+          emptyMessage={<span className="text-muted-foreground">Nenhuma subcategoria encontrada</span>}
         />
       </div>
     </div>

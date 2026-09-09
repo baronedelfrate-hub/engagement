@@ -51,28 +51,28 @@ const BancosList = () => {
       sortable: true,
       cell: ({ row }) => {
         const bankName = row.codigo ? getBankName(row.codigo) : row.nome;
-        return <span className="font-medium text-black">{bankName}</span>;
+        return <span className="font-medium text-foreground">{bankName}</span>;
       }
     },
     { 
       header: 'Nome da Conta', 
       accessorKey: 'nome',
-      cell: ({ row }) => <span className="text-black">{row.nome}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.nome}</span>
     },
     { 
       header: 'Agência', 
       accessorKey: 'agencia',
-      cell: ({ row }) => <span className="text-black">{row.agencia}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.agencia}</span>
     },
     { 
       header: 'Conta', 
       accessorKey: 'conta',
-      cell: ({ row }) => <span className="text-black">{row.conta}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.conta}</span>
     },
     { 
       header: 'Tipo', 
       accessorKey: 'tipo_conta',
-      cell: ({ row }) => <span className="text-black">{row.tipo_conta}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.tipo_conta}</span>
     },
     { 
         header: 'Saldo Atual', 
@@ -87,14 +87,14 @@ const BancosList = () => {
         header: 'Data Saldo Inicial', 
         accessorKey: 'data_saldo_inicial',
         cell: ({ row }) => (
-          <div className="flex items-center gap-1 text-slate-700">
+          <div className="flex items-center gap-1 text-foreground">
             {row.data_saldo_inicial ? (
               <>
-                <Calendar className="h-3 w-3 text-slate-500" />
+                <Calendar className="h-3 w-3 text-muted-foreground" />
                 <span className="text-sm">{formatDate(row.data_saldo_inicial)}</span>
               </>
             ) : (
-              <span className="text-slate-400 text-sm">-</span>
+              <span className="text-muted-foreground text-sm">-</span>
             )}
           </div>
         )
@@ -103,7 +103,7 @@ const BancosList = () => {
         header: 'Ativo', 
         accessorKey: 'ativo',
         cell: ({ row }) => (
-            <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100' : 'bg-slate-100 text-slate-800'}>
+            <Badge variant={row.ativo ? 'success' : 'secondary'} className={row.ativo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/30' : 'bg-muted text-foreground'}>
                 {row.ativo ? 'Sim' : 'Não'}
             </Badge>
         )
@@ -111,9 +111,9 @@ const BancosList = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       <CRUDTable
-        title={<span className="text-slate-900">Contas Bancárias</span>}
+        title={<span className="text-foreground">Contas Bancárias</span>}
         columns={columns}
         data={data}
         loading={loading}

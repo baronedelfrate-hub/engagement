@@ -58,36 +58,36 @@ const FornecedoresList = () => {
       header: 'Razão Social', 
       accessorKey: 'nome', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black font-medium">{row.nome}</span>
+      cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>
     },
     { 
       header: 'CNPJ', 
       accessorKey: 'cnpj', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black font-mono">{row.cnpj}</span>
+      cell: ({ row }) => <span className="text-foreground font-mono">{row.cnpj}</span>
     },
     { 
       header: 'Email', 
       accessorKey: 'email', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black">{row.email}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.email}</span>
     },
     { 
       header: 'Telefone', 
       accessorKey: 'telefone',
-      cell: ({ row }) => <span className="text-black">{row.telefone}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.telefone}</span>
     },
     { 
       header: 'Cidade', 
       accessorKey: 'cidade', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black">{row.cidade}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.cidade}</span>
     },
     { 
         header: 'Status', 
         accessorKey: 'status',
         cell: ({ row }) => (
-            <Badge variant={row.status === 'ativo' ? 'success' : 'secondary'} className={row.status === 'ativo' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-800'}>
+            <Badge variant={row.status === 'ativo' ? 'success' : 'secondary'} className={row.status === 'ativo' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
                 {row.status === 'ativo' ? 'Ativo' : 'Inativo'}
             </Badge>
         )
@@ -95,9 +95,9 @@ const FornecedoresList = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       <CRUDTable
-        title={<span className="text-slate-900">Gerenciamento de Fornecedores</span>}
+        title={<span className="text-foreground">Gerenciamento de Fornecedores</span>}
         columns={columns}
         data={data}
         loading={loading}

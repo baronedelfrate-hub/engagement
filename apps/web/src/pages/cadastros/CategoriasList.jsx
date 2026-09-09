@@ -22,19 +22,19 @@ const CategoriasList = () => {
       header: 'Nome', 
       accessorKey: 'nome', 
       sortable: true,
-      cell: ({ row }) => <span className="text-black font-medium">{row.nome}</span>
+      cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>
     },
     { 
       header: 'Descrição', 
       accessorKey: 'descricao',
-      cell: ({ row }) => <span className="text-black">{row.descricao}</span>
+      cell: ({ row }) => <span className="text-foreground">{row.descricao}</span>
     },
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       <CRUDTable
-        title={<span className="text-slate-900">Categorias de Produtos/Serviços</span>}
+        title={<span className="text-foreground">Categorias de Produtos/Serviços</span>}
         columns={columns}
         data={data}
         loading={loading}

@@ -125,7 +125,7 @@ const EmpresasForm = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Tabs defaultValue="geral" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4 bg-slate-800/50">
+          <TabsList className="grid w-full grid-cols-3 mb-4 bg-muted">
             <TabsTrigger value="geral">Dados Gerais</TabsTrigger>
             <TabsTrigger value="endereco">Endereço & Contato</TabsTrigger>
             <TabsTrigger value="config">Visual & Status</TabsTrigger>
@@ -170,8 +170,8 @@ const EmpresasForm = () => {
                   </div>
                 </div>
                 
-                <div className="border-t border-slate-700/50 pt-4 mt-4">
-                  <h4 className="text-sm font-semibold text-slate-300 mb-3">Endereço</h4>
+                <div className="border-t border-border/50 pt-4 mt-4">
+                  <h4 className="text-sm font-semibold text-muted-foreground mb-3">Endereço</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="cep">CEP</Label>
@@ -208,7 +208,7 @@ const EmpresasForm = () => {
               <CardHeader><CardTitle>Configurações e Identidade</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 
-                <div className="bg-slate-900/50 p-6 rounded-lg border border-slate-700">
+                <div className="bg-muted p-6 rounded-lg border border-border">
                   <Label className="mb-4 block text-base">Logotipo da Empresa</Label>
                   <div className="max-w-sm">
                     <FileUploader 
@@ -220,7 +220,7 @@ const EmpresasForm = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 p-4 border rounded-lg border-slate-700 bg-slate-900/30">
+                <div className="flex items-center space-x-2 p-4 border rounded-lg border-border bg-muted/50">
                    <Checkbox 
                       id="ativo" 
                       checked={formData.ativo} 
@@ -228,7 +228,7 @@ const EmpresasForm = () => {
                    />
                    <div className="grid gap-1.5 leading-none">
                      <Label htmlFor="ativo" className="cursor-pointer">Cadastro Ativo</Label>
-                     <p className="text-sm text-slate-500">
+                     <p className="text-sm text-muted-foreground">
                        Desative para ocultar esta empresa em novos lançamentos.
                      </p>
                    </div>

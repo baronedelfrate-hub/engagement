@@ -369,7 +369,7 @@ const ServicosForm = () => {
         {/* TAB: PREÇOS E CUSTOS */}
         <TabsContent value="prices" className="space-y-6 bg-card p-6 rounded-lg border shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4 border p-5 rounded-lg bg-slate-50/50">
+            <div className="space-y-4 border p-5 rounded-lg bg-muted/50">
               <h3 className="font-semibold text-lg border-b pb-2">Custos</h3>
               <div className="space-y-2">
                 <Label>Custo Padrão (R$)</Label>
@@ -387,7 +387,7 @@ const ServicosForm = () => {
                 </div>
                 <div className="space-y-2">
                    <Label>Margem Lucro (%)</Label>
-                   <Input value={formData.margem.toFixed(2)} readOnly disabled className="bg-white/50 font-mono" />
+                   <Input value={formData.margem.toFixed(2)} readOnly disabled className="bg-background/50 font-mono" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-primary/10 mt-2">
@@ -587,10 +587,10 @@ const ServicosForm = () => {
                     {formData.documentos && formData.documentos.length > 0 && (
                         <div className="mt-4 space-y-2 max-h-[300px] overflow-y-auto pr-2">
                             {formData.documentos.map((doc, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-slate-50 dark:bg-slate-900/50 text-sm group hover:border-primary/50 transition-colors">
+                                <div key={idx} className="flex items-center justify-between p-3 border rounded-lg bg-muted text-sm group hover:border-primary/50 transition-colors">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className="p-2 bg-slate-200 dark:bg-slate-800 rounded-md">
-                                          <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                        <div className="p-2 bg-muted rounded-md">
+                                          <FileText className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
                                         </div>
                                         <div className="truncate flex flex-col">
                                           <span className="font-medium truncate" title={doc.name}>{doc.name || 'Documento Anexado'}</span>

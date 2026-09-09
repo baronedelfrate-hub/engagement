@@ -294,7 +294,7 @@ const BancosForm = () => {
                   onChange={handleChange}
                   max={new Date().toISOString().split('T')[0]}
                   required={parseCurrency(formData.saldo) !== 0}
-                  className="text-slate-900 dark:text-slate-100"
+                  className="text-foreground"
                 />
                 <p className="text-xs text-muted-foreground">
                   {parseCurrency(formData.saldo) !== 0 

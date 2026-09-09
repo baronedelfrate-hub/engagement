@@ -147,7 +147,7 @@ function FichaTecnicaForm() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <form onSubmit={handleSubmit} className={isSimulation ? "border-2 border-yellow-400 rounded-lg p-2" : ""}>
             {isSimulation && (
-                <div className="bg-yellow-50 p-3 rounded mb-4 flex items-center gap-2 text-yellow-800 font-bold border border-yellow-200">
+                <div className="bg-yellow-50 p-3 rounded mb-4 flex items-center gap-2 text-yellow-800 font-bold border border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800">
                     <AlertTriangle className="h-5 w-5" /> MODO SIMULAÇÃO ATIVO - Alterações não serão salvas
                 </div>
             )}
@@ -159,14 +159,14 @@ function FichaTecnicaForm() {
                     <CardContent className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Vincular Produto (Opcional)</Label>
-                            <select onChange={(e) => handleProductLink(e.target.value)} className="flex h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                            <select onChange={(e) => handleProductLink(e.target.value)} className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
                                 <option value="">Selecione...</option>
                                 {produtos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
                             </select>
                         </div>
                          <div className="space-y-2">
                             <Label>Versão</Label>
-                            <Input name="versao" value={formData.versao} onChange={handleChange} readOnly className="bg-slate-50" />
+                            <Input name="versao" value={formData.versao} onChange={handleChange} readOnly className="bg-muted" />
                         </div>
                         <div className="space-y-2">
                             <Label>Código *</Label>
@@ -190,7 +190,7 @@ function FichaTecnicaForm() {
                     </CardHeader>
                     <CardContent className="p-0">
                         <table className="w-full text-sm">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-muted">
                                 <tr>
                                     <th className="text-left p-2 pl-4">Item</th>
                                     <th className="w-24 p-2">Qtd</th>
@@ -221,7 +221,7 @@ function FichaTecnicaForm() {
                     </CardHeader>
                     <CardContent className="p-0">
                         <table className="w-full text-sm">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-muted">
                                 <tr>
                                     <th className="text-left p-2 pl-4">Descrição</th>
                                     <th className="w-24 p-2">Horas</th>
@@ -253,26 +253,26 @@ function FichaTecnicaForm() {
                         <div className="space-y-2">
                             <Label>CIF Alocados (Valor)</Label>
                             <Input type="number" step="0.01" name="cif_alocados" value={formData.cif_alocados} onChange={handleChange} />
-                            <p className="text-xs text-slate-400">Energia, Aluguel rateado, Depreciação...</p>
+                            <p className="text-xs text-muted-foreground">Energia, Aluguel rateado, Depreciação...</p>
                         </div>
                         <div className="space-y-2">
                             <Label>Rendimento / Eficiência (%)</Label>
                             <div className="flex items-center gap-2">
                                 <Input type="number" min="1" max="100" name="rendimento" value={formData.rendimento} onChange={handleChange} />
-                                <span className="text-slate-500 font-bold">%</span>
+                                <span className="text-muted-foreground font-bold">%</span>
                             </div>
-                            <p className="text-xs text-slate-400">Se menor que 100%, aumenta o custo unitário.</p>
+                            <p className="text-xs text-muted-foreground">Se menor que 100%, aumenta o custo unitário.</p>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className={`border-2 ${isSimulation ? 'border-yellow-400 bg-yellow-50/20' : 'border-blue-100 bg-blue-50/20'}`}>
+                <Card className={`border-2 ${isSimulation ? 'border-yellow-400 bg-yellow-50/20 dark:bg-yellow-950/20' : 'border-blue-100 dark:border-blue-900 bg-blue-50/20 dark:bg-blue-950/20'}`}>
                     <CardHeader><CardTitle>Custo Final Calculado</CardTitle></CardHeader>
                     <CardContent>
-                        <div className="text-4xl font-bold text-slate-800 text-center py-4">
+                        <div className="text-4xl font-bold text-foreground text-center py-4">
                             R$ {formData.custo_unitario_final.toFixed(2)}
                         </div>
-                        <div className="text-center text-xs text-slate-500 mb-4">Por Unidade Produzida</div>
+                        <div className="text-center text-xs text-muted-foreground mb-4">Por Unidade Produzida</div>
                         
                         <Button 
                             type="button" 

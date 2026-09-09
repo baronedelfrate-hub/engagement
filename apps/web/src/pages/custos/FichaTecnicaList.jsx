@@ -88,7 +88,7 @@ function FichaTecnicaList() {
   const columns = [
     { header: 'Código', accessor: 'codigo' },
     { header: 'Produto / Nome', accessor: 'nome' },
-    { header: 'Versão', render: (item) => <span className="bg-slate-100 px-2 py-1 rounded text-xs font-mono">{item.versao}</span> },
+    { header: 'Versão', render: (item) => <span className="bg-muted px-2 py-1 rounded text-xs font-mono">{item.versao}</span> },
     { header: 'Rendimento', render: (item) => `${item.rendimento}%` },
     { header: 'Custo Unit.', render: (item) => `R$ ${parseFloat(item.custo_unitario_final || 0).toFixed(2)}` }
   ];
@@ -142,7 +142,7 @@ function FichaTecnicaList() {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-                <p className="text-xs text-slate-500 mt-2 text-center">
+                <p className="text-xs text-muted-foreground mt-2 text-center">
                     *Comparação baseada no código do produto vinculado na ficha técnica e no cadastro de produtos.
                 </p>
             </div>

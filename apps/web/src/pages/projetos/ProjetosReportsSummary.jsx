@@ -12,35 +12,35 @@ const ProjetosReportsSummary = ({ stats }) => {
       title: "Total de Projetos",
       value: stats.total,
       icon: <Briefcase className="h-5 w-5 text-blue-600" />,
-      bgColor: "bg-blue-100",
+      bgColor: "bg-blue-100 dark:bg-blue-950/30",
       textColor: "text-blue-600"
     },
     {
       title: "Orçamento Total",
       value: formatCurrency(stats.budget),
       icon: <DollarSign className="h-5 w-5 text-emerald-600" />,
-      bgColor: "bg-emerald-100",
+      bgColor: "bg-emerald-100 dark:bg-emerald-950/30",
       textColor: "text-emerald-600"
     },
     {
       title: "Em Andamento",
       value: stats.inProgress,
       icon: <Clock className="h-5 w-5 text-indigo-600" />,
-      bgColor: "bg-indigo-100",
+      bgColor: "bg-indigo-100 dark:bg-indigo-950/30",
       textColor: "text-indigo-600"
     },
     {
       title: "Concluídos",
       value: stats.completed,
-      icon: <CheckCircle2 className="h-5 w-5 text-slate-600" />,
-      bgColor: "bg-slate-100",
-      textColor: "text-slate-600"
+      icon: <CheckCircle2 className="h-5 w-5 text-muted-foreground" />,
+      bgColor: "bg-muted",
+      textColor: "text-muted-foreground"
     },
     {
       title: "Atrasados",
       value: stats.overdue,
       icon: <AlertCircle className="h-5 w-5 text-red-600" />,
-      bgColor: "bg-red-100",
+      bgColor: "bg-red-100 dark:bg-red-950/30",
       textColor: "text-red-600"
     }
   ];
@@ -53,7 +53,7 @@ const ProjetosReportsSummary = ({ stats }) => {
             <div className={`p-3 rounded-full ${card.bgColor}`}>
               {card.icon}
             </div>
-            <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">{card.title}</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">{card.title}</h3>
             <p className={`text-2xl font-bold ${card.textColor}`}>{card.value}</p>
           </CardContent>
         </Card>

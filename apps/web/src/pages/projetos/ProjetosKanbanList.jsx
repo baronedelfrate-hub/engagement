@@ -11,7 +11,7 @@ import PageHeader from '@/components/PageHeader';
 import ProjetosKanbanCard from './ProjetosKanbanCard';
 
 const COLUMNS = [
-  { id: 'Planejamento', title: 'Planejamento', color: 'bg-slate-100 dark:bg-slate-800/50' },
+  { id: 'Planejamento', title: 'Planejamento', color: 'bg-muted' },
   { id: 'Em Andamento', title: 'Em Andamento', color: 'bg-blue-50 dark:bg-blue-900/20' },
   { id: 'Pausado', title: 'Pausado', color: 'bg-yellow-50 dark:bg-yellow-900/20' },
   { id: 'Concluído', title: 'Concluído', color: 'bg-emerald-50 dark:bg-emerald-900/20' },
@@ -163,11 +163,11 @@ export default function ProjetosKanbanList() {
             <div className="flex gap-6 h-full items-start min-w-max">
               {COLUMNS.map(column => (
                 <div key={column.id} className={`w-80 flex flex-col h-full max-h-full rounded-xl border ${column.color}`}>
-                  <div className="p-4 font-semibold flex items-center justify-between shrink-0 border-b border-slate-200/50 dark:border-slate-700/50">
-                    <span className="text-sm uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  <div className="p-4 font-semibold flex items-center justify-between shrink-0 border-b border-border/50 dark:border-border/50">
+                    <span className="text-sm uppercase tracking-wider text-foreground">
                       {column.title}
                     </span>
-                    <span className="bg-white/50 dark:bg-black/20 text-slate-600 dark:text-slate-400 py-0.5 px-2 rounded-full text-xs">
+                    <span className="bg-background/50 dark:bg-black/20 text-muted-foreground dark:text-muted-foreground py-0.5 px-2 rounded-full text-xs">
                       {columnsData[column.id]?.length || 0}
                     </span>
                   </div>
@@ -177,7 +177,7 @@ export default function ProjetosKanbanList() {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`p-3 flex-1 overflow-y-auto min-h-[150px] transition-colors ${snapshot.isDraggingOver ? 'bg-black/5 dark:bg-white/5' : ''}`}
+                        className={`p-3 flex-1 overflow-y-auto min-h-[150px] transition-colors ${snapshot.isDraggingOver ? 'bg-black/5 dark:bg-background/5' : ''}`}
                       >
                         {columnsData[column.id]?.map((projeto, index) => (
                           <ProjetosKanbanCard 

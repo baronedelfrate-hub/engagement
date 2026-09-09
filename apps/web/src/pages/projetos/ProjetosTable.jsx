@@ -22,12 +22,12 @@ export default function ProjetosTable({ projetos, loading, onDelete }) {
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case 'planejamento': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'em andamento': return 'bg-green-100 text-green-800 border-green-200';
-      case 'pausado': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'concluído': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'cancelado': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'planejamento': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+      case 'em andamento': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800';
+      case 'pausado': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+      case 'concluído': return 'bg-muted text-foreground border-border';
+      case 'cancelado': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+      default: return 'bg-muted text-foreground';
     }
   };
 
@@ -41,14 +41,14 @@ export default function ProjetosTable({ projetos, loading, onDelete }) {
 
   if (!projetos || projetos.length === 0) {
     return (
-      <div className="text-center py-10 text-muted-foreground bg-white rounded-lg border">
+      <div className="text-center py-10 text-muted-foreground bg-background rounded-lg border">
         Nenhum projeto encontrado.
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border bg-white overflow-hidden">
+    <div className="rounded-md border bg-background overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>

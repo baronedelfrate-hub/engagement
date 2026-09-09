@@ -276,7 +276,7 @@ export default function ProjetosReports() {
             <CardContent>
               <div className="rounded-md border overflow-hidden">
                 <Table>
-                  <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+                  <TableHeader className="bg-muted">
                     <TableRow>
                       <TableHead>Projeto</TableHead>
                       <TableHead>Cliente</TableHead>
@@ -302,10 +302,10 @@ export default function ProjetosReports() {
                             <TableCell>{formatCurrency(p.orcamento)}</TableCell>
                             <TableCell>
                               <Badge variant="outline" className={
-                                p.status === 'Concluído' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                p.status === 'Cancelado' ? 'bg-red-50 text-red-700 border-red-200' :
-                                p.status === 'Em Andamento' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                'bg-slate-100 text-slate-700'
+                                p.status === 'Concluído' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' :
+                                p.status === 'Cancelado' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800' :
+                                p.status === 'Em Andamento' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' :
+                                'bg-muted text-foreground'
                               }>
                                 {p.status || 'Planejamento'}
                               </Badge>

@@ -181,7 +181,7 @@ export default function ProjetosForm() {
   const getClientSelectState = () => {
       if (loadingClientes) return { disabled: true, placeholder: "Carregando clientes...", showSpinner: true, className: "bg-muted/50 cursor-wait" };
       if (clientesError) return { disabled: true, placeholder: "Erro ao carregar clientes", showSpinner: false, className: "bg-destructive/10 border-destructive cursor-not-allowed" };
-      if (clientes.length === 0) return { disabled: true, placeholder: "Nenhum cliente cadastrado", showSpinner: false, className: "bg-yellow-50 border-yellow-300 cursor-not-allowed" };
+      if (clientes.length === 0) return { disabled: true, placeholder: "Nenhum cliente cadastrado", showSpinner: false, className: "bg-yellow-50 border-yellow-300 cursor-not-allowed dark:bg-yellow-950/30 dark:border-yellow-800" };
       return { disabled: false, placeholder: "Selecione o Cliente", showSpinner: false, className: "" };
   };
 
@@ -192,7 +192,7 @@ export default function ProjetosForm() {
       
       {/* Debug Info apenas em localhost */}
       {window.location.hostname === 'localhost' && (
-          <Card className="bg-slate-900 border-slate-700">
+          <Card className="bg-slate-900 border-border">
               <CardHeader className="py-3">
                   <CardTitle className="text-sm font-mono text-emerald-400">🐛 Debug Info: ProjetosForm</CardTitle>
               </CardHeader>
@@ -227,10 +227,10 @@ export default function ProjetosForm() {
             )}
 
             {!loadingClientes && !clientesError && clientes.length === 0 && (
-                <Alert className="bg-yellow-50 border-yellow-200">
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                    <AlertTitle className="text-yellow-800">Nenhum Cliente Cadastrado</AlertTitle>
-                    <AlertDescription className="text-yellow-700">
+                <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-950/30 dark:border-yellow-800">
+                    <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                    <AlertTitle className="text-yellow-800 dark:text-yellow-400">Nenhum Cliente Cadastrado</AlertTitle>
+                    <AlertDescription className="text-yellow-700 dark:text-yellow-400">
                         Você precisa cadastrar pelo menos um cliente antes de criar um projeto.{' '}
                         <Button variant="link" className="p-0 h-auto text-yellow-800 underline" onClick={() => navigate('/cadastros/clientes/novo')}>
                             Clique aqui para cadastrar
@@ -242,7 +242,7 @@ export default function ProjetosForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome do Projeto *</Label>
-                <Input id="nome" name="nome" value={formData.nome} onChange={handleChange} required placeholder="Ex: Implantação Sistema ERP" className="text-slate-900 dark:text-slate-100" />
+                <Input id="nome" name="nome" value={formData.nome} onChange={handleChange} required placeholder="Ex: Implantação Sistema ERP" className="text-foreground" />
               </div>
 
               <div className="space-y-2">
@@ -264,17 +264,17 @@ export default function ProjetosForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="data_inicio">Data de Início *</Label>
-                <Input type="date" id="data_inicio" name="data_inicio" value={formData.data_inicio} onChange={handleChange} required className="text-slate-900 dark:text-slate-100" />
+                <Input type="date" id="data_inicio" name="data_inicio" value={formData.data_inicio} onChange={handleChange} required className="text-foreground" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="data_fim">Data de Término *</Label>
-                <Input type="date" id="data_fim" name="data_fim" value={formData.data_fim} onChange={handleChange} required className="text-slate-900 dark:text-slate-100" />
+                <Input type="date" id="data_fim" name="data_fim" value={formData.data_fim} onChange={handleChange} required className="text-foreground" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="orcamento">Orçamento Total (R$) *</Label>
-                <Input type="number" step="0.01" id="orcamento" name="orcamento" value={formData.orcamento} onChange={handleChange} required placeholder="0.00" className="text-slate-900 dark:text-slate-100" />
+                <Input type="number" step="0.01" id="orcamento" name="orcamento" value={formData.orcamento} onChange={handleChange} required placeholder="0.00" className="text-foreground" />
               </div>
 
               <div className="space-y-2">
@@ -294,7 +294,7 @@ export default function ProjetosForm() {
 
             <div className="space-y-2">
               <Label htmlFor="descricao">Descrição / Escopo do Projeto</Label>
-              <Textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} rows={4} placeholder="Detalhes adicionais..." className="text-slate-900 dark:text-slate-100" />
+              <Textarea id="descricao" name="descricao" value={formData.descricao} onChange={handleChange} rows={4} placeholder="Detalhes adicionais..." className="text-foreground" />
             </div>
 
             <div className="flex justify-end gap-4 pt-6 border-t">

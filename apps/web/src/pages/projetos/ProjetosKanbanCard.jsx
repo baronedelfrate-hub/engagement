@@ -53,7 +53,7 @@ const ProjetosKanbanCard = ({ projeto, index }) => {
                     <Calendar className="h-3 w-3 mr-1" />
                     {formatDate(projeto.data_fim)}
                   </div>
-                  <div className="flex items-center font-medium text-slate-700 dark:text-slate-300" title="Orçamento">
+                  <div className="flex items-center font-medium text-foreground" title="Orçamento">
                     <DollarSign className="h-3 w-3 mr-1" />
                     {formatCurrency(projeto.orcamento)}
                   </div>

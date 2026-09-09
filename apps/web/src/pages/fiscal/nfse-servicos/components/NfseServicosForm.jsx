@@ -157,9 +157,9 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* SEÇÃO 1 - DADOS BÁSICOS */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <Card className="shadow-sm border-border">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Building2 className="w-4 h-4 text-blue-600" /> 1. Dados Básicos
             </CardTitle>
           </CardHeader>
@@ -167,7 +167,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             <div className="col-span-2 space-y-1">
               <Label>Empresa Emitente *</Label>
               <Select value={formData.empresa_id} onValueChange={handleEmpresaSelect}>
-                <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {dropdowns.empresas?.map(e => <SelectItem key={e.id} value={e.id}>{e.razao_social}</SelectItem>)}
                 </SelectContent>
@@ -175,27 +175,27 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             </div>
             <div className="space-y-1">
               <Label>Número da Nota *</Label>
-              <Input value={formData.numero} onChange={e => handleChange('numero', e.target.value)} className="text-slate-900 bg-white" />
+              <Input value={formData.numero} onChange={e => handleChange('numero', e.target.value)} className="text-foreground bg-background" />
             </div>
             <div className="space-y-1">
               <Label>Série *</Label>
-              <Input value={formData.serie} onChange={e => handleChange('serie', e.target.value)} className="text-slate-900 bg-white" />
+              <Input value={formData.serie} onChange={e => handleChange('serie', e.target.value)} className="text-foreground bg-background" />
             </div>
             <div className="space-y-1">
               <Label>RPS *</Label>
-              <Input value={formData.rps} onChange={e => handleChange('rps', e.target.value)} className="text-slate-900 bg-white" />
+              <Input value={formData.rps} onChange={e => handleChange('rps', e.target.value)} className="text-foreground bg-background" />
             </div>
             <div className="space-y-1">
               <Label>Data de Emissão *</Label>
-              <Input type="date" value={formData.data_emissao} onChange={e => handleChange('data_emissao', e.target.value)} className="text-slate-900 bg-white" />
+              <Input type="date" value={formData.data_emissao} onChange={e => handleChange('data_emissao', e.target.value)} className="text-foreground bg-background" />
             </div>
           </CardContent>
         </Card>
 
         {/* SEÇÃO 2 - CLIENTE E LOCALIZAÇÃO */}
-        <Card className="shadow-sm border-slate-200 h-fit overflow-visible">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <Card className="shadow-sm border-border h-fit overflow-visible">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-600" /> 2. Cliente e Localização
             </CardTitle>
           </CardHeader>
@@ -203,7 +203,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             <div className="space-y-1">
               <Label>Cliente / Tomador *</Label>
               <Select value={formData.cliente_id} onValueChange={v => handleChange('cliente_id', v)}>
-                <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {dropdowns.clientes?.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                 </SelectContent>
@@ -219,7 +219,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="flex items-center text-xs text-slate-500 cursor-help">
+                        <span className="flex items-center text-xs text-muted-foreground cursor-help">
                           <Info className="h-3 w-3 mr-1" />
                           Cod. IBGE: {formData.municipio_incidencia_iss_codigo_ibge}
                         </span>
@@ -235,13 +235,13 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               {/* Custom Combobox Trigger */}
               <div 
                 className={cn(
-                  "flex items-center justify-between w-full px-3 py-2 text-sm bg-white border rounded-md cursor-pointer transition-colors hover:bg-slate-50 ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+                  "flex items-center justify-between w-full px-3 py-2 text-sm bg-background border rounded-md cursor-pointer transition-colors hover:bg-muted ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                   isDropdownOpen ? "ring-2 ring-ring ring-offset-2" : "",
                   (searchError || !formData.municipio_id) ? "border-red-500" : "border-input"
                 )}
                 onClick={() => setIsDropdownOpen(true)}
               >
-                <span className={cn("truncate", !selectedMunicipioDisplay ? "text-slate-500" : "text-slate-900")}>
+                <span className={cn("truncate", !selectedMunicipioDisplay ? "text-muted-foreground" : "text-foreground")}>
                   {selectedMunicipioDisplay || "Buscar por cidade (ex: Indaiatuba)..."}
                 </span>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -249,12 +249,12 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
 
               {/* Custom Combobox Dropdown */}
               {isDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1 z-[9999] min-w-full rounded-md border bg-white shadow-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
-                  <div className="flex items-center border-b px-3 py-2 bg-slate-50/50">
-                    <Search className="w-4 h-4 mr-2 text-slate-400 shrink-0" />
+                <div className="absolute left-0 right-0 top-full mt-1 z-[9999] min-w-full rounded-md border bg-background shadow-xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+                  <div className="flex items-center border-b px-3 py-2 bg-muted/50">
+                    <Search className="w-4 h-4 mr-2 text-muted-foreground shrink-0" />
                     <input 
                       autoFocus
-                      className="flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 text-slate-900"
+                      className="flex h-8 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
                       placeholder="Ex: São Paulo, Indaiatuba..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -264,28 +264,28 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
                     />
                   </div>
                   
-                  <div className="max-h-[250px] overflow-y-auto p-1 custom-scrollbar bg-white">
+                  <div className="max-h-[250px] overflow-y-auto p-1 custom-scrollbar bg-background">
                     {isSearching ? (
-                      <div className="py-6 text-center text-sm text-slate-500 flex items-center justify-center gap-2">
+                      <div className="py-6 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
                         <RefreshCw className="h-4 w-4 animate-spin text-primary" /> Buscando...
                       </div>
                     ) : localMunicipios.length === 0 ? (
-                      <div className="py-6 text-center text-sm text-slate-500">
+                      <div className="py-6 text-center text-sm text-muted-foreground">
                         Nenhum município encontrado.
                       </div>
                     ) : (
                       localMunicipios.map((m) => (
                         <div
                           key={m.id}
-                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-sm hover:bg-slate-100 transition-colors"
+                          className="flex items-center justify-between px-3 py-2 cursor-pointer rounded-sm hover:bg-muted transition-colors"
                           onMouseDown={(e) => {
                             e.preventDefault(); 
                             handleSelectMunicipio(m);
                           }}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium text-slate-800 text-sm">{m.nome_formatado || `${m.nome_municipio} - ${m.uf}`}</span>
-                            <span className="text-xs text-slate-500">IBGE: {m.codigo_ibge}</span>
+                            <span className="font-medium text-foreground text-sm">{m.nome_formatado || `${m.nome_municipio} - ${m.uf}`}</span>
+                            <span className="text-xs text-muted-foreground">IBGE: {m.codigo_ibge}</span>
                           </div>
                           {formData.municipio_id === m.id && (
                             <Check className="h-4 w-4 text-emerald-600 shrink-0" />
@@ -298,7 +298,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               )}
               
               {searchError && (
-                <div className="mt-2 p-2 bg-red-50 text-red-600 rounded text-xs flex items-start gap-1 border border-red-100">
+                <div className="mt-2 p-2 bg-red-50 text-red-600 rounded text-xs flex items-start gap-1 border border-red-100 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <p>{searchError}</p>
                 </div>
@@ -311,9 +311,9 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
         </Card>
 
         {/* SEÇÃO 3 - SERVIÇO */}
-        <Card className="shadow-sm border-slate-200 col-span-1 lg:col-span-2">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <Card className="shadow-sm border-border col-span-1 lg:col-span-2">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-indigo-600" /> 3. Detalhes do Serviço
             </CardTitle>
           </CardHeader>
@@ -321,7 +321,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             <div className="col-span-full md:col-span-3 space-y-1">
               <Label>Serviço Prestado *</Label>
               <Select value={formData.servico_id} onValueChange={handleServicoSelect}>
-                <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {dropdowns.servicos?.map(s => <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>)}
                 </SelectContent>
@@ -329,70 +329,70 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             </div>
             <div className="space-y-1">
               <Label>Código LC 116/03</Label>
-              <Input value={formData.codigo_servico} readOnly className="bg-slate-50 text-slate-900" />
+              <Input value={formData.codigo_servico} readOnly className="bg-muted text-foreground" />
             </div>
             <div className="col-span-full space-y-1">
               <Label>Descrição Completa do Serviço</Label>
               <Textarea 
                 value={formData.descricao_servico} 
                 onChange={e => handleChange('descricao_servico', e.target.value)} 
-                className="text-slate-900 min-h-[80px] bg-white" 
+                className="text-foreground min-h-[80px] bg-background" 
               />
             </div>
             <div className="space-y-1">
               <Label>Quantidade *</Label>
-              <Input type="number" min="1" step="0.01" value={formData.quantidade} onChange={e => handleChange('quantidade', e.target.value)} className="text-slate-900 bg-white" />
+              <Input type="number" min="1" step="0.01" value={formData.quantidade} onChange={e => handleChange('quantidade', e.target.value)} className="text-foreground bg-background" />
             </div>
             <div className="space-y-1">
               <Label>Valor Unitário (R$) *</Label>
-              <Input type="number" min="0" step="0.01" value={formData.valor_servico} onChange={e => handleChange('valor_servico', e.target.value)} className="text-slate-900 bg-white" />
+              <Input type="number" min="0" step="0.01" value={formData.valor_servico} onChange={e => handleChange('valor_servico', e.target.value)} className="text-foreground bg-background" />
             </div>
-            <div className="col-span-2 space-y-1 bg-slate-50 p-2 rounded flex flex-col justify-center items-end border border-slate-100">
-              <Label className="text-xs text-slate-500">Valor Total do Serviço</Label>
-              <span className="text-lg font-semibold text-slate-800">{formatCurrency((parseFloat(formData.quantidade)||0) * (parseFloat(formData.valor_servico)||0))}</span>
+            <div className="col-span-2 space-y-1 bg-muted p-2 rounded flex flex-col justify-center items-end border border-border">
+              <Label className="text-xs text-muted-foreground">Valor Total do Serviço</Label>
+              <span className="text-lg font-semibold text-foreground">{formatCurrency((parseFloat(formData.quantidade)||0) * (parseFloat(formData.valor_servico)||0))}</span>
             </div>
           </CardContent>
         </Card>
 
         {/* SEÇÃO 4 - IMPOSTOS E RETENÇÕES */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+        <Card className="shadow-sm border-border">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <DollarSign className="w-4 h-4 text-orange-600" /> 4. Impostos e Retenções
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label>Alíquota ISS (%)</Label>
-              <Input type="number" min="0" step="0.01" value={formData.aliquota} onChange={e => handleChange('aliquota', e.target.value)} className="text-slate-900 bg-white" />
+              <Input type="number" min="0" step="0.01" value={formData.aliquota} onChange={e => handleChange('aliquota', e.target.value)} className="text-foreground bg-background" />
             </div>
             <div className="space-y-1">
               <Label>Valor do Imposto</Label>
-              <Input value={formatCurrency(formData.valor_imposto)} readOnly className="bg-slate-50 text-slate-900" />
+              <Input value={formatCurrency(formData.valor_imposto)} readOnly className="bg-muted text-foreground" />
             </div>
             <div className="space-y-1">
               <Label>Retenções (R$)</Label>
-              <Input type="number" min="0" step="0.01" value={formData.retencoes} onChange={e => handleChange('retencoes', e.target.value)} className="text-slate-900 text-red-600 font-medium bg-white" />
+              <Input type="number" min="0" step="0.01" value={formData.retencoes} onChange={e => handleChange('retencoes', e.target.value)} className="text-foreground text-red-600 font-medium bg-background" />
             </div>
-            <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 flex flex-col justify-center items-end">
-              <Label className="text-xs text-emerald-700">Valor Líquido da Nota</Label>
-              <span className="text-lg font-bold text-emerald-700">{formatCurrency(formData.valor_liquido)}</span>
+            <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900 flex flex-col justify-center items-end">
+              <Label className="text-xs text-emerald-700 dark:text-emerald-400">Valor Líquido da Nota</Label>
+              <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(formData.valor_liquido)}</span>
             </div>
           </CardContent>
         </Card>
 
         {/* SEÇÃO 5 - VINCULAÇÕES E PAGAMENTO */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-              <LinkIcon className="w-4 h-4 text-slate-600" /> 5. Pagamento e Vinculações
+        <Card className="shadow-sm border-border">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <LinkIcon className="w-4 h-4 text-muted-foreground" /> 5. Pagamento e Vinculações
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-4">
             <div className="space-y-1">
               <Label>Condição de Pagamento *</Label>
               <Select value={formData.condicao_pagamento_id} onValueChange={v => handleChange('condicao_pagamento_id', v)}>
-                <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {dropdowns.condicoes?.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                 </SelectContent>
@@ -402,7 +402,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               <div className="space-y-1">
                 <Label>Pedido de Venda</Label>
                 <Select value={vinculacoes.pedido_venda_id || 'none'} onValueChange={v => handleVincChange('pedido_venda_id', v)}>
-                  <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Nenhum" /></SelectTrigger>
+                  <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Nenhum" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
                     {dropdowns.pedidos?.map(p => <SelectItem key={p.id} value={p.id}>{p.numero}</SelectItem>)}
@@ -412,7 +412,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               <div className="space-y-1">
                 <Label>Proposta Comercial</Label>
                 <Select value={vinculacoes.proposta_id || 'none'} onValueChange={v => handleVincChange('proposta_id', v)}>
-                  <SelectTrigger className="text-slate-900 bg-white"><SelectValue placeholder="Nenhuma" /></SelectTrigger>
+                  <SelectTrigger className="text-foreground bg-background"><SelectValue placeholder="Nenhuma" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhuma</SelectItem>
                     {dropdowns.propostas?.map(p => <SelectItem key={p.id} value={p.id}>{p.numero || 'S/N'}</SelectItem>)}
@@ -424,41 +424,41 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
         </Card>
 
         {/* SEÇÃO 6 - OBSERVAÇÕES */}
-        <Card className="shadow-sm border-slate-200">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-slate-600" /> 6. Observações
+        <Card className="shadow-sm border-border">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <FileText className="w-4 h-4 text-muted-foreground" /> 6. Observações
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <Textarea 
               value={formData.observacoes} 
               onChange={e => handleChange('observacoes', e.target.value)} 
-              className="min-h-[120px] text-slate-900 text-sm bg-white"
+              className="min-h-[120px] text-foreground text-sm bg-background"
               placeholder="Texto livre para aparecer no corpo da nota (rodapé)..."
             />
           </CardContent>
         </Card>
 
         {/* SEÇÃO 7 - STATUS */}
-        <Card className="shadow-sm border-slate-200 col-span-1 lg:col-span-2">
-          <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-            <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-slate-600" /> 7. Status e Conclusão
+        <Card className="shadow-sm border-border col-span-1 lg:col-span-2">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-muted-foreground" /> 7. Status e Conclusão
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 space-y-4">
             <div className="max-w-md space-y-1">
               <Label>Status da NFS-e *</Label>
               <Select value={formData.status} onValueChange={v => handleChange('status', v)}>
-                <SelectTrigger className="text-slate-900 font-medium bg-white"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-foreground font-medium bg-background"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Em digitação">Em digitação</SelectItem>
                   <SelectItem value="Aguardando emissão">Aguardando emissão</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="p-3 bg-blue-50 text-blue-800 rounded text-sm border border-blue-100 flex items-start gap-2">
+            <div className="p-3 bg-blue-50 text-blue-800 rounded text-sm border border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900 flex items-start gap-2">
               <Info className="w-4 h-4 shrink-0 mt-0.5" />
               <p>Certifique-se de que o Município de Incidência do ISS está corretamente selecionado. O código IBGE será utilizado para as regras de retenção.</p>
             </div>

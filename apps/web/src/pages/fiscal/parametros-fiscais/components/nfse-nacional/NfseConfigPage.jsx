@@ -120,14 +120,14 @@ export default function NfseConfigPage({ empresaId }) {
   return (
     <div className="space-y-6 relative">
       {!showForm && hasConfig && (
-        <Card className="border-emerald-200 bg-emerald-50/50 transition-all duration-300 ease-in-out">
+        <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/30 transition-all duration-300 ease-in-out">
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-emerald-800 flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold text-emerald-800 dark:text-emerald-400 flex items-center gap-2 mb-2">
                   <CheckCircle2 className="w-5 h-5" /> Configuração NFS-e Ativa
                 </h3>
-                <div className="space-y-1 text-sm text-slate-700">
+                <div className="space-y-1 text-sm text-foreground">
                   <p><strong>Empresa:</strong> {config.razao_social}</p>
                   <p><strong>CNPJ:</strong> {config.cnpj}</p>
                   <div className="flex items-center gap-2 mt-2">
@@ -145,8 +145,8 @@ export default function NfseConfigPage({ empresaId }) {
       )}
 
       {showForm && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 ease-in-out">
-          <h2 className="text-xl font-semibold text-slate-800 mb-6">Configuração Padrão Nacional NFS-e</h2>
+        <div className="bg-background p-6 rounded-xl shadow-sm border border-border transition-all duration-300 ease-in-out">
+          <h2 className="text-xl font-semibold text-foreground mb-6">Configuração Padrão Nacional NFS-e</h2>
           
           {saveError && (
             <Alert variant="destructive" className="mb-6">

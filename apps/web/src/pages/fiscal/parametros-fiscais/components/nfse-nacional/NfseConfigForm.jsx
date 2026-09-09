@@ -55,9 +55,9 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
 
   return (
     <div className="space-y-6">
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4 space-y-4">
-          <h3 className="text-md font-medium text-slate-800 flex items-center gap-2 mb-4">
+          <h3 className="text-md font-medium text-foreground flex items-center gap-2 mb-4">
             <Building2 className="w-4 h-4 text-blue-600" />
             Identificação da Empresa (Padrão Nacional)
           </h3>
@@ -71,7 +71,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.cnpj || ''}
                 onChange={handleChange}
                 placeholder="00.000.000/0000-00"
-                className={`bg-white ${formData.cnpj && !validateCNPJ(formData.cnpj) ? 'border-red-500' : ''}`}
+                className={`bg-background ${formData.cnpj && !validateCNPJ(formData.cnpj) ? 'border-red-500' : ''}`}
                 maxLength={18}
               />
               {formData.cnpj && !validateCNPJ(formData.cnpj) && (
@@ -87,7 +87,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.inscricao_municipal || ''}
                 onChange={handleChange}
                 placeholder="Número da IM"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -99,22 +99,22 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.razao_social || ''}
                 onChange={handleChange}
                 placeholder="Razão Social da Empresa"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4 space-y-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-md font-medium text-slate-800 flex items-center gap-2">
+            <h3 className="text-md font-medium text-foreground flex items-center gap-2">
               <FileKey2 className="w-4 h-4 text-amber-600" />
               Certificado Digital (A1)
             </h3>
             {formData.hasExistingCert && (
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800">
                 Certificado Instalado
               </Badge>
             )}
@@ -129,9 +129,9 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 type="file"
                 accept=".pfx,.p12"
                 onChange={handleFileChange}
-                className="bg-white cursor-pointer"
+                className="bg-background cursor-pointer"
               />
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {formData.hasExistingCert 
                   ? "Selecione um novo arquivo apenas se desejar substituir o certificado atual."
                   : "Selecione o arquivo do certificado digital A1 para emissão."}
@@ -147,7 +147,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.senha_certificado || ''}
                 onChange={handleChange}
                 placeholder="Senha de instalação"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -160,7 +160,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.senha_confirmacao || ''}
                 onChange={handleChange}
                 placeholder="Confirme a senha"
-                className={`bg-white ${formData.senha_certificado && formData.senha_confirmacao && formData.senha_certificado !== formData.senha_confirmacao ? 'border-red-500' : ''}`}
+                className={`bg-background ${formData.senha_certificado && formData.senha_confirmacao && formData.senha_certificado !== formData.senha_confirmacao ? 'border-red-500' : ''}`}
               />
               {formData.senha_certificado && formData.senha_confirmacao && formData.senha_certificado !== formData.senha_confirmacao && (
                 <p className="text-xs text-red-500">As senhas não coincidem</p>
@@ -170,9 +170,9 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200 shadow-sm">
+      <Card className="border-border shadow-sm">
         <CardContent className="p-4 space-y-4">
-          <h3 className="text-md font-medium text-slate-800 flex items-center gap-2 mb-4">
+          <h3 className="text-md font-medium text-foreground flex items-center gap-2 mb-4">
             <TerminalSquare className="w-4 h-4 text-purple-600" />
             Parâmetros de Teste e Ambiente
           </h3>
@@ -181,7 +181,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
             <div className="space-y-2 md:col-span-3">
               <Label htmlFor="ambiente">Ambiente de Operação</Label>
               <Select value={formData.ambiente || 'testes'} onValueChange={(val) => handleSelectChange('ambiente', val)}>
-                <SelectTrigger className="bg-white w-full">
+                <SelectTrigger className="bg-background w-full">
                   <SelectValue placeholder="Selecione o ambiente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -199,7 +199,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.descricao_servico_teste || ''}
                 onChange={handleChange}
                 placeholder="Ex: Serviço de teste de integração NFS-e Nacional"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -213,7 +213,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.valor_servico_teste || ''}
                 onChange={handleChange}
                 placeholder="1.00"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -227,7 +227,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.aliquota_iss_teste || ''}
                 onChange={handleChange}
                 placeholder="2.00"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
 
@@ -239,7 +239,7 @@ export default function NfseConfigForm({ formData, setFormData, setPfxFileBase64
                 value={formData.cpf_cnpj_cliente_teste || ''}
                 onChange={handleChange}
                 placeholder="Somente números"
-                className="bg-white"
+                className="bg-background"
               />
             </div>
           </div>

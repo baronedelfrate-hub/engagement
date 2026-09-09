@@ -32,10 +32,10 @@ export default function NfseServicosListView({ data, loading, onRefresh }) {
   };
 
   return (
-    <Card className="shadow-sm border-slate-200">
+    <Card className="shadow-sm border-border">
       <CardContent className="p-0 overflow-auto">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead className="w-24">Número / RPS</TableHead>
               <TableHead>Cliente</TableHead>
@@ -51,8 +51,8 @@ export default function NfseServicosListView({ data, loading, onRefresh }) {
               <TableRow><TableCell colSpan={7} className="h-32 text-center"><Loader2 className="w-6 h-6 animate-spin text-blue-500 mx-auto" /></TableCell></TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-slate-500">
-                  <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                  <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   Nenhuma NFS-e encontrada com os filtros atuais.
                 </TableCell>
               </TableRow>
@@ -60,24 +60,24 @@ export default function NfseServicosListView({ data, loading, onRefresh }) {
               data.map((item) => (
                 <TableRow 
                   key={item.id} 
-                  className="cursor-pointer hover:bg-slate-50/80 transition-colors group"
+                  className="cursor-pointer hover:bg-muted/80 transition-colors group"
                   onClick={() => navigate(`/fiscal/nfse-servicos/${item.id}`)}
                 >
                   <TableCell>
-                    <div className="font-medium text-slate-800">{item.numero || 'S/N'}{item.serie ? `-${item.serie}` : ''}</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">RPS: {item.rps || '-'}</div>
+                    <div className="font-medium text-foreground">{item.numero || 'S/N'}{item.serie ? `-${item.serie}` : ''}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">RPS: {item.rps || '-'}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-slate-800 truncate max-w-[200px]" title={item.clientes?.nome}>
+                    <div className="font-medium text-foreground truncate max-w-[200px]" title={item.clientes?.nome}>
                       {item.clientes?.nome || 'N/I'}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm text-slate-600 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-slate-400" /> {item.municipios?.nome || '-'}
+                    <div className="text-sm text-muted-foreground flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-muted-foreground" /> {item.municipios?.nome || '-'}
                     </div>
                   </TableCell>
-                  <TableCell className="text-slate-600">{formatDate(item.data_emissao)}</TableCell>
+                  <TableCell className="text-muted-foreground">{formatDate(item.data_emissao)}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(item.valor_liquido || item.valor_servico)}</TableCell>
                   
                   <TableCell className="text-center">
@@ -88,19 +88,19 @@ export default function NfseServicosListView({ data, loading, onRefresh }) {
 
                   <TableCell className="text-right" onClick={e => e.stopPropagation()}>
                     <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600" onClick={() => navigate(`/fiscal/nfse-servicos/${item.id}`)} title="Visualizar">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600" onClick={() => navigate(`/fiscal/nfse-servicos/${item.id}`)} title="Visualizar">
                         <Eye className="w-4 h-4" />
                       </Button>
                       {(item.status === 'Em digitação' || item.status === 'Rejeitada') && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-emerald-600" onClick={() => navigate(`/fiscal/nfse-servicos/${item.id}/editar`)} title="Editar">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" onClick={() => navigate(`/fiscal/nfse-servicos/${item.id}/editar`)} title="Editar">
                           <Edit className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-900" onClick={(e) => handleDuplicate(e, item.id)} title="Duplicar">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={(e) => handleDuplicate(e, item.id)} title="Duplicar">
                         <Copy className="w-4 h-4" />
                       </Button>
                       {item.status === 'Emitida' && (
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-orange-600" onClick={handleDownloadPdf} title="Download PDF">
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-orange-600" onClick={handleDownloadPdf} title="Download PDF">
                            <Download className="w-4 h-4" />
                          </Button>
                       )}

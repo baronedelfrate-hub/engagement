@@ -9,7 +9,7 @@ export function ConfirmActionDialog({ isOpen, onClose, onConfirm, title, descrip
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="text-slate-600">{description}</DialogDescription>
+          <DialogDescription className="text-muted-foreground">{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>

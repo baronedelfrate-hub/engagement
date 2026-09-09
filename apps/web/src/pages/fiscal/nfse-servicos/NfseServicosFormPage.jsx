@@ -221,7 +221,7 @@ export default function NfseServicosFormPage() {
 
   const isPageLoading = loadingData || loadingDropdowns;
 
-  if (isPageLoading) return <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]"><Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" /><p className="text-slate-500">Carregando dados da NFS-e...</p></div>;
+  if (isPageLoading) return <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]"><Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" /><p className="text-muted-foreground">Carregando dados da NFS-e...</p></div>;
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
@@ -250,9 +250,9 @@ export default function NfseServicosFormPage() {
       </div>
 
       {saveError && (
-        <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertTitle className="text-red-800">Falha ao salvar</AlertTitle>
+        <Alert variant="destructive" className="bg-red-50 text-red-900 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800">
+          <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <AlertTitle className="text-red-800 dark:text-red-400">Falha ao salvar</AlertTitle>
           <AlertDescription>{saveError}</AlertDescription>
         </Alert>
       )}

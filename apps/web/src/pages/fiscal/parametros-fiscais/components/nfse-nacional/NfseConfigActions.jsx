@@ -16,10 +16,10 @@ export default function NfseConfigActions({
   if (hasConfig && !isEditMode) {
     return (
       <div className="flex flex-wrap gap-3 mt-6">
-        <Button onClick={onEdit} variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+        <Button onClick={onEdit} variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/30">
           <Edit className="w-4 h-4 mr-2" /> Editar Configuração
         </Button>
-        <Button onClick={onTestConnection} variant="secondary" className="bg-slate-100 text-slate-700">
+        <Button onClick={onTestConnection} variant="secondary" className="bg-muted text-foreground">
           <RefreshCw className="w-4 h-4 mr-2" /> Testar Conexão
         </Button>
         <Button onClick={onDelete} variant="destructive" className="ml-auto">
@@ -30,7 +30,7 @@ export default function NfseConfigActions({
   }
 
   return (
-    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
+    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
       <Button variant="ghost" onClick={onClear} disabled={isSaving}>
         <XCircle className="w-4 h-4 mr-2" /> Limpar Formulário
       </Button>

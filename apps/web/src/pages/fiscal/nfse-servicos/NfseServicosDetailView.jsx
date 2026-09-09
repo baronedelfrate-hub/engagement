@@ -162,14 +162,14 @@ export default function NfseServicosDetailView() {
       </div>
 
       {/* BANNER AÇÕES RÁPIDAS */}
-      <Card className="bg-white border-slate-200 shadow-sm">
+      <Card className="bg-background border-border shadow-sm">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <Badge className={`${getStatusColor(nota.status)} px-3 py-1 text-sm`}>
               {nota.status}
             </Badge>
-            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200"><CheckCircle2 className="w-3 h-3 mr-1"/> Financeiro</Badge>}
-            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200"><CheckCircle2 className="w-3 h-3 mr-1"/> Contabilidade</Badge>}
+            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Financeiro</Badge>}
+            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Contabilidade</Badge>}
           </div>
           
           <div className="flex flex-wrap gap-2">
@@ -181,19 +181,19 @@ export default function NfseServicosDetailView() {
             )}
             
             {canIntegrate && !nota.integrado_financeiro && (
-               <Button variant="outline" onClick={() => setShowCR(true)} disabled={actionLoading} className="text-purple-600 border-purple-200 hover:bg-purple-50">
+               <Button variant="outline" onClick={() => setShowCR(true)} disabled={actionLoading} className="text-purple-600 border-purple-200 hover:bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:hover:bg-purple-950/30">
                  <DollarSign className="w-4 h-4 mr-2" /> Gerar C. Receber
                </Button>
             )}
 
             {canIntegrate && !nota.integrado_contabil && (
-               <Button variant="outline" onClick={() => setShowAcc(true)} disabled={actionLoading} className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+               <Button variant="outline" onClick={() => setShowAcc(true)} disabled={actionLoading} className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-400 dark:border-indigo-800 dark:hover:bg-indigo-950/30">
                  <Send className="w-4 h-4 mr-2" /> Enviar à Contabilidade
                </Button>
             )}
 
             {canCancel && (
-              <Button variant="outline" onClick={() => setShowCancel(true)} disabled={actionLoading} className="text-red-600 border-red-200 hover:bg-red-50">
+              <Button variant="outline" onClick={() => setShowCancel(true)} disabled={actionLoading} className="text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-950/30">
                 <XCircle className="w-4 h-4 mr-2" /> Cancelar NFS-e
               </Button>
             )}
@@ -206,20 +206,20 @@ export default function NfseServicosDetailView() {
         {/* COLUNA PRINCIPAL */}
         <div className="lg:col-span-2 space-y-6">
           
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-blue-600" /> Dados do Tomador / Local
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-              <div><p className="text-xs text-slate-500 mb-1">Razão Social / Nome</p><p className="text-sm font-medium text-slate-900">{nota.clientes?.nome || '-'}</p></div>
-              <div><p className="text-xs text-slate-500 mb-1">CNPJ/CPF</p><p className="text-sm text-slate-900">{nota.clientes?.cnpj_cpf || '-'}</p></div>
-              <div className="md:col-span-2"><p className="text-xs text-slate-500 mb-1">Localidade</p><p className="text-sm text-slate-700">{[nota.clientes?.bairro, nota.clientes?.cidade, nota.clientes?.estado].filter(Boolean).join(' - ') || '-'}</p></div>
+              <div><p className="text-xs text-muted-foreground mb-1">Razão Social / Nome</p><p className="text-sm font-medium text-foreground">{nota.clientes?.nome || '-'}</p></div>
+              <div><p className="text-xs text-muted-foreground mb-1">CNPJ/CPF</p><p className="text-sm text-foreground">{nota.clientes?.cnpj_cpf || '-'}</p></div>
+              <div className="md:col-span-2"><p className="text-xs text-muted-foreground mb-1">Localidade</p><p className="text-sm text-foreground">{[nota.clientes?.bairro, nota.clientes?.cidade, nota.clientes?.estado].filter(Boolean).join(' - ') || '-'}</p></div>
               
-              <div className="col-span-full pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-500 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3"/> Local de Incidência</p>
-                <p className="text-sm font-medium text-slate-800">
+              <div className="col-span-full pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1"><MapPin className="w-3 h-3"/> Local de Incidência</p>
+                <p className="text-sm font-medium text-foreground">
                   {nota.municipio_incidencia_iss_nome && nota.municipio_incidencia_iss_uf 
                     ? `${nota.municipio_incidencia_iss_nome} - ${nota.municipio_incidencia_iss_uf}` 
                     : 'Não informado'}
@@ -228,42 +228,42 @@ export default function NfseServicosDetailView() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800">Detalhes do Serviço</CardTitle>
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground">Detalhes do Serviço</CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-6">
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2"><p className="text-xs text-slate-500 mb-1">Serviço Referência</p><p className="text-sm font-medium text-slate-900">{nota.servicos?.nome || '-'}</p></div>
-                <div><p className="text-xs text-slate-500 mb-1">Código LC 116/03</p><p className="text-sm text-slate-700">{nota.codigo_servico || '-'}</p></div>
-                <div className="col-span-full"><p className="text-xs text-slate-500 mb-1">Descrição</p><p className="text-sm text-slate-700 bg-slate-50 p-3 rounded">{nota.descricao_servico || '-'}</p></div>
+                <div className="md:col-span-2"><p className="text-xs text-muted-foreground mb-1">Serviço Referência</p><p className="text-sm font-medium text-foreground">{nota.servicos?.nome || '-'}</p></div>
+                <div><p className="text-xs text-muted-foreground mb-1">Código LC 116/03</p><p className="text-sm text-foreground">{nota.codigo_servico || '-'}</p></div>
+                <div className="col-span-full"><p className="text-xs text-muted-foreground mb-1">Descrição</p><p className="text-sm text-foreground bg-muted p-3 rounded">{nota.descricao_servico || '-'}</p></div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-100">
-                <div><p className="text-xs text-slate-500 mb-1">Qtd.</p><p className="text-base font-medium">{nota.quantidade}</p></div>
-                <div><p className="text-xs text-slate-500 mb-1">V. Unitário</p><p className="text-base font-medium">{formatCurrency(nota.valor_servico)}</p></div>
-                <div className="md:col-span-2 text-right"><p className="text-xs text-slate-500 mb-1">Total do Serviço</p><p className="text-lg font-semibold text-slate-800">{formatCurrency((nota.quantidade||1) * (nota.valor_servico||0))}</p></div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted p-4 rounded-lg border border-border">
+                <div><p className="text-xs text-muted-foreground mb-1">Qtd.</p><p className="text-base font-medium">{nota.quantidade}</p></div>
+                <div><p className="text-xs text-muted-foreground mb-1">V. Unitário</p><p className="text-base font-medium">{formatCurrency(nota.valor_servico)}</p></div>
+                <div className="md:col-span-2 text-right"><p className="text-xs text-muted-foreground mb-1">Total do Serviço</p><p className="text-lg font-semibold text-foreground">{formatCurrency((nota.quantidade||1) * (nota.valor_servico||0))}</p></div>
               </div>
 
               <Separator />
 
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-slate-800">Impostos e Totalizadores</h4>
+                <h4 className="text-sm font-semibold text-foreground">Impostos e Totalizadores</h4>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Alíquota ISS (%)</span>
-                  <span className="font-medium text-slate-800">{nota.aliquota}%</span>
+                  <span className="text-muted-foreground">Alíquota ISS (%)</span>
+                  <span className="font-medium text-foreground">{nota.aliquota}%</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Valor ISS</span>
+                  <span className="text-muted-foreground">Valor ISS</span>
                   <span className="font-medium text-red-600">- {formatCurrency(nota.valor_imposto)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Outras Retenções</span>
+                  <span className="text-muted-foreground">Outras Retenções</span>
                   <span className="font-medium text-red-600">- {formatCurrency(nota.retencoes)}</span>
                 </div>
-                <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
-                  <span className="font-semibold text-slate-800">Valor Líquido NFS-e</span>
+                <div className="pt-3 border-t border-border flex justify-between items-center">
+                  <span className="font-semibold text-foreground">Valor Líquido NFS-e</span>
                   <span className="text-xl font-bold text-emerald-600">{formatCurrency(nota.valor_liquido)}</span>
                 </div>
               </div>
@@ -275,39 +275,39 @@ export default function NfseServicosDetailView() {
         {/* SIDEBAR */}
         <div className="space-y-6">
           
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                <LinkIcon className="w-4 h-4 text-slate-600" /> Vinculações
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+                <LinkIcon className="w-4 h-4 text-muted-foreground" /> Vinculações
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               {nota.vinculacoes?.pedido_venda_id && (
-                <div className="flex justify-between items-center text-sm p-2 bg-slate-50 rounded">
-                  <span className="text-slate-600">Pedido:</span>
+                <div className="flex justify-between items-center text-sm p-2 bg-muted rounded">
+                  <span className="text-muted-foreground">Pedido:</span>
                   <Link to={`/vendas/pedidos/${nota.vinculacoes.pedido_venda_id}`} className="font-medium text-blue-600 hover:underline">{nota.vinculacoes.pedidos_venda?.numero}</Link>
                 </div>
               )}
               {nota.vinculacoes?.proposta_id && (
-                <div className="flex justify-between items-center text-sm p-2 bg-slate-50 rounded">
-                  <span className="text-slate-600">Proposta:</span>
+                <div className="flex justify-between items-center text-sm p-2 bg-muted rounded">
+                  <span className="text-muted-foreground">Proposta:</span>
                   <Link to={`/crm/propostas/${nota.vinculacoes.proposta_id}`} className="font-medium text-blue-600 hover:underline">{nota.vinculacoes.propostas?.numero}</Link>
                 </div>
               )}
               {!nota.vinculacoes?.pedido_venda_id && !nota.vinculacoes?.proposta_id && (
-                <p className="text-sm text-slate-500 text-center">Nenhum documento vinculado.</p>
+                <p className="text-sm text-muted-foreground text-center">Nenhum documento vinculado.</p>
               )}
               <Separator className="my-2" />
               <div className="text-sm">
-                <p className="text-xs text-slate-500 mb-1">Condição de Pagamento</p>
-                <p className="font-medium text-slate-800">{nota.condicoes_pagamento?.nome || 'Não informada'}</p>
+                <p className="text-xs text-muted-foreground mb-1">Condição de Pagamento</p>
+                <p className="font-medium text-foreground">{nota.condicoes_pagamento?.nome || 'Não informada'}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
                 <Download className="w-4 h-4 text-blue-600" /> Arquivos
               </CardTitle>
             </CardHeader>
@@ -316,42 +316,42 @@ export default function NfseServicosDetailView() {
                 <>
                   <Button variant="outline" className="w-full justify-between" onClick={() => toast({ title: 'Download', description: 'Baixando XML...' })}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-orange-500" /> Download XML</span>
-                    <Download className="w-4 h-4 text-slate-400" />
+                    <Download className="w-4 h-4 text-muted-foreground" />
                   </Button>
                   <Button variant="outline" className="w-full justify-between" onClick={() => toast({ title: 'Download', description: 'Baixando PDF...' })}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-red-500" /> Imprimir NFS-e</span>
-                    <Printer className="w-4 h-4 text-slate-400" />
+                    <Printer className="w-4 h-4 text-muted-foreground" />
                   </Button>
-                  <div className="mt-4 bg-slate-50 p-3 rounded text-xs text-slate-600 break-all border border-slate-100">
+                  <div className="mt-4 bg-muted p-3 rounded text-xs text-muted-foreground break-all border border-border">
                     <strong>Protocolo:</strong> {nota.protocolo_emissao}
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-2">Arquivos disponíveis após emissão municipal.</p>
+                <p className="text-sm text-muted-foreground text-center py-2">Arquivos disponíveis após emissão municipal.</p>
               )}
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
-                <History className="w-4 h-4 text-slate-600" /> Histórico
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+                <History className="w-4 h-4 text-muted-foreground" /> Histórico
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 max-h-[300px] overflow-y-auto">
               {nota.historico?.length === 0 ? (
-                <p className="text-sm text-slate-500 text-center py-2">Sem histórico registrado.</p>
+                <p className="text-sm text-muted-foreground text-center py-2">Sem histórico registrado.</p>
               ) : (
-                <div className="relative pl-4 border-l-2 border-slate-100 space-y-6 mt-2 ml-2">
+                <div className="relative pl-4 border-l-2 border-border space-y-6 mt-2 ml-2">
                   {nota.historico?.map((h) => (
                     <div key={h.id} className="relative">
                       <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-white"></div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-slate-800">
+                        <span className="text-sm font-medium text-foreground">
                           {h.status_anterior ? `${h.status_anterior} → ` : 'Criada como '} 
                           <span className="text-blue-600">{h.status_novo}</span>
                         </span>
-                        <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
+                        <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
                           <span>{formatDate(h.data_mudanca, true)}</span>
                           <span>•</span>
                           <span>{h.users?.nome || 'Sistema'}</span>

@@ -143,17 +143,17 @@ export default function NfseServicosForm({ id }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">
+          <h2 className="text-2xl font-bold text-foreground">
             {isEdit ? 'Editar Serviço NFS-e' : 'Novo Serviço NFS-e'}
           </h2>
-          <p className="text-slate-500">Configure os parâmetros do serviço para emissão de notas.</p>
+          <p className="text-muted-foreground">Configure os parâmetros do serviço para emissão de notas.</p>
         </div>
         <Button variant="outline" onClick={() => navigate('/fiscal/nfse-servicos')}>
           <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
         </Button>
       </div>
 
-      <Card className="border-slate-200">
+      <Card className="border-border">
         <CardContent className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -164,7 +164,7 @@ export default function NfseServicosForm({ id }) {
                 value={formData.codigo_servico}
                 onChange={handleChange}
                 placeholder="Ex: 14.01"
-                className="bg-white text-slate-900"
+                className="bg-background text-foreground"
               />
             </div>
 
@@ -178,7 +178,7 @@ export default function NfseServicosForm({ id }) {
                 value={formData.aliquota_iss}
                 onChange={handleChange}
                 placeholder="Ex: 2.00"
-                className="bg-white text-slate-900"
+                className="bg-background text-foreground"
               />
             </div>
 
@@ -190,7 +190,7 @@ export default function NfseServicosForm({ id }) {
                 value={formData.descricao_servico}
                 onChange={handleChange}
                 placeholder="Descrição que sairá na nota fiscal"
-                className="bg-white text-slate-900"
+                className="bg-background text-foreground"
               />
             </div>
 
@@ -201,7 +201,7 @@ export default function NfseServicosForm({ id }) {
                 name="municipio_id"
                 value={formData.municipio_id}
                 onChange={handleChange}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-slate-900"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-white placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
               >
                 <option value="">Selecione o Município</option>
                 {municipios.map(m => (

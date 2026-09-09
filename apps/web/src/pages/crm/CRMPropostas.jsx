@@ -43,10 +43,10 @@ const CRMPropostas = () => {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'GANHA': return 'bg-emerald-100 text-emerald-800';
-      case 'LEAD': return 'bg-slate-100 text-slate-800';
-      case 'ENVIADO_FATURAMENTO': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-amber-100 text-amber-800';
+      case 'GANHA': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400';
+      case 'LEAD': return 'bg-muted text-foreground';
+      case 'ENVIADO_FATURAMENTO': return 'bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400';
+      default: return 'bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400';
     }
   };
 
@@ -118,9 +118,9 @@ const CRMPropostas = () => {
         }
       />
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 mt-6 overflow-hidden">
+      <div className="bg-background rounded-xl shadow-sm border border-border mt-6 overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50">
+          <TableHeader className="bg-muted">
             <TableRow>
               <TableHead>Número</TableHead>
               <TableHead>Cliente</TableHead>
@@ -133,11 +133,11 @@ const CRMPropostas = () => {
             {loading ? (
               <TableRow><TableCell colSpan={5} className="text-center py-8">Carregando...</TableCell></TableRow>
             ) : propostas.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">Nenhuma proposta encontrada.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma proposta encontrada.</TableCell></TableRow>
             ) : (
               propostas.map((prop) => (
                 <TableRow key={prop.id}>
-                  <TableCell className="font-medium text-slate-800">{prop.numero || '-'}</TableCell>
+                  <TableCell className="font-medium text-foreground">{prop.numero || '-'}</TableCell>
                   <TableCell>{prop.cliente?.nome || 'Cliente Desconhecido'}</TableCell>
                   <TableCell>{new Date(prop.data_emissao).toLocaleDateString('pt-BR')}</TableCell>
                   <TableCell className="font-medium">

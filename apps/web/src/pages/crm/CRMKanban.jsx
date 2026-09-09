@@ -9,11 +9,11 @@ import PageHeader from '@/components/PageHeader';
 import { useToast } from '@/components/ui/use-toast';
 
 const COLUMNS = [
-  { id: 'LEAD', title: 'LEAD', color: 'border-l-slate-400 bg-slate-50' },
-  { id: 'PROPOSTA', title: 'PROPOSTA', color: 'border-l-blue-400 bg-blue-50' },
-  { id: 'NEGOCIACAO', title: 'NEGOCIAÇÃO', color: 'border-l-amber-400 bg-amber-50' },
-  { id: 'GANHA', title: 'GANHA', color: 'border-l-emerald-400 bg-emerald-50' },
-  { id: 'ENVIADO_FATURAMENTO', title: 'ENVIADO P/ FATURAMENTO', color: 'border-l-purple-400 bg-purple-50' }
+  { id: 'LEAD', title: 'LEAD', color: 'border-l-slate-400 bg-muted' },
+  { id: 'PROPOSTA', title: 'PROPOSTA', color: 'border-l-blue-400 bg-blue-50 dark:bg-blue-950/30' },
+  { id: 'NEGOCIACAO', title: 'NEGOCIAÇÃO', color: 'border-l-amber-400 bg-amber-50 dark:bg-amber-950/30' },
+  { id: 'GANHA', title: 'GANHA', color: 'border-l-emerald-400 bg-emerald-50 dark:bg-emerald-950/30' },
+  { id: 'ENVIADO_FATURAMENTO', title: 'ENVIADO P/ FATURAMENTO', color: 'border-l-purple-400 bg-purple-50 dark:bg-purple-950/30' }
 ];
 
 const CRMKanban = () => {
@@ -97,17 +97,17 @@ const CRMKanban = () => {
                 <div 
                   key={column.id} 
                   data-testid={`column-${column.id}`}
-                  className="flex flex-col min-w-[320px] w-[320px] flex-shrink-0 bg-slate-100/50 rounded-xl border border-slate-200"
+                  className="flex flex-col min-w-[320px] w-[320px] flex-shrink-0 bg-muted/50 rounded-xl border border-border"
                 >
                   {/* Column Header */}
-                  <div className={`p-3 rounded-t-xl border-b border-slate-200 flex justify-between items-center bg-white border-l-4 sticky top-0 z-10 ${column.color}`}>
+                  <div className={`p-3 rounded-t-xl border-b border-border flex justify-between items-center bg-background border-l-4 sticky top-0 z-10 ${column.color}`}>
                     <div>
-                      <h3 className="font-bold text-slate-700 text-xs uppercase tracking-wider">{column.title}</h3>
-                      <div className="text-[10px] font-medium text-slate-500 mt-0.5">
+                      <h3 className="font-bold text-foreground text-xs uppercase tracking-wider">{column.title}</h3>
+                      <div className="text-[10px] font-medium text-muted-foreground mt-0.5">
                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(totalValue)}
                       </div>
                     </div>
-                    <Badge variant="secondary" className="bg-slate-100 text-slate-600">{items.length}</Badge>
+                    <Badge variant="secondary" className="bg-muted text-muted-foreground">{items.length}</Badge>
                   </div>
 
                   {/* Droppable Area - No nested overflow-y-auto to fix dnd conflicts */}
@@ -116,7 +116,7 @@ const CRMKanban = () => {
                       <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className={`p-3 min-h-[150px] transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-slate-200/50 rounded-b-xl' : ''}`}
+                        className={`p-3 min-h-[150px] transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-muted rounded-b-xl' : ''}`}
                       >
                         {items.map((item, index) => (
                           <Draggable key={item.id} draggableId={item.id} index={index}>
@@ -132,22 +132,22 @@ const CRMKanban = () => {
                                   willChange: 'transform'
                                 }}
                               >
-                                <Card className={`bg-white shadow-sm border-slate-200 hover:border-blue-300 transition-all ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500/50 rotate-2 z-50' : ''}`}>
+                                <Card className={`bg-background shadow-sm border-border hover:border-blue-300 transition-all ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500/50 rotate-2 z-50' : ''}`}>
                                   <CardContent className="p-3">
                                     <div className="flex justify-between items-start mb-2">
-                                      <span className="text-[10px] font-semibold text-slate-400 truncate max-w-[120px]">
+                                      <span className="text-[10px] font-semibold text-muted-foreground truncate max-w-[120px]">
                                         {item.numero || 'S/N'}
                                       </span>
                                     </div>
-                                    <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2" title={item.cliente?.nome}>
+                                    <h4 className="font-semibold text-foreground text-sm mb-2 line-clamp-2" title={item.cliente?.nome}>
                                       {item.cliente?.nome || 'Cliente Desconhecido'}
                                     </h4>
-                                    <div className="flex flex-col gap-1 mt-3 pt-2 border-t border-slate-50">
-                                      <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                                        <DollarSign className="h-3.5 w-3.5 text-slate-400" />
+                                    <div className="flex flex-col gap-1 mt-3 pt-2 border-t border-border">
+                                      <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                                        <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                                         {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(item.valor_total || 0)}
                                       </div>
-                                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                                         <Calendar className="h-3 w-3" />
                                         {new Date(item.data_emissao).toLocaleDateString('pt-BR')}
                                       </div>

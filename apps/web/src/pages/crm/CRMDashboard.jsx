@@ -48,30 +48,30 @@ const CRMDashboard = () => {
       <PageHeader title="CRM Dashboard" description="Visão geral de vendas e pipeline" icon={Activity} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Clientes</CardTitle>
-            <Users className="h-4 w-4 text-slate-400" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Clientes</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-800">{clientes.length}</div>
+            <div className="text-2xl font-bold text-foreground">{clientes.length}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Total Propostas</CardTitle>
-            <FileText className="h-4 w-4 text-slate-400" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Propostas</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-800">{propostas.length}</div>
+            <div className="text-2xl font-bold text-foreground">{propostas.length}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Valor em Pipeline</CardTitle>
-            <DollarSign className="h-4 w-4 text-slate-400" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Valor em Pipeline</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
@@ -80,10 +80,10 @@ const CRMDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">Propostas Ganhas</CardTitle>
-            <Activity className="h-4 w-4 text-slate-400" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Propostas Ganhas</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-600">{stats.ganhas}</div>
@@ -92,7 +92,7 @@ const CRMDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader>
             <CardTitle>Propostas por Status</CardTitle>
           </CardHeader>
@@ -109,7 +109,7 @@ const CRMDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+        <Card className="bg-background/50 backdrop-blur-sm border-border">
           <CardHeader>
             <CardTitle>Valor por Etapa (R$)</CardTitle>
           </CardHeader>

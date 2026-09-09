@@ -33,9 +33,9 @@ const CRMClientes = () => {
         }
       />
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mt-6">
+      <div className="bg-background rounded-xl shadow-sm border border-border p-4 mt-6">
         <div className="flex items-center gap-2 mb-4 max-w-sm">
-          <Search className="h-4 w-4 text-slate-400" />
+          <Search className="h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Buscar clientes..." 
             value={searchTerm} 
@@ -44,9 +44,9 @@ const CRMClientes = () => {
           />
         </div>
 
-        <div className="rounded-md border border-slate-200">
+        <div className="rounded-md border border-border">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-muted">
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
@@ -59,13 +59,13 @@ const CRMClientes = () => {
               {loading ? (
                 <TableRow><TableCell colSpan={5} className="text-center py-8">Carregando...</TableCell></TableRow>
               ) : filteredClientes.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-slate-500">Nenhum cliente encontrado.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhum cliente encontrado.</TableCell></TableRow>
               ) : (
                 filteredClientes.map((cliente) => (
                   <TableRow key={cliente.id}>
-                    <TableCell className="font-medium text-slate-800">{cliente.nome}</TableCell>
-                    <TableCell className="text-slate-600">{cliente.email || '-'}</TableCell>
-                    <TableCell className="text-slate-600">{cliente.telefone || '-'}</TableCell>
+                    <TableCell className="font-medium text-foreground">{cliente.nome}</TableCell>
+                    <TableCell className="text-muted-foreground">{cliente.email || '-'}</TableCell>
+                    <TableCell className="text-muted-foreground">{cliente.telefone || '-'}</TableCell>
                     <TableCell>
                       <Badge variant={cliente.status === 'Ativo' ? 'default' : 'secondary'}>
                         {cliente.status || 'Ativo'}

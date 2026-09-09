@@ -159,8 +159,7 @@ const F5Metodologia = () => {
 
   const getRequiredFields = (phase) => {
     switch(phase) {
-      // F1 is handled by DiagnosticoF1.jsx primarily, but this is for F5Metodologia standalone form use
-      case 1: return ['empresa_nome', 'cnpj', 'resumo_atual']; 
+      case 1: return ['empresa_nome', 'cnpj', 'resumo_atual'];
       // Validation for F2: ERP is mandatory. Checklist items are encouraged but not strictly blocking if at least one is done.
       case 2: return ['erp_utilizado', 'resp_financeiro']; 
       case 3: return ['kpis_principais'];

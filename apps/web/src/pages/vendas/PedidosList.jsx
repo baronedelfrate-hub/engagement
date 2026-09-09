@@ -81,7 +81,7 @@ const PedidosList = () => {
         accessorKey: 'empresas.razao_social',
         cell: ({ row }) => (
             <div className="flex items-center gap-2">
-                <Building2 className="h-3 w-3 text-slate-400" />
+                <Building2 className="h-3 w-3 text-muted-foreground" />
                 <span className="truncate max-w-[150px]" title={row.empresas?.razao_social}>
                     {row.empresas?.razao_social || 'Não Informada'}
                 </span>
@@ -111,13 +111,13 @@ const PedidosList = () => {
         accessorKey: 'status_pedido',
         cell: ({ row }) => {
             const statusConfig = {
-                'draft': { label: 'Rascunho', color: 'bg-slate-100 text-slate-700' },
-                'confirmed': { label: 'Confirmado', color: 'bg-blue-100 text-blue-700' },
-                'invoiced': { label: 'Faturado', color: 'bg-emerald-100 text-emerald-700' },
-                'cancelled': { label: 'Cancelado', color: 'bg-red-100 text-red-700' },
-                'rascunho': { label: 'Rascunho', color: 'bg-slate-100 text-slate-700' }
+                'draft': { label: 'Rascunho', color: 'bg-muted text-foreground' },
+                'confirmed': { label: 'Confirmado', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' },
+                'invoiced': { label: 'Faturado', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' },
+                'cancelled': { label: 'Cancelado', color: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400' },
+                'rascunho': { label: 'Rascunho', color: 'bg-muted text-foreground' }
             };
-            const config = statusConfig[row.status_pedido || row.status] || { label: row.status_pedido, color: 'bg-gray-100 text-gray-700' };
+            const config = statusConfig[row.status_pedido || row.status] || { label: row.status_pedido, color: 'bg-muted text-foreground' };
             return (
                 <span className={`px-2 py-1 rounded-full text-xs font-medium border border-transparent ${config.color}`}>
                     {config.label}
@@ -135,7 +135,7 @@ const PedidosList = () => {
                         <Edit className="h-4 w-4" />
                      </Button>
                      {(row.status_pedido === 'confirmed' || row.status === 'confirmado') && (
-                        <Button variant="outline" size="sm" className="h-8 text-xs text-indigo-600 border-indigo-200 ml-2" onClick={() => handleConvertToNFe(row)}>
+                        <Button variant="outline" size="sm" className="h-8 text-xs text-indigo-600 border-indigo-200 ml-2 dark:text-indigo-400 dark:border-indigo-800" onClick={() => handleConvertToNFe(row)}>
                             <Receipt className="h-3 w-3 mr-1" />
                             Gerar NFe
                         </Button>

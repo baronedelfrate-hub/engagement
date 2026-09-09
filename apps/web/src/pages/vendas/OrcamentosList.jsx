@@ -77,7 +77,7 @@ const OrcamentosList = () => {
                 <div className="flex flex-col gap-1 items-start">
                     <Badge variant={colors[row.status] || 'outline'}>{row.status}</Badge>
                     {row.status_conversao === 'convertido' && (
-                        <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-600 border-emerald-200">Convertido</Badge>
+                        <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800">Convertido</Badge>
                     )}
                 </div>
             );
@@ -92,7 +92,7 @@ const OrcamentosList = () => {
                     <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="text-xs text-blue-600 border-blue-200 hover:bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:hover:bg-blue-950/30"
                         onClick={(e) => { e.stopPropagation(); handleConvertClick(row); }}
                     >
                         <ArrowRight className="h-3 w-3 mr-1" />

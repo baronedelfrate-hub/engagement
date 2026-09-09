@@ -137,27 +137,27 @@ const OrcamentosForm = () => {
             />
 
             {id && orcamento && (
-                <Card className="border-blue-100 bg-blue-50/50 dark:bg-slate-900 dark:border-slate-800">
+                <Card className="border-blue-100 dark:border-border bg-blue-50/50 dark:bg-muted">
                     <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex flex-col gap-1">
-                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Status de Conversão</span>
+                            <span className="text-sm font-semibold text-foreground">Status de Conversão</span>
                             {orcamento.status_conversao === 'convertido' ? (
                                 <div className="flex items-center gap-2">
-                                    <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none">
+                                    <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/30">
                                         <CheckCircle2 className="w-3 h-3 mr-1" /> Convertido
                                     </Badge>
                                     {orcamento.data_conversao && (
-                                        <span className="text-xs text-slate-500">em {new Date(orcamento.data_conversao).toLocaleDateString()}</span>
+                                        <span className="text-xs text-muted-foreground">em {new Date(orcamento.data_conversao).toLocaleDateString()}</span>
                                     )}
                                 </div>
                             ) : (
-                                <Badge variant="outline" className="text-slate-500 w-fit">Pendente</Badge>
+                                <Badge variant="outline" className="text-muted-foreground w-fit">Pendente</Badge>
                             )}
                         </div>
                         
                         <div>
                             {orcamento.status_conversao === 'convertido' && orcamento.pedido_venda_id ? (
-                                 <Button variant="outline" className="bg-white" onClick={() => navigate(`/vendas/pedidos/${orcamento.pedido_venda_id}`)}>
+                                 <Button variant="outline" className="bg-background" onClick={() => navigate(`/vendas/pedidos/${orcamento.pedido_venda_id}`)}>
                                     <ExternalLink className="w-4 h-4 mr-2" />
                                     Ver Pedido Relacionado
                                  </Button>
@@ -182,7 +182,7 @@ const OrcamentosForm = () => {
                     <CardContent className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label>Número</Label>
-                            <Input value={orcamento.numero} readOnly className="bg-slate-50 text-slate-500" />
+                            <Input value={orcamento.numero} readOnly className="bg-muted text-muted-foreground" />
                         </div>
                         <div className="space-y-1">
                             <Label>Cliente</Label>
@@ -239,7 +239,7 @@ const OrcamentosForm = () => {
             <PedidoVendaItensSection itens={itens} setItens={setItens} />
             <TotalizadoresSection itens={itens} frete={0} />
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-200">
+            <div className="flex justify-end gap-4 pt-4 border-t border-border">
                 <Button variant="outline" onClick={() => navigate('/vendas/orcamentos')}><X className="w-4 h-4 mr-2"/> Cancelar</Button>
                 <Button onClick={handleSave} disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white"><Save className="w-4 h-4 mr-2"/> Salvar Orçamento</Button>
             </div>

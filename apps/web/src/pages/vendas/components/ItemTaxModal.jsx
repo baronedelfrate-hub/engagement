@@ -273,12 +273,12 @@ export default function ItemTaxModal({ isOpen, onClose, onSave, itemData }) {
                     </div>
 
                     {/* Classificação Section */}
-                    <div className="col-span-full border-t pt-4 mt-2 font-medium text-sm text-slate-500 uppercase">Classificação Gerencial</div>
+                    <div className="col-span-full border-t pt-4 mt-2 font-medium text-sm text-muted-foreground uppercase">Classificação Gerencial</div>
                     
                     <div className="space-y-1">
                         <Label className="flex items-center justify-between">
                             Categoria *
-                            {loading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
+                            {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                         </Label>
                         <Select 
                             value={formData.categoria_id || 'none'} 
@@ -312,7 +312,7 @@ export default function ItemTaxModal({ isOpen, onClose, onSave, itemData }) {
                     <div className="space-y-1">
                         <Label className="flex items-center justify-between">
                             Centro de Custos *
-                            {loading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
+                            {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                         </Label>
                         <Select 
                             value={formData.centro_custos_id || 'none'} 
@@ -329,7 +329,7 @@ export default function ItemTaxModal({ isOpen, onClose, onSave, itemData }) {
                     <div className="space-y-1">
                         <Label className="flex items-center justify-between">
                             Projeto
-                            {loading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
+                            {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
                         </Label>
                         <Select 
                             value={formData.projeto_id || 'none'} 
@@ -345,33 +345,33 @@ export default function ItemTaxModal({ isOpen, onClose, onSave, itemData }) {
                     </div>
 
                     {/* Tax Section */}
-                    <div className="col-span-full border-t pt-4 mt-2 font-medium text-sm text-slate-500 uppercase">Tributos (Alíquotas %)</div>
+                    <div className="col-span-full border-t pt-4 mt-2 font-medium text-sm text-muted-foreground uppercase">Tributos (Alíquotas %)</div>
                     
                     <div className="space-y-1">
                         <Label>ICMS (%)</Label>
                         <Input type="number" min="0" step="0.01" value={formData.aliquota_icms} onChange={e => handleCalcAndSet('aliquota_icms', e.target.value)} />
-                        <span className="text-xs text-slate-400">Valor: R$ {formData.valor_icms.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground">Valor: R$ {formData.valor_icms.toFixed(2)}</span>
                     </div>
                     <div className="space-y-1">
                         <Label>IPI (%)</Label>
                         <Input type="number" min="0" step="0.01" value={formData.aliquota_ipi} onChange={e => handleCalcAndSet('aliquota_ipi', e.target.value)} />
-                        <span className="text-xs text-slate-400">Valor: R$ {formData.valor_ipi.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground">Valor: R$ {formData.valor_ipi.toFixed(2)}</span>
                     </div>
                     <div className="space-y-1">
                         <Label>PIS (%)</Label>
                         <Input type="number" min="0" step="0.01" value={formData.aliquota_pis} onChange={e => handleCalcAndSet('aliquota_pis', e.target.value)} />
-                        <span className="text-xs text-slate-400">Valor: R$ {formData.valor_pis.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground">Valor: R$ {formData.valor_pis.toFixed(2)}</span>
                     </div>
                     <div className="space-y-1">
                         <Label>COFINS (%)</Label>
                         <Input type="number" min="0" step="0.01" value={formData.aliquota_cofins} onChange={e => handleCalcAndSet('aliquota_cofins', e.target.value)} />
-                        <span className="text-xs text-slate-400">Valor: R$ {formData.valor_cofins.toFixed(2)}</span>
+                        <span className="text-xs text-muted-foreground">Valor: R$ {formData.valor_cofins.toFixed(2)}</span>
                     </div>
 
                     <div className="col-span-full border-t pt-4 mt-2 flex justify-end">
                         <div className="text-right">
-                            <Label className="block text-sm text-slate-500 mb-1">Valor Total do Item</Label>
-                            <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                            <Label className="block text-sm text-muted-foreground mb-1">Valor Total do Item</Label>
+                            <span className="text-2xl font-bold text-foreground">
                                 R$ {(formData.valor_total || 0).toFixed(2)}
                             </span>
                         </div>

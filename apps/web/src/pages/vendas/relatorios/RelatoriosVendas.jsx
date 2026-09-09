@@ -206,18 +206,18 @@ const RelatoriosVendas = () => {
 
     const getStatusColor = (statusValue) => {
         const colors = {
-            'rascunho': 'bg-slate-100 text-slate-600 border-slate-200',
-            'pendente': 'bg-amber-100 text-amber-700 border-amber-200',
-            'confirmado': 'bg-blue-100 text-blue-700 border-blue-200',
-            'aprovado': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            'em_separacao': 'bg-purple-100 text-purple-700 border-purple-200',
-            'enviado': 'bg-indigo-100 text-indigo-700 border-indigo-200',
-            'faturado': 'bg-green-100 text-green-700 border-green-200',
-            'cancelado': 'bg-red-100 text-red-700 border-red-200',
-            'rejeitado': 'bg-red-100 text-red-700 border-red-200'
+            'rascunho': 'bg-muted text-muted-foreground border-border',
+            'pendente': 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800',
+            'confirmado': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800',
+            'aprovado': 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800',
+            'em_separacao': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800',
+            'enviado': 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800',
+            'faturado': 'bg-green-100 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800',
+            'cancelado': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800',
+            'rejeitado': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800'
         };
         const st = (statusValue || '').toLowerCase();
-        return colors[st] || 'bg-gray-100 text-gray-700';
+        return colors[st] || 'bg-muted text-foreground';
     };
 
     return (
@@ -236,7 +236,7 @@ const RelatoriosVendas = () => {
                 <div className="xl:col-span-1 space-y-6">
                     {/* Source Selection */}
                     <Card>
-                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-slate-500">Fonte de Dados</CardTitle></CardHeader>
+                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-muted-foreground">Fonte de Dados</CardTitle></CardHeader>
                         <CardContent>
                             <Select value={source} onValueChange={(val) => { setSource(val); handleClearFilters(); }}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -265,10 +265,10 @@ const RelatoriosVendas = () => {
                         <Card>
                             <CardContent className="p-4 flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs text-slate-500 font-medium uppercase">Registros Encontrados</p>
+                                    <p className="text-xs text-muted-foreground font-medium uppercase">Registros Encontrados</p>
                                     <h3 className="text-2xl font-bold">{stats.count}</h3>
                                 </div>
-                                <div className="h-10 w-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center">
+                                <div className="h-10 w-10 bg-blue-50 text-blue-500 dark:bg-blue-950/30 dark:text-blue-400 rounded-full flex items-center justify-center">
                                     <Table className="h-5 w-5" />
                                 </div>
                             </CardContent>
@@ -276,10 +276,10 @@ const RelatoriosVendas = () => {
                         <Card>
                             <CardContent className="p-4 flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs text-slate-500 font-medium uppercase">Soma Total</p>
+                                    <p className="text-xs text-muted-foreground font-medium uppercase">Soma Total</p>
                                     <h3 className="text-2xl font-bold text-emerald-600">{formatCurrency(stats.total)}</h3>
                                 </div>
-                                <div className="h-10 w-10 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center">
+                                <div className="h-10 w-10 bg-emerald-50 text-emerald-500 dark:bg-emerald-950/30 dark:text-emerald-400 rounded-full flex items-center justify-center">
                                     <DollarIcon className="h-5 w-5" />
                                 </div>
                             </CardContent>
@@ -287,10 +287,10 @@ const RelatoriosVendas = () => {
                         <Card>
                             <CardContent className="p-4 flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs text-slate-500 font-medium uppercase">Ticket Médio</p>
+                                    <p className="text-xs text-muted-foreground font-medium uppercase">Ticket Médio</p>
                                     <h3 className="text-2xl font-bold text-amber-600">{formatCurrency(stats.avg)}</h3>
                                 </div>
-                                <div className="h-10 w-10 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center">
+                                <div className="h-10 w-10 bg-amber-50 text-amber-500 dark:bg-amber-950/30 dark:text-amber-400 rounded-full flex items-center justify-center">
                                     <PercentIcon className="h-5 w-5" />
                                 </div>
                             </CardContent>
@@ -298,9 +298,9 @@ const RelatoriosVendas = () => {
                     </div>
 
                     {/* Toolbar */}
-                    <div className="bg-white p-4 rounded-lg border shadow-sm flex flex-wrap justify-between items-center gap-4">
+                    <div className="bg-background p-4 rounded-lg border shadow-sm flex flex-wrap justify-between items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs font-normal text-slate-500">
+                            <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
                                 Listando dados da tabela: {source === 'pedidos_venda' ? 'Pedidos de Venda' : 'Orçamentos'}
                             </Badge>
                         </div>
@@ -328,27 +328,27 @@ const RelatoriosVendas = () => {
                     <Card className="overflow-hidden min-h-[500px] flex flex-col">
                         <div className="overflow-x-auto flex-1">
                             <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-50 text-slate-600 font-medium border-b">
+                                <thead className="bg-muted text-muted-foreground font-medium border-b">
                                     <tr>
-                                        <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 whitespace-nowrap" onClick={() => requestSort('numero')}>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-muted whitespace-nowrap" onClick={() => requestSort('numero')}>
                                             <div className="flex items-center gap-1">Número <ArrowUpDown className="h-3 w-3 opacity-50"/></div>
                                         </th>
-                                        <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 whitespace-nowrap" onClick={() => requestSort('data_emissao')}>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-muted whitespace-nowrap" onClick={() => requestSort('data_emissao')}>
                                             <div className="flex items-center gap-1">Data Emissão <ArrowUpDown className="h-3 w-3 opacity-50"/></div>
                                         </th>
-                                        <th className="px-4 py-3 cursor-pointer hover:bg-slate-100" onClick={() => requestSort('cliente_nome')}>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-muted" onClick={() => requestSort('cliente_nome')}>
                                             <div className="flex items-center gap-1">Cliente <ArrowUpDown className="h-3 w-3 opacity-50"/></div>
                                         </th>
-                                        <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 text-right" onClick={() => requestSort('valor_total')}>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-muted text-right" onClick={() => requestSort('valor_total')}>
                                             <div className="flex items-center justify-end gap-1">Valor Total <ArrowUpDown className="h-3 w-3 opacity-50"/></div>
                                         </th>
-                                        <th className="px-4 py-3 cursor-pointer hover:bg-slate-100 text-center" onClick={() => requestSort('status')}>
+                                        <th className="px-4 py-3 cursor-pointer hover:bg-muted text-center" onClick={() => requestSort('status')}>
                                             <div className="flex items-center justify-center gap-1">Status <ArrowUpDown className="h-3 w-3 opacity-50"/></div>
                                         </th>
                                         <th className="px-4 py-3 text-center">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
+                                <tbody className="divide-y divide-slate-100 bg-background">
                                     {loading ? (
                                         [...Array(5)].map((_, i) => (
                                             <tr key={i}>
@@ -362,17 +362,17 @@ const RelatoriosVendas = () => {
                                         ))
                                     ) : paginatedData.length > 0 ? (
                                         paginatedData.map((row) => (
-                                            <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="px-4 py-3 whitespace-nowrap font-medium text-slate-700">
+                                            <tr key={row.id} className="hover:bg-muted transition-colors">
+                                                <td className="px-4 py-3 whitespace-nowrap font-medium text-foreground">
                                                     {row.numero}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-slate-600">
+                                                <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
                                                     {formatDate(row.data_emissao)}
                                                 </td>
-                                                <td className="px-4 py-3 text-slate-700 max-w-[200px] truncate" title={row.cliente_nome}>
+                                                <td className="px-4 py-3 text-foreground max-w-[200px] truncate" title={row.cliente_nome}>
                                                     {row.cliente_nome}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-slate-700">
+                                                <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-foreground">
                                                     {formatCurrency(row.valor_total)}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap text-center">
@@ -407,7 +407,7 @@ const RelatoriosVendas = () => {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="p-12 text-center text-slate-400">
+                                            <td colSpan={6} className="p-12 text-center text-muted-foreground">
                                                 <div className="flex flex-col items-center gap-3">
                                                     <Search className="h-10 w-10 opacity-20" />
                                                     <p>Nenhum dado encontrado para os filtros selecionados.</p>
@@ -423,8 +423,8 @@ const RelatoriosVendas = () => {
                         </div>
                         
                         {/* Pagination */}
-                        <div className="p-4 border-t bg-slate-50 flex items-center justify-between">
-                            <span className="text-xs text-slate-500">
+                        <div className="p-4 border-t bg-muted flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
                                 Mostrando {paginatedData.length > 0 ? ((page - 1) * ITEMS_PER_PAGE) + 1 : 0} a {Math.min(page * ITEMS_PER_PAGE, sortedData.length)} de {sortedData.length} registros
                             </span>
                             <div className="flex gap-1 items-center">

@@ -77,7 +77,7 @@ export default function PedidoVendaItensSection({ itens, setItens }) {
             <CardContent>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left border rounded-md">
-                        <thead className="bg-slate-50 border-b text-slate-600">
+                        <thead className="bg-muted border-b text-muted-foreground">
                             <tr>
                                 <th className="px-3 py-2 w-16">Tipo</th>
                                 <th className="px-3 py-2">Item / Descrição</th>
@@ -102,7 +102,7 @@ export default function PedidoVendaItensSection({ itens, setItens }) {
                                 </tr>
                             )}
                             {!loading && itens.length === 0 && (
-                                <tr><td colSpan="9" className="px-3 py-6 text-center text-slate-500">Nenhum item adicionado. Clique no botão acima para inserir produtos ou serviços.</td></tr>
+                                <tr><td colSpan="9" className="px-3 py-6 text-center text-muted-foreground">Nenhum item adicionado. Clique no botão acima para inserir produtos ou serviços.</td></tr>
                             )}
                             {!loading && itens.map((item, idx) => {
                                 const isProduct = (item.tipo_item === 'produto' || (!item.tipo_item && item.produto_id));
@@ -111,30 +111,30 @@ export default function PedidoVendaItensSection({ itens, setItens }) {
                                 const actualName = getItemName(item);
                                 
                                 return (
-                                <tr key={idx} className="hover:bg-slate-50/50">
+                                <tr key={idx} className="hover:bg-muted/50">
                                     <td className="px-3 py-2">
-                                        <Badge variant="outline" className={`flex items-center gap-1 w-max ${isProduct ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                        <Badge variant="outline" className={`flex items-center gap-1 w-max ${isProduct ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'}`}>
                                             <TypeIcon className="w-3 h-3" />
                                             {typeName}
                                         </Badge>
                                     </td>
-                                    <td className="px-3 py-2 font-medium text-slate-700">
+                                    <td className="px-3 py-2 font-medium text-foreground">
                                         <div className="flex flex-col">
                                             <span>{actualName}</span>
                                             {item.descricao && item.descricao !== actualName && (
-                                                <span className="text-xs text-slate-400 font-normal">{item.descricao}</span>
+                                                <span className="text-xs text-muted-foreground font-normal">{item.descricao}</span>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-3 py-2 text-slate-500 text-xs">{getCatName(item.categoria_id)}</td>
-                                    <td className="px-3 py-2 text-slate-500 text-xs">{getSubcatName(item.subcategoria_id)}</td>
-                                    <td className="px-3 py-2 text-slate-500 text-xs">{getCcName(item.centro_custos_id)}</td>
+                                    <td className="px-3 py-2 text-muted-foreground text-xs">{getCatName(item.categoria_id)}</td>
+                                    <td className="px-3 py-2 text-muted-foreground text-xs">{getSubcatName(item.subcategoria_id)}</td>
+                                    <td className="px-3 py-2 text-muted-foreground text-xs">{getCcName(item.centro_custos_id)}</td>
                                     <td className="px-3 py-2 text-right">{item.quantidade}</td>
                                     <td className="px-3 py-2 text-right">R$ {parseFloat(item.valor_unitario||0).toFixed(2)}</td>
-                                    <td className="px-3 py-2 text-right font-semibold text-slate-800">R$ {parseFloat(item.valor_total||0).toFixed(2)}</td>
+                                    <td className="px-3 py-2 text-right font-semibold text-foreground">R$ {parseFloat(item.valor_total||0).toFixed(2)}</td>
                                     <td className="px-3 py-2 flex justify-center gap-1">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50" onClick={() => handleEdit(idx)}><Edit2 className="w-4 h-4"/></Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(idx)}><Trash2 className="w-4 h-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={() => handleEdit(idx)}><Edit2 className="w-4 h-4"/></Button>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30" onClick={() => handleDelete(idx)}><Trash2 className="w-4 h-4"/></Button>
                                     </td>
                                 </tr>
                             )})}

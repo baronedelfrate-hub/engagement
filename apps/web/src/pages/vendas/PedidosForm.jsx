@@ -248,7 +248,7 @@ const PedidosForm = () => {
                     <CardContent className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label>Número do Pedido</Label>
-                            <Input value={pedido.numero} readOnly className="bg-slate-50 text-slate-500" />
+                            <Input value={pedido.numero} readOnly className="bg-muted text-muted-foreground" />
                         </div>
                         <div className="space-y-1">
                             <Label>Data de Emissão</Label>
@@ -301,48 +301,48 @@ const PedidosForm = () => {
                         </div>
 
                         {empresasLoading ? (
-                             <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-md border border-dashed">
+                             <div className="flex flex-col items-center justify-center py-6 text-muted-foreground bg-muted rounded-md border border-dashed">
                                  <Loader2 className="h-6 w-6 animate-spin mb-2" />
                                  <span className="text-xs">Carregando empresas...</span>
                              </div>
                         ) : selectedEmpresa ? (
-                            <div className="bg-slate-50 p-4 rounded-md border text-sm space-y-3">
+                            <div className="bg-muted p-4 rounded-md border text-sm space-y-3">
                                 {selectedEmpresa.logo_path && (
                                     <div className="flex justify-center mb-2">
                                         <img src={getLogoUrl(selectedEmpresa.logo_path)} alt="Logo da Empresa" className="h-12 object-contain" />
                                     </div>
                                 )}
                                 <div>
-                                    <span className="font-semibold text-slate-600 block text-xs">Razão Social</span>
-                                    <span className="text-slate-800">{selectedEmpresa.razao_social}</span>
+                                    <span className="font-semibold text-muted-foreground block text-xs">Razão Social</span>
+                                    <span className="text-foreground">{selectedEmpresa.razao_social}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="font-semibold text-slate-600 block text-xs">CNPJ</span>
-                                        <span className="text-slate-800">{selectedEmpresa.cnpj || '-'}</span>
+                                        <span className="font-semibold text-muted-foreground block text-xs">CNPJ</span>
+                                        <span className="text-foreground">{selectedEmpresa.cnpj || '-'}</span>
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-slate-600 block text-xs">Insc. Estadual</span>
-                                        <span className="text-slate-800">{selectedEmpresa.inscricao_estadual || '-'}</span>
+                                        <span className="font-semibold text-muted-foreground block text-xs">Insc. Estadual</span>
+                                        <span className="text-foreground">{selectedEmpresa.inscricao_estadual || '-'}</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <span className="font-semibold text-slate-600 block text-xs">Endereço Completo</span>
-                                    <span className="text-slate-800">{formatEnderecoCompleto(selectedEmpresa) || '-'}</span>
+                                    <span className="font-semibold text-muted-foreground block text-xs">Endereço Completo</span>
+                                    <span className="text-foreground">{formatEnderecoCompleto(selectedEmpresa) || '-'}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span className="font-semibold text-slate-600 block text-xs">Telefone</span>
-                                        <span className="text-slate-800">{selectedEmpresa.telefone || '-'}</span>
+                                        <span className="font-semibold text-muted-foreground block text-xs">Telefone</span>
+                                        <span className="text-foreground">{selectedEmpresa.telefone || '-'}</span>
                                     </div>
                                     <div>
-                                        <span className="font-semibold text-slate-600 block text-xs">Email</span>
-                                        <span className="text-slate-800 truncate block" title={selectedEmpresa.email}>{selectedEmpresa.email || '-'}</span>
+                                        <span className="font-semibold text-muted-foreground block text-xs">Email</span>
+                                        <span className="text-foreground truncate block" title={selectedEmpresa.email}>{selectedEmpresa.email || '-'}</span>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-6 text-slate-400 bg-slate-50 rounded-md border border-dashed">
+                            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground bg-muted rounded-md border border-dashed">
                                 <Building2 className="h-8 w-8 mb-2 opacity-50" />
                                 <span className="text-xs">Nenhuma empresa selecionada</span>
                             </div>
@@ -364,7 +364,7 @@ const PedidosForm = () => {
                     </div>
 
                     {!pedido.endereco_entrega_mesmo_cliente && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-md border border-slate-100">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-muted p-4 rounded-md border border-border">
                             <div className="space-y-1 md:col-span-2">
                                 <Label>Rua/Logradouro</Label>
                                 <Input value={pedido.endereco_entrega_rua || ''} onChange={e => handleFieldChange('endereco_entrega_rua', e.target.value)} />
@@ -401,7 +401,7 @@ const PedidosForm = () => {
             <FreteEPagamentoSection pedido={pedido} onChange={handleFieldChange} />
             <TotalizadoresSection itens={itens} frete={pedido.valor_frete} />
 
-            <div className="flex justify-end gap-4 pt-4 border-t border-slate-200">
+            <div className="flex justify-end gap-4 pt-4 border-t border-border">
                 <Button variant="outline" onClick={() => navigate('/vendas/pedidos')}><X className="w-4 h-4 mr-2"/> Cancelar</Button>
                 <Button onClick={() => handleSave(false)} disabled={loading} className="bg-slate-900 hover:bg-slate-800 text-white">
                     {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2"/>} Salvar Pedido

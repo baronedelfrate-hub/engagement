@@ -32,38 +32,38 @@ export default function TotalizadoresSection({ itens, frete }) {
     const formatCurrency = (val) => `R$ ${val.toFixed(2)}`;
 
     return (
-        <Card className="bg-slate-50 dark:bg-slate-900 border-none shadow-inner">
+        <Card className="bg-muted border-none shadow-inner">
             <CardContent className="p-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Subtotal Produtos</p>
+                    <p className="text-xs font-medium text-muted-foreground">Subtotal Produtos</p>
                     <p className="font-semibold">{formatCurrency(totals.subtotal)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Descontos</p>
+                    <p className="text-xs font-medium text-muted-foreground">Descontos</p>
                     <p className="font-semibold text-red-500">-{formatCurrency(totals.desconto)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Acréscimos</p>
+                    <p className="text-xs font-medium text-muted-foreground">Acréscimos</p>
                     <p className="font-semibold text-green-600">+{formatCurrency(totals.acrescimo)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Total ICMS</p>
+                    <p className="text-xs font-medium text-muted-foreground">Total ICMS</p>
                     <p className="font-semibold">{formatCurrency(totals.icms)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Total IPI</p>
+                    <p className="text-xs font-medium text-muted-foreground">Total IPI</p>
                     <p className="font-semibold">{formatCurrency(totals.ipi)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">PIS/COFINS</p>
+                    <p className="text-xs font-medium text-muted-foreground">PIS/COFINS</p>
                     <p className="font-semibold">{formatCurrency(totals.pis + totals.cofins)}</p>
                 </div>
                 <div className="space-y-1">
-                    <p className="text-xs font-medium text-slate-500">Frete</p>
+                    <p className="text-xs font-medium text-muted-foreground">Frete</p>
                     <p className="font-semibold">{formatCurrency(parseFloat(frete)||0)}</p>
                 </div>
                 <div className="space-y-1 border-l pl-4">
-                    <p className="text-sm font-bold text-slate-600 uppercase">Valor Total</p>
+                    <p className="text-sm font-bold text-muted-foreground uppercase">Valor Total</p>
                     <p className="text-2xl font-bold text-blue-600">{formatCurrency(totals.total)}</p>
                 </div>
             </CardContent>

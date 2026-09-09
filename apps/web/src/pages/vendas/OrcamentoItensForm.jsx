@@ -64,7 +64,7 @@ const OrcamentoItensForm = () => {
   ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto text-slate-900 dark:text-slate-100">
+    <div className="p-8 max-w-7xl mx-auto text-foreground">
       <CRUDForm
         title={id ? "Editar Item de Orçamento" : "Novo Item de Orçamento"}
         fields={fields}

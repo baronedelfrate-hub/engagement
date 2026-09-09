@@ -43,17 +43,17 @@ const VendasReportFilters = ({ filters, setFilters, onApply, onClear, source }) 
   };
 
   return (
-    <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
-      <CardHeader className="pb-3 pt-4 border-b border-slate-100 dark:border-slate-800">
+    <Card className="bg-background border-border shadow-sm">
+      <CardHeader className="pb-3 pt-4 border-b border-border dark:border-border">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-sm uppercase text-slate-500 font-bold tracking-wider">
+          <CardTitle className="text-sm uppercase text-muted-foreground font-bold tracking-wider">
             Filtros do Relatório
           </CardTitle>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={onClear} 
-            className="h-8 px-2 text-slate-500 hover:text-red-500"
+            className="h-8 px-2 text-muted-foreground hover:text-red-500"
           >
             <FilterX className="h-4 w-4 mr-2" /> Limpar Filtros
           </Button>

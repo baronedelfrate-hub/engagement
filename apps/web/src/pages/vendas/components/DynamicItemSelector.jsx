@@ -12,7 +12,7 @@ export default function DynamicItemSelector({ itemType, items, loading, selected
         <div className="space-y-1">
             <Label className="flex items-center justify-between">
                 {label}
-                {loading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
+                {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
             </Label>
             <Select 
                 value={selectedId || 'none'} 

@@ -156,14 +156,14 @@ const F5Governance = () => {
 
   if (isFinished) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-center px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-muted text-center px-4">
         <Helmet><title>F5 - Concluído</title></Helmet>
-        <div className="bg-white p-12 rounded-2xl shadow-xl max-w-lg border-t-8 border-green-500">
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="bg-background p-12 rounded-2xl shadow-xl max-w-lg border-t-8 border-green-500">
+          <div className="w-24 h-24 bg-green-100 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="h-12 w-12 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Metodologia Completa</h1>
-          <p className="text-slate-500 mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Metodologia Completa</h1>
+          <p className="text-muted-foreground mb-8">
             O projeto foi finalizado e todos os relatórios foram gerados com sucesso.
             Parabéns pela jornada de transformação!
           </p>
@@ -176,7 +176,7 @@ const F5Governance = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-muted/50 pb-20">
       <Helmet><title>F5 - Governança</title></Helmet>
       
       <PageHeader 
@@ -189,13 +189,13 @@ const F5Governance = () => {
       <div className="max-w-5xl mx-auto mt-6 px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="governance" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+            <TabsTrigger value="governance" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800 dark:data-[state=active]:bg-purple-950/40 dark:data-[state=active]:text-purple-300">
               <ShieldCheck className="h-4 w-4 mr-2" /> Governança
             </TabsTrigger>
-            <TabsTrigger value="sustainability" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800">
+            <TabsTrigger value="sustainability" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 dark:data-[state=active]:bg-emerald-950/40 dark:data-[state=active]:text-emerald-300">
               <Leaf className="h-4 w-4 mr-2" /> Sustentabilidade
             </TabsTrigger>
-            <TabsTrigger value="report" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
+            <TabsTrigger value="report" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">
               <FileCheck className="h-4 w-4 mr-2" /> Relatório Final
             </TabsTrigger>
           </TabsList>
@@ -227,15 +227,15 @@ const F5Governance = () => {
             <Card>
               <CardHeader><CardTitle>Práticas ESG</CardTitle></CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center space-x-2 border p-4 rounded bg-white">
+                <div className="flex items-center space-x-2 border p-4 rounded bg-background">
                   <Checkbox id="esg" checked={sustData.esg_policy} onCheckedChange={(c) => setSustData({...sustData, esg_policy: c})} />
                   <Label htmlFor="esg" className="font-medium">Política ESG Formalizada</Label>
                 </div>
-                <div className="flex items-center space-x-2 border p-4 rounded bg-white">
+                <div className="flex items-center space-x-2 border p-4 rounded bg-background">
                   <Checkbox id="carbon" checked={sustData.carbon_neutral} onCheckedChange={(c) => setSustData({...sustData, carbon_neutral: c})} />
                   <Label htmlFor="carbon" className="font-medium">Iniciativas de Carbono Neutro</Label>
                 </div>
-                <div className="flex items-center space-x-2 border p-4 rounded bg-white">
+                <div className="flex items-center space-x-2 border p-4 rounded bg-background">
                   <Checkbox id="social" checked={sustData.social_impact} onCheckedChange={(c) => setSustData({...sustData, social_impact: c})} />
                   <Label htmlFor="social" className="font-medium">Projetos de Impacto Social</Label>
                 </div>
@@ -251,7 +251,7 @@ const F5Governance = () => {
           </TabsContent>
 
           <TabsContent value="report">
-            <Card className="border-t-4 border-t-green-600 bg-slate-50">
+            <Card className="border-t-4 border-t-green-600 bg-muted">
               <CardHeader>
                 <CardTitle className="text-2xl text-center">Revisão Final do Projeto</CardTitle>
                 <CardDescription className="text-center">
@@ -260,12 +260,12 @@ const F5Governance = () => {
               </CardHeader>
               <CardContent className="flex flex-col items-center py-10 space-y-6">
                 <div className="grid grid-cols-2 gap-4 w-full max-w-lg mb-4">
-                  <div className="bg-white p-4 rounded border text-center">
-                    <span className="block font-bold text-slate-500">Governança</span>
+                  <div className="bg-background p-4 rounded border text-center">
+                    <span className="block font-bold text-muted-foreground">Governança</span>
                     <span className={govData.board_members ? "text-green-600 font-bold" : "text-red-500"}>{govData.board_members ? 'Preenchido' : 'Pendente'}</span>
                   </div>
-                  <div className="bg-white p-4 rounded border text-center">
-                    <span className="block font-bold text-slate-500">Sustentabilidade</span>
+                  <div className="bg-background p-4 rounded border text-center">
+                    <span className="block font-bold text-muted-foreground">Sustentabilidade</span>
                     <span className={sustData.esg_policy || sustData.notes ? "text-green-600 font-bold" : "text-orange-500"}>Verificado</span>
                   </div>
                 </div>

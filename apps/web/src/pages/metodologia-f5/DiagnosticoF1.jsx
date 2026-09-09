@@ -158,8 +158,8 @@ const DiagnosticoF1 = () => {
     
     if (field.type === 'score') {
       return (
-        <div key={field.id} className="space-y-3 pt-4 pb-6 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 p-4 rounded-lg transition-colors">
-          <Label className="text-base font-semibold text-slate-800 block mb-3 leading-snug">{field.label}</Label>
+        <div key={field.id} className="space-y-3 pt-4 pb-6 border-b border-border last:border-0 hover:bg-muted/50 p-4 rounded-lg transition-colors">
+          <Label className="text-base font-semibold text-foreground block mb-3 leading-snug">{field.label}</Label>
           <RadioGroup 
             value={value.toString()} 
             onValueChange={(val) => handleInputChange(null, field.id, val)}
@@ -174,7 +174,7 @@ const DiagnosticoF1 = () => {
                      flex flex-col items-center justify-center text-center h-full px-2 py-3 rounded-lg border-2 cursor-pointer transition-all
                      peer-data-[state=checked]:bg-[#FF7A00] peer-data-[state=checked]:text-white peer-data-[state=checked]:border-[#FF7A00]
                      peer-data-[state=checked]:shadow-md
-                     hover:bg-orange-50 hover:border-orange-200 border-slate-200 text-slate-600 font-medium text-sm
+                     hover:bg-orange-50 hover:border-orange-200 dark:hover:bg-orange-950/30 dark:hover:border-orange-800 border-border text-muted-foreground font-medium text-sm
                    `}
                  >
                    <span className="text-lg font-bold mb-1">{opt.value}</span>
@@ -192,7 +192,7 @@ const DiagnosticoF1 = () => {
         <div key={field.id} className={`${field.width === 'half' ? 'col-span-1' : 'col-span-2'}`}>
           <Label className="mb-2 block font-medium">{field.label}</Label>
           <Select value={value} onValueChange={(val) => handleInputChange(null, field.id, val)}>
-            <SelectTrigger className="border-slate-300 focus:ring-[#FF7A00]"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+            <SelectTrigger className="border-border focus:ring-[#FF7A00]"><SelectValue placeholder="Selecione..." /></SelectTrigger>
             <SelectContent>
               {field.options.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
             </SelectContent>
@@ -208,7 +208,7 @@ const DiagnosticoF1 = () => {
           id={field.id} 
           value={value} 
           onChange={(e) => handleInputChange(null, field.id, e.target.value)} 
-          className="focus-visible:ring-[#FF7A00] border-slate-300"
+          className="focus-visible:ring-[#FF7A00] border-border"
           placeholder={field.type === 'money' ? 'R$ 0,00' : ''}
           type={field.type === 'number' ? 'number' : 'text'}
         />
@@ -233,7 +233,7 @@ const DiagnosticoF1 = () => {
             <Button variant="outline" onClick={() => navigate('/metodologia-f5/historico-f1')} className="gap-2">
               <History className="h-4 w-4" /> Histórico
             </Button>
-            <Button variant="secondary" onClick={() => handleSave(false)} className="gap-2 bg-slate-200 hover:bg-slate-300 text-slate-800">
+            <Button variant="secondary" onClick={() => handleSave(false)} className="gap-2 bg-muted hover:bg-muted/80 text-foreground">
               <Save className="h-4 w-4" /> Salvar Rascunho
             </Button>
             <Button onClick={() => handleSave(true)} className="gap-2 bg-[#FF7A00] hover:bg-orange-600 text-white shadow-lg shadow-orange-200">
@@ -301,24 +301,24 @@ const DiagnosticoF1 = () => {
                className={`shadow-md border-t-4 transition-all duration-300 ${activeSection === section.id ? 'opacity-100 translate-x-0' : 'hidden translate-x-10'}`}
                style={{ borderTopColor: '#FF7A00' }}
              >
-                <CardHeader className="bg-gradient-to-r from-slate-50 to-white pb-6 border-b border-slate-100">
-                   <CardTitle className="flex items-center gap-3 text-slate-800 text-2xl">
-                      <div className="p-3 bg-orange-100 rounded-xl shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-muted to-background pb-6 border-b border-border">
+                   <CardTitle className="flex items-center gap-3 text-foreground text-2xl">
+                      <div className="p-3 bg-orange-100 dark:bg-orange-950/30 rounded-xl shadow-sm">
                          <section.icon className="h-8 w-8 text-[#FF7A00]" />
                       </div>
                       {section.title}
                    </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 md:p-8 bg-white">
+                <CardContent className="p-6 md:p-8 bg-background">
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                       {section.fields.map(renderField)}
                    </div>
                 </CardContent>
-                <CardFooter className="bg-slate-50 border-t border-slate-100 p-6 flex justify-between">
+                <CardFooter className="bg-muted border-t border-border p-6 flex justify-between">
                     <Button variant="ghost" disabled={section.id === FORM_SECTIONS[0].id} onClick={() => {
                         const idx = FORM_SECTIONS.findIndex(s => s.id === section.id);
                         if(idx > 0) setActiveSection(FORM_SECTIONS[idx-1].id);
-                    }} className="text-slate-500 hover:text-slate-900">
+                    }} className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-4 w-4 mr-2" /> Anterior
                     </Button>
                     <Button onClick={() => {

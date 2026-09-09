@@ -174,14 +174,14 @@ const F3Monitoring = () => {
 
   const getStatusBadge = (status) => {
     switch(status) {
-      case 'on_track': return <Badge className="bg-green-100 text-green-700 flex gap-1"><CheckCircle2 className="h-3 w-3"/> Na Meta</Badge>;
-      case 'at_risk': return <Badge className="bg-yellow-100 text-yellow-700 flex gap-1"><AlertTriangle className="h-3 w-3"/> Atenção</Badge>;
-      default: return <Badge className="bg-red-100 text-red-700 flex gap-1"><XCircle className="h-3 w-3"/> Crítico</Badge>;
+      case 'on_track': return <Badge className="bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400 flex gap-1"><CheckCircle2 className="h-3 w-3"/> Na Meta</Badge>;
+      case 'at_risk': return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400 flex gap-1"><AlertTriangle className="h-3 w-3"/> Atenção</Badge>;
+      default: return <Badge className="bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400 flex gap-1"><XCircle className="h-3 w-3"/> Crítico</Badge>;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-muted/50 pb-20">
       <Helmet><title>F3 - Monitoramento | KPIs</title></Helmet>
       
       <PageHeader 
@@ -194,7 +194,7 @@ const F3Monitoring = () => {
                 <Button onClick={() => { setEditingKpi(null); setFormData({}); setIsModalOpen(true); }} className="gap-2">
                     <Plus className="h-4 w-4" /> Novo KPI
                 </Button>
-                <Button onClick={handleFinishPhase} variant="outline" className="gap-2 border-green-600 text-green-700 hover:bg-green-50">
+                <Button onClick={handleFinishPhase} variant="outline" className="gap-2 border-green-600 text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950/30">
                     <CheckCircle2 className="h-4 w-4" /> Concluir Fase
                 </Button>
             </div>
@@ -203,13 +203,13 @@ const F3Monitoring = () => {
 
       {isFinished && (
         <div className="max-w-[1600px] mx-auto px-4 mb-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400">
             <CheckCircle2 className="h-6 w-6" />
             <div>
               <p className="font-bold">Fase Concluída</p>
               <p className="text-sm">Os indicadores foram consolidados e o relatório gerado. Edições estão bloqueadas.</p>
             </div>
-            <Button variant="outline" size="sm" className="ml-auto bg-white" onClick={() => navigate(`/metodologia-f5/relatorios`)}>
+            <Button variant="outline" size="sm" className="ml-auto bg-background" onClick={() => navigate(`/metodologia-f5/relatorios`)}>
               <FileText className="h-4 w-4 mr-2" /> Ver Relatório
             </Button>
           </div>
@@ -223,28 +223,28 @@ const F3Monitoring = () => {
                   <Card key={kpi.id} className="border-t-4 border-t-blue-500">
                       <CardContent className="pt-6">
                           <div className="flex justify-between items-start mb-2">
-                              <p className="text-sm font-medium text-slate-500 truncate" title={kpi.title}>{kpi.title}</p>
+                              <p className="text-sm font-medium text-muted-foreground truncate" title={kpi.title}>{kpi.title}</p>
                               {getStatusBadge(kpi.status)}
                           </div>
                           <div className="flex items-baseline gap-2">
-                              <span className="text-3xl font-bold text-slate-800">{kpi.current_value}</span>
-                              <span className="text-sm text-slate-400">{kpi.unit}</span>
+                              <span className="text-3xl font-bold text-foreground">{kpi.current_value}</span>
+                              <span className="text-sm text-muted-foreground">{kpi.unit}</span>
                           </div>
-                          <div className="mt-2 text-xs text-slate-500 flex justify-between">
+                          <div className="mt-2 text-xs text-muted-foreground flex justify-between">
                               <span>Meta: {kpi.target_value}</span>
                               <span className="text-blue-600 font-medium">{kpi.frequency}</span>
                           </div>
                           {!isFinished && (
-                              <div className="mt-4 flex justify-end gap-2 pt-2 border-t border-slate-100">
-                                  <button onClick={() => { setEditingKpi(kpi); setFormData(kpi); setIsModalOpen(true); }} className="text-slate-400 hover:text-blue-600"><Edit2 className="h-4 w-4"/></button>
-                                  <button onClick={() => handleDeleteKpi(kpi.id)} className="text-slate-400 hover:text-red-600"><Trash2 className="h-4 w-4"/></button>
+                              <div className="mt-4 flex justify-end gap-2 pt-2 border-t border-border">
+                                  <button onClick={() => { setEditingKpi(kpi); setFormData(kpi); setIsModalOpen(true); }} className="text-muted-foreground hover:text-blue-600"><Edit2 className="h-4 w-4"/></button>
+                                  <button onClick={() => handleDeleteKpi(kpi.id)} className="text-muted-foreground hover:text-red-600"><Trash2 className="h-4 w-4"/></button>
                               </div>
                           )}
                       </CardContent>
                   </Card>
               ))}
               {kpis.length === 0 && (
-                  <div className="col-span-full text-center py-12 bg-white rounded-lg border border-dashed text-slate-400">
+                  <div className="col-span-full text-center py-12 bg-background rounded-lg border border-dashed text-muted-foreground">
                       <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-20" />
                       <p>Nenhum indicador cadastrado.</p>
                   </div>

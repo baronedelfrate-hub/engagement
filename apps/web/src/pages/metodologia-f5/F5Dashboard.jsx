@@ -84,7 +84,7 @@ const F5Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Projetos Ativos</CardTitle>
             <FolderKanban className="h-4 w-4 text-primary" />
@@ -95,7 +95,7 @@ const F5Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Fases Concluídas</CardTitle>
             <Settings className="h-4 w-4 text-emerald-500" />
@@ -106,7 +106,7 @@ const F5Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Equipe Alocada</CardTitle>
             <Users className="h-4 w-4 text-blue-500" />
@@ -117,7 +117,7 @@ const F5Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Eficiência</CardTitle>
             <LayoutDashboard className="h-4 w-4 text-amber-500" />
@@ -134,7 +134,7 @@ const F5Dashboard = () => {
         {projects.map((project) => (
           <Card 
             key={project.id} 
-            className="group cursor-pointer hover:border-primary/50 transition-all duration-300 hover:shadow-lg bg-slate-950/40 border-slate-800"
+            className="group cursor-pointer hover:border-primary/50 transition-all duration-300 hover:shadow-lg bg-card border-border"
             onClick={() => handleProjectClick(project)}
           >
             <CardHeader className="pb-3">
@@ -174,7 +174,7 @@ const F5Dashboard = () => {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="pt-3 border-t border-slate-800/50 flex justify-between items-center text-sm text-muted-foreground">
+            <CardFooter className="pt-3 border-t border-border/50 flex justify-between items-center text-sm text-muted-foreground">
               <span className="font-mono text-xs opacity-50 truncate max-w-[150px]" title={project.id}>ID: {project.id}</span>
               <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary" />
             </CardFooter>
@@ -182,7 +182,7 @@ const F5Dashboard = () => {
         ))}
 
         {projects.length === 0 && (
-          <div className="col-span-full py-12 text-center text-muted-foreground bg-slate-900/20 rounded-lg border border-dashed border-slate-800">
+          <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/50 rounded-lg border border-dashed border-border">
             <FolderKanban className="h-12 w-12 mx-auto mb-4 opacity-20" />
             <p className="text-lg font-medium">Nenhum projeto encontrado</p>
             <p className="text-sm mt-2 max-w-sm mx-auto">

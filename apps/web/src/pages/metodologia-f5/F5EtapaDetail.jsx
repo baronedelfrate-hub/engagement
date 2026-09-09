@@ -30,28 +30,28 @@ const StatusCard = ({ title, value, total, percent, color, icon: Icon }) => {
   const progress = total > 0 ? (value / total) * 100 : percent || 0;
   
   return (
-    <Card className="border-none shadow-sm bg-white text-slate-800">
+    <Card className="border-none shadow-sm bg-background text-foreground">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <p className="text-sm text-slate-500 font-medium mb-1">{title}</p>
+            <p className="text-sm text-muted-foreground font-medium mb-1">{title}</p>
             <div className="flex items-baseline gap-1">
                {total !== undefined ? (
                  <>
-                   <span className="text-3xl font-bold text-slate-800">{value}</span>
-                   <span className="text-lg text-slate-400 font-medium">/ {total}</span>
+                   <span className="text-3xl font-bold text-foreground">{value}</span>
+                   <span className="text-lg text-muted-foreground font-medium">/ {total}</span>
                  </>
                ) : (
                  <span className="text-3xl font-bold text-blue-600">{value}%</span>
                )}
             </div>
           </div>
-          <div className={cn("p-2 rounded-lg", color === 'blue' ? "bg-blue-50 text-blue-600" : color === 'green' ? "bg-emerald-50 text-emerald-600" : "bg-indigo-50 text-indigo-600")}>
+          <div className={cn("p-2 rounded-lg", color === 'blue' ? "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400" : color === 'green' ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400")}>
             <Icon className="h-6 w-6" />
           </div>
         </div>
         
-        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
           <div 
             className={cn("h-full rounded-full transition-all duration-500", 
               color === 'blue' ? "bg-blue-600" : color === 'green' ? "bg-emerald-500" : "bg-indigo-600"
@@ -152,16 +152,16 @@ const F5EtapaDetail = () => {
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)} 
-          className="mb-4 text-slate-400 hover:text-white pl-0 hover:bg-transparent"
+          className="mb-4 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent"
         >
           ← Voltar para Projeto
         </Button>
         <div className="flex items-center gap-3 mb-2">
             <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">ETAPA {stage.ordem}</span>
-            <span className="text-slate-400 text-sm">{projectName}</span>
+            <span className="text-muted-foreground text-sm">{projectName}</span>
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">{stage.nome}</h1>
-        <p className="text-slate-400 text-lg max-w-3xl">{stage.descricao}</p>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{stage.nome}</h1>
+        <p className="text-muted-foreground text-lg max-w-3xl">{stage.descricao}</p>
       </div>
 
       <motion.div 
@@ -196,7 +196,7 @@ const F5EtapaDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center gap-2 text-xl font-semibold text-white">
+            <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
               <CheckSquare className="h-5 w-5 text-blue-400" />
               <h2>Checklist de Atividades</h2>
             </div>
@@ -208,8 +208,8 @@ const F5EtapaDetail = () => {
                   className={cn(
                     "flex items-start gap-4 p-4 rounded-lg transition-all duration-200 group border",
                     item.status === 'Concluído' 
-                      ? "bg-slate-50 border-slate-200 opacity-75" 
-                      : "bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200"
+                      ? "bg-muted border-border opacity-75" 
+                      : "bg-background border-border shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
                   )}
                 >
                   <div className="pt-1">
@@ -220,7 +220,7 @@ const F5EtapaDetail = () => {
                     />
                   </div>
                   <div className="flex-1">
-                    <label className={cn("text-base font-medium cursor-pointer select-none block", item.status === 'Concluído' ? "text-slate-500 line-through" : "text-slate-800")}>
+                    <label className={cn("text-base font-medium cursor-pointer select-none block", item.status === 'Concluído' ? "text-muted-foreground line-through" : "text-foreground")}>
                       {item.descricao}
                     </label>
                   </div>
@@ -230,34 +230,34 @@ const F5EtapaDetail = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="flex items-center gap-2 text-xl font-semibold text-white">
+            <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
               <FileText className="h-5 w-5 text-blue-400" />
               <h2>Documentos & Evidências</h2>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+            <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
               <div 
                 onClick={handleUpload}
-                className="border-2 border-dashed border-slate-200 rounded-lg p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer group mb-6"
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted transition-colors cursor-pointer group mb-6"
               >
-                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors text-slate-400">
+                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-950/30 dark:group-hover:text-blue-400 transition-colors text-muted-foreground">
                   <Upload className="h-6 w-6" />
                 </div>
-                <p className="text-sm text-slate-600 mb-2">Arraste arquivos aqui</p>
+                <p className="text-sm text-muted-foreground mb-2">Arraste arquivos aqui</p>
                 <Button variant="outline" size="sm">Selecionar</Button>
               </div>
 
               <div className="space-y-3">
                 {deliverables.map(del => (
-                  <div key={del.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <div className="h-10 w-10 bg-white rounded-lg flex items-center justify-center border border-slate-200 text-blue-600 shrink-0">
+                  <div key={del.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
+                    <div className="h-10 w-10 bg-background rounded-lg flex items-center justify-center border border-border text-blue-600 shrink-0">
                       <FileText className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">{del.nome}</p>
-                      <p className="text-xs text-slate-500">{del.size}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{del.nome}</p>
+                      <p className="text-xs text-muted-foreground">{del.size}</p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600">
                        <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -270,20 +270,20 @@ const F5EtapaDetail = () => {
         {/* KPIs Section */}
         {kpis.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-white mb-4">Indicadores de Performance (KPIs)</h3>
+            <h3 className="text-xl font-bold text-foreground mb-4">Indicadores de Performance (KPIs)</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {kpis.map(kpi => (
-                <Card key={kpi.id} className="bg-slate-800 border-slate-700">
+                <Card key={kpi.id} className="bg-card border-border">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-slate-400 text-sm">{kpi.nome_kpi}</span>
+                      <span className="text-muted-foreground text-sm">{kpi.nome_kpi}</span>
                       <span className={`text-xs px-2 py-1 rounded ${kpi.tendencia === 'Alta' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                         {kpi.tendencia}
                       </span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-white">{kpi.valor_atual}</span>
-                      <span className="text-sm text-slate-500">/ Meta: {kpi.meta}</span>
+                      <span className="text-2xl font-bold text-foreground">{kpi.valor_atual}</span>
+                      <span className="text-sm text-muted-foreground">/ Meta: {kpi.meta}</span>
                     </div>
                   </CardContent>
                 </Card>

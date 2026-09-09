@@ -169,8 +169,8 @@ const F4Planning = () => {
       );
       case 4: return (
         <div className="space-y-6 text-sm">
-          <div className="bg-slate-50 p-4 rounded border">
-            <h4 className="font-bold text-lg mb-2 text-slate-800">Resumo do Planejamento</h4>
+          <div className="bg-muted p-4 rounded border">
+            <h4 className="font-bold text-lg mb-2 text-foreground">Resumo do Planejamento</h4>
             <div className="grid grid-cols-2 gap-4">
               <div><strong>Missão:</strong> {formData.missao || '-'}</div>
               <div><strong>Visão:</strong> {formData.visao || '-'}</div>
@@ -178,7 +178,7 @@ const F4Planning = () => {
               <div><strong>Orçamento:</strong> R$ {formData.orcamento_total || '0'}</div>
             </div>
           </div>
-          <p className="text-center text-slate-500">Ao clicar em "Concluir Fase", um relatório executivo será gerado e a fase será travada.</p>
+          <p className="text-center text-muted-foreground">Ao clicar em "Concluir Fase", um relatório executivo será gerado e a fase será travada.</p>
         </div>
       );
       default: return null;
@@ -186,7 +186,7 @@ const F4Planning = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-muted/50 pb-20">
       <Helmet><title>F4 - Planejamento Estratégico</title></Helmet>
       
       <PageHeader 
@@ -210,7 +210,7 @@ const F4Planning = () => {
             {STEPS.map((s, idx) => {
               const Icon = s.icon;
               return (
-                <div key={s.id} className={`p-3 rounded-lg flex items-center gap-3 text-sm ${idx === currentStep ? 'bg-blue-100 text-blue-700 font-bold' : idx < currentStep ? 'bg-green-50 text-green-700' : 'text-slate-400'}`}>
+                <div key={s.id} className={`p-3 rounded-lg flex items-center gap-3 text-sm ${idx === currentStep ? 'bg-blue-100 text-blue-700 font-bold dark:bg-blue-950/40 dark:text-blue-300' : idx < currentStep ? 'bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400' : 'text-muted-foreground'}`}>
                   <Icon className="h-4 w-4" />
                   <span className="hidden md:inline">{s.title}</span>
                 </div>
@@ -228,12 +228,12 @@ const F4Planning = () => {
                 <div className="h-full flex flex-col items-center justify-center text-green-600">
                   <CheckCircle2 className="h-16 w-16 mb-4" />
                   <h3 className="text-2xl font-bold">Planejamento Concluído</h3>
-                  <p className="text-slate-500 mt-2">Esta fase foi finalizada e arquivada.</p>
+                  <p className="text-muted-foreground mt-2">Esta fase foi finalizada e arquivada.</p>
                 </div>
               ) : renderStepContent()}
             </CardContent>
             {!isFinished && (
-              <CardFooter className="flex justify-between border-t p-6 bg-slate-50 rounded-b-xl">
+              <CardFooter className="flex justify-between border-t p-6 bg-muted rounded-b-xl">
                 <Button variant="ghost" onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))} disabled={currentStep === 0 || loading}>
                   <ChevronLeft className="h-4 w-4 mr-2" /> Anterior
                 </Button>

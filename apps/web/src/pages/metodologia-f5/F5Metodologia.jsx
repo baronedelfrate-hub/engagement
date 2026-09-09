@@ -25,11 +25,11 @@ import {
 } from 'lucide-react';
 
 const PHASES = [
-  { id: 1, code: 'F1', title: 'Diagnóstico', icon: Search, color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-200' },
-  { id: 2, code: 'F2', title: 'Estruturação', icon: Settings, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-200' },
-  { id: 3, code: 'F3', title: 'Acompanhamento', icon: BarChart2, color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-  { id: 4, code: 'F4', title: 'Planejamento', icon: PieChart, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200' },
-  { id: 5, code: 'F5', title: 'Governança', icon: ShieldCheck, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200' },
+  { id: 1, code: 'F1', title: 'Diagnóstico', icon: Search, color: 'text-blue-500 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800' },
+  { id: 2, code: 'F2', title: 'Estruturação', icon: Settings, color: 'text-indigo-500 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-950/30', border: 'border-indigo-200 dark:border-indigo-800' },
+  { id: 3, code: 'F3', title: 'Acompanhamento', icon: BarChart2, color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800' },
+  { id: 4, code: 'F4', title: 'Planejamento', icon: PieChart, color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800' },
+  { id: 5, code: 'F5', title: 'Governança', icon: ShieldCheck, color: 'text-purple-500 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800' },
 ];
 
 const F5Metodologia = () => {
@@ -182,13 +182,13 @@ const F5Metodologia = () => {
       />
 
       {/* Progress Overview */}
-      <div className="mb-8 bg-white p-6 rounded-xl border shadow-sm">
+      <div className="mb-8 bg-background p-6 rounded-xl border shadow-sm">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-slate-800">Progresso da Jornada</h3>
-          <span className="text-sm text-slate-500">Fase {activePhase} de 5</span>
+          <h3 className="font-semibold text-foreground">Progresso da Jornada</h3>
+          <span className="text-sm text-muted-foreground">Fase {activePhase} de 5</span>
         </div>
         <div className="relative pt-4 pb-8">
-          <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-100 -translate-y-1/2 z-0" />
+          <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 z-0" />
           <div className="relative z-10 flex justify-between w-full">
             {PHASES.map((phase) => {
               const isCompleted = state.phases[phase.id].status === 'completed';
@@ -200,16 +200,16 @@ const F5Metodologia = () => {
                   <div 
                     className={`
                       w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
-                      ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 
-                        isCurrent ? 'bg-blue-600 border-blue-600 text-white scale-110 shadow-lg ring-4 ring-blue-100' : 
-                        'bg-white border-slate-200 text-slate-300'}
+                      ${isCompleted ? 'bg-green-500 border-green-500 text-white' :
+                        isCurrent ? 'bg-blue-600 border-blue-600 text-white scale-110 shadow-lg ring-4 ring-blue-100 dark:ring-blue-900' :
+                        'bg-background border-border text-muted-foreground'}
                     `}
                   >
                     {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : 
                      isLocked ? <Lock className="h-4 w-4" /> : 
                      <span className="font-bold">{phase.id}</span>}
                   </div>
-                  <span className={`text-xs font-medium ${isCurrent ? 'text-blue-600' : 'text-slate-400'}`}>
+                  <span className={`text-xs font-medium ${isCurrent ? 'text-blue-600' : 'text-muted-foreground'}`}>
                     {phase.code}
                   </span>
                 </div>
@@ -232,8 +232,8 @@ const F5Metodologia = () => {
                 className={`
                   w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all
                   ${activePhase === phase.id 
-                    ? `bg-white shadow-md border-l-4 ${phase.border.replace('border-', 'border-l-')} ${phase.color}` 
-                    : 'hover:bg-slate-50 text-slate-500'}
+                    ? `bg-background shadow-md border-l-4 ${phase.border.replace('border-', 'border-l-')} ${phase.color}` 
+                    : 'hover:bg-muted text-muted-foreground'}
                   ${!state.phases[phase.id].unlocked && 'opacity-50 cursor-not-allowed'}
                 `}
               >
@@ -266,7 +266,7 @@ const F5Metodologia = () => {
                       <CardHeader className={`${phase.bg} border-b ${phase.border}`}>
                         <div className="flex justify-between items-start">
                           <div>
-                            <Badge variant="outline" className={`mb-2 bg-white ${phase.color} ${phase.border}`}>{phase.code}</Badge>
+                            <Badge variant="outline" className={`mb-2 bg-background ${phase.color} ${phase.border}`}>{phase.code}</Badge>
                             <CardTitle className="text-2xl">{phase.title}</CardTitle>
                             <CardDescription>Preencha as informações para avançar na metodologia.</CardDescription>
                           </div>
@@ -312,7 +312,7 @@ const F5Metodologia = () => {
                                 value={formData.maturidade || 5}
                                 onChange={(e) => handleInputChange('maturidade', e.target.value)}
                               />
-                              <div className="flex justify-between text-xs text-slate-500">
+                              <div className="flex justify-between text-xs text-muted-foreground">
                                 <span>Caótica (1)</span>
                                 <span>Organizada (10)</span>
                               </div>
@@ -324,13 +324,13 @@ const F5Metodologia = () => {
                         {phase.id === 2 && (
                           <div className="space-y-6">
                              {/* Auto-filled Info Alert */}
-                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start gap-3">
-                                 <div className="p-2 bg-blue-100 rounded-full text-blue-600 mt-1">
+                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex items-start gap-3 dark:bg-blue-950/30 dark:border-blue-900">
+                                 <div className="p-2 bg-blue-100 rounded-full text-blue-600 mt-1 dark:bg-blue-950/40 dark:text-blue-400">
                                      <Settings className="h-4 w-4" />
                                  </div>
                                  <div>
-                                     <h4 className="font-bold text-blue-900 text-sm">Dados Importados de F1</h4>
-                                     <p className="text-xs text-blue-700 mt-1">
+                                     <h4 className="font-bold text-blue-900 dark:text-blue-300 text-sm">Dados Importados de F1</h4>
+                                     <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
                                          Os dados cadastrais foram trazidos automaticamente do Diagnóstico F1 para agilizar o processo.
                                      </p>
                                  </div>
@@ -342,7 +342,7 @@ const F5Metodologia = () => {
                                   <Input 
                                     value={formData.empresa_nome || ''} 
                                     readOnly 
-                                    className="bg-slate-50"
+                                    className="bg-muted"
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -350,7 +350,7 @@ const F5Metodologia = () => {
                                   <Input 
                                     value={formData.cnpj || ''} 
                                     readOnly 
-                                    className="bg-slate-50"
+                                    className="bg-muted"
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -369,8 +369,8 @@ const F5Metodologia = () => {
                                 </div>
                              </div>
 
-                             <div className="border-t border-slate-100 my-4 pt-4">
-                                 <h4 className="font-bold text-lg mb-4 text-slate-700">Definições da Fase 2</h4>
+                             <div className="border-t border-border my-4 pt-4">
+                                 <h4 className="font-bold text-lg mb-4 text-foreground">Definições da Fase 2</h4>
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                       <Label>ERP Utilizado *</Label>
@@ -383,7 +383,7 @@ const F5Metodologia = () => {
                                  </div>
                              </div>
 
-                             <div className="space-y-4 border p-4 rounded-lg bg-slate-50">
+                             <div className="space-y-4 border p-4 rounded-lg bg-muted">
                                 <Label className="block mb-2 font-bold">Checklist de Estruturação (Opcional)</Label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {['Plano de Contas Definido', 'Conciliação Bancária Ativa', 'Contas a Pagar Organizado', 'Contas a Receber Organizado'].map((item, i) => (
@@ -492,11 +492,11 @@ const F5Metodologia = () => {
                                   placeholder="Empresa responsável (se houver)" 
                                 />
                               </div>
-                              <div className="p-4 bg-purple-50 rounded-lg border border-purple-100 mt-4">
-                                 <h4 className="font-bold text-purple-900 mb-2 flex items-center gap-2">
+                              <div className="p-4 bg-purple-50 rounded-lg border border-purple-100 mt-4 dark:bg-purple-950/30 dark:border-purple-900">
+                                 <h4 className="font-bold text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2">
                                    <ShieldCheck className="h-4 w-4"/> Certificação F5
                                  </h4>
-                                 <p className="text-sm text-purple-700">
+                                 <p className="text-sm text-purple-700 dark:text-purple-400">
                                    Ao concluir esta etapa, sua empresa estará elegível para receber o selo de governança Engagement Consulting.
                                  </p>
                               </div>
@@ -505,7 +505,7 @@ const F5Metodologia = () => {
 
                       </CardContent>
 
-                      <CardFooter className="bg-slate-50 border-t flex justify-between p-6 rounded-b-xl">
+                      <CardFooter className="bg-muted border-t flex justify-between p-6 rounded-b-xl">
                         <Button variant="outline" onClick={handleSaveDraft} className="gap-2">
                           <Save className="h-4 w-4" /> Salvar Rascunho
                         </Button>

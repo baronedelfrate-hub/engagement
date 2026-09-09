@@ -100,7 +100,7 @@ const HistoricoF1 = () => {
                     <CardDescription>Lista de avaliações em andamento e finalizadas</CardDescription>
                 </div>
                 <div className="relative w-full md:w-72">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
                       placeholder="Buscar empresa ou CNPJ..." 
                       className="pl-8"
@@ -112,7 +112,7 @@ const HistoricoF1 = () => {
           </CardHeader>
           <CardContent>
             {filtered.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed">
+                <div className="text-center py-12 text-muted-foreground bg-muted rounded-lg border border-dashed">
                     <FileText className="h-10 w-10 mx-auto mb-3 opacity-20" />
                     <p>Nenhum diagnóstico encontrado.</p>
                 </div>
@@ -139,10 +139,10 @@ const HistoricoF1 = () => {
                                 <TableRow key={item.id}>
                                     <TableCell className="font-medium">
                                         <div>{companyName}</div>
-                                        <div className="text-xs text-slate-400">{cnpj}</div>
+                                        <div className="text-xs text-muted-foreground">{cnpj}</div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={isFinished ? 'default' : 'secondary'} className={isFinished ? 'bg-green-600' : 'bg-slate-200 text-slate-600'}>
+                                        <Badge variant={isFinished ? 'default' : 'secondary'} className={isFinished ? 'bg-green-600' : 'bg-muted text-muted-foreground'}>
                                             {isFinished ? 'Finalizado' : 'Rascunho'}
                                         </Badge>
                                     </TableCell>
@@ -154,9 +154,9 @@ const HistoricoF1 = () => {
                                         ) : '-'}
                                     </TableCell>
                                     <TableCell>
-                                        {item.percentage > 0 ? <span className="font-bold text-slate-700">{item.percentage}%</span> : '-'}
+                                        {item.percentage > 0 ? <span className="font-bold text-foreground">{item.percentage}%</span> : '-'}
                                     </TableCell>
-                                    <TableCell className="text-slate-500 text-xs">
+                                    <TableCell className="text-muted-foreground text-xs">
                                         <div className="flex items-center gap-1">
                                             <Clock className="h-3 w-3" />
                                             {new Date(item.updatedAt).toLocaleDateString()}
@@ -173,7 +173,7 @@ const HistoricoF1 = () => {
                                                     <Edit className="h-4 w-4 text-blue-600" />
                                                 </Button>
                                             )}
-                                            <Button size="sm" variant="ghost" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                                            <Button size="sm" variant="ghost" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>

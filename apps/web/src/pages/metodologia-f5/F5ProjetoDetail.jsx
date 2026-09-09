@@ -149,7 +149,7 @@ const F5ProjetoDetail = () => {
   if (!project) {
      return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-            <h2 className="text-xl font-bold text-slate-100">Projeto não encontrado</h2>
+            <h2 className="text-xl font-bold text-foreground">Projeto não encontrado</h2>
             <p className="text-muted-foreground">O ID "{id}" não foi encontrado na base de dados local.</p>
             <Button onClick={() => navigate('/metodologia-f5/projetos')}>Voltar para Lista</Button>
         </div>
@@ -169,12 +169,12 @@ const F5ProjetoDetail = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => navigate('/metodologia-f5/projetos')}
-            className="rounded-full hover:bg-slate-800"
+            className="rounded-full hover:bg-muted"
           >
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">{project.name}</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{project.name}</h1>
             <p className="text-muted-foreground flex items-center gap-2 mt-1">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
               {project.client} • {project.type || 'Consultoria'}
@@ -183,7 +183,7 @@ const F5ProjetoDetail = () => {
         </div>
         
         <div className="flex gap-2">
-           <Button variant="outline" className="border-slate-700">
+           <Button variant="outline" className="border-border">
              <Clock className="mr-2 h-4 w-4" />
              Histórico
            </Button>
@@ -194,7 +194,7 @@ const F5ProjetoDetail = () => {
       </div>
 
       {/* Project Status Overview */}
-      <Card className="bg-slate-900/50 border-slate-800">
+      <Card className="bg-card border-border">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="space-y-2">
@@ -216,16 +216,16 @@ const F5ProjetoDetail = () => {
 
             <div className="space-y-2">
               <span className="text-sm text-muted-foreground">Início</span>
-              <div className="flex items-center gap-2 text-slate-200">
-                <CalendarDays className="h-4 w-4 text-slate-500" />
+              <div className="flex items-center gap-2 text-foreground">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 {project.startDate ? new Date(project.startDate).toLocaleDateString() : '-'}
               </div>
             </div>
 
             <div className="space-y-2">
               <span className="text-sm text-muted-foreground">Previsão Fim</span>
-              <div className="flex items-center gap-2 text-slate-200">
-                <CalendarDays className="h-4 w-4 text-slate-500" />
+              <div className="flex items-center gap-2 text-foreground">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
                 {project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}
               </div>
             </div>
@@ -255,7 +255,7 @@ const F5ProjetoDetail = () => {
               className="h-full"
             >
               <Card 
-                className={`h-full cursor-pointer transition-all duration-300 hover:shadow-lg border-slate-800 bg-slate-950/50 hover:bg-slate-900 group relative overflow-hidden flex flex-col`}
+                className={`h-full cursor-pointer transition-all duration-300 hover:shadow-lg border-border bg-card hover:bg-muted group relative overflow-hidden flex flex-col`}
                 onClick={(e) => {
                    e.preventDefault();
                    e.stopPropagation();

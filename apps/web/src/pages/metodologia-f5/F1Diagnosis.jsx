@@ -172,7 +172,7 @@ const F1Diagnosis = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-muted/50 pb-20">
       <Helmet><title>F1 - Diagnóstico 360°</title></Helmet>
       
       <PageHeader 
@@ -189,7 +189,7 @@ const F1Diagnosis = () => {
 
       {isFinished && (
         <div className="max-w-5xl mx-auto px-4 mb-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400">
             <CheckCircle2 className="h-6 w-6" />
             <div>
               <p className="font-bold">Fase Concluída</p>
@@ -202,10 +202,10 @@ const F1Diagnosis = () => {
       <div className="max-w-5xl mx-auto mt-6 px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="interview" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
+            <TabsTrigger value="interview" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 dark:data-[state=active]:bg-blue-950/40 dark:data-[state=active]:text-blue-300">
               <Users className="h-4 w-4 mr-2" /> Entrevista Inicial
             </TabsTrigger>
-            <TabsTrigger value="checklist" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800">
+            <TabsTrigger value="checklist" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 dark:data-[state=active]:bg-emerald-950/40 dark:data-[state=active]:text-emerald-300">
               <CheckSquare className="h-4 w-4 mr-2" /> Checklist de Maturidade
             </TabsTrigger>
           </TabsList>

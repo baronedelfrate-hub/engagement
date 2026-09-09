@@ -201,7 +201,7 @@ function F5Relatorios() {
         action={
             <div className="flex gap-2">
                 <select 
-                    className="bg-slate-900 text-white border border-slate-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="bg-background text-foreground border border-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={selectedProject}
                     onChange={(e) => setSelectedProject(e.target.value)}
                 >
@@ -213,10 +213,10 @@ function F5Relatorios() {
 
       <PermissionGate permission={F5_PERMISSIONS.REPORT_GENERATE} fallback>
         <Tabs defaultValue="executive" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800 p-1">
-                <TabsTrigger value="executive" className="data-[state=active]:bg-blue-600 text-slate-300"><BarChart2 className="mr-2 h-4 w-4"/> Executivo</TabsTrigger>
-                <TabsTrigger value="detailed" className="data-[state=active]:bg-emerald-600 text-slate-300"><FileText className="mr-2 h-4 w-4"/> Detalhado</TabsTrigger>
-                <TabsTrigger value="audit" className="data-[state=active]:bg-amber-600 text-slate-300"><ShieldAlert className="mr-2 h-4 w-4"/> Auditoria Técnica</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-muted p-1">
+                <TabsTrigger value="executive" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-muted-foreground"><BarChart2 className="mr-2 h-4 w-4"/> Executivo</TabsTrigger>
+                <TabsTrigger value="detailed" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-muted-foreground"><FileText className="mr-2 h-4 w-4"/> Detalhado</TabsTrigger>
+                <TabsTrigger value="audit" className="data-[state=active]:bg-amber-600 data-[state=active]:text-white text-muted-foreground"><ShieldAlert className="mr-2 h-4 w-4"/> Auditoria Técnica</TabsTrigger>
             </TabsList>
 
             {reportData ? (
@@ -262,8 +262,8 @@ function F5Relatorios() {
                                     </ResponsiveContainer>
                                 </div>
                                 <div className="text-center mt-4">
-                                    <p className="text-3xl font-bold text-slate-800">{reportData.project.percentual_conclusao}%</p>
-                                    <p className="text-sm text-slate-500">Conclusão Total</p>
+                                    <p className="text-3xl font-bold text-foreground">{reportData.project.percentual_conclusao}%</p>
+                                    <p className="text-sm text-muted-foreground">Conclusão Total</p>
                                 </div>
                                 <Button onClick={generateExecutivePDF} className="w-full mt-6 bg-blue-600 hover:bg-blue-700">
                                     <Download className="mr-2 h-4 w-4" /> Exportar PDF Executivo
@@ -277,9 +277,9 @@ function F5Relatorios() {
                         <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {reportData.kpis.map(k => (
-                                    <div key={k.id} className="p-4 border rounded-lg bg-slate-50">
-                                        <div className="text-sm text-slate-500">{k.nome_kpi}</div>
-                                        <div className="text-2xl font-bold text-slate-800 mt-1">{k.valor_atual}</div>
+                                    <div key={k.id} className="p-4 border rounded-lg bg-muted">
+                                        <div className="text-sm text-muted-foreground">{k.nome_kpi}</div>
+                                        <div className="text-2xl font-bold text-foreground mt-1">{k.valor_atual}</div>
                                         <div className="text-xs flex justify-between mt-2">
                                             <span>Meta: {k.meta}</span>
                                             <span className={k.tendencia === 'Alta' ? 'text-green-600' : 'text-red-600'}>{k.tendencia}</span>
@@ -296,7 +296,7 @@ function F5Relatorios() {
                     <Card className="mb-6">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle>Detalhamento de Atividades</CardTitle>
-                            <Button onClick={generateDetailedPDF} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                            <Button onClick={generateDetailedPDF} variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/30">
                                 <Download className="mr-2 h-4 w-4" /> Baixar PDF Detalhado
                             </Button>
                         </CardHeader>
@@ -304,17 +304,17 @@ function F5Relatorios() {
                             <div className="space-y-6">
                                 {reportData.stages.map(stage => (
                                     <div key={stage.id} className="border rounded-lg overflow-hidden">
-                                        <div className="bg-slate-100 p-3 font-bold text-slate-700 flex justify-between">
+                                        <div className="bg-muted p-3 font-bold text-foreground flex justify-between">
                                             <span>{stage.nome}</span>
-                                            <span className="text-sm bg-white px-2 py-0.5 rounded border">{stage.status}</span>
+                                            <span className="text-sm bg-background px-2 py-0.5 rounded border">{stage.status}</span>
                                         </div>
                                         <div className="divide-y">
                                             {reportData.checklists.filter(c => c.etapa_id === stage.id).map(chk => (
-                                                <div key={chk.id} className="p-3 flex items-start gap-3 bg-white hover:bg-slate-50">
-                                                    <CheckSquare className={`h-5 w-5 ${chk.status === 'Concluído' ? 'text-green-500' : 'text-slate-300'}`} />
+                                                <div key={chk.id} className="p-3 flex items-start gap-3 bg-background hover:bg-muted">
+                                                    <CheckSquare className={`h-5 w-5 ${chk.status === 'Concluído' ? 'text-green-500' : 'text-muted-foreground'}`} />
                                                     <div className="flex-1">
-                                                        <p className="text-sm font-medium text-slate-800">{chk.descricao}</p>
-                                                        <div className="flex gap-4 mt-1 text-xs text-slate-500">
+                                                        <p className="text-sm font-medium text-foreground">{chk.descricao}</p>
+                                                        <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
                                                             <span className="flex items-center gap-1"><User className="h-3 w-3"/> {chk.responsavel_id || 'N/A'}</span>
                                                             <span className="flex items-center gap-1"><Calendar className="h-3 w-3"/> {chk.data_conclusao || '-'}</span>
                                                         </div>
@@ -338,14 +338,14 @@ function F5Relatorios() {
                                     <CardTitle>Auditoria Técnica</CardTitle>
                                     <CardDescription>Registro imutável de ações no projeto</CardDescription>
                                 </div>
-                                <Button onClick={generateAuditCSV} variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50">
+                                <Button onClick={generateAuditCSV} variant="outline" className="border-amber-200 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950/30">
                                     <Download className="mr-2 h-4 w-4" /> Exportar CSV (Audit Log)
                                 </Button>
                             </CardHeader>
                             <CardContent>
                                 <div className="rounded-md border overflow-hidden">
                                     <table className="w-full text-sm">
-                                        <thead className="bg-slate-100 text-slate-700 font-medium">
+                                        <thead className="bg-muted text-foreground font-medium">
                                             <tr>
                                                 <th className="p-3 text-left">Data/Hora</th>
                                                 <th className="p-3 text-left">Usuário</th>
@@ -354,21 +354,21 @@ function F5Relatorios() {
                                                 <th className="p-3 text-left">IP</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y bg-white">
+                                        <tbody className="divide-y bg-background">
                                             {/* Simulated Log Data for UI */}
                                             <tr>
-                                                <td className="p-3 text-slate-600">{new Date().toLocaleString()}</td>
+                                                <td className="p-3 text-muted-foreground">{new Date().toLocaleString()}</td>
                                                 <td className="p-3">ADM001</td>
-                                                <td className="p-3"><span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold">VIEW</span></td>
+                                                <td className="p-3"><span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold dark:bg-blue-950/30 dark:text-blue-400">VIEW</span></td>
                                                 <td className="p-3">PROJECT</td>
-                                                <td className="p-3 text-slate-400 text-xs">192.168.1.10</td>
+                                                <td className="p-3 text-muted-foreground text-xs">192.168.1.10</td>
                                             </tr>
                                             <tr>
-                                                <td className="p-3 text-slate-600">{new Date(Date.now() - 3600000).toLocaleString()}</td>
+                                                <td className="p-3 text-muted-foreground">{new Date(Date.now() - 3600000).toLocaleString()}</td>
                                                 <td className="p-3">USER_02</td>
-                                                <td className="p-3"><span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold">UPDATE</span></td>
+                                                <td className="p-3"><span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-bold dark:bg-green-950/30 dark:text-green-400">UPDATE</span></td>
                                                 <td className="p-3">CHECKLIST</td>
-                                                <td className="p-3 text-slate-400 text-xs">10.0.0.55</td>
+                                                <td className="p-3 text-muted-foreground text-xs">10.0.0.55</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -379,7 +379,7 @@ function F5Relatorios() {
                 </TabsContent>
                 </>
             ) : (
-                <div className="p-12 text-center text-slate-400 bg-slate-900/50 rounded-lg border border-slate-800">
+                <div className="p-12 text-center text-muted-foreground bg-muted/50 rounded-lg border border-border">
                     Selecione um projeto para visualizar os relatórios.
                 </div>
             )}

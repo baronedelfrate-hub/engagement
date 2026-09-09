@@ -163,7 +163,7 @@ const F2Execution = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-muted/50 pb-20">
       <Helmet><title>F2 - Execução e Rotinas</title></Helmet>
       
       <PageHeader 
@@ -180,7 +180,7 @@ const F2Execution = () => {
 
       {isFinished && (
         <div className="max-w-5xl mx-auto px-4 mb-6">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800">
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 text-green-800 dark:bg-green-950/30 dark:border-green-800 dark:text-green-400">
             <CheckCircle2 className="h-6 w-6" />
             <div>
               <p className="font-bold">Fase Concluída</p>
@@ -193,10 +193,10 @@ const F2Execution = () => {
       <div className="max-w-5xl mx-auto mt-6 px-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="actions" className="data-[state=active]:bg-orange-100 data-[state=active]:text-orange-800">
+            <TabsTrigger value="actions" className="data-[state=active]:bg-orange-100 data-[state=active]:text-orange-800 dark:data-[state=active]:bg-orange-950/40 dark:data-[state=active]:text-orange-300">
               <ListTodo className="h-4 w-4 mr-2" /> Plano de Ação
             </TabsTrigger>
-            <TabsTrigger value="routines" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800">
+            <TabsTrigger value="routines" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-800 dark:data-[state=active]:bg-purple-950/40 dark:data-[state=active]:text-purple-300">
               <CalendarClock className="h-4 w-4 mr-2" /> Rotinas de Gestão
             </TabsTrigger>
           </TabsList>
@@ -221,18 +221,18 @@ const F2Execution = () => {
                 )}
                 
                 <div className="space-y-2">
-                  {actions.length === 0 && <p className="text-center text-slate-400 py-8">Nenhuma ação registrada.</p>}
+                  {actions.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhuma ação registrada.</p>}
                   {actions.map((action) => (
-                    <div key={action.id} className="flex items-center justify-between p-3 border rounded-lg bg-white hover:bg-slate-50 transition-colors">
+                    <div key={action.id} className="flex items-center justify-between p-3 border rounded-lg bg-background hover:bg-muted transition-colors">
                       <div className="flex items-center gap-3">
                         <input 
                           type="checkbox" 
                           checked={action.status === 'done'} 
                           onChange={() => !isFinished && handleToggleAction(action.id)} 
                           disabled={isFinished}
-                          className="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                          className="h-4 w-4 rounded border-border text-green-600 focus:ring-green-500"
                         />
-                        <span className={action.status === 'done' ? 'line-through text-slate-400' : 'text-slate-700'}>
+                        <span className={action.status === 'done' ? 'line-through text-muted-foreground' : 'text-foreground'}>
                           {action.title}
                         </span>
                       </div>
@@ -283,11 +283,11 @@ const F2Execution = () => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   {routines.length === 0 && <div className="col-span-2 text-center text-slate-400 py-8">Nenhuma rotina definida.</div>}
+                   {routines.length === 0 && <div className="col-span-2 text-center text-muted-foreground py-8">Nenhuma rotina definida.</div>}
                    {routines.map((routine) => (
-                     <div key={routine.id} className="border p-4 rounded-lg bg-white flex justify-between items-center">
+                     <div key={routine.id} className="border p-4 rounded-lg bg-background flex justify-between items-center">
                        <div>
-                         <p className="font-bold text-slate-800">{routine.title}</p>
+                         <p className="font-bold text-foreground">{routine.title}</p>
                          <Badge variant="outline" className="mt-1">{routine.frequency}</Badge>
                        </div>
                        {!isFinished && (

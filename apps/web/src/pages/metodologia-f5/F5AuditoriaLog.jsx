@@ -56,7 +56,7 @@ function F5AuditoriaLog() {
                                     placeholder="Filtrar por Usuário (ID)" 
                                     value={filterUser} 
                                     onChange={e => setFilterUser(e.target.value)}
-                                    icon={<Search className="h-4 w-4 text-slate-400"/>}
+                                    icon={<Search className="h-4 w-4 text-muted-foreground"/>}
                                 />
                             </div>
                             <div className="w-64">
@@ -81,7 +81,7 @@ function F5AuditoriaLog() {
                         <CardContent className="p-0">
                             <div className="rounded-md border overflow-hidden">
                                 <table className="w-full text-sm">
-                                    <thead className="bg-slate-100 text-slate-700 font-medium">
+                                    <thead className="bg-muted text-foreground font-medium">
                                         <tr>
                                             <th className="p-4 text-left">Data/Hora</th>
                                             <th className="p-4 text-left">Usuário</th>
@@ -91,32 +91,32 @@ function F5AuditoriaLog() {
                                             <th className="p-4 text-left">Detalhes</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y bg-white">
+                                    <tbody className="divide-y bg-background">
                                         {filteredLogs.map(log => (
-                                            <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="p-4 text-slate-600 whitespace-nowrap">
+                                            <tr key={log.id} className="hover:bg-muted transition-colors">
+                                                <td className="p-4 text-muted-foreground whitespace-nowrap">
                                                     {new Date(log.data_hora).toLocaleString()}
                                                 </td>
-                                                <td className="p-4 font-medium text-slate-900">{log.usuario_id}</td>
+                                                <td className="p-4 font-medium text-foreground">{log.usuario_id}</td>
                                                 <td className="p-4">
                                                     <span className={`text-xs px-2 py-1 rounded-full font-bold border ${
-                                                        log.acao === 'DELETE' ? 'bg-red-100 text-red-800 border-red-200' :
-                                                        log.acao === 'UPDATE' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                                                        'bg-green-100 text-green-800 border-green-200'
+                                                        log.acao === 'DELETE' ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800' :
+                                                        log.acao === 'UPDATE' ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800' :
+                                                        'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800'
                                                     }`}>
                                                         {log.acao}
                                                     </span>
                                                 </td>
-                                                <td className="p-4 text-slate-600">{log.tabela_afetada}</td>
-                                                <td className="p-4 text-slate-400 text-xs">{log.ip}</td>
-                                                <td className="p-4 text-slate-500 max-w-md truncate" title={log.details}>
+                                                <td className="p-4 text-muted-foreground">{log.tabela_afetada}</td>
+                                                <td className="p-4 text-muted-foreground text-xs">{log.ip}</td>
+                                                <td className="p-4 text-muted-foreground max-w-md truncate" title={log.details}>
                                                     {log.details || '-'}
                                                 </td>
                                             </tr>
                                         ))}
                                         {filteredLogs.length === 0 && (
                                             <tr>
-                                                <td colSpan="6" className="p-8 text-center text-slate-400">Nenhum registro encontrado.</td>
+                                                <td colSpan="6" className="p-8 text-center text-muted-foreground">Nenhum registro encontrado.</td>
                                             </tr>
                                         )}
                                     </tbody>

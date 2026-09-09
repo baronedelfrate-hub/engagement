@@ -77,18 +77,18 @@ function F5ConfigPermissions() {
                             <table className="w-full text-sm border-collapse">
                                 <thead>
                                     <tr>
-                                        <th className="p-3 border-b text-left bg-slate-50">Permissão</th>
+                                        <th className="p-3 border-b text-left bg-muted">Permissão</th>
                                         {roles.map(role => (
-                                            <th key={role.id} className="p-3 border-b text-center bg-slate-50 w-32">{role.nome}</th>
+                                            <th key={role.id} className="p-3 border-b text-center bg-muted w-32">{role.nome}</th>
                                         ))}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {f5PermissionsList.map(permCode => (
-                                        <tr key={permCode} className="hover:bg-slate-50">
-                                            <td className="p-3 border-b font-medium text-slate-700">
+                                        <tr key={permCode} className="hover:bg-muted">
+                                            <td className="p-3 border-b font-medium text-foreground">
                                                 {permCode}
-                                                <p className="text-xs text-slate-400 font-normal">
+                                                <p className="text-xs text-muted-foreground font-normal">
                                                     {permCode === 'f5.view' ? 'Acesso de leitura aos projetos' : 
                                                      permCode === 'f5.edit' ? 'Editar dados e status' :
                                                      permCode === 'f5.upload' ? 'Enviar documentos' :

@@ -87,7 +87,7 @@ const BPOFaseDetail = () => {
         <button onClick={() => handleStatusChange(activity, activity.status === 'Concluído' ? 'Pendente' : 'Concluído')}>
             {activity.status === 'Concluído' ? <CheckCircle2 className="text-green-500 h-5 w-5" /> : 
              activity.status === 'Em Andamento' ? <Clock className="text-blue-500 h-5 w-5" /> : 
-             <Circle className="text-gray-300 h-5 w-5" />}
+             <Circle className="text-muted-foreground h-5 w-5" />}
         </button>
         <span className={activity.status === 'Concluído' ? 'line-through text-muted-foreground' : ''}>{activity.descricao}</span>
       </div>

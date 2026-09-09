@@ -152,18 +152,18 @@ export default function FileUploadSection({ fase_id, tipo_arquivo }) {
           variant="outline" 
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-full h-24 border-dashed border-2 flex flex-col items-center justify-center gap-2 hover:bg-slate-50 transition-colors"
+          className="w-full h-24 border-dashed border-2 flex flex-col items-center justify-center gap-2 hover:bg-muted transition-colors"
         >
           {isUploading ? (
             <>
               <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              <span className="text-sm text-slate-500">Enviando arquivo...</span>
+              <span className="text-sm text-muted-foreground">Enviando arquivo...</span>
             </>
           ) : (
             <>
-              <Upload className="w-6 h-6 text-slate-400" />
-              <span className="text-sm text-slate-600 font-medium">Clique para anexar arquivo</span>
-              <span className="text-xs text-slate-400">PDF, PNG, JPG (Máx 20MB)</span>
+              <Upload className="w-6 h-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground font-medium">Clique para anexar arquivo</span>
+              <span className="text-xs text-muted-foreground">PDF, PNG, JPG (Máx 20MB)</span>
             </>
           )}
         </Button>
@@ -171,14 +171,14 @@ export default function FileUploadSection({ fase_id, tipo_arquivo }) {
 
       {isLoading ? (
         <div className="flex justify-center p-4">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       ) : files.length > 0 ? (
         <div className="space-y-2 mt-4">
           {files.map((file) => (
-            <div key={file.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <div key={file.id} className="flex items-center justify-between p-3 bg-background border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="bg-slate-100 p-2 rounded-md shrink-0">
+                <div className="bg-muted p-2 rounded-md shrink-0">
                   {isImage(file.nome_arquivo) ? (
                     <ImageIcon className="w-5 h-5 text-blue-500" />
                   ) : (
@@ -186,17 +186,17 @@ export default function FileUploadSection({ fase_id, tipo_arquivo }) {
                   )}
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-sm font-medium text-slate-700 truncate" title={file.nome_arquivo}>
+                  <span className="text-sm font-medium text-foreground truncate" title={file.nome_arquivo}>
                     {file.nome_arquivo}
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted-foreground">
                     {formatFileSize(file.tamanho)} • {format(new Date(file.created_at), "dd/MM/yyyy HH:mm")}
                   </span>
                 </div>
               </div>
               
               <div className="flex items-center gap-1 shrink-0 ml-2">
-                <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-slate-500 hover:text-primary">
+                <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-muted-foreground hover:text-primary">
                   <a href={file.url_arquivo} target="_blank" rel="noopener noreferrer">
                     <Download className="w-4 h-4" />
                   </a>
@@ -204,7 +204,7 @@ export default function FileUploadSection({ fase_id, tipo_arquivo }) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 text-slate-500 hover:text-red-500 hover:bg-red-50"
+                  className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                   onClick={() => handleDelete(file.id, file.url_arquivo)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -214,7 +214,7 @@ export default function FileUploadSection({ fase_id, tipo_arquivo }) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-6 text-sm text-slate-500 bg-slate-50 rounded-lg border border-slate-100 border-dashed">
+        <div className="text-center py-6 text-sm text-muted-foreground bg-muted rounded-lg border border-border border-dashed">
           Nenhum arquivo anexado ainda.
         </div>
       )}

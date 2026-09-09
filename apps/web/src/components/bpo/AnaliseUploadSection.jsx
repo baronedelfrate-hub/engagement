@@ -83,24 +83,24 @@ const UploadBox = ({ title, fieldType, clienteFasesId, currentUrl, currentName, 
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col h-full w-full">
-      <h4 className="text-sm font-semibold text-slate-800 mb-3">{title}</h4>
+    <div className="bg-muted border border-border rounded-xl p-4 flex flex-col h-full w-full">
+      <h4 className="text-sm font-semibold text-foreground mb-3">{title}</h4>
       
       {currentUrl ? (
-        <div className="bg-white border border-blue-100 rounded-lg p-4 flex items-center justify-between shadow-sm flex-1">
+        <div className="bg-background border border-blue-100 dark:border-blue-900 rounded-lg p-4 flex items-center justify-between shadow-sm flex-1">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="bg-blue-50 p-2 rounded-md">
+            <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded-md">
               <FileText className="w-6 h-6 text-blue-600" />
             </div>
-            <span className="text-sm text-slate-700 font-medium truncate max-w-[150px] sm:max-w-[200px]" title={currentName}>
+            <span className="text-sm text-foreground font-medium truncate max-w-[150px] sm:max-w-[200px]" title={currentName}>
               {currentName || 'Arquivo anexado'}
             </span>
           </div>
           <div className="flex items-center space-x-2 shrink-0">
-            <Button size="icon" variant="ghost" onClick={() => downloadAnaliseFile(currentUrl, currentName)} className="text-slate-500 hover:text-blue-600">
+            <Button size="icon" variant="ghost" onClick={() => downloadAnaliseFile(currentUrl, currentName)} className="text-muted-foreground hover:text-blue-600">
               <Download className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={handleDelete} className="text-slate-500 hover:text-red-600">
+            <Button size="icon" variant="ghost" onClick={handleDelete} className="text-muted-foreground hover:text-red-600">
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
@@ -108,7 +108,7 @@ const UploadBox = ({ title, fieldType, clienteFasesId, currentUrl, currentName, 
       ) : (
         <div 
           className={`flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 transition-colors text-center cursor-pointer
-            ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-white hover:bg-slate-50 hover:border-blue-400'}
+            ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border bg-background hover:bg-muted hover:border-blue-400'}
           `}
           onDragOver={onDragOver}
           onDragLeave={onDragLeave}
@@ -126,14 +126,14 @@ const UploadBox = ({ title, fieldType, clienteFasesId, currentUrl, currentName, 
           {isUploading ? (
             <div className="flex flex-col items-center w-full max-w-xs space-y-3">
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-              <p className="text-xs text-slate-500 font-medium">Enviando arquivo...</p>
-              <Progress value={uploadProgress} className="h-1.5 w-full bg-blue-100" />
+              <p className="text-xs text-muted-foreground font-medium">Enviando arquivo...</p>
+              <Progress value={uploadProgress} className="h-1.5 w-full bg-blue-100 dark:bg-blue-950/30" />
             </div>
           ) : (
             <>
-              <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-              <p className="text-sm text-slate-700 font-medium mb-1">Clique ou arraste um arquivo</p>
-              <p className="text-xs text-slate-500">PDF, Excel, Word, PPT ou Imagem (Máx 10MB)</p>
+              <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-foreground font-medium mb-1">Clique ou arraste um arquivo</p>
+              <p className="text-xs text-muted-foreground">PDF, Excel, Word, PPT ou Imagem (Máx 10MB)</p>
             </>
           )}
         </div>
@@ -148,8 +148,8 @@ export default function AnaliseUploadSection({ clienteFasesId, uploads = {}, onU
   return (
     <div className="mb-8">
       <div className="mb-4">
-        <h3 className="text-xl font-bold text-slate-800">Procedimento Aprovado</h3>
-        <p className="text-sm text-slate-500">Anexe o Procedimento Aprovado desta fase.</p>
+        <h3 className="text-xl font-bold text-foreground">Procedimento Aprovado</h3>
+        <p className="text-sm text-muted-foreground">Anexe o Procedimento Aprovado desta fase.</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

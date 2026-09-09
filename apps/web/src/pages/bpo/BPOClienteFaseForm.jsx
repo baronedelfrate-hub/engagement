@@ -140,14 +140,14 @@ const BPOClienteFaseForm = () => {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Editar Fase</h1>
-          <p className="text-slate-500 text-sm">Atualize o status e o cronograma da fase</p>
+          <h1 className="text-2xl font-bold text-foreground">Editar Fase</h1>
+          <p className="text-muted-foreground text-sm">Atualize o status e o cronograma da fase</p>
         </div>
       </div>
 
-      <Card className="shadow-sm border-slate-200">
+      <Card className="shadow-sm border-border">
         <form onSubmit={handleSubmit}>
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
+          <CardHeader className="border-b border-border bg-muted/50 pb-4">
             <CardTitle className="text-base font-semibold">Detalhes da Fase</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
@@ -158,7 +158,7 @@ const BPOClienteFaseForm = () => {
                   id="fase"
                   value={formData.fase} 
                   readOnly
-                  className="bg-slate-50 text-slate-600 font-medium"
+                  className="bg-muted text-muted-foreground font-medium"
                 />
               </div>
 
@@ -175,7 +175,7 @@ const BPOClienteFaseForm = () => {
               <div className="space-y-2 md:col-span-2">
                 <Label>Status <span className="text-red-500">*</span></Label>
                 <Select value={formData.status} onValueChange={(val) => handleChange('status', val)}>
-                  <SelectTrigger className={`bg-white ${errors.status ? "border-red-500" : ""}`}>
+                  <SelectTrigger className={`bg-background ${errors.status ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -208,7 +208,7 @@ const BPOClienteFaseForm = () => {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-3 border-t border-slate-100 bg-slate-50/50 p-4">
+          <CardFooter className="flex justify-end gap-3 border-t border-border bg-muted/50 p-4">
             <Button 
               type="button" 
               variant="outline" 

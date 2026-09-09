@@ -21,7 +21,7 @@ const ClientesBPOPage = () => {
         />
 
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="bg-slate-900 border-slate-800 shadow-2xl max-w-2xl w-full">
+          <Card className="bg-slate-900 border-border shadow-2xl max-w-2xl w-full">
             <CardContent className="p-12">
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="p-6 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-2 border-blue-500/30">
@@ -32,7 +32,7 @@ const ClientesBPOPage = () => {
                   <h2 className="text-3xl font-bold text-white">
                     Página em Construção
                   </h2>
-                  <p className="text-lg text-slate-400">
+                  <p className="text-lg text-muted-foreground">
                     Nenhum submenu configurado ainda
                   </p>
                 </div>
@@ -44,7 +44,7 @@ const ClientesBPOPage = () => {
                   </AlertDescription>
                 </Alert>
 
-                <div className="pt-4 space-y-2 text-sm text-slate-500">
+                <div className="pt-4 space-y-2 text-sm text-muted-foreground">
                   <p className="flex items-center gap-2 justify-center">
                     <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Sistema disponível para navegação

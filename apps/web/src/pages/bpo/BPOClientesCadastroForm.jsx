@@ -190,18 +190,18 @@ const BPOClientesCadastroForm = () => {
 
   if (fetching) {
     return (
-      <div className="flex justify-center items-center h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="flex justify-center items-center h-screen bg-muted">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div className="p-8 max-w-5xl mx-auto space-y-6 bg-muted min-h-screen">
       {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-4">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground mb-4">
         <span 
-          className="font-medium text-slate-900 dark:text-slate-100 cursor-pointer hover:underline" 
+          className="font-medium text-foreground cursor-pointer hover:underline" 
           onClick={() => navigate('/clientes-bpo')}
         >
           CLIENTES BPO
@@ -214,7 +214,7 @@ const BPOClientesCadastroForm = () => {
           Cadastro de Clientes
         </span>
         <ChevronRight className="h-4 w-4" />
-        <span className="text-slate-900 dark:text-slate-100 font-medium">
+        <span className="text-foreground font-medium">
           {id && id !== 'novo' ? 'Editar' : 'Novo'}
         </span>
       </div>
@@ -226,11 +226,11 @@ const BPOClientesCadastroForm = () => {
             variant="outline" 
             size="icon" 
             onClick={() => navigate('/clientes-bpo/cadastro-clientes')}
-            className="border-slate-300 dark:border-slate-700"
+            className="border-border"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-foreground dark:text-white">
             {id && id !== 'novo' ? "Editar Cliente BPO" : "Novo Cliente BPO"}
           </h1>
         </div>
@@ -248,13 +248,13 @@ const BPOClientesCadastroForm = () => {
       )}
 
       {/* Form Card */}
-      <Card className="shadow-lg border-slate-200 dark:border-slate-800">
-        <CardHeader className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-          <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+      <Card className="shadow-lg border-border">
+        <CardHeader className="border-b border-border bg-muted">
+          <CardTitle className="flex items-center gap-2 text-foreground dark:text-white">
             <Building2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Dados Cadastrais
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-400">
+          <CardDescription className="text-muted-foreground dark:text-muted-foreground">
             Informações principais do cliente BPO
           </CardDescription>
         </CardHeader>
@@ -263,7 +263,7 @@ const BPOClientesCadastroForm = () => {
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="nome" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="nome" className="text-foreground">
                   Nome / Razão Social *
                 </Label>
                 <Input
@@ -273,12 +273,12 @@ const BPOClientesCadastroForm = () => {
                   onChange={handleChange}
                   required
                   placeholder="Nome do cliente"
-                  className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="cnpj_cpf" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="cnpj_cpf" className="text-foreground">
                   CNPJ / CPF
                 </Label>
                 <Input
@@ -287,12 +287,12 @@ const BPOClientesCadastroForm = () => {
                   value={formData.cnpj_cpf}
                   onChange={handleChange}
                   placeholder="Apenas números ou formatado"
-                  className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 font-mono"
+                  className="bg-background border-border text-foreground font-mono"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="email" className="text-foreground">
                   Email
                 </Label>
                 <Input
@@ -302,12 +302,12 @@ const BPOClientesCadastroForm = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="email@empresa.com"
-                  className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="telefone" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="telefone" className="text-foreground">
                   Telefone
                 </Label>
                 <Input
@@ -316,84 +316,84 @@ const BPOClientesCadastroForm = () => {
                   value={formData.telefone}
                   onChange={handleChange}
                   placeholder="(00) 0000-0000"
-                  className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
 
             {/* Address Section */}
-            <div className="border-t pt-6 mt-6 border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-medium mb-4 text-slate-900 dark:text-white">Endereço</h3>
+            <div className="border-t pt-6 mt-6 border-border">
+              <h3 className="text-lg font-medium mb-4 text-foreground dark:text-white">Endereço</h3>
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 <div className="col-span-1 md:col-span-3 space-y-2">
-                  <Label htmlFor="cep" className="text-slate-700 dark:text-slate-300">CEP</Label>
+                  <Label htmlFor="cep" className="text-foreground">CEP</Label>
                   <Input
                     id="cep"
                     name="cep"
                     value={formData.cep}
                     onChange={handleChange}
                     placeholder="00000-000"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-7 space-y-2">
-                  <Label htmlFor="endereco" className="text-slate-700 dark:text-slate-300">Logradouro</Label>
+                  <Label htmlFor="endereco" className="text-foreground">Logradouro</Label>
                   <Input
                     id="endereco"
                     name="endereco"
                     value={formData.endereco}
                     onChange={handleChange}
                     placeholder="Rua, Avenida, etc."
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-2 space-y-2">
-                  <Label htmlFor="numero" className="text-slate-700 dark:text-slate-300">Número</Label>
+                  <Label htmlFor="numero" className="text-foreground">Número</Label>
                   <Input
                     id="numero"
                     name="numero"
                     value={formData.numero}
                     onChange={handleChange}
                     placeholder="Ex: 123"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
 
                 <div className="col-span-1 md:col-span-4 space-y-2">
-                  <Label htmlFor="complemento" className="text-slate-700 dark:text-slate-300">Complemento</Label>
+                  <Label htmlFor="complemento" className="text-foreground">Complemento</Label>
                   <Input
                     id="complemento"
                     name="complemento"
                     value={formData.complemento}
                     onChange={handleChange}
                     placeholder="Sala, Andar, etc."
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-4 space-y-2">
-                  <Label htmlFor="bairro" className="text-slate-700 dark:text-slate-300">Bairro</Label>
+                  <Label htmlFor="bairro" className="text-foreground">Bairro</Label>
                   <Input
                     id="bairro"
                     name="bairro"
                     value={formData.bairro}
                     onChange={handleChange}
                     placeholder="Bairro"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-6 space-y-2">
-                  <Label htmlFor="cidade" className="text-slate-700 dark:text-slate-300">Cidade</Label>
+                  <Label htmlFor="cidade" className="text-foreground">Cidade</Label>
                   <Input
                     id="cidade"
                     name="cidade"
                     value={formData.cidade}
                     onChange={handleChange}
                     placeholder="Município"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-2 space-y-2">
-                  <Label htmlFor="estado" className="text-slate-700 dark:text-slate-300">UF</Label>
+                  <Label htmlFor="estado" className="text-foreground">UF</Label>
                   <Input
                     id="estado"
                     name="estado"
@@ -401,29 +401,29 @@ const BPOClientesCadastroForm = () => {
                     onChange={handleChange}
                     maxLength={2}
                     placeholder="SP, RJ, etc."
-                    className="uppercase bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="uppercase bg-background border-border text-foreground"
                   />
                 </div>
               </div>
             </div>
 
             {/* Additional Information */}
-            <div className="border-t pt-6 mt-6 border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-medium mb-4 text-slate-900 dark:text-white">Informações Adicionais</h3>
+            <div className="border-t pt-6 mt-6 border-border">
+              <h3 className="text-lg font-medium mb-4 text-foreground dark:text-white">Informações Adicionais</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="cnae" className="text-slate-700 dark:text-slate-300">CNAE</Label>
+                  <Label htmlFor="cnae" className="text-foreground">CNAE</Label>
                   <Input
                     id="cnae"
                     name="cnae"
                     value={formData.cnae}
                     onChange={handleChange}
                     placeholder="Código CNAE"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="situacao_cadastral" className="text-slate-700 dark:text-slate-300">
+                  <Label htmlFor="situacao_cadastral" className="text-foreground">
                     Situação Cadastral
                   </Label>
                   <Input
@@ -432,17 +432,17 @@ const BPOClientesCadastroForm = () => {
                     value={formData.situacao_cadastral}
                     onChange={handleChange}
                     placeholder="Ex: Ativa"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
               </div>
             </div>
 
             {/* Observations */}
-            <div className="border-t pt-6 mt-6 border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-medium mb-4 text-slate-900 dark:text-white">Observações</h3>
+            <div className="border-t pt-6 mt-6 border-border">
+              <h3 className="text-lg font-medium mb-4 text-foreground dark:text-white">Observações</h3>
               <div className="space-y-2">
-                <Label htmlFor="observacoes" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="observacoes" className="text-foreground">
                   Observações Gerais
                 </Label>
                 <Textarea
@@ -452,13 +452,13 @@ const BPOClientesCadastroForm = () => {
                   onChange={handleChange}
                   placeholder="Anotações adicionais sobre o cliente"
                   rows={4}
-                  className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
 
             {/* Footer with Actions */}
-            <div className="flex justify-between items-center pt-6 border-t mt-6 border-slate-200 dark:border-slate-700">
+            <div className="flex justify-between items-center pt-6 border-t mt-6 border-border">
               <div className="flex items-center space-x-2">
                 <Switch
                   id="status"
@@ -467,7 +467,7 @@ const BPOClientesCadastroForm = () => {
                     setFormData(prev => ({ ...prev, status: checked ? 'ativo' : 'inativo' }))
                   }
                 />
-                <Label htmlFor="status" className="text-slate-700 dark:text-slate-300">
+                <Label htmlFor="status" className="text-foreground">
                   Cadastro Ativo
                 </Label>
               </div>
@@ -478,7 +478,7 @@ const BPOClientesCadastroForm = () => {
                   variant="outline"
                   onClick={() => navigate('/clientes-bpo/cadastro-clientes')}
                   disabled={loading}
-                  className="border-slate-300 dark:border-slate-700"
+                  className="border-border"
                 >
                   Cancelar
                 </Button>

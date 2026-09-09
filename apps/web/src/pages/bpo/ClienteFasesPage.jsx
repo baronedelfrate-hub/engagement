@@ -95,7 +95,7 @@ export default function ClienteFasesPage() {
             icon={<Layers className="w-8 h-8 text-primary" />}
           />
         )}
-        <Button variant="outline" onClick={() => navigate('/operacao/bpo-e5/clientes-bpo')} className="shrink-0 bg-white hover:bg-slate-50 shadow-sm transition-all">
+        <Button variant="outline" onClick={() => navigate('/operacao/bpo-e5/clientes-bpo')} className="shrink-0 bg-background hover:bg-muted shadow-sm transition-all">
           <ArrowLeft className="w-4 h-4 mr-2" /> Voltar aos Clientes
         </Button>
       </div>
@@ -112,18 +112,18 @@ export default function ClienteFasesPage() {
               <p className="text-xs">Código 42501 indica erro de permissão no Supabase (Row Level Security). Verifique as políticas de segurança da tabela `cliente_fases`.</p>
             )}
           </AlertDescription>
-          <Button onClick={handleRetry} variant="outline" className="bg-white text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 mt-2">
+          <Button onClick={handleRetry} variant="outline" className="bg-background text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300 dark:border-red-800 mt-2">
             <RefreshCw className="w-4 h-4 mr-2" /> Tentar Novamente
           </Button>
         </Alert>
       ) : fasesLoading ? (
-        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm min-h-[400px] flex flex-col items-center justify-center">
+        <div className="bg-muted p-6 rounded-xl border border-border shadow-sm min-h-[400px] flex flex-col items-center justify-center">
           <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-          <span className="text-slate-600 font-medium text-lg">Carregando Fases do BPO E5...</span>
-          <p className="text-slate-400 text-sm mt-2">Buscando informações e anexos no servidor</p>
+          <span className="text-muted-foreground font-medium text-lg">Carregando Fases do BPO E5...</span>
+          <p className="text-muted-foreground text-sm mt-2">Buscando informações e anexos no servidor</p>
         </div>
       ) : (
-        <div className="bg-slate-50/50 p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-muted/50 p-6 rounded-xl border border-border shadow-sm">
           <ClienteFasesKanban 
             fases={fases} 
             arquivos={arquivos} 

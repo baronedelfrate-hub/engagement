@@ -143,15 +143,15 @@ const BPOClientesForm = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Novo Cliente BPO</h1>
-            <p className="text-slate-500 text-sm">Vincule um cliente existente à operação de BPO</p>
+            <h1 className="text-2xl font-bold text-foreground">Novo Cliente BPO</h1>
+            <p className="text-muted-foreground text-sm">Vincule um cliente existente à operação de BPO</p>
           </div>
         </div>
       </div>
 
-      <Card className="shadow-sm border-slate-200">
+      <Card className="shadow-sm border-border">
         <form onSubmit={handleSubmit}>
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
+          <CardHeader className="border-b border-border bg-muted/50 pb-4">
             <CardTitle className="text-base font-semibold">Seleção de Cliente e Configurações BPO</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 pt-6">
@@ -160,7 +160,7 @@ const BPOClientesForm = () => {
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="cliente">Cliente <span className="text-red-500">*</span></Label>
                 <Select value={formData.cliente_id} onValueChange={handleClienteChange} disabled={loadingClientes}>
-                  <SelectTrigger className={`bg-white ${errors.cliente_id ? "border-red-500" : ""}`}>
+                  <SelectTrigger className={`bg-background ${errors.cliente_id ? "border-red-500" : ""}`}>
                     <SelectValue placeholder={loadingClientes ? "Carregando clientes..." : "Selecione um cliente..."} />
                   </SelectTrigger>
                   <SelectContent>
@@ -181,7 +181,7 @@ const BPOClientesForm = () => {
                   value={formData.cnpj} 
                   readOnly
                   placeholder="Auto-preenchido"
-                  className="bg-slate-50 text-slate-600"
+                  className="bg-muted text-muted-foreground"
                 />
               </div>
 
@@ -192,7 +192,7 @@ const BPOClientesForm = () => {
                   value={formData.email} 
                   readOnly
                   placeholder="Auto-preenchido"
-                  className="bg-slate-50 text-slate-600"
+                  className="bg-muted text-muted-foreground"
                 />
               </div>
 
@@ -203,7 +203,7 @@ const BPOClientesForm = () => {
                   value={formData.telefone} 
                   readOnly
                   placeholder="Auto-preenchido"
-                  className="bg-slate-50 text-slate-600"
+                  className="bg-muted text-muted-foreground"
                 />
               </div>
 
@@ -214,18 +214,18 @@ const BPOClientesForm = () => {
                   value={formData.endereco} 
                   readOnly
                   placeholder="Auto-preenchido"
-                  className="bg-slate-50 text-slate-600"
+                  className="bg-muted text-muted-foreground"
                 />
               </div>
 
-              <div className="col-span-full border-t border-slate-100 my-2 pt-4">
-                <h3 className="text-sm font-semibold text-slate-800 mb-4">Configurações BPO</h3>
+              <div className="col-span-full border-t border-border my-2 pt-4">
+                <h3 className="text-sm font-semibold text-foreground mb-4">Configurações BPO</h3>
               </div>
 
               <div className="space-y-2">
                 <Label>Status BPO <span className="text-red-500">*</span></Label>
                 <Select value={formData.status_bpo} onValueChange={(val) => handleChange('status_bpo', val)}>
-                  <SelectTrigger className={`bg-white ${errors.status_bpo ? "border-red-500" : ""}`}>
+                  <SelectTrigger className={`bg-background ${errors.status_bpo ? "border-red-500" : ""}`}>
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -250,7 +250,7 @@ const BPOClientesForm = () => {
 
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-3 border-t border-slate-100 bg-slate-50/50 p-4">
+          <CardFooter className="flex justify-end gap-3 border-t border-border bg-muted/50 p-4">
             <Button 
               type="button" 
               variant="outline" 

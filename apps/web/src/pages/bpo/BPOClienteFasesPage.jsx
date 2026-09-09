@@ -82,8 +82,8 @@ const BPOClienteFasesPage = () => {
     return (
       <div className="p-6 max-w-4xl mx-auto text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-slate-800 mb-2">Erro ao carregar cliente</h2>
-        <p className="text-slate-500 mb-6">{error}</p>
+        <h2 className="text-xl font-bold text-foreground mb-2">Erro ao carregar cliente</h2>
+        <p className="text-muted-foreground mb-6">{error}</p>
         <Button onClick={() => navigate('/operacao/bpo-e5/clientes-bpo')}>
           Voltar para Lista
         </Button>
@@ -103,10 +103,10 @@ const BPOClienteFasesPage = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">
+            <h1 className="text-2xl font-bold text-foreground">
               Fases do BPO - {bpoCliente?.cliente?.nome || 'Cliente'}
             </h1>
-            <p className="text-slate-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               Visualize e gerencie as fases de implementação e operação
             </p>
           </div>
@@ -115,27 +115,27 @@ const BPOClienteFasesPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {fases.map((fase) => (
-          <Card key={fase.id} className="shadow-sm border-slate-200 flex flex-col">
-            <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
+          <Card key={fase.id} className="shadow-sm border-border flex flex-col">
+            <CardHeader className="border-b border-border bg-muted/50 pb-4">
               <div className="flex justify-between items-start gap-2">
-                <CardTitle className="text-lg font-semibold text-slate-800">{fase.fase}</CardTitle>
+                <CardTitle className="text-lg font-semibold text-foreground">{fase.fase}</CardTitle>
                 <Badge variant={getStatusBadge(fase.status)}>{fase.status || 'Não Iniciada'}</Badge>
               </div>
             </CardHeader>
             <CardContent className="pt-4 flex-1 space-y-3">
               <div className="text-sm">
-                <span className="text-slate-500 block mb-1">Período</span>
-                <span className="font-medium text-slate-800">
+                <span className="text-muted-foreground block mb-1">Período</span>
+                <span className="font-medium text-foreground">
                   {fase.data_inicio ? formatBPODate(fase.data_inicio) : '-'} até {fase.data_fim ? formatBPODate(fase.data_fim) : '-'}
                 </span>
               </div>
               <div className="text-sm">
-                <span className="text-slate-500 block mb-1">Responsável</span>
+                <span className="text-muted-foreground block mb-1">Responsável</span>
                 {/* Simulated Responsável field as requested */}
-                <span className="font-medium text-slate-800">{bpoCliente?.responsavel?.nome || 'Não atribuído'}</span>
+                <span className="font-medium text-foreground">{bpoCliente?.responsavel?.nome || 'Não atribuído'}</span>
               </div>
             </CardContent>
-            <div className="p-4 border-t border-slate-100 mt-auto">
+            <div className="p-4 border-t border-border mt-auto">
               <Button 
                 variant="outline" 
                 className="w-full gap-2"
@@ -148,8 +148,8 @@ const BPOClienteFasesPage = () => {
           </Card>
         ))}
         {fases.length === 0 && (
-          <div className="col-span-full py-12 text-center bg-slate-50 rounded-lg border border-slate-200 border-dashed">
-            <p className="text-slate-500">Nenhuma fase encontrada para este cliente.</p>
+          <div className="col-span-full py-12 text-center bg-muted rounded-lg border border-border border-dashed">
+            <p className="text-muted-foreground">Nenhuma fase encontrada para este cliente.</p>
           </div>
         )}
       </div>

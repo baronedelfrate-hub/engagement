@@ -115,26 +115,26 @@ const BPOClientesCadastroList = () => {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="p-8 max-w-7xl mx-auto min-h-screen bg-muted">
       {/* Breadcrumb Navigation */}
-      <div className="mb-6 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-        <span className="font-medium text-slate-900 dark:text-slate-100">CLIENTES BPO</span>
+      <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
+        <span className="font-medium text-foreground">CLIENTES BPO</span>
         <ChevronRight className="h-4 w-4" />
         <span>Cadastro de Clientes</span>
       </div>
 
-      <Card className="shadow-lg border-slate-200 dark:border-slate-800">
-        <CardHeader className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+      <Card className="shadow-lg border-border">
+        <CardHeader className="border-b border-border bg-muted">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-500/10">
                 <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-slate-900 dark:text-white">
+                <CardTitle className="text-2xl font-bold text-foreground dark:text-white">
                   Cadastro de Clientes BPO
                 </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
+                <CardDescription className="text-muted-foreground dark:text-muted-foreground">
                   Gerenciamento exclusivo de clientes BPO
                 </CardDescription>
               </div>
@@ -153,12 +153,12 @@ const BPOClientesCadastroList = () => {
           {/* Search Bar */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar por nome, CNPJ/CPF ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
+                className="pl-10 bg-background border-border"
               />
             </div>
           </div>
@@ -170,8 +170,8 @@ const BPOClientesCadastroList = () => {
             </div>
           ) : filteredData.length === 0 ? (
             <div className="text-center py-12">
-              <Building2 className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-500 dark:text-slate-400 text-lg">
+              <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground dark:text-muted-foreground text-lg">
                 {searchTerm ? 'Nenhum cliente encontrado.' : 'Nenhum cliente BPO cadastrado.'}
               </p>
               {!searchTerm && (
@@ -185,42 +185,42 @@ const BPOClientesCadastroList = () => {
               )}
             </div>
           ) : (
-            <div className="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="rounded-md border border-border overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50 dark:bg-slate-900/50">
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Nome</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">CNPJ/CPF</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Email</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Telefone</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Cidade</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Estado</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-700 dark:text-slate-300 text-right">Ações</TableHead>
+                  <TableRow className="bg-muted">
+                    <TableHead className="font-semibold text-foreground">Nome</TableHead>
+                    <TableHead className="font-semibold text-foreground">CNPJ/CPF</TableHead>
+                    <TableHead className="font-semibold text-foreground">Email</TableHead>
+                    <TableHead className="font-semibold text-foreground">Telefone</TableHead>
+                    <TableHead className="font-semibold text-foreground">Cidade</TableHead>
+                    <TableHead className="font-semibold text-foreground">Estado</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredData.map((cliente) => (
                     <TableRow 
                       key={cliente.id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                      className="hover:bg-muted transition-colors"
                     >
-                      <TableCell className="font-medium text-slate-900 dark:text-slate-100">
+                      <TableCell className="font-medium text-foreground">
                         {cliente.nome}
                       </TableCell>
-                      <TableCell className="font-mono text-slate-700 dark:text-slate-300">
+                      <TableCell className="font-mono text-foreground">
                         {cliente.cnpj_cpf || '-'}
                       </TableCell>
-                      <TableCell className="text-slate-700 dark:text-slate-300">
+                      <TableCell className="text-foreground">
                         {cliente.email || '-'}
                       </TableCell>
-                      <TableCell className="text-slate-700 dark:text-slate-300">
+                      <TableCell className="text-foreground">
                         {cliente.telefone || '-'}
                       </TableCell>
-                      <TableCell className="text-slate-700 dark:text-slate-300">
+                      <TableCell className="text-foreground">
                         {cliente.cidade || '-'}
                       </TableCell>
-                      <TableCell className="text-slate-700 dark:text-slate-300">
+                      <TableCell className="text-foreground">
                         {cliente.estado || '-'}
                       </TableCell>
                       <TableCell>
@@ -228,7 +228,7 @@ const BPOClientesCadastroList = () => {
                           variant={cliente.status === 'ativo' ? 'success' : 'secondary'}
                           className={cliente.status === 'ativo' 
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300' 
-                            : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                            : 'bg-muted text-foreground'
                           }
                         >
                           {cliente.status === 'ativo' ? 'Ativo' : 'Inativo'}
@@ -268,7 +268,7 @@ const BPOClientesCadastroList = () => {
 
           {/* Results Count */}
           {!loading && filteredData.length > 0 && (
-            <div className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="mt-4 text-sm text-muted-foreground dark:text-muted-foreground">
               Exibindo {filteredData.length} {filteredData.length === 1 ? 'cliente' : 'clientes'}
               {searchTerm && ` de ${data.length} total`}
             </div>

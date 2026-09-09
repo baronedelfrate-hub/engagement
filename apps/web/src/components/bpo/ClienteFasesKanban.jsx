@@ -13,10 +13,10 @@ export default function ClienteFasesKanban({ fases, arquivos, onEditFase }) {
 
   if (!fases || fases.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl border border-dashed border-slate-300">
-        <AlertCircle className="h-10 w-10 text-slate-400 mb-4" />
-        <h3 className="text-lg font-medium text-slate-800">Nenhuma fase encontrada</h3>
-        <p className="text-slate-500 text-sm mt-1">As fases do BPO ainda não foram inicializadas para este cliente.</p>
+      <div className="flex flex-col items-center justify-center p-12 bg-background rounded-xl border border-dashed border-border">
+        <AlertCircle className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium text-foreground">Nenhuma fase encontrada</h3>
+        <p className="text-muted-foreground text-sm mt-1">As fases do BPO ainda não foram inicializadas para este cliente.</p>
       </div>
     );
   }
@@ -24,12 +24,12 @@ export default function ClienteFasesKanban({ fases, arquivos, onEditFase }) {
   // Define accent colors corresponding to each BPO phase
   const getPhaseAccentColor = (faseId) => {
     switch(faseId) {
-      case 'B1': return 'border-blue-500 bg-blue-50';
-      case 'B2': return 'border-emerald-500 bg-emerald-50';
-      case 'B3': return 'border-yellow-500 bg-yellow-50';
-      case 'B4': return 'border-orange-500 bg-orange-50';
-      case 'B5': return 'border-purple-500 bg-purple-50';
-      default: return 'border-slate-300 bg-slate-50';
+      case 'B1': return 'border-blue-500 bg-blue-50 dark:bg-blue-950/30';
+      case 'B2': return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30';
+      case 'B3': return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30';
+      case 'B4': return 'border-orange-500 bg-orange-50 dark:bg-orange-950/30';
+      case 'B5': return 'border-purple-500 bg-purple-50 dark:bg-purple-950/30';
+      default: return 'border-border bg-muted';
     }
   };
 
@@ -50,60 +50,60 @@ export default function ClienteFasesKanban({ fases, arquivos, onEditFase }) {
         className="flex-1 min-w-[300px] md:min-w-[320px]"
       >
         <Card 
-          className={`h-full border-t-4 shadow-sm flex flex-col hover:shadow-md transition-all duration-200 ${phaseAccent.split(' ')[0]} bg-white cursor-pointer`}
+          className={`h-full border-t-4 shadow-sm flex flex-col hover:shadow-md transition-all duration-200 ${phaseAccent.split(' ')[0]} bg-background cursor-pointer`}
           onClick={() => onEditFase(faseData)}
         >
-          <CardHeader className={`p-4 border-b border-slate-100 ${phaseAccent.split(' ')[1]}`}>
+          <CardHeader className={`p-4 border-b border-border ${phaseAccent.split(' ').slice(1).join(' ')}`}>
             <div className="flex justify-between items-start mb-2">
-              <Badge variant="outline" className="font-bold border-slate-300 text-slate-800 bg-white shadow-sm">
+              <Badge variant="outline" className="font-bold border-border text-foreground bg-background shadow-sm">
                 {faseData.fase}
               </Badge>
               <Badge variant="outline" className={statusColor}>
                 {faseData.status}
               </Badge>
             </div>
-            <CardTitle className="text-base text-slate-800 font-semibold leading-tight">
+            <CardTitle className="text-base text-foreground font-semibold leading-tight">
               {PHASE_NAMES[faseData.fase]}
             </CardTitle>
           </CardHeader>
           
           <CardContent className="p-4 flex-1 flex flex-col">
             <div className="space-y-2 mb-4 flex-1">
-              <div className="flex items-center text-xs text-slate-500">
-                <Calendar className="w-4 h-4 mr-1.5 text-slate-400" />
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Calendar className="w-4 h-4 mr-1.5 text-muted-foreground" />
                 <span>
                   {faseData.data_inicio ? new Date(faseData.data_inicio).toLocaleDateString() : 'A iniciar'} 
                   {' - '} 
                   {faseData.data_conclusao ? new Date(faseData.data_conclusao).toLocaleDateString() : 'Em aberto'}
                 </span>
               </div>
-              <div className="flex items-center text-xs text-slate-500">
-                <User className="w-4 h-4 mr-1.5 text-slate-400" />
+              <div className="flex items-center text-xs text-muted-foreground">
+                <User className="w-4 h-4 mr-1.5 text-muted-foreground" />
                 <span>Responsável: Não atribuído</span>
               </div>
             </div>
 
-            <div className="space-y-3 mb-4 border-t border-slate-100 pt-4">
+            <div className="space-y-3 mb-4 border-t border-border pt-4">
               <div className="flex items-start space-x-2">
-                <Checkbox checked={faseData.status === 'Em andamento' || faseData.status === 'Concluído'} disabled className="mt-0.5 border-slate-300 data-[state=checked]:bg-primary" />
-                <span className="text-xs text-slate-700 leading-tight font-medium">Diagnóstico / Implantação</span>
+                <Checkbox checked={faseData.status === 'Em andamento' || faseData.status === 'Concluído'} disabled className="mt-0.5 border-border data-[state=checked]:bg-primary" />
+                <span className="text-xs text-foreground leading-tight font-medium">Diagnóstico / Implantação</span>
               </div>
               <div className="flex items-start space-x-2">
-                <Checkbox checked={faseArquivos.length > 0} disabled className="mt-0.5 border-slate-300 data-[state=checked]:bg-primary" />
-                <span className="text-xs text-slate-700 leading-tight font-medium">Anexos de Aprovação</span>
+                <Checkbox checked={faseArquivos.length > 0} disabled className="mt-0.5 border-border data-[state=checked]:bg-primary" />
+                <span className="text-xs text-foreground leading-tight font-medium">Anexos de Aprovação</span>
               </div>
               
               {faseData.fase === 'B1' && (
                 <div className="flex items-start space-x-2">
-                  <Checkbox checked={isRequiredFileUploaded('B1', 'plano_contas', faseArquivos)} disabled className="mt-0.5 border-slate-300 data-[state=checked]:bg-primary" />
-                  <span className="text-xs text-slate-700 leading-tight font-medium">Plano de Contas Anexado</span>
+                  <Checkbox checked={isRequiredFileUploaded('B1', 'plano_contas', faseArquivos)} disabled className="mt-0.5 border-border data-[state=checked]:bg-primary" />
+                  <span className="text-xs text-foreground leading-tight font-medium">Plano de Contas Anexado</span>
                 </div>
               )}
             </div>
 
             <Button 
               variant="outline" 
-              className="w-full mt-auto bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-sm transition-colors"
+              className="w-full mt-auto bg-background hover:bg-muted border-border text-foreground shadow-sm transition-colors"
               onClick={(e) => { e.stopPropagation(); onEditFase(faseData); }}
             >
               <Edit className="w-4 h-4 mr-2" /> Editar Fase

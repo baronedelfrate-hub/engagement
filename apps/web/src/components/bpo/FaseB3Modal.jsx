@@ -55,42 +55,42 @@ export default function FaseB3Modal({ isOpen, onClose, faseData, onSave }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[1100px] flex flex-col p-0 gap-0 bg-slate-50 border-slate-200">
-        <DialogHeader className="p-6 bg-white border-b border-slate-200 shadow-sm z-10 relative shrink-0">
-          <DialogTitle className="text-2xl text-slate-800 flex items-center">
-            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-xl font-bold mr-3">{faseData.fase}</span>
+      <DialogContent className="sm:max-w-[1100px] flex flex-col p-0 gap-0 bg-muted border-border">
+        <DialogHeader className="p-6 bg-background border-b border-border shadow-sm z-10 relative shrink-0">
+          <DialogTitle className="text-2xl text-foreground flex items-center">
+            <span className="bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 px-3 py-1 rounded-md text-xl font-bold mr-3">{faseData.fase}</span>
             {PHASE_NAMES[faseData.fase] || 'Fase B3 - Operação'}
           </DialogTitle>
-          <DialogDescription className="mt-2 text-base text-slate-500">
+          <DialogDescription className="mt-2 text-base text-muted-foreground">
             {config?.description || 'Gestão da rotina contábil, financeira e gerencial mensal.'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className={`w-full bg-slate-50/50 ${scrollClasses}`}>
+        <div className={`w-full bg-muted/50 ${scrollClasses}`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col w-full h-full">
-            <div className="bg-white border-b border-slate-200 px-6 py-3 shadow-sm shrink-0 sticky top-0 z-20 overflow-x-auto scrollbar-none">
-              <TabsList className="inline-flex h-12 bg-slate-100/80 p-1 min-w-max rounded-lg">
+            <div className="bg-background border-b border-border px-6 py-3 shadow-sm shrink-0 sticky top-0 z-20 overflow-x-auto scrollbar-none">
+              <TabsList className="inline-flex h-12 bg-muted/80 p-1 min-w-max rounded-lg">
                 <TabsTrigger 
                   value="tab1" 
-                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
+                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-background data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
                 >
                   1. Organização e Envio Contábil
                 </TabsTrigger>
                 <TabsTrigger 
                   value="tab2" 
-                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
+                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-background data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
                 >
                   2. Fechamento Financeiro
                 </TabsTrigger>
                 <TabsTrigger 
                   value="tab3" 
-                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
+                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-background data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
                 >
                   3. Apuração de Resultado
                 </TabsTrigger>
                 <TabsTrigger 
                   value="tab4" 
-                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
+                  className="text-sm font-medium rounded-md px-5 py-2 data-[state=active]:bg-background data-[state=active]:text-blue-700 data-[state=active]:shadow-sm transition-all"
                 >
                   4. Gestão e Controle
                 </TabsTrigger>
@@ -106,8 +106,8 @@ export default function FaseB3Modal({ isOpen, onClose, faseData, onSave }) {
           </Tabs>
         </div>
 
-        <DialogFooter className="p-4 bg-white border-t border-slate-200 flex justify-end items-center shrink-0 gap-3">
-          <Button variant="outline" onClick={onClose} disabled={isSaving} className="border-slate-300 text-slate-700 hover:bg-slate-50">
+        <DialogFooter className="p-4 bg-background border-t border-border flex justify-end items-center shrink-0 gap-3">
+          <Button variant="outline" onClick={onClose} disabled={isSaving} className="border-border text-foreground hover:bg-muted">
             <X className="w-4 h-4 mr-2" /> Fechar
           </Button>
           <Button onClick={handleSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-6">

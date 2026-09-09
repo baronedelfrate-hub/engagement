@@ -118,26 +118,26 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[1100px] flex flex-col p-0 gap-0 bg-slate-50 border-slate-200">
-        <DialogHeader className="p-6 bg-white border-b border-slate-200 shadow-sm z-10 relative shrink-0">
-          <DialogTitle className="text-2xl text-slate-800 flex items-center">
+      <DialogContent className="sm:max-w-[1100px] flex flex-col p-0 gap-0 bg-muted border-border">
+        <DialogHeader className="p-6 bg-background border-b border-border shadow-sm z-10 relative shrink-0">
+          <DialogTitle className="text-2xl text-foreground flex items-center">
             <span className="bg-primary/10 text-primary px-3 py-1 rounded-md text-xl font-bold mr-3">{faseData.fase}</span>
             {PHASE_NAMES[faseData.fase]}
           </DialogTitle>
-          <DialogDescription className="mt-2 text-base text-slate-500">{config?.description}</DialogDescription>
+          <DialogDescription className="mt-2 text-base text-muted-foreground">{config?.description}</DialogDescription>
         </DialogHeader>
 
-        <div className={`w-full bg-slate-50/50 ${scrollClasses}`}>
+        <div className={`w-full bg-muted/50 ${scrollClasses}`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col w-full">
-            <div className="bg-white border-b border-slate-200 px-6 py-2 shadow-sm shrink-0 sticky top-0 z-20">
-              <TabsList className="grid w-full max-w-[700px] grid-cols-3 h-12 bg-slate-100/50">
-                <TabsTrigger value="diagnostico" className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+            <div className="bg-background border-b border-border px-6 py-2 shadow-sm shrink-0 sticky top-0 z-20">
+              <TabsList className="grid w-full max-w-[700px] grid-cols-3 h-12 bg-muted/50">
+                <TabsTrigger value="diagnostico" className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
                   1. Diagnóstico (Bloco 01)
                 </TabsTrigger>
-                <TabsTrigger value="analise" className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+                <TabsTrigger value="analise" className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
                   2. Análise & Aprovação
                 </TabsTrigger>
-                <TabsTrigger value="implantacao" className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm">
+                <TabsTrigger value="implantacao" className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm">
                   3. Implantação (Bloco 02)
                 </TabsTrigger>
               </TabsList>
@@ -147,7 +147,7 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center h-64">
                   <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-                  <p className="text-slate-500 font-medium">Carregando dados da fase...</p>
+                  <p className="text-muted-foreground font-medium">Carregando dados da fase...</p>
                 </div>
               ) : (
                 <>
@@ -165,7 +165,7 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
                   </TabsContent>
 
                   <TabsContent value="analise" className={`m-0 border-none outline-none mt-2 ${scrollClasses}`}>
-                    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm flex flex-col min-h-[400px]">
+                    <div className="bg-background border border-border rounded-xl p-8 shadow-sm flex flex-col min-h-[400px]">
                       
                       <AnaliseUploadSection 
                         clienteFasesId={faseData.id}
@@ -174,9 +174,9 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
                         onDeleteSuccess={handleAnaliseDeleteSuccess}
                       />
 
-                      <div className="pt-6 border-t border-slate-100">
-                        <h3 className="text-xl font-bold text-slate-800 mb-2">Upload de Anexos Adicionais</h3>
-                        <p className="text-slate-500 mb-8">Anexe outros arquivos necessários para a análise (ex: Plano de Contas, Extratos).</p>
+                      <div className="pt-6 border-t border-border">
+                        <h3 className="text-xl font-bold text-foreground mb-2">Upload de Anexos Adicionais</h3>
+                        <p className="text-muted-foreground mb-8">Anexe outros arquivos necessários para a análise (ex: Plano de Contas, Extratos).</p>
                         
                         <div className="flex-1">
                           <FileUploadSection 
@@ -186,8 +186,8 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
                         </div>
                       </div>
 
-                      <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
-                        <Button variant="outline" onClick={() => setActiveTab('diagnostico')} className="text-slate-700">
+                      <div className="mt-8 pt-6 border-t border-border flex justify-between items-center">
+                        <Button variant="outline" onClick={() => setActiveTab('diagnostico')} className="text-foreground">
                           <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao Diagnóstico
                         </Button>
                         <Button onClick={() => setActiveTab('implantacao')} className="bg-primary text-primary-foreground">
@@ -214,12 +214,12 @@ export default function ClienteFasesModal({ isOpen, onClose, faseData, onSave })
           </Tabs>
         </div>
 
-        <DialogFooter className="p-4 bg-white border-t border-slate-200 flex sm:justify-between items-center shrink-0">
-          <div className="text-sm text-slate-500 hidden sm:block">
+        <DialogFooter className="p-4 bg-background border-t border-border flex sm:justify-between items-center shrink-0">
+          <div className="text-sm text-muted-foreground hidden sm:block">
             <span className="flex items-center gap-1"><Save className="w-3 h-3"/> Auto-save ativado em todas as abas.</span>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={handleClose} disabled={isSaving} className="border-slate-300 text-slate-700">Fechar</Button>
+            <Button variant="outline" onClick={handleClose} disabled={isSaving} className="border-border text-foreground">Fechar</Button>
             <Button onClick={handleMainSave} disabled={isSaving} className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm px-6">
               {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Salvando...</> : 'Salvar Alterações'}
             </Button>

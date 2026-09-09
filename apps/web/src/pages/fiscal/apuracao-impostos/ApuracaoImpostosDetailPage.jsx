@@ -218,7 +218,7 @@ export default function ApuracaoImpostosDetailPage() {
                 <div className="relative pl-4 border-l-2 border-border space-y-6 mt-2 ml-2">
                   {data.apuracao_impostos_historico?.map((h) => (
                     <div key={h.id} className="relative">
-                      <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-white"></div>
+                      <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-card"></div>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-foreground">
                           {h.status_anterior ? `${h.status_anterior} → ` : 'Iniciado como '} 

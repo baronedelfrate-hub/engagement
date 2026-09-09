@@ -133,7 +133,7 @@ export default function EntradaNFDetail() {
       </div>
 
       {/* QUICK ACTIONS */}
-      <Card className="bg-muted border-blue-100 shadow-sm">
+      <Card className="bg-muted border-blue-100 dark:border-blue-900 shadow-sm">
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Badge className={`${getStatusColor(nota.status)} px-3 py-1 text-sm font-medium`}>{nota.status}</Badge>
@@ -286,7 +286,7 @@ export default function EntradaNFDetail() {
                 <div className="relative pl-4 border-l-2 border-border space-y-6 mt-2 ml-2">
                   {historico.map((h, i) => (
                     <div key={h.id} className="relative">
-                      <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-white"></div>
+                      <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-card"></div>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-foreground">
                           {h.status_anterior ? `${h.status_anterior} → ` : 'Criada como '}

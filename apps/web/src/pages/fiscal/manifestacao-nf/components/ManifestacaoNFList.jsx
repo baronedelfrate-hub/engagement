@@ -59,8 +59,8 @@ export default function ManifestacaoNFList({ data, loading, onRefresh }) {
       
       {/* Batch Actions Bar */}
       {selectedIds.length > 0 && (
-        <div className="bg-blue-50 border-b border-blue-100 p-3 flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-800">{selectedIds.length} notas selecionadas</span>
+        <div className="bg-blue-50 dark:bg-blue-950/30 border-b border-blue-100 dark:border-blue-900 p-3 flex items-center justify-between">
+          <span className="text-sm font-medium text-blue-800 dark:text-blue-400">{selectedIds.length} notas selecionadas</span>
           <Button size="sm" onClick={handleConsultarLote} disabled={loadingBatch} className="bg-blue-600 hover:bg-blue-700 text-white">
             {loadingBatch ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
             Consultar SEFAZ em Lote

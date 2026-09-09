@@ -12,7 +12,7 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] bg-slate-950 border-slate-800 text-slate-100">
+      <DialogContent className="sm:max-w-[600px] bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white text-xl">
             <div className="p-2 rounded-full bg-blue-900/20 text-blue-500">
@@ -20,7 +20,7 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
             </div>
             Confirmar Conciliação
           </DialogTitle>
-          <DialogDescription className="text-slate-400 pt-2">
+          <DialogDescription className="text-muted-foreground pt-2">
             Verifique se os lançamentos selecionados correspondem à mesma transação.
           </DialogDescription>
         </DialogHeader>
@@ -29,19 +29,19 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
           
           <div className="grid grid-cols-2 gap-4">
               {/* System Side */}
-              <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-                  <div className="text-xs uppercase tracking-wider font-bold text-slate-500 mb-3 border-b border-slate-800 pb-2">Sistema (ERP)</div>
+              <div className="bg-background rounded-xl p-4 border border-border">
+                  <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-3 border-b border-border pb-2">Sistema (ERP)</div>
                   <div className="space-y-2">
                       <div>
-                          <p className="text-xs text-slate-500">Data</p>
+                          <p className="text-xs text-muted-foreground">Data</p>
                           <p className="text-sm font-medium">{new Date(systemRecord.data_baixa).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div>
-                          <p className="text-xs text-slate-500">Descrição</p>
+                          <p className="text-xs text-muted-foreground">Descrição</p>
                           <p className="text-sm font-medium truncate" title={systemRecord.entidadeNome}>{systemRecord.entidadeNome}</p>
                       </div>
                       <div>
-                          <p className="text-xs text-slate-500">Valor</p>
+                          <p className="text-xs text-muted-foreground">Valor</p>
                           <p className={`font-bold ${systemRecord.valor < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                               {systemRecord.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </p>
@@ -50,19 +50,19 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
               </div>
 
               {/* OFX Side */}
-              <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-                  <div className="text-xs uppercase tracking-wider font-bold text-slate-500 mb-3 border-b border-slate-800 pb-2">Extrato Bancário</div>
+              <div className="bg-background rounded-xl p-4 border border-border">
+                  <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-3 border-b border-border pb-2">Extrato Bancário</div>
                   <div className="space-y-2">
                       <div>
-                          <p className="text-xs text-slate-500">Data</p>
+                          <p className="text-xs text-muted-foreground">Data</p>
                           <p className="text-sm font-medium">{new Date(ofxRecord.data_transacao).toLocaleDateString('pt-BR')}</p>
                       </div>
                       <div>
-                          <p className="text-xs text-slate-500">Descrição</p>
+                          <p className="text-xs text-muted-foreground">Descrição</p>
                           <p className="text-sm font-medium truncate" title={ofxRecord.descricao}>{ofxRecord.descricao}</p>
                       </div>
                       <div>
-                          <p className="text-xs text-slate-500">Valor</p>
+                          <p className="text-xs text-muted-foreground">Valor</p>
                           <p className={`font-bold ${ofxRecord.valor < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                               {ofxRecord.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </p>
@@ -85,7 +85,7 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} className="hover:bg-slate-800 text-slate-400">Cancelar</Button>
+          <Button variant="ghost" onClick={onClose} className="hover:bg-muted text-muted-foreground">Cancelar</Button>
           <Button 
             onClick={() => onConfirm(systemRecord, ofxRecord)} 
             disabled={loading} 

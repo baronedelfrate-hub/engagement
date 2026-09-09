@@ -9,32 +9,32 @@ import { Filter, XCircle } from 'lucide-react';
 
 const ConciliacaoBancariaFilters = ({ filters, setFilters, onApply, onClear, dropdowns }) => {
   return (
-    <Card className="bg-slate-900 border-slate-800 shadow-xl mb-6">
+    <Card className="bg-background border-border shadow-xl mb-6">
       <CardContent className="pt-6">
         <div className="flex flex-col md:flex-row items-end gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 flex-1 w-full">
             <div className="space-y-2">
-              <Label className="text-slate-400">Data Início</Label>
+              <Label className="text-muted-foreground">Data Início</Label>
               <Input 
                 type="date" 
-                className="bg-slate-800 border-slate-700 text-slate-200"
+                className="bg-muted border-border text-foreground"
                 value={filters.dataInicio}
                 onChange={e => setFilters({...filters, dataInicio: e.target.value})}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-400">Data Fim</Label>
+              <Label className="text-muted-foreground">Data Fim</Label>
               <Input 
                 type="date" 
-                className="bg-slate-800 border-slate-700 text-slate-200"
+                className="bg-muted border-border text-foreground"
                 value={filters.dataFim}
                 onChange={e => setFilters({...filters, dataFim: e.target.value})}
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-400">Banco</Label>
+              <Label className="text-muted-foreground">Banco</Label>
               <Select value={filters.bancoId} onValueChange={v => setFilters({...filters, bancoId: v})}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
+                <SelectTrigger className="bg-muted border-border text-foreground">
                   <SelectValue placeholder="Todos os Bancos" />
                 </SelectTrigger>
                 <SelectContent>
@@ -46,9 +46,9 @@ const ConciliacaoBancariaFilters = ({ filters, setFilters, onApply, onClear, dro
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-400">Status</Label>
+              <Label className="text-muted-foreground">Status</Label>
               <Select value={filters.statusConciliacao} onValueChange={v => setFilters({...filters, statusConciliacao: v})}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
+                <SelectTrigger className="bg-muted border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -64,7 +64,7 @@ const ConciliacaoBancariaFilters = ({ filters, setFilters, onApply, onClear, dro
             <Button onClick={onApply} className="bg-blue-600 hover:bg-blue-700 text-white flex-1 md:flex-none">
               <Filter className="h-4 w-4 mr-2" /> Aplicar
             </Button>
-            <Button variant="outline" onClick={onClear} className="border-slate-700 text-slate-300 hover:bg-slate-800 flex-none px-3">
+            <Button variant="outline" onClick={onClear} className="border-border text-muted-foreground hover:bg-muted flex-none px-3">
               <XCircle className="h-4 w-4" />
             </Button>
           </div>

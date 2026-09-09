@@ -207,28 +207,28 @@ const ContasPagarForm = () => {
                     <Label>Número do Título *</Label>
                     <div className="relative">
                         <Input value={formData.numeroTitulo} onChange={e => setFormData({...formData, numeroTitulo: e.target.value})} placeholder="Ex: NF-12345" />
-                        <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-10 w-10 text-slate-400" onClick={() => setFormData({...formData, numeroTitulo: `CP-${Date.now().toString().slice(-6)}`})} title="Gerar Automático"><RefreshCw className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="absolute right-0 top-0 h-10 w-10 text-muted-foreground" onClick={() => setFormData({...formData, numeroTitulo: `CP-${Date.now().toString().slice(-6)}`})} title="Gerar Automático"><RefreshCw className="h-4 w-4" /></Button>
                     </div>
                  </div>
                  <div className="space-y-2">
                     <Label>Fornecedor *</Label>
                     <Select value={formData.fornecedorId} onValueChange={v => handleSelectChange('fornecedorId', v)}>
-                        <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                        <SelectTrigger className="!text-foreground">
                             <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
-                            {fornecedores.map(f => <SelectItem key={f.id} value={f.id} className="text-black">{f.nome} {f.cnpj ? `(${f.cnpj})` : ''}</SelectItem>)}
+                        <SelectContent className="bg-background">
+                            {fornecedores.map(f => <SelectItem key={f.id} value={f.id} className="text-foreground">{f.nome} {f.cnpj ? `(${f.cnpj})` : ''}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
                     <Label>Empresa *</Label>
                     <Select value={formData.empresaId} onValueChange={v => handleSelectChange('empresaId', v)}>
-                        <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                        <SelectTrigger className="!text-foreground">
                             <SelectValue placeholder="Selecione..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-white">
-                            {empresas.map(f => <SelectItem key={f.id} value={f.id} className="text-black">{f.nome_fantasia || f.razao_social || 'Sem Nome'}</SelectItem>)}
+                        <SelectContent className="bg-background">
+                            {empresas.map(f => <SelectItem key={f.id} value={f.id} className="text-foreground">{f.nome_fantasia || f.razao_social || 'Sem Nome'}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -243,11 +243,11 @@ const ContasPagarForm = () => {
                     <div className="space-y-2">
                         <Label>Banco Pref.</Label>
                         <Select value={formData.bancoId} onValueChange={v => handleSelectChange('bancoId', v)}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {bancos.map(b => <SelectItem key={b.id} value={b.id} className="text-black">{b.nome}</SelectItem>)}
+                            <SelectContent className="bg-background">
+                                {bancos.map(b => <SelectItem key={b.id} value={b.id} className="text-foreground">{b.nome}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
@@ -256,22 +256,22 @@ const ContasPagarForm = () => {
                     <div className="space-y-2">
                         <Label>Categoria</Label>
                         <Select value={formData.categoriaId} onValueChange={v => setFormData({...formData, categoriaId: v, subcategoriaId: ''})}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {categorias.map(c => <SelectItem key={c.id} value={c.id} className="text-black">{c.nome}</SelectItem>)}
+                            <SelectContent className="bg-background">
+                                {categorias.map(c => <SelectItem key={c.id} value={c.id} className="text-foreground">{c.nome}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="space-y-2">
                         <Label>Subcategoria</Label>
                         <Select value={formData.subcategoriaId} onValueChange={v => handleSelectChange('subcategoriaId', v)} disabled={!formData.categoriaId}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {filteredSubcategorias.map(sc => <SelectItem key={sc.id} value={sc.id} className="text-black">{sc.nome}</SelectItem>)}
+                            <SelectContent className="bg-background">
+                                {filteredSubcategorias.map(sc => <SelectItem key={sc.id} value={sc.id} className="text-foreground">{sc.nome}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
@@ -280,22 +280,22 @@ const ContasPagarForm = () => {
                     <div className="space-y-2">
                         <Label>Centro de Custo</Label>
                         <Select value={formData.centroCustosId} onValueChange={v => handleSelectChange('centroCustosId', v)}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {centrosCusto.map(cc => <SelectItem key={cc.id} value={cc.id} className="text-black">{cc.nome}</SelectItem>)}
+                            <SelectContent className="bg-background">
+                                {centrosCusto.map(cc => <SelectItem key={cc.id} value={cc.id} className="text-foreground">{cc.nome}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="space-y-2">
                         <Label>Projeto</Label>
                         <Select value={formData.projetoId} onValueChange={v => handleSelectChange('projetoId', v)}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                {projetos.map(p => <SelectItem key={p.id} value={p.id} className="text-black">{p.nome}</SelectItem>)}
+                            <SelectContent className="bg-background">
+                                {projetos.map(p => <SelectItem key={p.id} value={p.id} className="text-foreground">{p.nome}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
@@ -314,20 +314,20 @@ const ContasPagarForm = () => {
                       <div className="space-y-2">
                         <Label>Intervalo entre Parcelas</Label>
                         <Select value={String(formData.intervalo_dias)} onValueChange={v => handleSelectChange('intervalo_dias', v)} disabled={isEditing && !editGroup}>
-                            <SelectTrigger className="!text-black" style={{ color: '#000000' }}>
+                            <SelectTrigger className="!text-foreground">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-white">
-                                <SelectItem value="7" className="text-black">7 dias</SelectItem>
-                                <SelectItem value="15" className="text-black">15 dias</SelectItem>
-                                <SelectItem value="30" className="text-black">30 dias</SelectItem>
-                                <SelectItem value="45" className="text-black">45 dias</SelectItem>
-                                <SelectItem value="60" className="text-black">60 dias</SelectItem>
+                            <SelectContent className="bg-background">
+                                <SelectItem value="7" className="text-foreground">7 dias</SelectItem>
+                                <SelectItem value="15" className="text-foreground">15 dias</SelectItem>
+                                <SelectItem value="30" className="text-foreground">30 dias</SelectItem>
+                                <SelectItem value="45" className="text-foreground">45 dias</SelectItem>
+                                <SelectItem value="60" className="text-foreground">60 dias</SelectItem>
                             </SelectContent>
                         </Select>
                       </div>
                   </div>
-                  {previewParcelas.length > 0 && (<div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-900"><div className="bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2"><Calculator className="h-3 w-3" /> Simulação de Parcelas</div><table className="w-full text-sm"><thead className="bg-slate-950/50 text-slate-400 border-b border-slate-800"><tr><th className="px-4 py-2 text-left w-20">#</th><th className="px-4 py-2 text-left">Vencimento</th><th className="px-4 py-2 text-left">Valor</th></tr></thead><tbody className="divide-y divide-slate-800">{previewParcelas.map((p) => (<tr key={p.parcela_atual}><td className="px-4 py-2 font-mono text-slate-500">{p.parcela_atual}</td><td className="px-4 py-2 text-slate-300">{new Date(p.data_vencimento).toLocaleDateString()}</td><td className="px-4 py-2 text-emerald-400 font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}</td></tr>))}</tbody></table></div>)}
+                  {previewParcelas.length > 0 && (<div className="border border-border rounded-lg overflow-hidden bg-background"><div className="bg-muted px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2"><Calculator className="h-3 w-3" /> Simulação de Parcelas</div><table className="w-full text-sm"><thead className="bg-background/50 text-muted-foreground border-b border-border"><tr><th className="px-4 py-2 text-left w-20">#</th><th className="px-4 py-2 text-left">Vencimento</th><th className="px-4 py-2 text-left">Valor</th></tr></thead><tbody className="divide-y divide-border">{previewParcelas.map((p) => (<tr key={p.parcela_atual}><td className="px-4 py-2 font-mono text-muted-foreground">{p.parcela_atual}</td><td className="px-4 py-2 text-muted-foreground">{new Date(p.data_vencimento).toLocaleDateString()}</td><td className="px-4 py-2 text-emerald-400 font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}</td></tr>))}</tbody></table></div>)}
               </CardContent>
           )}
       </Card>

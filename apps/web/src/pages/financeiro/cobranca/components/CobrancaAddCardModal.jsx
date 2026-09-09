@@ -97,7 +97,7 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] bg-slate-950 border-slate-800 text-slate-100">
+      <DialogContent className="sm:max-w-[600px] bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Nova Cobrança</DialogTitle>
         </DialogHeader>
@@ -106,10 +106,10 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="space-y-2">
             <Label htmlFor="cliente">Cliente *</Label>
             <Select id="cliente" value={selectedCliente} onValueChange={handleClienteChange} disabled={loadingDropdowns}>
-              <SelectTrigger className="bg-slate-900 border-slate-700">
+              <SelectTrigger className="bg-background border-border">
                 <SelectValue placeholder="Selecione o cliente..." />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px] bg-slate-950 border-slate-700 text-slate-200">
+              <SelectContent className="max-h-[200px] bg-background border-border text-foreground">
                 {clientes.map(c => (
                   <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
                 ))}
@@ -120,10 +120,10 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="space-y-2">
              <Label htmlFor="contas_receber">Título em Aberto (Contas a Receber)</Label>
              <Select id="contas_receber" value={formData.contas_receber_id} onValueChange={handleContaChange} disabled={!selectedCliente || contasReceber.length === 0}>
-               <SelectTrigger className="bg-slate-900 border-slate-700">
+               <SelectTrigger className="bg-background border-border">
                  <SelectValue placeholder={contasReceber.length === 0 && selectedCliente ? "Nenhum título pendente" : "Selecione o título..."} />
                </SelectTrigger>
-               <SelectContent className="bg-slate-950 border-slate-700 text-slate-200">
+               <SelectContent className="bg-background border-border text-foreground">
                  {contasReceber.map(c => (
                    <SelectItem key={c.id} value={c.id}>
                      {c.numero} - {formatCurrency(c.valor_original)} (Venc: {new Date(c.data_vencimento).toLocaleDateString()})
@@ -140,7 +140,7 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
                 id="valor"
                 value={formData.valor}
                 onChange={e => setFormData({...formData, valor: e.target.value})}
-                className="bg-slate-900 border-slate-700"
+                className="bg-background border-border"
                 type="number"
                 step="0.01"
               />
@@ -152,7 +152,7 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
                 type="date"
                 value={formData.data_vencimento}
                 onChange={e => setFormData({...formData, data_vencimento: e.target.value})}
-                className="bg-slate-900 border-slate-700"
+                className="bg-background border-border"
               />
             </div>
           </div>
@@ -160,10 +160,10 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="space-y-2">
             <Label htmlFor="fase">Fase Inicial</Label>
             <Select id="fase" value={formData.fase} onValueChange={v => setFormData({...formData, fase: v})}>
-              <SelectTrigger className="bg-slate-900 border-slate-700">
+              <SelectTrigger className="bg-background border-border">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-slate-950 border-slate-700 text-slate-200">
+              <SelectContent className="bg-background border-border text-foreground">
                 {getPhaseSequence().map(p => (
                    <SelectItem key={p} value={p}>{PHASES[p].label}</SelectItem>
                 ))}
@@ -177,7 +177,7 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
               id="observacoes"
               value={formData.observacoes}
               onChange={e => setFormData({...formData, observacoes: e.target.value})}
-              className="bg-slate-900 border-slate-700"
+              className="bg-background border-border"
               placeholder="Detalhes iniciais..."
             />
           </div>

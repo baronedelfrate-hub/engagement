@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 const FluxoCaixaDashboardChart = ({ timeline }) => {
   if (!timeline || timeline.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 bg-slate-50 rounded-lg border border-dashed">
-        <p className="text-slate-400">Sem dados para exibir no gráfico.</p>
+      <div className="flex items-center justify-center h-64 bg-muted rounded-lg border border-dashed">
+        <p className="text-muted-foreground">Sem dados para exibir no gráfico.</p>
       </div>
     );
   }
@@ -37,13 +37,13 @@ const FluxoCaixaDashboardChart = ({ timeline }) => {
         <CardContent className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12} 
                 tickLine={false} 
                 axisLine={false} 
-                tick={{ fill: '#64748b' }}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 interval="preserveStartEnd"
                 minTickGap={30}
               />
@@ -52,22 +52,22 @@ const FluxoCaixaDashboardChart = ({ timeline }) => {
                 tickLine={false} 
                 axisLine={false} 
                 tickFormatter={(value) => `R$ ${value/1000}k`}
-                tick={{ fill: '#64748b' }}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
               <Tooltip 
                 formatter={(value) => formatCurrency(value)}
                 labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))' }}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Area 
-                type="monotone" 
-                dataKey="saldoPrevisto" 
-                name="Saldo Previsto" 
-                fill="#dbeafe" 
-                stroke="#3b82f6" 
+              <Area
+                type="monotone"
+                dataKey="saldoPrevisto"
+                name="Saldo Previsto"
+                fill="#3b82f6"
+                fillOpacity={0.15}
+                stroke="#3b82f6"
                 strokeWidth={2}
-                fillOpacity={0.5} 
               />
               <Line 
                 type="monotone" 
@@ -91,13 +91,13 @@ const FluxoCaixaDashboardChart = ({ timeline }) => {
         <CardContent className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="date" 
                 fontSize={12} 
                 tickLine={false} 
                 axisLine={false}
-                tick={{ fill: '#64748b' }}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
                 interval="preserveStartEnd"
                 minTickGap={30}
               />
@@ -106,13 +106,13 @@ const FluxoCaixaDashboardChart = ({ timeline }) => {
                 tickLine={false} 
                 axisLine={false} 
                 tickFormatter={(value) => `R$ ${value/1000}k`}
-                tick={{ fill: '#64748b' }}
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
               <Tooltip 
                 formatter={(value) => formatCurrency(value)}
                 labelFormatter={(label, payload) => payload[0]?.payload?.fullDate || label}
-                cursor={{ fill: '#f1f5f9' }}
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                cursor={{ fill: 'hsl(var(--muted))' }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))' }}
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
               <Bar 

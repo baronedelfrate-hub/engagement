@@ -62,10 +62,10 @@ const CobrancaKanbanIntegrated = () => {
         description="Acompanhamento automático de títulos por fase de vencimento."
         action={
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={loadData} className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" onClick={loadData} className="text-muted-foreground hover:text-foreground">
               <RefreshCw className="w-4 h-4 mr-2" /> Atualizar
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate('/financeiro/cobranca/dashboard')} className="text-slate-300 border-slate-700">
+            <Button variant="outline" size="sm" onClick={() => navigate('/financeiro/cobranca/dashboard')} className="text-muted-foreground border-border">
                 <BarChart2 className="w-4 h-4 mr-2" /> Dashboard
             </Button>
           </div>

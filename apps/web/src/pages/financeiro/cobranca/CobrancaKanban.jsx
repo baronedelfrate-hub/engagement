@@ -99,11 +99,11 @@ const CobrancaKanban = () => {
         description="Controle de inadimplência com fases automáticas baseadas no vencimento."
         action={
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={handleSyncPhases} disabled={isSyncing} className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" onClick={handleSyncPhases} disabled={isSyncing} className="text-muted-foreground hover:text-foreground">
               <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? 'Sincronizando...' : 'Atualizar Fases'}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')} className="text-slate-300 hover:text-white border-slate-700">
+            <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'kanban' ? 'list' : 'kanban')} className="text-muted-foreground hover:text-foreground border-border">
               {viewMode === 'kanban' ? <><ListIcon className="w-4 h-4 mr-2" /> Lista</> : <><LayoutGrid className="w-4 h-4 mr-2" /> Kanban</>}
             </Button>
             <Button onClick={() => setIsAddOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
@@ -116,20 +116,20 @@ const CobrancaKanban = () => {
       <CobrancaFilters onFilterChange={handleFilterChange} loading={loadingData} />
 
       {(loadingData && items.length === 0) ? (
-        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-slate-500" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
       ) : viewMode === 'list' ? (
         <CobrancaListView items={items.filter(item => item.status === (currentFilters.status === 'ALL' ? item.status : currentFilters.status))} onEdit={handleCardClick} />
       ) : (
         <div className="overflow-x-auto h-[calc(100vh-280px)] pb-4">
           <div className="flex gap-4 min-w-[1500px] h-full">
             {columns.map(col => (
-              <div key={col.id} className="flex flex-col w-[300px] min-w-[300px] bg-slate-950/50 rounded-lg border border-slate-800/50 h-full">
-                <div className={`p-3 border-b-2 ${PHASES[col.id].border} bg-slate-900 rounded-t-lg flex justify-between items-center`}>
+              <div key={col.id} className="flex flex-col w-[300px] min-w-[300px] bg-background/50 rounded-lg border border-border/50 h-full">
+                <div className={`p-3 border-b-2 ${PHASES[col.id].border} bg-background rounded-t-lg flex justify-between items-center`}>
                   <div className="flex flex-col">
-                    <h3 className="font-semibold text-slate-200 text-sm truncate max-w-[200px]" title={col.title}>{col.title}</h3>
-                    <span className="text-[10px] text-slate-500 font-normal">{PHASES[col.id].description}</span>
+                    <h3 className="font-semibold text-foreground text-sm truncate max-w-[200px]" title={col.title}>{col.title}</h3>
+                    <span className="text-[10px] text-muted-foreground font-normal">{PHASES[col.id].description}</span>
                   </div>
-                  <span className="text-xs font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-400">{col.items.length}</span>
+                  <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">{col.items.length}</span>
                 </div>
                 
                 <div className="flex-1 p-2 overflow-y-auto custom-scrollbar">
@@ -137,17 +137,17 @@ const CobrancaKanban = () => {
                     <div
                       key={item.id}
                       onClick={() => handleCardClick(item)}
-                      className={`mb-3 p-3 rounded-md border bg-slate-900 shadow-sm cursor-pointer hover:border-blue-500/50 group transition-all border-slate-800
+                      className={`mb-3 p-3 rounded-md border bg-background shadow-sm cursor-pointer hover:border-blue-500/50 group transition-all border-border
                         ${item.status === 'resolvido' ? 'opacity-60 grayscale' : ''}
                       `}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium text-slate-200 text-sm truncate pr-2" title={item.cliente?.nome}>{item.cliente?.nome}</h4>
+                        <h4 className="font-medium text-foreground text-sm truncate pr-2" title={item.cliente?.nome}>{item.cliente?.nome}</h4>
                         <div className="flex items-center gap-1">
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
-                                <BadgeInfo className="w-3 h-3 text-slate-600" />
+                                <BadgeInfo className="w-3 h-3 text-muted-foreground" />
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p className="text-xs">Fase Automática</p>
@@ -164,7 +164,7 @@ const CobrancaKanban = () => {
                       
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                          <p className="text-xs text-slate-500">Venc: {new Date(item.data_vencimento).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground">Venc: {new Date(item.data_vencimento).toLocaleDateString()}</p>
                           {getDueDateBadge(item.dias_ate_vencimento)}
                         </div>
                         

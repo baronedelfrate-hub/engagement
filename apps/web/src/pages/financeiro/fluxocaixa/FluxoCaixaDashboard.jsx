@@ -86,7 +86,7 @@ function FluxoCaixaDashboard() {
         transition={{ duration: 0.5 }}
         className="space-y-6"
       >
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-slate-900 p-4 rounded-lg border border-slate-800">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-background p-4 rounded-lg border border-border">
           <div className="flex gap-4 items-center w-full md:w-auto">
              <div className="w-48">
                  <Select value={filters.empresaId} onValueChange={v => setFilters({...filters, empresaId: v})}>
@@ -115,7 +115,7 @@ function FluxoCaixaDashboard() {
         </div>
 
         <Tabs defaultValue="tabela" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-slate-800">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-muted">
             <TabsTrigger value="tabela">Tabela de Fluxo</TabsTrigger>
             <TabsTrigger value="graficos">Gráficos de Fluxo</TabsTrigger>
           </TabsList>

@@ -231,13 +231,13 @@ const RelatoriosFinanceiros = () => {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Sidebar: Settings & Filters */}
           <div className="w-full lg:w-80 space-y-6 shrink-0">
-            <Card className="bg-slate-900 border-slate-800 shadow-xl">
+            <Card className="bg-background border-border shadow-xl">
               <CardContent className="pt-6">
-                <label className="text-xs uppercase text-slate-500 font-bold tracking-wider mb-2 block">
+                <label className="text-xs uppercase text-muted-foreground font-bold tracking-wider mb-2 block">
                   Módulo de Relatório
                 </label>
                 <Select value={source} onValueChange={setSource}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white h-12">
+                  <SelectTrigger className="bg-muted border-border text-white h-12">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -260,8 +260,8 @@ const RelatoriosFinanceiros = () => {
 
           {/* Right Content: Summaries & Actions */}
           <div className="flex-1 space-y-6 min-w-0">
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap gap-4 justify-between items-center shadow-lg">
-              <div className="text-slate-300">
+            <div className="bg-background border border-border rounded-xl p-4 flex flex-wrap gap-4 justify-between items-center shadow-lg">
+              <div className="text-muted-foreground">
                 Mostrando <span className="font-bold text-white">{filteredData.length}</span> registros.
                 {loadingData && <Loader2 className="inline-block ml-3 h-4 w-4 animate-spin text-orange-500" />}
               </div>
@@ -271,7 +271,7 @@ const RelatoriosFinanceiros = () => {
                   variant="outline" 
                   onClick={handleExportPDF} 
                   disabled={exportingPdf || loadingData || filteredData.length === 0} 
-                  className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white flex-1 sm:flex-none"
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
                 >
                   {exportingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2 text-rose-500" />} 
                   Exportar PDF
@@ -280,7 +280,7 @@ const RelatoriosFinanceiros = () => {
                   variant="outline" 
                   onClick={handleExportExcel} 
                   disabled={exportingExcel || loadingData || filteredData.length === 0} 
-                  className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white flex-1 sm:flex-none"
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
                 >
                   {exportingExcel ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <TableIcon className="h-4 w-4 mr-2 text-emerald-500" />} 
                   Exportar Excel
@@ -293,10 +293,10 @@ const RelatoriosFinanceiros = () => {
             )}
 
             {!loadingData && filteredData.length === 0 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-16 text-center shadow-lg flex flex-col items-center justify-center">
-                <Filter className="h-12 w-12 text-slate-700 mb-4" />
-                <h3 className="text-lg font-medium text-slate-300">Nenhum registro encontrado</h3>
-                <p className="text-slate-500 text-sm mt-2 max-w-md">
+              <div className="bg-background border border-border rounded-xl p-16 text-center shadow-lg flex flex-col items-center justify-center">
+                <Filter className="h-12 w-12 text-foreground mb-4" />
+                <h3 className="text-lg font-medium text-muted-foreground">Nenhum registro encontrado</h3>
+                <p className="text-muted-foreground text-sm mt-2 max-w-md">
                   Tente ajustar seus filtros ou período de datas para visualizar os dados financeiros.
                 </p>
               </div>

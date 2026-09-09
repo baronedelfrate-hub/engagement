@@ -8,7 +8,7 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) => {
   if (loading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 h-[500px]">
+      <div className="bg-background border border-border rounded-xl p-4 h-[500px]">
         <SkeletonLoader className="h-10 w-full mb-4 opacity-10" />
         <SkeletonLoader className="h-16 w-full mb-2 opacity-10" />
         <SkeletonLoader className="h-16 w-full mb-2 opacity-10" />
@@ -19,28 +19,28 @@ const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) 
   const safeData = Array.isArray(data) ? data : [];
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg h-[600px] flex flex-col">
-      <div className="p-4 bg-slate-800/50 border-b border-slate-800 flex justify-between items-center">
-        <h3 className="font-semibold text-slate-200 flex items-center gap-2">
+    <div className="bg-background border border-border rounded-xl overflow-hidden shadow-lg h-[600px] flex flex-col">
+      <div className="p-4 bg-muted/50 border-b border-border flex justify-between items-center">
+        <h3 className="font-semibold text-foreground flex items-center gap-2">
           Baixas do Sistema
-          <Badge variant="secondary" className="bg-slate-700">{safeData.length}</Badge>
+          <Badge variant="secondary" className="bg-muted">{safeData.length}</Badge>
         </h3>
       </div>
       <div className="flex-1 overflow-auto">
         <Table>
-          <TableHeader className="bg-slate-900 sticky top-0 z-10 shadow-sm">
-            <TableRow className="border-slate-800 hover:bg-transparent">
+          <TableHeader className="bg-background sticky top-0 z-10 shadow-sm">
+            <TableRow className="border-border hover:bg-transparent">
               <TableHead className="w-12 text-center"></TableHead>
-              <TableHead className="text-slate-400 text-xs uppercase w-24">Data</TableHead>
-              <TableHead className="text-slate-400 text-xs uppercase">Descrição</TableHead>
-              <TableHead className="text-slate-400 text-xs uppercase text-right">Valor</TableHead>
-              <TableHead className="text-slate-400 text-xs uppercase text-center w-24">Status</TableHead>
+              <TableHead className="text-muted-foreground text-xs uppercase w-24">Data</TableHead>
+              <TableHead className="text-muted-foreground text-xs uppercase">Descrição</TableHead>
+              <TableHead className="text-muted-foreground text-xs uppercase text-right">Valor</TableHead>
+              <TableHead className="text-muted-foreground text-xs uppercase text-center w-24">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {safeData.length === 0 ? (
               <TableRow>
-                 <TableCell colSpan={5} className="text-center text-slate-500 py-8">Nenhuma baixa encontrada</TableCell>
+                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhuma baixa encontrada</TableCell>
               </TableRow>
             ) : safeData.map((row) => {
               const isConciliado = row?.status_conciliacao === 'Conciliado';
@@ -52,7 +52,7 @@ const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) 
               return (
                 <TableRow 
                   key={row?.id || Math.random().toString()} 
-                  className={`border-slate-800/50 transition-colors cursor-pointer ${isSelected ? 'bg-blue-900/20' : 'hover:bg-slate-800/30'}`}
+                  className={`border-border/50 transition-colors cursor-pointer ${isSelected ? 'bg-blue-900/20' : 'hover:bg-muted/30'}`}
                   onClick={() => onSelect(isSelected ? null : row)}
                 >
                   <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
@@ -60,17 +60,17 @@ const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) 
                         checked={isSelected} 
                         onCheckedChange={(checked) => onSelect(checked ? row : null)}
                         disabled={isConciliado}
-                        className="border-slate-600 data-[state=checked]:bg-blue-600"
+                        className="border-border data-[state=checked]:bg-blue-600"
                     />
                   </TableCell>
-                  <TableCell className="text-slate-400 text-sm whitespace-nowrap">
+                  <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                     {dateVal}
                   </TableCell>
                   <TableCell>
-                    <div className="text-slate-200 text-sm truncate max-w-[180px]" title={row?.entidadeNome || ''}>
+                    <div className="text-foreground text-sm truncate max-w-[180px]" title={row?.entidadeNome || ''}>
                       {row?.entidadeNome || 'S/N'}
                     </div>
-                    <div className="text-slate-500 text-xs truncate">
+                    <div className="text-muted-foreground text-xs truncate">
                       {row?.bancoNome || ''}
                     </div>
                   </TableCell>

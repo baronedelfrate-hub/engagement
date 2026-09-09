@@ -90,7 +90,7 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px] bg-slate-950 border-slate-800 text-slate-100">
+      <DialogContent className="sm:max-w-[550px] bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white text-xl">
               <div className={`p-2 rounded-full ${isPagar ? 'bg-red-900/20 text-red-500' : 'bg-emerald-900/20 text-emerald-500'}`}>
@@ -101,17 +101,17 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
         </DialogHeader>
         
         <div className="py-2 space-y-6">
-           <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-800 grid grid-cols-2 gap-4">
+           <div className="p-4 bg-background/50 rounded-xl border border-border grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                    <Label className="text-xs text-slate-500 uppercase font-bold tracking-wider">{isPagar ? 'Fornecedor' : 'Cliente'}</Label>
+                    <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{isPagar ? 'Fornecedor' : 'Cliente'}</Label>
                     <p className="font-semibold text-lg text-white truncate">{titulo.entidadeNome}</p>
                 </div>
                 <div>
-                    <Label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Título</Label>
-                    <p className="font-mono text-slate-300 text-base">{titulo.numeroDisplay}</p>
+                    <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Título</Label>
+                    <p className="font-mono text-muted-foreground text-base">{titulo.numeroDisplay}</p>
                 </div>
                 <div>
-                    <Label className="text-xs text-slate-500 uppercase font-bold tracking-wider">Valor Original</Label>
+                    <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Valor Original</Label>
                     <p className={`font-bold text-base ${isPagar ? 'text-red-400' : 'text-emerald-400'}`}>
                         R$ {parseFloat(titulo.valor || 0).toFixed(2)}
                     </p>
@@ -121,20 +121,20 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
            <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Data da Baixa *</Label>
+                        <Label className="text-muted-foreground">Data da Baixa *</Label>
                         <Input 
                             type="date" 
-                            className="bg-slate-900 border-slate-700 text-slate-100 h-11"
+                            className="bg-background border-border text-foreground h-11"
                             value={formData.data_baixa}
                             onChange={e => setFormData({...formData, data_baixa: e.target.value})}
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Valor {isPagar ? 'Pago' : 'Recebido'} (R$) *</Label>
+                        <Label className="text-muted-foreground">Valor {isPagar ? 'Pago' : 'Recebido'} (R$) *</Label>
                         <Input 
                             type="number" 
                             step="0.01"
-                            className="bg-slate-900 border-slate-700 font-bold text-lg h-11 text-white"
+                            className="bg-background border-border font-bold text-lg h-11 text-white"
                             value={formData.valor_pago}
                             onChange={e => setFormData({...formData, valor_pago: e.target.value})}
                         />
@@ -143,9 +143,9 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Banco *</Label>
+                        <Label className="text-muted-foreground">Banco *</Label>
                         <Select value={formData.banco_id} onValueChange={v => setFormData({...formData, banco_id: v})}>
-                            <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100 h-11">
+                            <SelectTrigger className="bg-background border-border text-foreground h-11">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -154,9 +154,9 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Tipo de Pagamento</Label>
+                        <Label className="text-muted-foreground">Tipo de Pagamento</Label>
                         <Select value={formData.tipo_pagamento_id} onValueChange={v => setFormData({...formData, tipo_pagamento_id: v})}>
-                            <SelectTrigger className="bg-slate-900 border-slate-700 text-slate-100 h-11">
+                            <SelectTrigger className="bg-background border-border text-foreground h-11">
                                 <SelectValue placeholder="Selecione..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -167,9 +167,9 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
                 </div>
 
                 <div className="space-y-2">
-                    <Label className="text-slate-300">Observações</Label>
+                    <Label className="text-muted-foreground">Observações</Label>
                     <Textarea 
-                        className="bg-slate-900 border-slate-700 resize-none text-slate-100"
+                        className="bg-background border-border resize-none text-foreground"
                         rows={3}
                         placeholder="Detalhes adicionais sobre a baixa..."
                         value={formData.observacoes}
@@ -180,7 +180,7 @@ const RegistrarBaixaModal = ({ isOpen, onClose, titulo, onSuccess }) => {
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={onClose} className="hover:bg-slate-800 text-slate-400">Cancelar</Button>
+          <Button variant="ghost" onClick={onClose} className="hover:bg-muted text-muted-foreground">Cancelar</Button>
           <Button onClick={handleSubmit} disabled={loading} className={`${isPagar ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white shadow-lg`}>
               {loading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Confirmar Baixa

@@ -70,11 +70,11 @@ const CobrancaDashboard = () => {
         <div className="space-y-6">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-400">Taxa de Inadimplência</p>
+                    <p className="text-sm font-medium text-muted-foreground">Taxa de Inadimplência</p>
                     <h3 className="text-2xl font-bold text-red-500 mt-2">{inadimplenciaRate.toFixed(1)}%</h3>
                   </div>
                   <div className="p-2 bg-red-900/20 rounded-lg">
@@ -84,11 +84,11 @@ const CobrancaDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-400">Títulos Vencidos</p>
+                    <p className="text-sm font-medium text-muted-foreground">Títulos Vencidos</p>
                     <h3 className="text-2xl font-bold text-orange-500 mt-2">{totalVencidos}</h3>
                   </div>
                   <div className="p-2 bg-orange-900/20 rounded-lg">
@@ -98,11 +98,11 @@ const CobrancaDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-400">Recuperados (Pagos)</p>
+                    <p className="text-sm font-medium text-muted-foreground">Recuperados (Pagos)</p>
                     <h3 className="text-2xl font-bold text-emerald-500 mt-2">{totalPagos}</h3>
                   </div>
                   <div className="p-2 bg-emerald-900/20 rounded-lg">
@@ -112,11 +112,11 @@ const CobrancaDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-400">Prazo Médio Rec. (PMR)</p>
+                    <p className="text-sm font-medium text-muted-foreground">Prazo Médio Rec. (PMR)</p>
                     <h3 className="text-2xl font-bold text-blue-500 mt-2">{pmr.toFixed(0)} dias</h3>
                   </div>
                   <div className="p-2 bg-blue-900/20 rounded-lg">
@@ -129,9 +129,9 @@ const CobrancaDashboard = () => {
 
           {/* Charts Row 1 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-200">Distribuição por Fase (Ativos)</CardTitle>
+                <CardTitle className="text-lg text-foreground">Distribuição por Fase (Ativos)</CardTitle>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -151,8 +151,8 @@ const CobrancaDashboard = () => {
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
-                      itemStyle={{ color: '#e2e8f0' }}
+                      contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                     />
                     <Legend />
                   </PieChart>
@@ -160,19 +160,19 @@ const CobrancaDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-200">Top 5 Clientes Inadimplentes (Valor)</CardTitle>
+                <CardTitle className="text-lg text-foreground">Top 5 Clientes Inadimplentes (Valor)</CardTitle>
               </CardHeader>
               <CardContent className="h-[300px]">
                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart layout="vertical" data={topDebtors} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#1e293b" />
-                      <XAxis type="number" stroke="#64748b" tickFormatter={(val) => `R$${(val / 1000).toFixed(0)}k`} />
-                      <YAxis dataKey="name" type="category" width={100} stroke="#64748b" style={{ fontSize: '10px' }} />
+                      <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" tickFormatter={(val) => `R$${(val / 1000).toFixed(0)}k`} />
+                      <YAxis dataKey="name" type="category" width={100} stroke="hsl(var(--muted-foreground))" style={{ fontSize: '10px' }} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
-                        itemStyle={{ color: '#e2e8f0' }}
+                        contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                        itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                         formatter={(value) => formatCurrency(value)}
                       />
                       <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={20} />
@@ -184,19 +184,19 @@ const CobrancaDashboard = () => {
 
           {/* Charts Row 2 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-200">Títulos Vencidos vs Pagos</CardTitle>
+                <CardTitle className="text-lg text-foreground">Títulos Vencidos vs Pagos</CardTitle>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={statusChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="name" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
-                      itemStyle={{ color: '#e2e8f0' }}
+                      contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                       formatter={(value) => `${value} títulos`}
                     />
                     <Legend />
@@ -206,19 +206,19 @@ const CobrancaDashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-800">
+            <Card className="bg-background border-border">
               <CardHeader>
-                <CardTitle className="text-lg text-slate-200">Timeline de Recuperação (Últimos 30 dias)</CardTitle>
+                <CardTitle className="text-lg text-foreground">Timeline de Recuperação (Últimos 30 dias)</CardTitle>
               </CardHeader>
               <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={[]}> {/* Placeholder */}
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="date" stroke="#64748b" />
-                    <YAxis stroke="#64748b" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
-                      itemStyle={{ color: '#e2e8f0' }}
+                      contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
                     />
                     <Legend />
                     <Line type="monotone" dataKey="recovered" stroke="#22c55e" activeDot={{ r: 8 }} name="Recuperados" />

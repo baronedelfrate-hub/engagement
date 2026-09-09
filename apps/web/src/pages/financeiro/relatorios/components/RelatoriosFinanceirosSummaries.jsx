@@ -60,26 +60,26 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
     }, [data, source]);
 
     const GeralCard = ({ title, value, subtext, icon: Icon, colorClass }) => (
-        <Card className="bg-slate-900 border-slate-800 overflow-hidden relative">
+        <Card className="bg-background border-border overflow-hidden relative">
             <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 opacity-20 ${colorClass}`}></div>
             <CardContent className="p-6 relative z-10">
                 <div className="flex justify-between items-start">
                     <div className="space-y-2">
-                        <p className="text-sm font-medium text-slate-400">{title}</p>
+                        <p className="text-sm font-medium text-muted-foreground">{title}</p>
                         <p className="text-2xl sm:text-3xl font-bold text-white">{formatCurrency(value)}</p>
                     </div>
-                    <div className={`p-3 rounded-xl bg-slate-800 ${colorClass.replace('bg-', 'text-')}`}>
+                    <div className={`p-3 rounded-xl bg-muted ${colorClass.replace('bg-', 'text-')}`}>
                         <Icon className="h-5 w-5" />
                     </div>
                 </div>
-                <div className="mt-4 text-xs text-slate-500">{subtext}</div>
+                <div className="mt-4 text-xs text-muted-foreground">{subtext}</div>
             </CardContent>
         </Card>
     );
 
     const TableSummary = ({ title, icon: Icon, dataList }) => (
-        <Card className="bg-slate-900 border-slate-800 shadow-lg">
-            <CardHeader className="pb-3 border-b border-slate-800">
+        <Card className="bg-background border-border shadow-lg">
+            <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-sm uppercase text-orange-500 flex items-center gap-2">
                     <Icon className="h-4 w-4" /> {title}
                 </CardTitle>
@@ -87,7 +87,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
             <CardContent className="p-0">
                 <div className="max-h-[300px] overflow-auto custom-scrollbar">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-800/50 text-slate-400 font-medium sticky top-0 backdrop-blur-sm z-10">
+                        <thead className="bg-muted/50 text-muted-foreground font-medium sticky top-0 backdrop-blur-sm z-10">
                             <tr>
                                 <th className="px-4 py-3 font-medium">Descrição</th>
                                 <th className="px-4 py-3 font-medium text-right">Total</th>
@@ -95,12 +95,12 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                                 <th className="px-4 py-3 font-medium text-right hidden sm:table-cell">Pendente</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800">
+                        <tbody className="divide-y divide-border">
                             {dataList.length === 0 ? (
-                                <tr><td colSpan={4} className="p-4 text-center text-slate-500">Nenhum dado encontrado</td></tr>
+                                <tr><td colSpan={4} className="p-4 text-center text-muted-foreground">Nenhum dado encontrado</td></tr>
                             ) : (
                                 dataList.map((item, idx) => (
-                                    <tr key={idx} className="hover:bg-slate-800/50 transition-colors text-slate-200">
+                                    <tr key={idx} className="hover:bg-muted/50 transition-colors text-foreground">
                                         <td className="px-4 py-3 truncate max-w-[150px]" title={item.label}>{item.label}</td>
                                         <td className="px-4 py-3 text-right font-medium text-white">{formatCurrency(item.total)}</td>
                                         <td className="px-4 py-3 text-right text-emerald-400 hidden sm:table-cell">{formatCurrency(item.pago)}</td>
@@ -162,8 +162,8 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                     <TableSummary title="Resumo por Categoria" icon={Layers} dataList={summary.byCategoria} />
                 </div>
                 
-                <Card className="bg-slate-900 border-slate-800 shadow-lg flex flex-col">
-                    <CardHeader className="pb-0 border-b border-slate-800">
+                <Card className="bg-background border-border shadow-lg flex flex-col">
+                    <CardHeader className="pb-0 border-b border-border">
                         <CardTitle className="text-sm uppercase text-orange-500">Distribuição por Categoria</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 flex items-center justify-center p-6 min-h-[300px]">
@@ -185,13 +185,13 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                                     </Pie>
                                     <Tooltip 
                                         formatter={(value) => formatCurrency(value)}
-                                        contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', color: '#f8fafc' }}
+                                        contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--popover-foreground))' }}
                                     />
-                                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
+                                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '12px', color: 'hsl(var(--muted-foreground))' }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="text-slate-500">Sem dados para exibir</div>
+                            <div className="text-muted-foreground">Sem dados para exibir</div>
                         )}
                     </CardContent>
                 </Card>

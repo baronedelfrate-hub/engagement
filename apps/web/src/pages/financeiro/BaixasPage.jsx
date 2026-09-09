@@ -127,22 +127,22 @@ const BaixasPage = () => {
       { 
           header: 'Título', 
           id: 'titulo',
-          cell: ({ row }) => <span className="font-mono text-slate-200 font-medium">{row.numeroDisplay}</span>
+          cell: ({ row }) => <span className="font-mono text-foreground font-medium">{row.numeroDisplay}</span>
       },
       { 
           header: 'Entidade', 
           accessorKey: 'entidadeNome', 
-          cell: ({ row }) => <span className="text-slate-300 font-medium">{row.entidadeNome}</span>
+          cell: ({ row }) => <span className="text-muted-foreground font-medium">{row.entidadeNome}</span>
       },
       { 
           header: 'Categoria', 
           id: 'categoria', 
-          cell: ({ row }) => <span className="text-slate-400 text-xs">{row.categoria?.nome || '-'}</span> 
+          cell: ({ row }) => <span className="text-muted-foreground text-xs">{row.categoria?.nome || '-'}</span> 
       },
       { 
           header: 'Vencimento', 
           accessorKey: 'data_vencimento', 
-          cell: ({ row }) => <span className="text-slate-300">{row.data_vencimento ? new Date(row.data_vencimento).toLocaleDateString('pt-BR') : '-'}</span> 
+          cell: ({ row }) => <span className="text-muted-foreground">{row.data_vencimento ? new Date(row.data_vencimento).toLocaleDateString('pt-BR') : '-'}</span> 
       },
       { 
           header: 'Valor', 
@@ -163,7 +163,7 @@ const BaixasPage = () => {
                 <Badge variant="outline" className={`${
                     isSettled
                     ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                    : 'bg-slate-800 text-yellow-500 border-slate-700'
+                    : 'bg-muted text-yellow-500 border-border'
                 }`}>
                   {isSettled && <CheckCircle2 className="h-3 w-3 mr-1" />}
                   {row.status || 'Pendente'}
@@ -225,10 +225,10 @@ const BaixasPage = () => {
             onClear={() => setFilters(initialFilters)} 
         />
 
-        <Card className="bg-slate-900 border-slate-800 shadow-xl overflow-hidden">
+        <Card className="bg-background border-border shadow-xl overflow-hidden">
             <CardContent className="p-0">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center p-24 text-slate-400 space-y-4">
+                    <div className="flex flex-col items-center justify-center p-24 text-muted-foreground space-y-4">
                         <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
                         <p>Carregando títulos...</p>
                     </div>
@@ -238,7 +238,7 @@ const BaixasPage = () => {
                             data={data}
                             columns={columns}
                             emptyMessage="Nenhum título encontrado com os filtros atuais."
-                            rowClassName="hover:bg-slate-800/50 transition-colors"
+                            rowClassName="hover:bg-muted/50 transition-colors"
                         />
                     </div>
                 )}

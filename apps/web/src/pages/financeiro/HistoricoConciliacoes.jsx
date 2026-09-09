@@ -20,7 +20,7 @@ const HistoricoConciliacoes = () => {
             <Card>
                 <CardContent className="p-0">
                     <table className="w-full text-sm">
-                        <thead className="bg-slate-50 font-medium text-slate-700">
+                        <thead className="bg-muted font-medium text-foreground">
                             <tr>
                                 <th className="p-4 text-left">Data Fechamento</th>
                                 <th className="p-4 text-left">Banco</th>
@@ -30,11 +30,11 @@ const HistoricoConciliacoes = () => {
                         </thead>
                         <tbody className="divide-y">
                             {historico.map(h => (
-                                <tr key={h.id} className="hover:bg-slate-50">
+                                <tr key={h.id} className="hover:bg-muted">
                                     <td className="p-4">{h.data}</td>
                                     <td className="p-4">{h.banco}</td>
                                     <td className="p-4">{h.usuario}</td>
-                                    <td className="p-4"><span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">{h.status}</span></td>
+                                    <td className="p-4"><span className="bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400 px-2 py-1 rounded text-xs font-bold">{h.status}</span></td>
                                 </tr>
                             ))}
                         </tbody>

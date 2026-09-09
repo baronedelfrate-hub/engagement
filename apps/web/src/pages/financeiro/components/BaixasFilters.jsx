@@ -15,20 +15,20 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
   };
 
   return (
-    <Card className="bg-slate-900 border-slate-800 shadow-lg">
+    <Card className="bg-background border-border shadow-lg">
       <CardContent className="p-4 space-y-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Filtros Avançados</h3>
-          <Button variant="ghost" size="sm" onClick={onClear} className="h-8 text-slate-400 hover:text-white hover:bg-slate-800">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Filtros Avançados</h3>
+          <Button variant="ghost" size="sm" onClick={onClear} className="h-8 text-muted-foreground hover:text-foreground hover:bg-muted">
             <FilterX className="h-4 w-4 mr-2" /> Limpar
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Tipo de Conta</Label>
+            <Label className="text-xs text-muted-foreground">Tipo de Conta</Label>
             <Select value={filters.tipoConta} onValueChange={v => handleChange('tipoConta', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="AMBOS">Ambos</SelectItem>
                 <SelectItem value="PAGAR">Contas a Pagar</SelectItem>
@@ -38,9 +38,9 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Status</Label>
+            <Label className="text-xs text-muted-foreground">Status</Label>
             <Select value={filters.status} onValueChange={v => handleChange('status', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="TODOS">Todos</SelectItem>
                 <SelectItem value="PENDENTE">Pendentes</SelectItem>
@@ -50,29 +50,29 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Período (Início)</Label>
+            <Label className="text-xs text-muted-foreground">Período (Início)</Label>
             <Input 
               type="date" 
-              className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"
+              className="h-9 text-xs bg-background border-border text-foreground"
               value={filters.dataInicio}
               onChange={e => handleChange('dataInicio', e.target.value)}
             />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Período (Fim)</Label>
+            <Label className="text-xs text-muted-foreground">Período (Fim)</Label>
             <Input 
               type="date" 
-              className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"
+              className="h-9 text-xs bg-background border-border text-foreground"
               value={filters.dataFim}
               onChange={e => handleChange('dataFim', e.target.value)}
             />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Categoria</Label>
+            <Label className="text-xs text-muted-foreground">Categoria</Label>
             <Select value={filters.categoriaId} onValueChange={v => handleChange('categoriaId', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue placeholder="Todas" /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="TODOS">Todas</SelectItem>
                 {dropdowns.categorias.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
@@ -81,9 +81,9 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Centro de Custo</Label>
+            <Label className="text-xs text-muted-foreground">Centro de Custo</Label>
             <Select value={filters.centroCustoId} onValueChange={v => handleChange('centroCustoId', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="TODOS">Todos</SelectItem>
                 {dropdowns.centrosCusto.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
@@ -92,9 +92,9 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Entidade (Fornec./Cliente)</Label>
+            <Label className="text-xs text-muted-foreground">Entidade (Fornec./Cliente)</Label>
             <Select value={filters.entidadeId} onValueChange={v => handleChange('entidadeId', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="TODOS">Todos</SelectItem>
                 {filters.tipoConta !== 'RECEBER' && dropdowns.fornecedores.map(f => <SelectItem key={f.id} value={f.id}>(F) {f.nome}</SelectItem>)}
@@ -104,9 +104,9 @@ const BaixasFilters = ({ filters, setFilters, onClear }) => {
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Banco</Label>
+            <Label className="text-xs text-muted-foreground">Banco</Label>
             <Select value={filters.bancoId} onValueChange={v => handleChange('bancoId', v)}>
-              <SelectTrigger className="h-9 text-xs bg-slate-950 border-slate-700 text-slate-100"><SelectValue placeholder="Todos" /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="TODOS">Todos</SelectItem>
                 {dropdowns.bancos.map(b => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}

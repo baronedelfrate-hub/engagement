@@ -97,12 +97,12 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] bg-slate-950 border-slate-800 text-slate-100 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] bg-background border-border text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span className="text-xl font-bold">{card.cliente?.nome}</span>
             <div className="flex gap-2">
-                <Badge variant="outline" className="border-slate-700 text-slate-400 font-normal">
+                <Badge variant="outline" className="border-border text-muted-foreground font-normal">
                     Automático
                 </Badge>
                 <Badge className={`${PHASES[phaseInfo.fase]?.color} text-white border-0`}>
@@ -110,7 +110,7 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
                 </Badge>
             </div>
           </DialogTitle>
-          <div className="text-sm text-slate-400 flex flex-col gap-1 mt-2">
+          <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-2">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Vencimento: {new Date(card.data_vencimento).toLocaleDateString()}</span>
               <span className="font-bold text-lg text-emerald-400">{formatCurrency(card.valor)}</span>
@@ -122,8 +122,8 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
           </div>
         </DialogHeader>
 
-        <div className="bg-slate-900 p-3 rounded-md border border-slate-800 text-sm space-y-1 mb-4">
-            <div className="flex items-center gap-2 text-slate-300">
+        <div className="bg-background p-3 rounded-md border border-border text-sm space-y-1 mb-4">
+            <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4 text-blue-400" />
                 <span className="font-medium">Status do Prazo:</span>
                 <span className={`${phaseInfo.dias_ate_vencimento < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -131,9 +131,9 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
                         ? `${Math.abs(phaseInfo.dias_ate_vencimento)} dias de atraso` 
                         : `${phaseInfo.dias_ate_vencimento} dias até o vencimento`}
                 </span>
-                <span className="text-slate-500">({phaseInfo.status_label})</span>
+                <span className="text-muted-foreground">({phaseInfo.status_label})</span>
             </div>
-            <p className="text-xs text-slate-500 ml-6">
+            <p className="text-xs text-muted-foreground ml-6">
                 Vencimento: {new Date(card.data_vencimento).toLocaleDateString()} | Hoje: {new Date().toLocaleDateString()}
             </p>
         </div>
@@ -141,17 +141,17 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column: Edit Form */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-200 flex items-center gap-2">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
               <Save className="w-4 h-4 text-blue-400" /> Detalhes da Cobrança
             </h3>
             
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select id="status" value={formData.status} onValueChange={(v) => setFormData({...formData, status: v})}>
-                <SelectTrigger className="bg-slate-900 border-slate-700">
+                <SelectTrigger className="bg-background border-border">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-950 border-slate-700 text-slate-200">
+                <SelectContent className="bg-background border-border text-foreground">
                   <SelectItem value="ativo">Ativo (Em andamento)</SelectItem>
                   <SelectItem value="resolvido">Resolvido (Pago/Negociado)</SelectItem>
                   <SelectItem value="cancelado">Cancelado</SelectItem>
@@ -163,7 +163,7 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
               <Label htmlFor="observacoes">Observações / Anotações</Label>
               <Textarea 
                 id="observacoes"
-                className="bg-slate-900 border-slate-700 min-h-[120px]"
+                className="bg-background border-border min-h-[120px]"
                 value={formData.observacoes}
                 onChange={(e) => setFormData({...formData, observacoes: e.target.value})}
                 placeholder="Registre aqui o contato com o cliente..."
@@ -171,30 +171,30 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
             </div>
             
             <div className="pt-2">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                     * A fase é calculada automaticamente pelo sistema com base na data de vencimento e não pode ser alterada manualmente.
                 </p>
             </div>
           </div>
 
           {/* Right Column: Timeline */}
-          <div className="space-y-4 border-l border-slate-800 pl-6">
-            <h3 className="font-semibold text-slate-200 flex items-center gap-2">
+          <div className="space-y-4 border-l border-border pl-6">
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
               <History className="w-4 h-4 text-purple-400" /> Histórico de Ações
             </h3>
             <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {card.historico && card.historico.length > 0 ? (
                 card.historico.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map((hist) => (
-                  <div key={hist.id} className="relative pl-4 border-l-2 border-slate-700 pb-2">
-                    <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-500"></div>
-                    <p className="text-sm text-slate-300">{hist.acao}</p>
-                    <p className="text-xs text-slate-500">
+                  <div key={hist.id} className="relative pl-4 border-l-2 border-border pb-2">
+                    <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-muted-foreground"></div>
+                    <p className="text-sm text-muted-foreground">{hist.acao}</p>
+                    <p className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(hist.created_at), { addSuffix: true, locale: ptBR })} • {hist.usuario?.nome || 'Sistema'}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-500 italic">Nenhum histórico registrado.</p>
+                <p className="text-sm text-muted-foreground italic">Nenhum histórico registrado.</p>
               )}
             </div>
           </div>
@@ -206,7 +206,7 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
            </Button>
 
            <div className="flex gap-2">
-             <Button variant="ghost" onClick={onClose} className="border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800" disabled={loading}>
+             <Button variant="ghost" onClick={onClose} className="border-border text-muted-foreground hover:text-foreground hover:bg-muted" disabled={loading}>
                Cancelar
              </Button>
              {formData.status !== 'resolvido' && (

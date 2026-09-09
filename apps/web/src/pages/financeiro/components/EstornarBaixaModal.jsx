@@ -23,13 +23,13 @@ const EstornarBaixaModal = ({ isOpen, onClose, onConfirm, titulo, loading = fals
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-md">
+      <DialogContent className="bg-background border-border text-foreground max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-orange-500">
             <RotateCcw className="h-5 w-5" />
             Estornar Baixa
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Confirme a operação para reverter esta baixa
           </DialogDescription>
         </DialogHeader>
@@ -42,33 +42,33 @@ const EstornarBaixaModal = ({ isOpen, onClose, onConfirm, titulo, loading = fals
             </AlertDescription>
           </Alert>
 
-          <div className="bg-slate-800 rounded-lg p-4 space-y-2 text-sm">
+          <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-400">Tipo:</span>
+              <span className="text-muted-foreground">Tipo:</span>
               <span className="font-medium">{tipoLabel}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Título:</span>
+              <span className="text-muted-foreground">Título:</span>
               <span className="font-mono font-medium">{titulo.numeroDisplay}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">{entidadeLabel}:</span>
+              <span className="text-muted-foreground">{entidadeLabel}:</span>
               <span className="font-medium">{titulo.entidadeNome}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Valor:</span>
+              <span className="text-muted-foreground">Valor:</span>
               <span className={`font-bold ${titulo.tipo_geral === 'PAGAR' ? 'text-red-400' : 'text-emerald-400'}`}>
                 R$ {titulo.valor.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-400">Status Atual:</span>
+              <span className="text-muted-foreground">Status Atual:</span>
               <span className="font-medium text-emerald-400">{titulo.status}</span>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
-            <p className="text-sm text-slate-300">
+          <div className="bg-muted/50 rounded-lg p-3 border border-border">
+            <p className="text-sm text-muted-foreground">
               Após estornar, o título voltará para status <strong className="text-yellow-400">"Aberto"</strong> e 
               todos os registros de baixa serão removidos.
             </p>
@@ -80,7 +80,7 @@ const EstornarBaixaModal = ({ isOpen, onClose, onConfirm, titulo, loading = fals
             variant="outline"
             onClick={onClose}
             disabled={isProcessing || loading}
-            className="border-slate-600 hover:bg-slate-800"
+            className="border-border hover:bg-muted"
           >
             <X className="h-4 w-4 mr-2" />
             Cancelar

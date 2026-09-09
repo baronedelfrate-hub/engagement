@@ -3,15 +3,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowDownToLine, ArrowUpToLine, CheckCircle2, AlertCircle, Scale, Calendar } from 'lucide-react';
 
 const SummaryCard = ({ title, value, subvalue, icon: Icon, colorClass }) => (
-  <Card className="bg-slate-900 border-slate-800">
+  <Card className="bg-background border-border">
     <CardContent className="p-4 flex items-center gap-4">
       <div className={`p-3 rounded-xl ${colorClass}`}>
         <Icon className="h-6 w-6" />
       </div>
       <div>
-        <p className="text-sm font-medium text-slate-400">{title}</p>
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <p className="text-xl font-bold text-white">{value}</p>
-        {subvalue && <p className="text-xs text-slate-500">{subvalue}</p>}
+        {subvalue && <p className="text-xs text-muted-foreground">{subvalue}</p>}
       </div>
     </CardContent>
   </Card>
@@ -54,13 +54,13 @@ const ConciliacaoSummarySection = ({ sistemaBaixas, ofxTransacoes, saldoInicial,
                   <Calendar className="h-5 w-5 text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Saldo Inicial</p>
+                  <p className="text-sm font-medium text-muted-foreground">Saldo Inicial</p>
                   <p className="text-2xl font-bold text-white">{formatBRL(saldoInicial)}</p>
                 </div>
               </div>
               {dataSaldoInicial && (
                 <div className="text-right">
-                  <p className="text-xs text-slate-400">Data de Referência</p>
+                  <p className="text-xs text-muted-foreground">Data de Referência</p>
                   <p className="text-sm font-semibold text-blue-300">{formatDate(dataSaldoInicial)}</p>
                 </div>
               )}

@@ -119,7 +119,7 @@ const ConciliacaoBancariaPage = () => {
                 onClick={loadData} 
                 disabled={loading} 
                 variant="outline"
-                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700"
+                className="bg-muted border-border text-foreground hover:bg-muted"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                 Atualizar
@@ -143,7 +143,7 @@ const ConciliacaoBancariaPage = () => {
         />
 
         {/* Central Match Actions */}
-        <div className="flex justify-center items-center h-12 bg-slate-900/50 rounded-lg border border-slate-800 my-4 shadow-inner px-4">
+        <div className="flex justify-center items-center h-12 bg-background/50 rounded-lg border border-border my-4 shadow-inner px-4">
             {canMatch ? (
                 <Button 
                     onClick={() => setMatchModalOpen(true)}
@@ -160,7 +160,7 @@ const ConciliacaoBancariaPage = () => {
                     <Unlink className="h-4 w-4 mr-2" /> Desfazer Conciliação
                 </Button>
             ) : (
-                <span className="text-sm text-slate-500 font-medium tracking-wide">
+                <span className="text-sm text-muted-foreground font-medium tracking-wide">
                     Selecione 1 item de cada lado para conciliar.
                 </span>
             )}

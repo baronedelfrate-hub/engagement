@@ -68,7 +68,7 @@ const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl bg-slate-900 border-slate-800 text-slate-100">
+      <DialogContent className="max-w-3xl bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Detalhamento do Parcelamento</DialogTitle>
         </DialogHeader>
@@ -77,31 +77,31 @@ const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
             {loading ? (
                 <div className="flex justify-center p-8"><Loader2 className="animate-spin h-8 w-8 text-blue-500" /></div>
             ) : parcelas.length === 0 ? (
-                <div className="text-center p-8 text-slate-500">Nenhuma parcela encontrada para este grupo.</div>
+                <div className="text-center p-8 text-muted-foreground">Nenhuma parcela encontrada para este grupo.</div>
             ) : (
                 <>
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                            <span className="text-xs text-slate-400 block uppercase">Total do Parcelamento</span>
+                        <div className="bg-muted p-3 rounded-lg border border-border">
+                            <span className="text-xs text-muted-foreground block uppercase">Total do Parcelamento</span>
                             <span className="text-lg font-bold text-white">
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalOriginal)}
                             </span>
-                            <span className="text-xs text-slate-500 block mt-1">{parcelas.length} parcelas</span>
+                            <span className="text-xs text-muted-foreground block mt-1">{parcelas.length} parcelas</span>
                         </div>
-                        <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
-                            <span className="text-xs text-slate-400 block uppercase">Total Quitado</span>
+                        <div className="bg-muted p-3 rounded-lg border border-border">
+                            <span className="text-xs text-muted-foreground block uppercase">Total Quitado</span>
                             <span className="text-lg font-bold text-emerald-400">
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalPago)}
                             </span>
-                            <div className="w-full bg-slate-950 h-1.5 mt-2 rounded-full overflow-hidden">
+                            <div className="w-full bg-background h-1.5 mt-2 rounded-full overflow-hidden">
                                 <div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="border border-slate-700 rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
+                    <div className="border border-border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
                         <table className="w-full text-sm">
-                            <thead className="bg-slate-950 text-slate-400 text-xs uppercase sticky top-0">
+                            <thead className="bg-background text-muted-foreground text-xs uppercase sticky top-0">
                                 <tr>
                                     <th className="px-4 py-3 text-left">Parc.</th>
                                     <th className="px-4 py-3 text-left">Vencimento</th>
@@ -110,10 +110,10 @@ const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
                                     <th className="px-4 py-3 text-right">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800">
+                            <tbody className="divide-y divide-border">
                                 {parcelas.map((p) => (
-                                    <tr key={p.id} className="hover:bg-slate-800/50 transition-colors">
-                                        <td className="px-4 py-3 font-medium text-slate-300">{p.parcela_atual}/{p.numero_parcelas}</td>
+                                    <tr key={p.id} className="hover:bg-muted/50 transition-colors">
+                                        <td className="px-4 py-3 font-medium text-muted-foreground">{p.parcela_atual}/{p.numero_parcelas}</td>
                                         <td className="px-4 py-3">{new Date(p.data_vencimento).toLocaleDateString()}</td>
                                         <td className="px-4 py-3 font-medium">
                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}
@@ -131,7 +131,7 @@ const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
                                             <Button 
                                                 size="sm" variant="ghost" 
                                                 onClick={() => { onClose(); navigate(`/financeiro/contas-pagar/${p.id}`); }}
-                                                className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+                                                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                                                 title="Ver Detalhes"
                                             >
                                                 <ExternalLink className="h-3 w-3" />

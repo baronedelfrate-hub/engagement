@@ -85,11 +85,11 @@ const ImportarExtratoPage = () => {
       <div className="max-w-4xl mx-auto pb-12">
           
           <div className="flex items-center justify-center mb-8 gap-4">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800'}`}>1</div>
-              <div className="h-1 w-24 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-muted'}`}>1</div>
+              <div className="h-1 w-24 bg-muted rounded-full overflow-hidden">
                 <div className={`h-full bg-blue-600 transition-all duration-500 ease-in-out ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
               </div>
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800'}`}>2</div>
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold transition-colors ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-muted'}`}>2</div>
           </div>
 
           {errorMsg && (
@@ -103,15 +103,15 @@ const ImportarExtratoPage = () => {
           )}
 
           {step === 1 && (
-              <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+              <Card className="bg-background border-border shadow-sm">
                   <CardHeader>
-                    <CardTitle className="text-slate-900 dark:text-white">Passo 1: Selecionar Arquivo</CardTitle>
+                    <CardTitle className="text-foreground">Passo 1: Selecionar Arquivo</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                       <div className="space-y-2">
-                          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Banco Destino</label>
+                          <label className="text-sm font-medium text-muted-foreground">Banco Destino</label>
                           <Select value={bancoId} onValueChange={setBancoId}>
-                              <SelectTrigger className="w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white">
+                              <SelectTrigger className="w-full bg-background dark:bg-background border-border dark:border-border text-foreground">
                                   <SelectValue placeholder="Selecione o Banco para vínculo" />
                               </SelectTrigger>
                               <SelectContent>
@@ -125,7 +125,7 @@ const ImportarExtratoPage = () => {
                           {!bancoId && <p className="text-xs text-amber-600 dark:text-amber-500/80">Necessário selecionar um banco primeiro para associar o extrato.</p>}
                       </div>
 
-                      <div className={`border-2 border-dashed ${bancoId ? 'border-slate-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer' : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 cursor-not-allowed opacity-60'} rounded-xl p-12 text-center transition-all relative group`}>
+                      <div className={`border-2 border-dashed ${bancoId ? 'border-border hover:border-blue-500 hover:bg-muted cursor-pointer' : 'border-border bg-muted cursor-not-allowed opacity-60'} rounded-xl p-12 text-center transition-all relative group`}>
                           <input 
                               type="file" 
                               accept=".ofx,.cfx,.csv" 
@@ -137,14 +137,14 @@ const ImportarExtratoPage = () => {
                               {isProcessing ? (
                                   <Loader2 className="h-16 w-16 text-blue-600 dark:text-blue-500 animate-spin mb-4" />
                               ) : (
-                                  <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-4 transition-transform ${bancoId ? 'bg-blue-100 dark:bg-slate-800 group-hover:scale-110' : 'bg-slate-100 dark:bg-slate-900'}`}>
-                                      <FileSpreadsheet className={`h-8 w-8 ${bancoId ? 'text-blue-600 dark:text-blue-500' : 'text-slate-400 dark:text-slate-600'}`} />
+                                  <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-4 transition-transform ${bancoId ? 'bg-blue-100 dark:bg-muted group-hover:scale-110' : 'bg-muted dark:bg-background'}`}>
+                                      <FileSpreadsheet className={`h-8 w-8 ${bancoId ? 'text-blue-600 dark:text-blue-500' : 'text-muted-foreground dark:text-muted-foreground'}`} />
                                   </div>
                               )}
-                              <h3 className="text-lg font-medium text-slate-800 dark:text-slate-200">
+                              <h3 className="text-lg font-medium text-foreground dark:text-foreground">
                                   {isProcessing ? 'Lendo arquivo...' : 'Clique ou arraste seu extrato OFX aqui'}
                               </h3>
-                              <p className="text-slate-500 dark:text-slate-500 mt-1">
+                              <p className="text-muted-foreground dark:text-muted-foreground mt-1">
                                 Arquivos suportados: .OFX 
                                 {bancoId && <span className="text-emerald-600 dark:text-emerald-500 text-xs ml-2 font-medium">✓ Banco Selecionado</span>}
                               </p>
@@ -155,33 +155,33 @@ const ImportarExtratoPage = () => {
           )}
 
           {step === 2 && (
-              <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <Card className="bg-background border-border shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between border-b border-border dark:border-border pb-4">
                       <div>
-                        <CardTitle className="text-slate-900 dark:text-white">Passo 2: Revisar Transações</CardTitle>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{previewData.length} transações prontas para importar</p>
+                        <CardTitle className="text-foreground">Passo 2: Revisar Transações</CardTitle>
+                        <p className="text-sm text-muted-foreground dark:text-muted-foreground mt-1">{previewData.length} transações prontas para importar</p>
                       </div>
-                      <Button onClick={() => { setStep(1); setFile(null); setPreviewData([]); }} variant="outline" className="text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700">
+                      <Button onClick={() => { setStep(1); setFile(null); setPreviewData([]); }} variant="outline" className="text-muted-foreground dark:text-muted-foreground border-border dark:border-border">
                         Voltar e trocar arquivo
                       </Button>
                   </CardHeader>
                   <CardContent className="pt-6">
-                      <div className="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden mb-6 max-h-[500px] overflow-y-auto custom-scrollbar">
-                          <table className="w-full text-sm text-slate-700 dark:text-slate-300">
-                              <thead className="bg-slate-50 dark:bg-slate-950 sticky top-0 z-10 shadow-sm">
+                      <div className="rounded-md border border-border dark:border-border overflow-hidden mb-6 max-h-[500px] overflow-y-auto custom-scrollbar">
+                          <table className="w-full text-sm text-muted-foreground">
+                              <thead className="bg-muted dark:bg-background sticky top-0 z-10 shadow-sm">
                                   <tr>
-                                      <th className="p-3 text-left font-medium text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">Data</th>
-                                      <th className="p-3 text-left font-medium text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">Descrição</th>
-                                      <th className="p-3 text-left font-medium text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">Documento</th>
-                                      <th className="p-3 text-right font-medium text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">Valor</th>
+                                      <th className="p-3 text-left font-medium text-muted-foreground dark:text-muted-foreground border-b border-border dark:border-border">Data</th>
+                                      <th className="p-3 text-left font-medium text-muted-foreground dark:text-muted-foreground border-b border-border dark:border-border">Descrição</th>
+                                      <th className="p-3 text-left font-medium text-muted-foreground dark:text-muted-foreground border-b border-border dark:border-border">Documento</th>
+                                      <th className="p-3 text-right font-medium text-muted-foreground dark:text-muted-foreground border-b border-border dark:border-border">Valor</th>
                                   </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50 bg-white dark:bg-slate-900">
+                              <tbody className="divide-y divide-border bg-background">
                                   {previewData.map((row, i) => (
-                                      <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                      <tr key={i} className="hover:bg-muted dark:hover:bg-muted/50 transition-colors">
                                           <td className="p-3 whitespace-nowrap">{row.data_transacao}</td>
                                           <td className="p-3">{row.descricao}</td>
-                                          <td className="p-3 text-slate-500 font-mono text-xs">{row.numero_documento}</td>
+                                          <td className="p-3 text-muted-foreground font-mono text-xs">{row.numero_documento}</td>
                                           <td className={`p-3 text-right font-medium ${row.valor < 0 ? 'text-red-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                               {row.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                           </td>
@@ -191,7 +191,7 @@ const ImportarExtratoPage = () => {
                           </table>
                       </div>
 
-                      <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex justify-end pt-4 border-t border-border dark:border-border">
                           <Button 
                             onClick={handleConfirmImport} 
                             disabled={isProcessing} 

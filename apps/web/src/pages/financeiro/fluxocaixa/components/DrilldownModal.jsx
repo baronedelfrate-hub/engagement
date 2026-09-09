@@ -14,7 +14,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
         
         <div className="mt-4 border rounded-lg overflow-hidden">
             <table className="w-full text-sm text-left">
-                <thead className="bg-slate-100 text-slate-700 font-medium">
+                <thead className="bg-muted text-foreground font-medium">
                     <tr>
                         <th className="p-3">Data</th>
                         <th className="p-3">Descrição</th>
@@ -25,12 +25,12 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                 </thead>
                 <tbody className="divide-y">
                     {items && items.length > 0 ? items.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50">
+                        <tr key={idx} className="hover:bg-muted">
                             <td className="p-3">{new Date(item.data).toLocaleDateString('pt-BR')}</td>
                             <td className="p-3 font-medium">{item.descricao}</td>
-                            <td className="p-3 text-slate-500">{item.categoria}</td>
+                            <td className="p-3 text-muted-foreground">{item.categoria}</td>
                             <td className="p-3 text-xs">
-                                <span className={`px-2 py-1 rounded ${item.tipo === 'PREVISTO' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
+                                <span className={`px-2 py-1 rounded ${item.tipo === 'PREVISTO' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400' : 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400'}`}>
                                     {item.tipo}
                                 </span>
                             </td>
@@ -39,7 +39,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                             </td>
                         </tr>
                     )) : (
-                        <tr><td colSpan="5" className="p-4 text-center text-slate-400">Nenhum item encontrado.</td></tr>
+                        <tr><td colSpan="5" className="p-4 text-center text-muted-foreground">Nenhum item encontrado.</td></tr>
                     )}
                 </tbody>
             </table>

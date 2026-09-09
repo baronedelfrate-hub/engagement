@@ -97,7 +97,7 @@ const ContasPagarList = () => {
       accessorKey: "numero", 
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-mono text-slate-300">{row.numero}</span>
+          <span className="font-mono text-muted-foreground">{row.numero}</span>
           {/* Correctly checking numero_parcelas > 1 to show badge */}
           {row.numero_parcelas > 1 && (
             <div className="flex gap-1 items-center mt-1">
@@ -105,7 +105,7 @@ const ContasPagarList = () => {
                   {row.parcela_atual}/{row.numero_parcelas}
                 </Badge>
                 {row.intervalo_dias && (
-                    <span className="text-[10px] text-slate-500">
+                    <span className="text-[10px] text-muted-foreground">
                         {row.intervalo_dias}d
                     </span>
                 )}
@@ -117,7 +117,7 @@ const ContasPagarList = () => {
     { 
         header: "Fornecedor", 
         accessorKey: "fornecedor.nome", 
-        cell: ({ row }) => <span className="text-slate-300 font-medium">{row.fornecedor?.nome || '-'}</span>
+        cell: ({ row }) => <span className="text-muted-foreground font-medium">{row.fornecedor?.nome || '-'}</span>
     },
     { 
         header: "Classificação",
@@ -125,12 +125,12 @@ const ContasPagarList = () => {
         cell: ({ row }) => (
             <div className="flex flex-wrap gap-1 max-w-[200px]">
                 {row.categoria && <Badge variant="secondary" className="bg-purple-900/20 text-[10px]">{row.categoria.nome}</Badge>}
-                {row.banco && <Badge variant="outline" className="border-slate-700 text-[10px]">{row.banco.nome}</Badge>}
+                {row.banco && <Badge variant="outline" className="border-border text-[10px]">{row.banco.nome}</Badge>}
             </div>
         )
     },
-    { header: "Valor", accessorKey: "valor_original", cell: ({ row }) => <span className="font-medium text-slate-200">R$ {parseFloat(row.valor_original).toFixed(2)}</span> },
-    { header: "Vencimento", accessorKey: "data_vencimento", cell: ({ row }) => <span className="text-slate-300">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
+    { header: "Valor", accessorKey: "valor_original", cell: ({ row }) => <span className="font-medium text-foreground">R$ {parseFloat(row.valor_original).toFixed(2)}</span> },
+    { header: "Vencimento", accessorKey: "data_vencimento", cell: ({ row }) => <span className="text-muted-foreground">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
     {
       header: "Status",
       accessorKey: "status",
@@ -186,19 +186,19 @@ const ContasPagarList = () => {
       
       <div className="flex gap-4 items-center">
         <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar fornecedor, título ou categoria..."
-                className="pl-9 bg-slate-900 border-slate-700"
+                className="pl-9 bg-background border-border"
             />
         </div>
       </div>
 
       {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Erro</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
       
-      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-slate-400"/></div> : <DataTable columns={columns} data={filteredData} rowClassName={getRowClassName} />}
+      {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-muted-foreground"/></div> : <DataTable columns={columns} data={filteredData} rowClassName={getRowClassName} />}
       
       <ContasPagarParcelasModal isOpen={isParcelasModalOpen} onClose={() => setIsParcelasModalOpen(false)} grupoId={selectedGrupoId} />
     </div>

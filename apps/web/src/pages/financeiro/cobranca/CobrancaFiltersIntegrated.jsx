@@ -46,9 +46,9 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-6 shadow-sm">
+    <div className="bg-background border border-border rounded-lg p-4 mb-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-slate-300 font-medium text-sm">
+        <div className="flex items-center gap-2 text-muted-foreground font-medium text-sm">
           <Filter className="w-4 h-4 text-blue-400" /> 
           Filtros Ativos
           {activeFilterCount > 0 && (
@@ -58,7 +58,7 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
           )}
         </div>
         {activeFilterCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={handleClear} className="h-6 text-xs text-slate-400 hover:text-white px-2">
+          <Button variant="ghost" size="sm" onClick={handleClear} className="h-6 text-xs text-muted-foreground hover:text-foreground px-2">
             <X className="w-3 h-3 mr-1" /> Limpar tudo
           </Button>
         )}
@@ -67,12 +67,12 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {/* Search */}
         <div className="space-y-1 col-span-1 md:col-span-2 lg:col-span-1">
-          <Label className="text-xs text-slate-500">Busca Rápida</Label>
+          <Label className="text-xs text-muted-foreground">Busca Rápida</Label>
           <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-slate-500" />
+            <Search className="absolute left-2 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
             <Input 
               placeholder="Cliente, Nº Título..." 
-              className="pl-8 h-9 bg-slate-950 border-slate-700 text-xs focus:ring-blue-500/20"
+              className="pl-8 h-9 bg-background border-border text-xs focus:ring-blue-500/20"
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
             />
@@ -81,12 +81,12 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
         {/* Status Prazo */}
         <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Situação do Prazo</Label>
+          <Label className="text-xs text-muted-foreground">Situação do Prazo</Label>
           <Select value={filters.statusPrazo} onValueChange={(v) => setFilters(prev => ({ ...prev, statusPrazo: v }))}>
-            <SelectTrigger className="h-9 bg-slate-950 border-slate-700 text-xs">
+            <SelectTrigger className="h-9 bg-background border-border text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="bg-slate-950 border-slate-700 text-slate-200">
+            <SelectContent className="bg-background border-border text-foreground">
               <SelectItem value="ALL">Todos os Prazos</SelectItem>
               <SelectItem value="vencidos" className="text-red-400">Vencidos</SelectItem>
               <SelectItem value="hoje" className="text-yellow-400">Vencendo Hoje</SelectItem>
@@ -98,12 +98,12 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
         {/* Cliente */}
         <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Cliente</Label>
+          <Label className="text-xs text-muted-foreground">Cliente</Label>
           <Select value={filters.clienteId} onValueChange={(v) => setFilters(prev => ({ ...prev, clienteId: v }))}>
-             <SelectTrigger className="h-9 bg-slate-950 border-slate-700 text-xs">
+             <SelectTrigger className="h-9 bg-background border-border text-xs">
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
-            <SelectContent className="max-h-[200px] bg-slate-950 border-slate-700 text-slate-200">
+            <SelectContent className="max-h-[200px] bg-background border-border text-foreground">
               <SelectItem value="ALL">Todos</SelectItem>
               {clientes.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
@@ -114,12 +114,12 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
         {/* Fase */}
         <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Fase da Régua</Label>
+          <Label className="text-xs text-muted-foreground">Fase da Régua</Label>
           <Select value={filters.fase} onValueChange={(v) => setFilters(prev => ({ ...prev, fase: v }))}>
-             <SelectTrigger className="h-9 bg-slate-950 border-slate-700 text-xs">
+             <SelectTrigger className="h-9 bg-background border-border text-xs">
               <SelectValue placeholder="Selecione..." />
             </SelectTrigger>
-            <SelectContent className="bg-slate-950 border-slate-700 text-slate-200">
+            <SelectContent className="bg-background border-border text-foreground">
               <SelectItem value="ALL">Todas as Fases</SelectItem>
               <SelectItem value="D-3">D-3 (Preventivo)</SelectItem>
               <SelectItem value="D+1">D+1 (Aviso)</SelectItem>
@@ -134,19 +134,19 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
         {/* Valor Range */}
         <div className="space-y-1 col-span-1">
-            <Label className="text-xs text-slate-500">Faixa de Valor</Label>
+            <Label className="text-xs text-muted-foreground">Faixa de Valor</Label>
             <div className="flex gap-2">
                 <Input 
                     type="number" 
                     placeholder="Min" 
-                    className="h-9 bg-slate-950 border-slate-700 text-xs w-full"
+                    className="h-9 bg-background border-border text-xs w-full"
                     value={filters.minValor}
                     onChange={(e) => setFilters(prev => ({ ...prev, minValor: e.target.value }))}
                 />
                 <Input 
                     type="number" 
                     placeholder="Max" 
-                    className="h-9 bg-slate-950 border-slate-700 text-xs w-full"
+                    className="h-9 bg-background border-border text-xs w-full"
                     value={filters.maxValor}
                     onChange={(e) => setFilters(prev => ({ ...prev, maxValor: e.target.value }))}
                 />
@@ -155,18 +155,18 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
         {/* Date Range */}
          <div className="space-y-1 col-span-1 md:col-span-2 lg:col-span-1">
-            <Label className="text-xs text-slate-500">Vencimento (Período)</Label>
+            <Label className="text-xs text-muted-foreground">Vencimento (Período)</Label>
             <div className="flex gap-2 items-center">
                  <Input 
                     type="date"
-                    className="h-9 bg-slate-950 border-slate-700 text-xs"
+                    className="h-9 bg-background border-border text-xs"
                     value={filters.dataVencimentoInicio}
                     onChange={(e) => setFilters(prev => ({ ...prev, dataVencimentoInicio: e.target.value }))}
                 />
-                <span className="text-slate-600">-</span>
+                <span className="text-muted-foreground">-</span>
                 <Input 
                     type="date"
-                    className="h-9 bg-slate-950 border-slate-700 text-xs"
+                    className="h-9 bg-background border-border text-xs"
                     value={filters.dataVencimentoFim}
                     onChange={(e) => setFilters(prev => ({ ...prev, dataVencimentoFim: e.target.value }))}
                 />

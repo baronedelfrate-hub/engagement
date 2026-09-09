@@ -49,50 +49,50 @@ const CobrancaDashboardIntegrated = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-background border-border">
           <CardContent className="p-6">
             <div className="flex justify-between">
-              <div><p className="text-sm text-slate-400">Em Cobrança</p><h3 className="text-2xl font-bold text-yellow-500">{formatCurrency(totalInCollection)}</h3></div>
+              <div><p className="text-sm text-muted-foreground">Em Cobrança</p><h3 className="text-2xl font-bold text-yellow-500">{formatCurrency(totalInCollection)}</h3></div>
               <AlertTriangle className="text-yellow-500"/>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-background border-border">
           <CardContent className="p-6">
             <div className="flex justify-between">
-              <div><p className="text-sm text-slate-400">Total Recuperado</p><h3 className="text-2xl font-bold text-emerald-500">{formatCurrency(totalRecovered)}</h3></div>
+              <div><p className="text-sm text-muted-foreground">Total Recuperado</p><h3 className="text-2xl font-bold text-emerald-500">{formatCurrency(totalRecovered)}</h3></div>
               <CheckCircle className="text-emerald-500"/>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-background border-border">
           <CardContent className="p-6">
             <div className="flex justify-between">
-              <div><p className="text-sm text-slate-400">Taxa de Recuperação</p><h3 className="text-2xl font-bold text-blue-500">{recoveryRate.toFixed(1)}%</h3></div>
+              <div><p className="text-sm text-muted-foreground">Taxa de Recuperação</p><h3 className="text-2xl font-bold text-blue-500">{recoveryRate.toFixed(1)}%</h3></div>
               <BarChart3 className="text-blue-500"/>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-background border-border">
           <CardContent className="p-6">
             <div className="flex justify-between">
-              <div><p className="text-sm text-slate-400">Tempo Médio (Dias)</p><h3 className="text-2xl font-bold text-slate-200">{avgRecoveryDays} dias</h3></div>
-              <TrendingDown className="text-slate-400"/>
+              <div><p className="text-sm text-muted-foreground">Tempo Médio (Dias)</p><h3 className="text-2xl font-bold text-foreground">{avgRecoveryDays} dias</h3></div>
+              <TrendingDown className="text-muted-foreground"/>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-slate-900 border-slate-800">
-            <CardHeader><CardTitle className="text-slate-200">Volume de Títulos</CardTitle></CardHeader>
+        <Card className="bg-background border-border">
+            <CardHeader><CardTitle className="text-foreground">Volume de Títulos</CardTitle></CardHeader>
             <CardContent className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} dataKey="value" label>
                             {pieData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                         </Pie>
-                        <Tooltip contentStyle={{backgroundColor: '#0f172a', border: 'none'}} />
+                        <Tooltip contentStyle={{backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', color: 'hsl(var(--popover-foreground))'}} />
                     </PieChart>
                 </ResponsiveContainer>
             </CardContent>

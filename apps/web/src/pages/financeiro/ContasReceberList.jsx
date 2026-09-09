@@ -114,14 +114,14 @@ function ContasReceberList() {
         accessorKey: 'numero', 
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-slate-200 font-mono">{row.numero}</span>
+                <span className="text-foreground font-mono">{row.numero}</span>
                 {/* Parcelamento Badge logic */}
                 {row.numero_parcelas > 1 ? (
                     <Badge variant="secondary" className="w-fit mt-1 text-[10px] bg-blue-900/30 text-blue-300 hover:bg-blue-900/40">
                         Parcela {row.parcela_atual}/{row.numero_parcelas}
                     </Badge>
                 ) : (
-                    <span className="text-[10px] text-slate-500 mt-1">Única</span>
+                    <span className="text-[10px] text-muted-foreground mt-1">Única</span>
                 )}
             </div>
         )
@@ -131,8 +131,8 @@ function ContasReceberList() {
         accessorKey: 'cliente.nome', 
         cell: ({ row }) => (
             <div className="flex flex-col">
-                <span className="text-slate-300 font-medium">{row.cliente?.nome || '-'}</span>
-                <span className="text-[10px] text-slate-500">{row.centro_custo?.nome}</span>
+                <span className="text-muted-foreground font-medium">{row.cliente?.nome || '-'}</span>
+                <span className="text-[10px] text-muted-foreground">{row.centro_custo?.nome}</span>
             </div>
         )
     },
@@ -141,19 +141,19 @@ function ContasReceberList() {
         id: 'classificacao',
         cell: ({ row }) => (
             <div className="flex flex-wrap gap-1 max-w-[200px]">
-                {row.categoria && <Badge variant="secondary" className="bg-slate-800 text-[10px]">{row.categoria.nome}</Badge>}
-                {row.banco && <Badge variant="outline" className="border-slate-700 text-[10px]">{row.banco.nome}</Badge>}
+                {row.categoria && <Badge variant="secondary" className="bg-muted text-[10px]">{row.categoria.nome}</Badge>}
+                {row.banco && <Badge variant="outline" className="border-border text-[10px]">{row.banco.nome}</Badge>}
             </div>
         )
     },
-    { header: 'Vencimento', accessorKey: 'data_vencimento', cell: ({ row }) => <span className="text-slate-400 text-sm">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
+    { header: 'Vencimento', accessorKey: 'data_vencimento', cell: ({ row }) => <span className="text-muted-foreground text-sm">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
     {
         header: 'Status',
         id: 'status_cobranca',
         cell: ({ row }) => {
              const { dias_ate_vencimento } = calculatePhaseFromDueDate(row.data_vencimento, row.status_cobranca, row.data_baixa);
              
-             let badgeColor = 'bg-slate-800 text-slate-400';
+             let badgeColor = 'bg-muted text-muted-foreground';
              if (row.status_cobranca === 'em_cobranca') badgeColor = 'bg-blue-900/30 text-blue-400 border-blue-800';
              if (row.status_cobranca === 'recuperado' || row.status === 'Pago') badgeColor = 'bg-emerald-900/30 text-emerald-400 border-emerald-800';
 
@@ -191,12 +191,12 @@ function ContasReceberList() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-slate-200">
-                    <DropdownMenuItem onClick={() => navigate(`/financeiro/contas-receber/${row.id}`)} className="focus:bg-slate-800 cursor-pointer">
+                  <DropdownMenuContent align="end" className="bg-background border-border text-foreground">
+                    <DropdownMenuItem onClick={() => navigate(`/financeiro/contas-receber/${row.id}`)} className="focus:bg-muted cursor-pointer">
                         <Pencil className="mr-2 h-4 w-4" /> Editar
                     </DropdownMenuItem>
                     {row.status_cobranca !== 'recuperado' && row.status !== 'Pago' && (
-                         <DropdownMenuItem onClick={() => setSelectedForAction(row)} className="focus:bg-slate-800 cursor-pointer text-emerald-500 focus:text-emerald-400">
+                         <DropdownMenuItem onClick={() => setSelectedForAction(row)} className="focus:bg-muted cursor-pointer text-emerald-500 focus:text-emerald-400">
                             <CheckCircle2 className="mr-2 h-4 w-4" /> Registrar Pagamento
                         </DropdownMenuItem>
                     )}
@@ -225,20 +225,20 @@ function ContasReceberList() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="md:col-span-2 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
                 value={searchTerm} 
                 onChange={(e) => setSearchTerm(e.target.value)} 
                 placeholder="Buscar por cliente, título, banco ou categoria..." 
-                className="pl-9 bg-slate-900 border-slate-700"
+                className="pl-9 bg-background border-border"
             />
         </div>
-        <Card className="bg-slate-900 border-slate-800">
+        <Card className="bg-background border-border">
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-900/20 rounded-full"><ArrowUpCircle className="h-6 w-6 text-emerald-500" /></div>
                     <div>
-                        <span className="text-xs font-medium text-slate-400">Total a Receber</span>
+                        <span className="text-xs font-medium text-muted-foreground">Total a Receber</span>
                         <div className="text-xl font-bold text-emerald-500">
                             R$ {filteredContas.reduce((acc, curr) => acc + parseFloat(curr.valor_original || 0), 0).toFixed(2)}
                         </div>

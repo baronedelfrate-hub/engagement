@@ -12,7 +12,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.totalNfe,
       icon: FileText,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      bgColor: 'bg-blue-100 dark:bg-blue-950/30',
       trend: indicators.variacaoNfe === null ? null : `${indicators.variacaoNfe >= 0 ? '+' : ''}${indicators.variacaoNfe}% vs mês ant.`,
       trendIcon: indicators.variacaoNfe >= 0 ? TrendingUp : TrendingDown,
       trendColor: indicators.variacaoNfe >= 0 ? 'text-green-600' : 'text-red-600'
@@ -22,7 +22,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.totalNfse,
       icon: FileText,
       color: 'text-indigo-600',
-      bgColor: 'bg-indigo-100',
+      bgColor: 'bg-indigo-100 dark:bg-indigo-950/30',
       trend: indicators.variacaoNfse === null ? null : `${indicators.variacaoNfse >= 0 ? '+' : ''}${indicators.variacaoNfse}% vs mês ant.`,
       trendIcon: indicators.variacaoNfse >= 0 ? TrendingUp : TrendingDown,
       trendColor: indicators.variacaoNfse >= 0 ? 'text-green-600' : 'text-red-600'
@@ -32,7 +32,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.totalEntrada,
       icon: ArrowDownToLine,
       color: 'text-emerald-600',
-      bgColor: 'bg-emerald-100',
+      bgColor: 'bg-emerald-100 dark:bg-emerald-950/30',
       trend: indicators.variacaoEntrada === null ? null : `${indicators.variacaoEntrada >= 0 ? '+' : ''}${indicators.variacaoEntrada}% vs mês ant.`,
       trendIcon: indicators.variacaoEntrada >= 0 ? TrendingUp : TrendingDown,
       trendColor: indicators.variacaoEntrada >= 0 ? 'text-green-600' : 'text-red-600'
@@ -42,7 +42,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.pendentesManifestacao,
       icon: AlertCircle,
       color: indicators.pendentesManifestacao > 0 ? 'text-amber-600' : 'text-muted-foreground',
-      bgColor: indicators.pendentesManifestacao > 0 ? 'bg-amber-100' : 'bg-muted',
+      bgColor: indicators.pendentesManifestacao > 0 ? 'bg-amber-100 dark:bg-amber-950/30' : 'bg-muted',
       isWarning: indicators.pendentesManifestacao > 0
     },
     {
@@ -50,7 +50,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.pendentesContabilidade,
       icon: Clock,
       color: indicators.pendentesContabilidade > 0 ? 'text-orange-600' : 'text-muted-foreground',
-      bgColor: indicators.pendentesContabilidade > 0 ? 'bg-orange-100' : 'bg-muted',
+      bgColor: indicators.pendentesContabilidade > 0 ? 'bg-orange-100 dark:bg-orange-950/30' : 'bg-muted',
       isWarning: indicators.pendentesContabilidade > 0
     },
     {
@@ -58,7 +58,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: formatCurrency(indicators.totalImpostos),
       icon: Calculator,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-100'
+      bgColor: 'bg-purple-100 dark:bg-purple-950/30'
       // Sem uma janela de comparação confiável (apuração é por período de referência,
       // não por data corrida) — sem tendência fake aqui.
     },
@@ -67,7 +67,7 @@ export default function FiscalDashboardIndicators({ data, loading }) {
       value: indicators.totalPendencias,
       icon: AlertTriangle,
       color: indicators.totalPendencias > 0 ? 'text-red-600' : 'text-muted-foreground',
-      bgColor: indicators.totalPendencias > 0 ? 'bg-red-100' : 'bg-muted',
+      bgColor: indicators.totalPendencias > 0 ? 'bg-red-100 dark:bg-red-950/30' : 'bg-muted',
       isCritical: indicators.totalPendencias > 0
     }
   ];

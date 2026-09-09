@@ -73,13 +73,13 @@ export default function FiscalDashboardGrids({ data, loading }) {
       </Card>
 
       {/* Pendentes de Manifestação */}
-      <Card className="flex flex-col h-full border-amber-200">
-        <CardHeader className="py-4 border-b border-border flex flex-row items-center justify-between bg-amber-50/30">
-          <CardTitle className="text-base font-semibold flex items-center gap-2 text-amber-800">
+      <Card className="flex flex-col h-full border-amber-200 dark:border-amber-800">
+        <CardHeader className="py-4 border-b border-border flex flex-row items-center justify-between bg-amber-50/30 dark:bg-amber-950/20">
+          <CardTitle className="text-base font-semibold flex items-center gap-2 text-amber-800 dark:text-amber-400">
             <AlertCircle className="w-4 h-4" />
             Notas Pendentes de Manifestação
           </CardTitle>
-          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+          <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800">
             {grids.pendentesManifestacao.length} Pendentes
           </Badge>
         </CardHeader>
@@ -102,12 +102,12 @@ export default function FiscalDashboardGrids({ data, loading }) {
                     <TableCell className="truncate max-w-[150px]">{item.fornecedor}</TableCell>
                     <TableCell className="text-right">{formatCurrency(item.valor)}</TableCell>
                     <TableCell className="text-center">
-                      <Badge className={item.dias_pendente > 30 ? 'bg-red-100 text-red-800 border-red-200' : 'bg-amber-100 text-amber-800 border-amber-200'} variant="outline">
+                      <Badge className={item.dias_pendente > 30 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800' : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'} variant="outline">
                         {item.dias_pendente} dias
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button size="sm" variant="ghost" className="h-8 px-2 text-blue-600 bg-blue-50 hover:bg-blue-100" onClick={handleAction}>
+                      <Button size="sm" variant="ghost" className="h-8 px-2 text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50" onClick={handleAction}>
                         Manifestar
                       </Button>
                     </TableCell>
@@ -167,13 +167,13 @@ export default function FiscalDashboardGrids({ data, loading }) {
       </Card>
 
       {/* Pendências Fiscais/Contábeis */}
-      <Card className="flex flex-col h-full border-red-200">
-        <CardHeader className="py-4 border-b border-border flex flex-row items-center justify-between bg-red-50/30">
-          <CardTitle className="text-base font-semibold flex items-center gap-2 text-red-800">
+      <Card className="flex flex-col h-full border-red-200 dark:border-red-800">
+        <CardHeader className="py-4 border-b border-border flex flex-row items-center justify-between bg-red-50/30 dark:bg-red-950/20">
+          <CardTitle className="text-base font-semibold flex items-center gap-2 text-red-800 dark:text-red-400">
             <PlayCircle className="w-4 h-4" />
             Pendências Fiscais e Contábeis
           </CardTitle>
-          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">
+          <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800">
             {grids.pendenciasFiscais.length} Itens
           </Badge>
         </CardHeader>

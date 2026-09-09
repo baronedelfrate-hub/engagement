@@ -29,7 +29,7 @@ export function CancelNfeDialog({ isOpen, onClose, onConfirm }) {
             placeholder="Motivo do cancelamento..." 
             value={motivo} 
             onChange={(e) => setMotivo(e.target.value)}
-            className="text-slate-900"
+            className="text-foreground"
           />
         </div>
         <DialogFooter>

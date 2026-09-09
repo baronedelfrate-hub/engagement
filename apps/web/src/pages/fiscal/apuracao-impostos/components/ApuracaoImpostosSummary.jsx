@@ -31,12 +31,12 @@ export default function ApuracaoImpostosSummary({ data }) {
   const calcPerc = (val) => summary.total > 0 ? Math.round((val / summary.total) * 100) : 0;
 
   const cards = [
-    { title: 'Total Apurado', value: summary.total, icon: Calculator, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { title: 'Em Aberto', value: summary.emAberto, perc: calcPerc(summary.emAberto), icon: AlertCircle, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-    { title: 'Em Conferência', value: summary.emConferencia, perc: calcPerc(summary.emConferencia), icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { title: 'Fechado', value: summary.fechado, perc: calcPerc(summary.fechado), icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { title: 'Enviado (Contab.)', value: summary.enviado, perc: calcPerc(summary.enviado), icon: Send, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { title: 'Pago', value: summary.pago, perc: calcPerc(summary.pago), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { title: 'Total Apurado', value: summary.total, icon: Calculator, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30' },
+    { title: 'Em Aberto', value: summary.emAberto, perc: calcPerc(summary.emAberto), icon: AlertCircle, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-950/30' },
+    { title: 'Em Conferência', value: summary.emConferencia, perc: calcPerc(summary.emConferencia), icon: Clock, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/30' },
+    { title: 'Fechado', value: summary.fechado, perc: calcPerc(summary.fechado), icon: CheckCircle2, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/30' },
+    { title: 'Enviado (Contab.)', value: summary.enviado, perc: calcPerc(summary.enviado), icon: Send, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/30' },
+    { title: 'Pago', value: summary.pago, perc: calcPerc(summary.pago), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
   ];
 
   return (

@@ -53,8 +53,8 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <Card className="shadow-sm border-border">
+        <CardHeader className="bg-muted/50 border-b border-border">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calculator className="w-5 h-5 text-orange-600" /> 
             Tributos e Retenções Padrão
@@ -65,7 +65,7 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
         </CardHeader>
         <CardContent className="p-0 overflow-auto">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-muted">
               <TableRow>
                 <TableHead>Tributo</TableHead>
                 <TableHead className="w-32 text-right">Alíquota (%)</TableHead>
@@ -76,13 +76,13 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
             <TableBody>
               {tributos.map((t, index) => t.isStandard && (
                 <TableRow key={t.tipo_tributo}>
-                  <TableCell className="font-medium text-slate-800">{t.tipo_tributo}</TableCell>
+                  <TableCell className="font-medium text-foreground">{t.tipo_tributo}</TableCell>
                   <TableCell>
                     <Input 
                       type="number" step="0.01" min="0" max="100"
                       value={t.aliquota_padrao || 0}
                       onChange={(e) => handleChange(index, 'aliquota_padrao', e.target.value)}
-                      className="text-right text-slate-900 h-8"
+                      className="text-right text-foreground h-8"
                     />
                   </TableCell>
                   <TableCell>
@@ -90,12 +90,12 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
                       type="number" step="0.01" min="0" max="100"
                       value={t.retencao_padrao || 0}
                       onChange={(e) => handleChange(index, 'retencao_padrao', e.target.value)}
-                      className="text-right text-slate-900 h-8"
+                      className="text-right text-foreground h-8"
                     />
                   </TableCell>
                   <TableCell>
                     <Select value={t.aplicavel_em || 'Ambos'} onValueChange={(v) => handleChange(index, 'aplicavel_em', v)}>
-                      <SelectTrigger className="h-8 text-slate-900"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-8 text-foreground"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Ambos">Ambos</SelectItem>
                         <SelectItem value="NF-e">NF-e</SelectItem>
@@ -110,8 +110,8 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100 flex flex-row items-center justify-between">
+      <Card className="shadow-sm border-border">
+        <CardHeader className="bg-muted/50 border-b border-border flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-base">Tributos Customizados</CardTitle>
             <CardDescription className="mt-1">Adicione impostos ou taxas específicas locais/regionais.</CardDescription>
@@ -122,12 +122,12 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
         </CardHeader>
         <CardContent className="p-0 overflow-auto">
           {customTaxes.length === 0 ? (
-             <div className="p-6 text-center text-slate-500 text-sm">
+             <div className="p-6 text-center text-muted-foreground text-sm">
                Nenhum tributo customizado adicionado.
              </div>
           ) : (
             <Table>
-              <TableHeader className="bg-slate-50">
+              <TableHeader className="bg-muted">
                 <TableRow>
                   <TableHead>Nome do Tributo</TableHead>
                   <TableHead className="w-32 text-right">Alíquota (%)</TableHead>
@@ -144,7 +144,7 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
                         placeholder="Nome"
                         value={t.tipo_tributo || ''}
                         onChange={(e) => handleChange(index, 'tipo_tributo', e.target.value)}
-                        className="text-slate-900 h-8"
+                        className="text-foreground h-8"
                       />
                     </TableCell>
                     <TableCell>
@@ -152,7 +152,7 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
                         type="number" step="0.01" min="0" max="100"
                         value={t.aliquota_padrao || 0}
                         onChange={(e) => handleChange(index, 'aliquota_padrao', e.target.value)}
-                        className="text-right text-slate-900 h-8"
+                        className="text-right text-foreground h-8"
                       />
                     </TableCell>
                     <TableCell>
@@ -160,12 +160,12 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
                         type="number" step="0.01" min="0" max="100"
                         value={t.retencao_padrao || 0}
                         onChange={(e) => handleChange(index, 'retencao_padrao', e.target.value)}
-                        className="text-right text-slate-900 h-8"
+                        className="text-right text-foreground h-8"
                       />
                     </TableCell>
                     <TableCell>
                       <Select value={t.aplicavel_em || 'Ambos'} onValueChange={(v) => handleChange(index, 'aplicavel_em', v)}>
-                        <SelectTrigger className="h-8 text-slate-900"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-8 text-foreground"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Ambos">Ambos</SelectItem>
                           <SelectItem value="NF-e">NF-e</SelectItem>
@@ -174,7 +174,7 @@ export default function ParametrosTributosSection({ initialData = [], onSave, lo
                       </Select>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleRemove(index)} className="h-8 w-8 text-slate-500 hover:text-red-600">
+                      <Button variant="ghost" size="icon" onClick={() => handleRemove(index)} className="h-8 w-8 text-muted-foreground hover:text-red-600">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>

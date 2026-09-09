@@ -39,17 +39,17 @@ const FiscalDashboard = () => {
       </div>
 
       {/* Quick Setup Section */}
-      <Card className="bg-blue-50/50 border-blue-200 shadow-sm">
+      <Card className="bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800 shadow-sm">
         <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-100 text-blue-700 rounded-lg shrink-0 mt-0.5">
+            <div className="p-2 bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 rounded-lg shrink-0 mt-0.5">
               <MapPin className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-900 flex items-center gap-2">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-400 flex items-center gap-2">
                 Setup Necessário: Municípios IBGE
               </h3>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
                 Para emitir NFS-e corretamente, certifique-se de que a tabela de municípios do IBGE está sincronizada e validada.
               </p>
             </div>

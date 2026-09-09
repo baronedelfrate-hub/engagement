@@ -55,14 +55,14 @@ export const calculateValorLiquido = (total, impostos) => {
 
 export const getStatusColor = (status) => {
   switch (status) {
-    case 'Pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'Conferência': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'Lançada': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'Integrada': return 'bg-purple-100 text-purple-800 border-purple-200';
+    case 'Pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'Conferência': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'Lançada': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800';
+    case 'Integrada': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800';
     case 'Enviada à contabilidade':
-    case 'Enviada': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-    case 'Cancelada': return 'bg-red-100 text-red-800 border-red-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'Enviada': return 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800';
+    case 'Cancelada': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    default: return 'bg-muted text-foreground border-border';
   }
 };
 

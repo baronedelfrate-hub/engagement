@@ -80,7 +80,7 @@ export default function NfeProductsPage() {
         />
         
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsSearchModalOpen(true)} className="bg-white">
+          <Button variant="outline" onClick={() => setIsSearchModalOpen(true)} className="bg-background">
             <Search className="w-4 h-4 mr-2" /> Buscar Pedido
           </Button>
           <Button onClick={() => navigate('/fiscal/nfe-produtos/novo')} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">

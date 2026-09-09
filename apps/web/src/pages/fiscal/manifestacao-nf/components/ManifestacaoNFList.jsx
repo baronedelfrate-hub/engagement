@@ -128,7 +128,7 @@ export default function ManifestacaoNFList({ data, loading, onRefresh }) {
                       {item.status_manifestacao}
                     </Badge>
                     {item.importado_entrada && (
-                      <div className="mt-1 flex justify-center"><Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Importado</Badge></div>
+                      <div className="mt-1 flex justify-center"><Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800 text-[10px]">Importado</Badge></div>
                     )}
                   </TableCell>
 
@@ -145,7 +145,7 @@ export default function ManifestacaoNFList({ data, loading, onRefresh }) {
                       )}
 
                       {canImport(item.situacao_consulta, item.status_manifestacao, item.importado_entrada) && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50" onClick={(e) => handleImportClick(e, item)} title="Importar para Entrada">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30" onClick={(e) => handleImportClick(e, item)} title="Importar para Entrada">
                           <Import className="w-4 h-4" />
                         </Button>
                       )}

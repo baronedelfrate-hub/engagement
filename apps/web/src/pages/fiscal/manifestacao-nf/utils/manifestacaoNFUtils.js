@@ -33,11 +33,11 @@ export const formatDate = (dateString, includeTime = false) => {
 
 export const getStatusManifestacaoColor = (status) => {
   switch (status) {
-    case 'Pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'Ciência': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'Confirmação': return 'bg-green-100 text-green-800 border-green-200';
-    case 'Desconhecimento': return 'bg-red-100 text-red-800 border-red-200';
-    case 'Não realizada': return 'bg-orange-100 text-orange-800 border-orange-200';
+    case 'Pendente': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'Ciência': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'Confirmação': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800';
+    case 'Desconhecimento': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    case 'Não realizada': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800';
     default: return 'bg-muted text-foreground border-border';
   }
 };
@@ -45,8 +45,8 @@ export const getStatusManifestacaoColor = (status) => {
 export const getSituacaoConsultaColor = (situacao) => {
   switch (situacao) {
     case 'Não consultada': return 'bg-muted text-muted-foreground border-border';
-    case 'Consultada': return 'bg-blue-100 text-blue-700 border-blue-200';
-    case 'XML Disponível': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    case 'Consultada': return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'XML Disponível': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800';
     default: return 'bg-muted text-foreground border-border';
   }
 };

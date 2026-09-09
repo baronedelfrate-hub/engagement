@@ -20,8 +20,8 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <Card className="shadow-sm border-border">
+        <CardHeader className="bg-muted/50 border-b border-border">
           <CardTitle className="text-lg flex items-center gap-2">
             <Building2 className="w-5 h-5 text-blue-600" /> 
             Dados Cadastrais Fiscais
@@ -35,7 +35,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
           <div className="space-y-2">
             <Label>Regime Tributário *</Label>
             <Select value={data.regime_tributario || ''} onValueChange={(v) => handleChange('regime_tributario', v)}>
-              <SelectTrigger className="text-slate-900">
+              <SelectTrigger className="text-foreground">
                 <SelectValue placeholder="Selecione o regime" />
               </SelectTrigger>
               <SelectContent>
@@ -52,7 +52,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               type="date" 
               value={data.data_inicio_atividades || ''} 
               onChange={(e) => handleChange('data_inicio_atividades', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -62,7 +62,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               placeholder="Ex: 123456789" 
               value={data.inscricao_estadual || ''} 
               onChange={(e) => handleChange('inscricao_estadual', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -72,7 +72,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               placeholder="Ex: 987654" 
               value={data.inscricao_municipal || ''} 
               onChange={(e) => handleChange('inscricao_municipal', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -82,7 +82,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               placeholder="Código CNAE" 
               value={data.cnae_principal_id || ''} 
               onChange={(e) => handleChange('cnae_principal_id', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -95,7 +95,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
                 const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
                 handleChange('cnae_secundarios', arr);
               }} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -105,7 +105,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               placeholder="Descreva as atividades para compor notas e relatórios..."
               value={data.descricao_atividades || ''} 
               onChange={(e) => handleChange('descricao_atividades', e.target.value)} 
-              className="text-slate-900 min-h-[80px]" 
+              className="text-foreground min-h-[80px]" 
             />
           </div>
 
@@ -115,7 +115,7 @@ export default function DadosFiscaisSection({ data, onChange, onSave, loading })
               placeholder="Observações internas..."
               value={data.observacoes_gerais || ''} 
               onChange={(e) => handleChange('observacoes_gerais', e.target.value)} 
-              className="text-slate-900 min-h-[80px]" 
+              className="text-foreground min-h-[80px]" 
             />
           </div>
 

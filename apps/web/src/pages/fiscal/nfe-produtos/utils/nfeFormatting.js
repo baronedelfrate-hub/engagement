@@ -21,13 +21,13 @@ export const formatDate = (dateString, includeTime = false) => {
 
 export const getStatusColor = (status) => {
   switch (status) {
-    case 'Em digitação': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'Aguardando emissão': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'Emitida': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    case 'Cancelada': return 'bg-red-100 text-red-800 border-red-200';
-    case 'Rejeitada': return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'Denegada': return 'bg-red-100 text-red-800 border-red-200';
-    default: return 'bg-slate-100 text-slate-800 border-slate-200';
+    case 'Em digitação': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'Aguardando emissão': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800';
+    case 'Emitida': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800';
+    case 'Cancelada': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    case 'Rejeitada': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800';
+    case 'Denegada': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    default: return 'bg-muted text-foreground border-border';
   }
 };
 

@@ -244,21 +244,21 @@ export default function EntradaNFList() {
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-2">
                         {item.integrado_financeiro ?
-                          <span className="flex items-center text-xs text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded" title="Integrado Financeiro"><CheckCircle2 className="w-3 h-3 mr-1" /> Fin</span> :
+                          <span className="flex items-center text-xs text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400 px-1.5 py-0.5 rounded" title="Integrado Financeiro"><CheckCircle2 className="w-3 h-3 mr-1" /> Fin</span> :
                           <span className="w-12"></span>
                         }
                         {item.integrado_contabil ?
-                          <span className="flex items-center text-xs text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded" title="Integrado Contábil"><CheckCircle2 className="w-3 h-3 mr-1" /> Cont</span> :
+                          <span className="flex items-center text-xs text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 dark:text-indigo-400 px-1.5 py-0.5 rounded" title="Integrado Contábil"><CheckCircle2 className="w-3 h-3 mr-1" /> Cont</span> :
                           <span className="w-12"></span>
                         }
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50" onClick={(e) => { e.stopPropagation(); navigate(`/fiscal/entrada-nf/${item.id}/editar`); }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={(e) => { e.stopPropagation(); navigate(`/fiscal/entrada-nf/${item.id}/editar`); }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={(e) => handleDelete(item.id, e)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30" onClick={(e) => handleDelete(item.id, e)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>

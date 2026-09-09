@@ -92,15 +92,15 @@ export default function ParametrosFiscaisPage() {
         </div>
       </div>
 
-      <Card className="shadow-sm border-slate-200">
+      <Card className="shadow-sm border-border">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <div className="font-medium text-slate-700 min-w-max">Selecione a Empresa:</div>
+            <div className="font-medium text-foreground min-w-max">Selecione a Empresa:</div>
             {fetchingEmpresas ? (
                <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
             ) : (
                <Select value={selectedEmpresa} onValueChange={setSelectedEmpresa}>
-                 <SelectTrigger className="w-[300px] text-slate-900 font-semibold bg-white">
+                 <SelectTrigger className="w-[300px] text-foreground font-semibold bg-background">
                    <SelectValue placeholder="Selecione..." />
                  </SelectTrigger>
                  <SelectContent>
@@ -115,19 +115,19 @@ export default function ParametrosFiscaisPage() {
       </Card>
 
       {!selectedEmpresa && !fetchingEmpresas && (
-        <div className="p-12 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="p-12 text-center text-muted-foreground bg-muted rounded-lg border border-border">
           Selecione ou cadastre uma empresa para configurar os parâmetros fiscais.
         </div>
       )}
 
       {selectedEmpresa && (
         <Tabs defaultValue="dados" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 bg-slate-100/50 p-1 mb-6 h-auto">
-            <TabsTrigger value="dados" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2"><Building2 className="w-4 h-4 mr-2 hidden md:block"/> Dados Fiscais</TabsTrigger>
-            <TabsTrigger value="nfe" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2"><Package className="w-4 h-4 mr-2 hidden md:block"/> NF-e</TabsTrigger>
-            <TabsTrigger value="nfse" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2"><FileText className="w-4 h-4 mr-2 hidden md:block"/> NFS-e</TabsTrigger>
-            <TabsTrigger value="tributos" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2"><Calculator className="w-4 h-4 mr-2 hidden md:block"/> Tributos</TabsTrigger>
-            <TabsTrigger value="integra" className="data-[state=active]:bg-white data-[state=active]:shadow-sm py-2"><Server className="w-4 h-4 mr-2 hidden md:block"/> Integrações</TabsTrigger>
+          <TabsList className="grid grid-cols-2 md:grid-cols-5 bg-muted/50 p-1 mb-6 h-auto">
+            <TabsTrigger value="dados" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"><Building2 className="w-4 h-4 mr-2 hidden md:block"/> Dados Fiscais</TabsTrigger>
+            <TabsTrigger value="nfe" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"><Package className="w-4 h-4 mr-2 hidden md:block"/> NF-e</TabsTrigger>
+            <TabsTrigger value="nfse" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"><FileText className="w-4 h-4 mr-2 hidden md:block"/> NFS-e</TabsTrigger>
+            <TabsTrigger value="tributos" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"><Calculator className="w-4 h-4 mr-2 hidden md:block"/> Tributos</TabsTrigger>
+            <TabsTrigger value="integra" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-2"><Server className="w-4 h-4 mr-2 hidden md:block"/> Integrações</TabsTrigger>
           </TabsList>
           
           <TabsContent value="dados">
@@ -156,7 +156,7 @@ export default function ParametrosFiscaisPage() {
               loading={paramsLoading}
             />
 
-            <div className="pt-8 border-t border-slate-200">
+            <div className="pt-8 border-t border-border">
               <NfseConfigPage empresaId={selectedEmpresa} />
             </div>
           </TabsContent>

@@ -94,7 +94,7 @@ export default function SubstituirProvisaoModal({ isOpen, onClose, nota, onSucce
                   {provisoes.map((prov) => (
                     <TableRow 
                       key={prov.id} 
-                      className={`cursor-pointer ${selectedId === prov.id ? 'bg-blue-50' : ''}`}
+                      className={`cursor-pointer ${selectedId === prov.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
                       onClick={() => setSelectedId(prov.id)}
                     >
                       <TableCell>

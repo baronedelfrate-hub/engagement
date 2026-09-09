@@ -90,9 +90,9 @@ export default function ApuracaoImpostosForm({ formData, setFormData, dropdowns 
             <Input type="number" min="0" step="0.01" value={formData.aliquota} onChange={e => handleChange('aliquota', e.target.value)} className="text-foreground" />
           </div>
 
-          <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 flex flex-col justify-center items-end">
-            <Label className="text-xs text-emerald-700">Valor Apurado</Label>
-            <span className="text-lg font-bold text-emerald-700">{formatCurrency(formData.valor_apurado)}</span>
+          <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900 flex flex-col justify-center items-end">
+            <Label className="text-xs text-emerald-700 dark:text-emerald-400">Valor Apurado</Label>
+            <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(formData.valor_apurado)}</span>
           </div>
 
           <div className="space-y-1">

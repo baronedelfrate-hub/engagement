@@ -31,10 +31,10 @@ export const calculateDaysPending = (dateString) => {
 
 export const getStatusColor = (status) => {
   const s = (status || '').toLowerCase();
-  if (s.includes('autorizado') || s.includes('concluído') || s.includes('pago') || s.includes('sucesso')) return 'bg-green-100 text-green-800 border-green-200';
-  if (s.includes('cancelado') || s.includes('erro') || s.includes('atrasado') || s.includes('rejeitado')) return 'bg-red-100 text-red-800 border-red-200';
-  if (s.includes('pendente') || s.includes('aguardando') || s.includes('processando')) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  return 'bg-slate-100 text-slate-800 border-slate-200';
+  if (s.includes('autorizado') || s.includes('concluído') || s.includes('pago') || s.includes('sucesso')) return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800';
+  if (s.includes('cancelado') || s.includes('erro') || s.includes('atrasado') || s.includes('rejeitado')) return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+  if (s.includes('pendente') || s.includes('aguardando') || s.includes('processando')) return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+  return 'bg-muted text-foreground border-border';
 };
 
 export const getStatusVariant = (status) => {

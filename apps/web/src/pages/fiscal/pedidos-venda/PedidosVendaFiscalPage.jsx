@@ -92,9 +92,9 @@ export default function PedidosVendaFiscalPage() {
 
   const getStatusBadge = (status) => {
     switch(status) {
-      case 'confirmed': return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Confirmado</Badge>;
-      case 'invoiced': return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Faturado</Badge>;
-      case 'draft': return <Badge variant="outline" className="text-slate-600">Rascunho</Badge>;
+      case 'confirmed': return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/30">Confirmado</Badge>;
+      case 'invoiced': return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-950/30">Faturado</Badge>;
+      case 'draft': return <Badge variant="outline" className="text-muted-foreground">Rascunho</Badge>;
       case 'cancelled': return <Badge variant="destructive">Cancelado</Badge>;
       default: return <Badge variant="secondary">{status || 'N/A'}</Badge>;
     }

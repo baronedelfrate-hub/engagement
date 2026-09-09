@@ -271,15 +271,15 @@ export default function NfeEmissionForm() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3 space-y-6">
           
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800">1. Dados Básicos</CardTitle>
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground">1. Dados Básicos</CardTitle>
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-1">
                 <Label>Empresa Emitente *</Label>
                 <Select value={formData.empresa_id} onValueChange={v => handleChange('empresa_id', v)}>
-                  <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
                     {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.razao_social}</SelectItem>)}
                   </SelectContent>
@@ -288,7 +288,7 @@ export default function NfeEmissionForm() {
               <div className="space-y-1">
                 <Label>Cliente *</Label>
                 <Select value={formData.cliente_id} onValueChange={v => handleChange('cliente_id', v)}>
-                  <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
                     {clientes.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                   </SelectContent>
@@ -298,7 +298,7 @@ export default function NfeEmissionForm() {
                 <Label>Vincular Pedido de Venda</Label>
                 <div className="flex gap-2">
                   <Select value={formData.pedido_venda_id} onValueChange={onPedidoSelect}>
-                    <SelectTrigger className="flex-1 text-slate-900"><SelectValue placeholder="Opcional..." /></SelectTrigger>
+                    <SelectTrigger className="flex-1 text-foreground"><SelectValue placeholder="Opcional..." /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Nenhum</SelectItem>
                       {pedidos.map(p => <SelectItem key={p.id} value={p.id}>{p.numero}</SelectItem>)}
@@ -313,45 +313,45 @@ export default function NfeEmissionForm() {
               </div>
               <div className="space-y-1">
                 <Label>Data de Emissão *</Label>
-                <Input type="date" value={formData.data_emissao} onChange={e => handleChange('data_emissao', e.target.value)} className="text-slate-900" />
+                <Input type="date" value={formData.data_emissao} onChange={e => handleChange('data_emissao', e.target.value)} className="text-foreground" />
               </div>
               <div className="space-y-1">
                 <Label>Número da Nota</Label>
-                <Input value={formData.numero} onChange={e => handleChange('numero', e.target.value)} placeholder="Auto se vazio" className="text-slate-900" />
+                <Input value={formData.numero} onChange={e => handleChange('numero', e.target.value)} placeholder="Auto se vazio" className="text-foreground" />
               </div>
               <div className="space-y-1">
                 <Label>Série</Label>
-                <Input value={formData.serie} onChange={e => handleChange('serie', e.target.value)} className="text-slate-900" />
+                <Input value={formData.serie} onChange={e => handleChange('serie', e.target.value)} className="text-foreground" />
               </div>
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-base font-semibold text-slate-800">2. Operação</CardTitle>
+            <Card className="shadow-sm border-border">
+              <CardHeader className="py-3 border-b border-border bg-muted/50">
+                <CardTitle className="text-base font-semibold text-foreground">2. Operação</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
                 <div className="space-y-1">
                   <Label>Natureza da Operação *</Label>
-                  <Input value={formData.natureza_operacao} onChange={e => handleChange('natureza_operacao', e.target.value)} className="text-slate-900" />
+                  <Input value={formData.natureza_operacao} onChange={e => handleChange('natureza_operacao', e.target.value)} className="text-foreground" />
                 </div>
                 <div className="space-y-1">
                   <Label>CFOP Padrão</Label>
-                  <Input value={formData.cfop} onChange={e => handleChange('cfop', e.target.value)} className="text-slate-900" />
+                  <Input value={formData.cfop} onChange={e => handleChange('cfop', e.target.value)} className="text-foreground" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="py-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-base font-semibold text-slate-800">3. Pagamento</CardTitle>
+            <Card className="shadow-sm border-border">
+              <CardHeader className="py-3 border-b border-border bg-muted/50">
+                <CardTitle className="text-base font-semibold text-foreground">3. Pagamento</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
                 <div className="space-y-1">
                   <Label>Condição de Pagamento</Label>
                   <Select value={formData.condicao_pagamento_id} onValueChange={v => handleChange('condicao_pagamento_id', v)}>
-                    <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent>
                       {condicoes.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                     </SelectContent>
@@ -360,7 +360,7 @@ export default function NfeEmissionForm() {
                 <div className="space-y-1">
                   <Label>Forma de Pagamento</Label>
                   <Select value={formData.forma_pagamento_id} onValueChange={v => handleChange('forma_pagamento_id', v)}>
-                    <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
                     <SelectContent>
                       {formas.map(f => <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>)}
                     </SelectContent>
@@ -370,9 +370,9 @@ export default function NfeEmissionForm() {
             </Card>
           </div>
 
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50 flex flex-row justify-between items-center">
-              <CardTitle className="text-base font-semibold text-slate-800">4. Produtos</CardTitle>
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50 flex flex-row justify-between items-center">
+              <CardTitle className="text-base font-semibold text-foreground">4. Produtos</CardTitle>
               <Button size="sm" onClick={handleAddItem} variant="outline" className="h-8">
                 <Plus className="w-4 h-4 mr-2" /> Adicionar Produto
               </Button>
@@ -380,7 +380,7 @@ export default function NfeEmissionForm() {
             <CardContent className="p-4 overflow-auto">
               <table className="w-full text-sm text-left">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
+                  <tr className="border-b border-border text-muted-foreground">
                     <th className="pb-2 font-medium min-w-[200px]">Produto</th>
                     <th className="pb-2 font-medium w-24">NCM</th>
                     <th className="pb-2 font-medium w-24">CFOP</th>
@@ -392,15 +392,15 @@ export default function NfeEmissionForm() {
                     <th className="pb-2 font-medium w-10"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {items.length === 0 ? (
-                    <tr><td colSpan={9} className="text-center py-6 text-slate-400">Nenhum produto adicionado.</td></tr>
+                    <tr><td colSpan={9} className="text-center py-6 text-muted-foreground">Nenhum produto adicionado.</td></tr>
                   ) : (
                     items.map((item, idx) => (
                       <tr key={item.id || idx}>
                         <td className="py-2 pr-2">
                           <Select value={item.produto_id} onValueChange={v => handleItemChange(idx, 'produto_id', v)}>
-                            <SelectTrigger className="h-8 text-xs text-slate-900">
+                            <SelectTrigger className="h-8 text-xs text-foreground">
                               <SelectValue placeholder="Selecione">
                                 {item.descricao && !item.produto_id ? item.descricao : null}
                               </SelectValue>
@@ -411,15 +411,15 @@ export default function NfeEmissionForm() {
                             </SelectContent>
                           </Select>
                         </td>
-                        <td className="py-2 pr-2"><Input value={item.ncm} readOnly className="h-8 text-xs bg-slate-50" /></td>
-                        <td className="py-2 pr-2"><Input value={item.cfop} onChange={e => handleItemChange(idx, 'cfop', e.target.value)} className="h-8 text-xs text-slate-900" /></td>
-                        <td className="py-2 pr-2"><Input type="number" min="1" step="any" value={item.quantidade} onChange={e => handleItemChange(idx, 'quantidade', e.target.value)} className="h-8 text-xs text-right text-slate-900" /></td>
-                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.valor_unitario || item.preco_unitario} onChange={e => handleItemChange(idx, 'valor_unitario', e.target.value)} className="h-8 text-xs text-right text-slate-900" /></td>
-                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.desconto} onChange={e => handleItemChange(idx, 'desconto', e.target.value)} className="h-8 text-xs text-right text-slate-900" /></td>
-                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.impostos} onChange={e => handleItemChange(idx, 'impostos', e.target.value)} className="h-8 text-xs text-right text-slate-900" /></td>
-                        <td className="py-2 text-right font-medium text-slate-800 pr-2">{formatCurrency(item.valor_total)}</td>
+                        <td className="py-2 pr-2"><Input value={item.ncm} readOnly className="h-8 text-xs bg-muted" /></td>
+                        <td className="py-2 pr-2"><Input value={item.cfop} onChange={e => handleItemChange(idx, 'cfop', e.target.value)} className="h-8 text-xs text-foreground" /></td>
+                        <td className="py-2 pr-2"><Input type="number" min="1" step="any" value={item.quantidade} onChange={e => handleItemChange(idx, 'quantidade', e.target.value)} className="h-8 text-xs text-right text-foreground" /></td>
+                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.valor_unitario || item.preco_unitario} onChange={e => handleItemChange(idx, 'valor_unitario', e.target.value)} className="h-8 text-xs text-right text-foreground" /></td>
+                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.desconto} onChange={e => handleItemChange(idx, 'desconto', e.target.value)} className="h-8 text-xs text-right text-foreground" /></td>
+                        <td className="py-2 pr-2"><Input type="number" min="0" step="any" value={item.impostos} onChange={e => handleItemChange(idx, 'impostos', e.target.value)} className="h-8 text-xs text-right text-foreground" /></td>
+                        <td className="py-2 text-right font-medium text-foreground pr-2">{formatCurrency(item.valor_total)}</td>
                         <td className="py-2 text-right">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50" onClick={() => handleRemoveItem(idx)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30" onClick={() => handleRemoveItem(idx)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </td>
@@ -433,39 +433,39 @@ export default function NfeEmissionForm() {
         </div>
 
         <div className="space-y-6">
-          <Card className="shadow-sm border-slate-200 border-t-4 border-t-emerald-500">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800">Totalizadores</CardTitle>
+          <Card className="shadow-sm border-border border-t-4 border-t-emerald-500">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground">Totalizadores</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Subtotal Produtos</span>
-                <span className="font-medium text-slate-800">{formatCurrency(totals.subtotal)}</span>
+                <span className="text-muted-foreground">Subtotal Produtos</span>
+                <span className="font-medium text-foreground">{formatCurrency(totals.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Total Descontos</span>
+                <span className="text-muted-foreground">Total Descontos</span>
                 <span className="font-medium text-red-600">- {formatCurrency(totals.total_descontos)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Total Impostos</span>
-                <span className="font-medium text-slate-800">+ {formatCurrency(totals.total_impostos)}</span>
+                <span className="text-muted-foreground">Total Impostos</span>
+                <span className="font-medium text-foreground">+ {formatCurrency(totals.total_impostos)}</span>
               </div>
-              <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
-                <span className="font-semibold text-slate-800">Valor Total NF-e</span>
+              <div className="pt-3 border-t border-border flex justify-between items-center">
+                <span className="font-semibold text-foreground">Valor Total NF-e</span>
                 <span className="text-lg font-bold text-emerald-600">{formatCurrency(totals.valor_total)}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="py-4 border-b border-slate-100 bg-slate-50/50">
-              <CardTitle className="text-base font-semibold text-slate-800">Status & Observações</CardTitle>
+          <Card className="shadow-sm border-border">
+            <CardHeader className="py-4 border-b border-border bg-muted/50">
+              <CardTitle className="text-base font-semibold text-foreground">Status & Observações</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-1">
                 <Label>Status da NF-e</Label>
                 <Select value={formData.status} onValueChange={v => handleChange('status', v)}>
-                  <SelectTrigger className="text-slate-900 font-medium"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="text-foreground font-medium"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Em digitação">Em digitação</SelectItem>
                     <SelectItem value="Aguardando emissão">Aguardando emissão</SelectItem>
@@ -478,7 +478,7 @@ export default function NfeEmissionForm() {
                 <Textarea 
                   value={formData.observacoes} 
                   onChange={e => handleChange('observacoes', e.target.value)} 
-                  className="min-h-[120px] text-slate-900 text-sm"
+                  className="min-h-[120px] text-foreground text-sm"
                   placeholder="Informações adicionais para o DANFE..."
                 />
               </div>

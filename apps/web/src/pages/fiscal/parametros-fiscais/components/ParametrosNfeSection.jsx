@@ -21,8 +21,8 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
 
   return (
     <div className="space-y-6">
-      <Card className="shadow-sm border-slate-200">
-        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <Card className="shadow-sm border-border">
+        <CardHeader className="bg-muted/50 border-b border-border">
           <CardTitle className="text-lg flex items-center gap-2">
             <Package className="w-5 h-5 text-emerald-600" /> 
             Configurações de NF-e (Produtos)
@@ -38,7 +38,7 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
             <Input 
               value={data.serie_padrao || ''} 
               onChange={(e) => handleChange('serie_padrao', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -48,14 +48,14 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
               type="number"
               value={data.proximo_numero || ''} 
               onChange={(e) => handleChange('proximo_numero', parseInt(e.target.value, 10))} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
           <div className="space-y-2">
             <Label>Modelo Padrão</Label>
             <Select value={data.modelo_padrao || ''} onValueChange={(v) => handleChange('modelo_padrao', v)}>
-              <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="55">NF-e (Modelo 55)</SelectItem>
                 <SelectItem value="65">NFC-e (Modelo 65)</SelectItem>
@@ -66,7 +66,7 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
           <div className="space-y-2">
             <Label>Tipo de Documento</Label>
             <Select value={data.tipo_documento || ''} onValueChange={(v) => handleChange('tipo_documento', v)}>
-              <SelectTrigger className="text-slate-900"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+              <SelectTrigger className="text-foreground"><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Saída">Saída</SelectItem>
                 <SelectItem value="Entrada">Entrada</SelectItem>
@@ -80,7 +80,7 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
               placeholder="Ex: 5101, 5102"
               value={data.cfop_padrao || ''} 
               onChange={(e) => handleChange('cfop_padrao', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -90,7 +90,7 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
               placeholder="Ex: Venda de Mercadoria"
               value={data.natureza_operacao_padrao || ''} 
               onChange={(e) => handleChange('natureza_operacao_padrao', e.target.value)} 
-              className="text-slate-900" 
+              className="text-foreground" 
             />
           </div>
 
@@ -100,11 +100,11 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
               placeholder="Texto impresso nas informações complementares..."
               value={data.observacoes_padrao || ''} 
               onChange={(e) => handleChange('observacoes_padrao', e.target.value)} 
-              className="text-slate-900 min-h-[80px]" 
+              className="text-foreground min-h-[80px]" 
             />
           </div>
 
-          <div className="flex items-center space-x-2 md:col-span-2 p-3 bg-slate-50 rounded-lg border border-slate-100">
+          <div className="flex items-center space-x-2 md:col-span-2 p-3 bg-muted rounded-lg border border-border">
             <Switch 
               id="nfe-cr" 
               checked={data.gerar_contas_receber || false} 
@@ -115,7 +115,7 @@ export default function ParametrosNfeSection({ data, onChange, onSave, loading }
             </Label>
           </div>
 
-          <div className="flex items-center space-x-2 md:col-span-2 p-3 bg-slate-50 rounded-lg border border-slate-100">
+          <div className="flex items-center space-x-2 md:col-span-2 p-3 bg-muted rounded-lg border border-border">
             <Switch 
               id="nfe-cont" 
               checked={data.enviar_contabilidade || false} 

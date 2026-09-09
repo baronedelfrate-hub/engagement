@@ -112,7 +112,7 @@ export default function ApuracaoImpostosDetailPage() {
                  variant="outline" 
                  onClick={() => handleAction((id, u) => apuracaoImpostosService.generateFinancialObligation(data, u), 'fin', 'Obrigação financeira gerada no Contas a Pagar.')} 
                  disabled={actionLoading} 
-                 className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                 className="text-purple-600 border-purple-200 hover:bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:hover:bg-purple-950/30"
                >
                  {actionLoading === 'fin' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <DollarSign className="w-4 h-4 mr-2" />} 
                  Gerar Obrigação (Pagar)
@@ -124,7 +124,7 @@ export default function ApuracaoImpostosDetailPage() {
                  variant="outline" 
                  onClick={() => handleAction(apuracaoImpostosService.sendToAccounting, 'acc', 'Enviado à contabilidade.')} 
                  disabled={actionLoading} 
-                 className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                 className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:text-indigo-400 dark:border-indigo-800 dark:hover:bg-indigo-950/30"
                >
                  {actionLoading === 'acc' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />} 
                  Enviar Contabilidade

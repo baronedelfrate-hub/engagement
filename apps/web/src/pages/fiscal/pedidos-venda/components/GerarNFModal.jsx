@@ -82,7 +82,7 @@ export default function GerarNFModal({ isOpen, onClose, pedido }) {
                 )}
 
                 {!hasProducts && !hasServices && (
-                  <div className="text-center p-4 text-sm text-muted-foreground bg-slate-50 rounded-md border border-dashed">
+                  <div className="text-center p-4 text-sm text-muted-foreground bg-muted rounded-md border border-dashed">
                     Nenhum item válido para faturamento encontrado neste pedido.
                   </div>
                 )}

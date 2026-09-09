@@ -83,9 +83,9 @@ export default function ManifestacaoNFDetail() {
               {nota.status_manifestacao}
             </Badge>
             
-            {nota.importado_entrada && <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><CheckCircle2 className="w-3 h-3 mr-1"/> Importado NF Entrada</Badge>}
-            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200"><CheckCircle2 className="w-3 h-3 mr-1"/> Financeiro Integrado</Badge>}
-            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200"><CheckCircle2 className="w-3 h-3 mr-1"/> Contabilidade Enviada</Badge>}
+            {nota.importado_entrada && <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Importado NF Entrada</Badge>}
+            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Financeiro Integrado</Badge>}
+            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"><CheckCircle2 className="w-3 h-3 mr-1"/> Contabilidade Enviada</Badge>}
           </div>
           
           <ActionButtons nota={nota} loadData={loadData} toast={toast} navigate={navigate} />

@@ -145,14 +145,14 @@ export function ActionButtons({ nota, loadData, toast, navigate }) {
         )}
 
         {!nota.integrado_financeiro && nota.status_manifestacao === 'Confirmação' && (
-           <Button size="sm" variant="outline" onClick={onGerarCP} disabled={loadingAction} className="text-emerald-600 border-emerald-200">
+           <Button size="sm" variant="outline" onClick={onGerarCP} disabled={loadingAction} className="text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800">
              {loadingAction === 'gerarCP' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
              Gerar C. Pagar
            </Button>
         )}
 
         {!nota.integrado_contabil && nota.status_manifestacao === 'Confirmação' && (
-           <Button size="sm" variant="outline" onClick={onContabilidade} disabled={loadingAction} className="text-indigo-600 border-indigo-200">
+           <Button size="sm" variant="outline" onClick={onContabilidade} disabled={loadingAction} className="text-indigo-600 border-indigo-200 dark:text-indigo-400 dark:border-indigo-800">
              {loadingAction === 'contabil' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
              Contabilidade
            </Button>

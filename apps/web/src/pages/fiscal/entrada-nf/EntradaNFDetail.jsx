@@ -123,10 +123,10 @@ export default function EntradaNFDetail() {
           <Button variant="outline" onClick={() => navigate('/fiscal/entrada-nf')}>
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </Button>
-          <Button variant="outline" onClick={() => navigate(`/fiscal/entrada-nf/${id}/editar`)} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200">
+          <Button variant="outline" onClick={() => navigate(`/fiscal/entrada-nf/${id}/editar`)} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 dark:text-blue-400 dark:hover:bg-blue-950/30 dark:border-blue-800">
             <Edit className="w-4 h-4 mr-2" /> Editar
           </Button>
-          <Button variant="outline" onClick={handleDelete} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+          <Button variant="outline" onClick={handleDelete} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:text-red-400 dark:hover:bg-red-950/30 dark:border-red-800">
             <Trash2 className="w-4 h-4 mr-2" /> Excluir
           </Button>
         </div>
@@ -137,8 +137,8 @@ export default function EntradaNFDetail() {
         <CardContent className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Badge className={`${getStatusColor(nota.status)} px-3 py-1 text-sm font-medium`}>{nota.status}</Badge>
-            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Financeiro Integrado</Badge>}
-            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Contabilidade Enviada</Badge>}
+            {nota.integrado_financeiro && <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800"><CheckCircle2 className="w-3 h-3 mr-1" /> Financeiro Integrado</Badge>}
+            {nota.integrado_contabil && <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"><CheckCircle2 className="w-3 h-3 mr-1" /> Contabilidade Enviada</Badge>}
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -231,7 +231,7 @@ export default function EntradaNFDetail() {
               {nota.observacoes && (
                 <div className="col-span-full pt-4 border-t border-border">
                   <h4 className="text-sm font-semibold text-foreground mb-2">Observações</h4>
-                  <p className="text-sm text-foreground whitespace-pre-wrap bg-yellow-50/50 p-3 rounded border border-yellow-100">{nota.observacoes}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap bg-yellow-50/50 dark:bg-yellow-950/20 p-3 rounded border border-yellow-100 dark:border-yellow-900">{nota.observacoes}</p>
                 </div>
               )}
 

@@ -10,9 +10,9 @@ export default function NfeFilters({ filters, setFilters, onApply, onReset, clie
   const handleChange = (k, v) => setFilters(prev => ({ ...prev, [k]: v }));
 
   return (
-    <Card className="mb-6 border-slate-200 shadow-sm">
+    <Card className="mb-6 border-border shadow-sm">
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-4 text-slate-700 font-medium">
+        <div className="flex items-center gap-2 mb-4 text-foreground font-medium">
           <Filter className="w-4 h-4" /> Filtros de Busca
         </div>
         
@@ -21,9 +21,9 @@ export default function NfeFilters({ filters, setFilters, onApply, onReset, clie
           <div className="space-y-1.5 xl:col-span-2">
             <Label className="text-xs">Período de Emissão</Label>
             <div className="flex items-center gap-2">
-              <Input type="date" value={filters.data_inicio} onChange={e => handleChange('data_inicio', e.target.value)} className="h-9 text-slate-900" />
-              <span className="text-slate-400">até</span>
-              <Input type="date" value={filters.data_fim} onChange={e => handleChange('data_fim', e.target.value)} className="h-9 text-slate-900" />
+              <Input type="date" value={filters.data_inicio} onChange={e => handleChange('data_inicio', e.target.value)} className="h-9 text-foreground" />
+              <span className="text-muted-foreground">até</span>
+              <Input type="date" value={filters.data_fim} onChange={e => handleChange('data_fim', e.target.value)} className="h-9 text-foreground" />
             </div>
           </div>
 

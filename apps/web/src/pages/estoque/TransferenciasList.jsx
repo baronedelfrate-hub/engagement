@@ -55,9 +55,9 @@ function TransferenciasList() {
         header: 'Origem -> Destino', 
         render: (item) => (
             <div className="flex items-center gap-2 text-sm">
-                <span className="bg-red-50 text-red-700 px-2 py-1 rounded">{item.origem}</span>
-                <ArrowRight className="h-3 w-3 text-slate-400" />
-                <span className="bg-green-50 text-green-700 px-2 py-1 rounded">{item.destino}</span>
+                <span className="bg-red-50 text-red-700 px-2 py-1 rounded dark:bg-red-950/30 dark:text-red-400">{item.origem}</span>
+                <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                <span className="bg-green-50 text-green-700 px-2 py-1 rounded dark:bg-green-950/30 dark:text-green-400">{item.destino}</span>
             </div>
         ) 
     },

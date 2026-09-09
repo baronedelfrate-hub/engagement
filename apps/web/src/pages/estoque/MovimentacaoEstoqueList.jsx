@@ -104,8 +104,8 @@ function MovimentacaoEstoqueList() {
       header: 'Tipo', 
       render: (item) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            item.tipo === 'Entrada' ? 'bg-green-100 text-green-700' : 
-            item.tipo === 'Saída' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+            item.tipo === 'Entrada' ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400' :
+            item.tipo === 'Saída' ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400'
         }`}>
           {item.tipo}
         </span>
@@ -118,7 +118,7 @@ function MovimentacaoEstoqueList() {
                 {item.status || 'Concluído'}
             </span>
             {item.status === 'Pendente' && (
-                <Button size="xs" variant="ghost" className="h-6 w-6 p-0 bg-green-50 text-green-600" onClick={() => handleApprove(item)} title="Aprovar">
+                <Button size="xs" variant="ghost" className="h-6 w-6 p-0 bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400" onClick={() => handleApprove(item)} title="Aprovar">
                     <Check className="h-3 w-3" />
                 </Button>
             )}

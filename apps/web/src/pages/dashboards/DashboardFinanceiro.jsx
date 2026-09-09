@@ -96,7 +96,7 @@ function DashboardFinanceiro() {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-blue-400">Saldo em Bancos</CardTitle></CardHeader>
             <CardContent>
                 <div className="text-3xl font-bold text-blue-500"><AnimatedCounter value={data.totalBancos} duration={1.5} isCurrency /></div>
-                <p className="text-xs text-slate-400 mt-1">Soma de todas as contas</p>
+                <p className="text-xs text-muted-foreground mt-1">Soma de todas as contas</p>
             </CardContent>
         </GlassCard>
         <GlassCard gradient="from-blue-500/40 to-purple-500/40" className="flex flex-row items-center justify-between pr-8">
@@ -176,7 +176,7 @@ function DashboardFinanceiro() {
         {/* RIGHT COLUMN - BANK DETAILS */}
         <div className="space-y-6">
             <GlassCard className="h-full">
-                <CardHeader className="border-b border-slate-800/50 pb-4">
+                <CardHeader className="border-b border-border/50 pb-4">
                     <CardTitle className="flex items-center gap-2">
                         <Building2 className="h-5 w-5 text-blue-400" /> Saldos Bancários
                     </CardTitle>
@@ -184,10 +184,10 @@ function DashboardFinanceiro() {
                 <CardContent className="pt-4 space-y-4">
                     {data.bancos.length > 0 ? (
                         data.bancos.map(b => (
-                            <div key={b.id} className="flex items-center justify-between p-3 bg-slate-900/30 rounded-lg border border-slate-800/50 hover:bg-slate-900/50 transition-colors">
+                            <div key={b.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border/50 hover:bg-muted transition-colors">
                                 <div>
-                                    <p className="font-medium text-sm text-slate-200">{b.nome}</p>
-                                    <p className="text-xs text-slate-500">{b.conta || 'Conta Principal'}</p>
+                                    <p className="font-medium text-sm text-foreground">{b.nome}</p>
+                                    <p className="text-xs text-muted-foreground">{b.conta || 'Conta Principal'}</p>
                                 </div>
                                 <span className={`font-mono font-bold ${(parseFloat(b.saldo) || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                     R$ {parseFloat(b.saldo || 0).toFixed(2)}
@@ -195,7 +195,7 @@ function DashboardFinanceiro() {
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-8 text-slate-500 text-sm">
+                        <div className="text-center py-8 text-muted-foreground text-sm">
                             Nenhum banco cadastrado.
                         </div>
                     )}

@@ -53,7 +53,7 @@ function DashboardVendas() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-400">Total de Orçamentos</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total de Orçamentos</CardTitle></CardHeader>
             <CardContent><div className="text-3xl font-bold text-white"><AnimatedCounter value={stats.totalOrcamentos} /></div></CardContent>
         </Card>
         <Card>
@@ -110,13 +110,13 @@ function DashboardVendas() {
                         : "Atenção: A taxa de conversão recente está baixa. Verifique os follow-ups."}
                 </div>
                 <div className="space-y-4 mt-6">
-                    <h4 className="font-medium text-sm text-slate-400 uppercase tracking-wider">Comparativo de Períodos</h4>
-                    <div className="flex items-center justify-between text-sm border-b border-white/10 pb-3">
-                        <span className="text-slate-300">Últimos 30 dias</span>
+                    <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">Comparativo de Períodos</h4>
+                    <div className="flex items-center justify-between text-sm border-b border-border pb-3">
+                        <span className="text-muted-foreground">Últimos 30 dias</span>
                         <span className="font-bold text-emerald-400"><AnimatedCounter value={stats.conversionRate30} suffix="%" /></span>
                     </div>
-                    <div className="flex items-center justify-between text-sm border-b border-white/10 pb-3">
-                        <span className="text-slate-300">Últimos 90 dias</span>
+                    <div className="flex items-center justify-between text-sm border-b border-border pb-3">
+                        <span className="text-muted-foreground">Últimos 90 dias</span>
                         <span className="font-bold text-purple-400"><AnimatedCounter value={stats.conversionRate90} suffix="%" /></span>
                     </div>
                 </div>

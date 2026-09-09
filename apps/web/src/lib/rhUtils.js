@@ -57,10 +57,10 @@ export const calculateNRStatus = (validade) => {
 
 export const getAlertColor = (status) => {
   switch (status) {
-    case 'Vencido': return 'bg-red-100 text-red-800 border-red-200';
-    case 'A Vencer': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'Válido': return 'bg-green-100 text-green-800 border-green-200';
-    case 'Pendente': return 'bg-gray-100 text-gray-800 border-gray-200';
-    default: return 'bg-slate-100 text-slate-800';
+    case 'Vencido': return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800';
+    case 'A Vencer': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800';
+    case 'Válido': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800';
+    case 'Pendente': return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-950/30 dark:text-gray-400 dark:border-gray-800';
+    default: return 'bg-muted text-foreground';
   }
 };

@@ -2,27 +2,27 @@ import { cn } from "@/lib/utils";
 
 export const tableStyles = {
   // Main container
-  container: "rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden",
-  
+  container: "rounded-md border border-border bg-background shadow-sm overflow-hidden",
+
   // Header styles
-  headerRow: "bg-slate-900 hover:bg-slate-900 border-none",
-  headerCell: "h-11 px-4 text-left align-middle font-medium text-slate-100 dark:text-slate-100 [&:has([role=checkbox])]:pr-0",
-  
+  headerRow: "bg-muted hover:bg-muted border-none",
+  headerCell: "h-11 px-4 text-left align-middle font-medium text-foreground [&:has([role=checkbox])]:pr-0",
+
   // Body styles
-  row: "border-b border-slate-100 dark:border-slate-800 transition-colors hover:bg-slate-100/50 dark:hover:bg-slate-800/50 data-[state=selected]:bg-muted even:bg-slate-50/50 dark:even:bg-slate-900/50",
-  cell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-slate-700 dark:text-slate-300 font-normal text-sm",
-  
-  // Empty state - added explicit white/dark background to prevent transparency issues causing dark overlays
-  emptyRow: "hover:bg-transparent bg-white dark:bg-slate-950",
-  emptyCell: "h-32 text-center align-middle text-slate-500 dark:text-slate-400 font-medium",
-  
+  row: "border-b border-border transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted even:bg-muted/30",
+  cell: "p-4 align-middle [&:has([role=checkbox])]:pr-0 text-foreground font-normal text-sm",
+
+  // Empty state - explicit theme background to prevent transparency issues causing overlay mismatches
+  emptyRow: "hover:bg-transparent bg-background",
+  emptyCell: "h-32 text-center align-middle text-muted-foreground font-medium",
+
   // Search/Filter inputs
-  searchInput: "h-10 w-full pl-10 pr-4 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:ring-offset-slate-950 dark:placeholder:text-slate-400 dark:focus-visible:ring-slate-300",
-  searchIcon: "absolute left-3 top-3 h-4 w-4 text-slate-500 dark:text-slate-400"
+  searchInput: "h-10 w-full pl-10 pr-4 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+  searchIcon: "absolute left-3 top-3 h-4 w-4 text-muted-foreground"
 };
 
 export const getStatusBadgeClass = (status) => {
-  if (!status) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700";
+  if (!status) return "bg-muted text-foreground border-border";
   
   const normalized = String(status).toLowerCase();
   
@@ -54,7 +54,7 @@ export const getStatusBadgeClass = (status) => {
     'atrasado': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
     
     // Default / Gray
-    'default': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+    'default': 'bg-muted text-foreground border-border'
   };
   
   return cn("px-2.5 py-0.5 rounded-full text-xs font-medium border", styles[normalized] || styles['default']);

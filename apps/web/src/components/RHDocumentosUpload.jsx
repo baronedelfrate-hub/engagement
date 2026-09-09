@@ -131,7 +131,7 @@ const RHDocumentosUpload = ({ funcionarioId, tipoDocumento = "Geral", onUploadCo
       <div 
         className={cn(
           "border-2 border-dashed rounded-lg p-4 text-center transition-colors relative overflow-hidden",
-          isUploading ? "border-slate-300 bg-slate-50 opacity-70 pointer-events-none" : "border-slate-300 hover:bg-slate-50 hover:border-primary/50 cursor-pointer",
+          isUploading ? "border-border bg-muted opacity-70 pointer-events-none" : "border-border hover:bg-muted hover:border-primary/50 cursor-pointer",
           error ? "border-red-400 bg-red-50/50" : ""
         )}
         onClick={() => !isUploading && fileInputRef.current?.click()}
@@ -141,14 +141,14 @@ const RHDocumentosUpload = ({ funcionarioId, tipoDocumento = "Geral", onUploadCo
         {isUploading ? (
           <div className="flex flex-col items-center justify-center py-2">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-            <span className="text-sm font-medium text-slate-700">Enviando documento...</span>
+            <span className="text-sm font-medium text-foreground">Enviando documento...</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 py-2">
-            <Upload className="h-8 w-8 text-slate-400" />
+            <Upload className="h-8 w-8 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium text-slate-700">Adicionar {tipoDocumento}</p>
-              <p className="text-xs text-slate-500 mt-1">PDF, JPG ou PNG (Máximo 5MB)</p>
+              <p className="text-sm font-medium text-foreground">Adicionar {tipoDocumento}</p>
+              <p className="text-xs text-muted-foreground mt-1">PDF, JPG ou PNG (Máximo 5MB)</p>
             </div>
             
             {error && (
@@ -172,7 +172,7 @@ const RHDocumentosUpload = ({ funcionarioId, tipoDocumento = "Geral", onUploadCo
       {documents.length > 0 && (
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
           {documents.map(doc => (
-            <Card key={doc.id} className="p-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+            <Card key={doc.id} className="p-3 flex items-center justify-between hover:bg-muted transition-colors">
               <div className="flex items-center gap-3 overflow-hidden">
                 {doc.nome_arquivo.toLowerCase().endsWith('.pdf') ? (
                   <div className="p-2 bg-red-100 rounded text-red-600"><FileText className="h-5 w-5 flex-shrink-0" /></div>
@@ -186,7 +186,7 @@ const RHDocumentosUpload = ({ funcionarioId, tipoDocumento = "Geral", onUploadCo
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <Button variant="ghost" size="icon" onClick={() => window.open(doc.arquivo_url, '_blank')} title="Visualizar/Baixar">
-                  <Download className="h-4 w-4 text-slate-600" />
+                  <Download className="h-4 w-4 text-muted-foreground" />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => handleDelete(doc.id, doc.arquivo_url)} title="Remover" className="hover:bg-red-100 hover:text-red-600">
                   <X className="h-4 w-4 text-red-500" />

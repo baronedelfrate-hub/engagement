@@ -53,9 +53,9 @@ const ConversaoHistorico = ({ orcamentoId, pedidoId }) => {
   if (!historico || historico.length === 0) return null;
 
   return (
-    <Card className="mt-6 mb-6 border-slate-200 dark:border-slate-800">
-      <CardHeader className="pb-2 bg-slate-50 dark:bg-slate-900/50">
-        <CardTitle className="text-sm font-medium flex items-center gap-2 text-slate-700 dark:text-slate-300">
+    <Card className="mt-6 mb-6 border-border">
+      <CardHeader className="pb-2 bg-muted">
+        <CardTitle className="text-sm font-medium flex items-center gap-2 text-foreground">
           <History className="h-4 w-4" />
           Histórico de Conversões
         </CardTitle>
@@ -78,7 +78,7 @@ const ConversaoHistorico = ({ orcamentoId, pedidoId }) => {
                     {new Date(h.data_conversao).toLocaleString('pt-BR')}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       {h.tipo_conversao === 'orcamento_para_pedido' ? (
                         <><span className="text-blue-600 font-medium">Orçamento</span> <ArrowRightLeft className="h-3 w-3" /> <span className="text-emerald-600 font-medium">Pedido</span></>
                       ) : (
@@ -86,7 +86,7 @@ const ConversaoHistorico = ({ orcamentoId, pedidoId }) => {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-slate-500">
+                  <TableCell className="text-sm text-muted-foreground">
                     {h.orcamentos?.numero} ↔ {h.pedidos_venda?.numero}
                   </TableCell>
                   <TableCell className="text-right">

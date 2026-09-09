@@ -165,7 +165,7 @@ const FileUploader = ({
       <div 
         className={cn(
           "relative border-2 border-dashed rounded-lg p-6 transition-colors text-center",
-          dragActive ? "border-primary bg-primary/5" : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/20",
+          dragActive ? "border-primary bg-primary/5" : "border-border bg-muted",
           isUploading ? "opacity-50 pointer-events-none" : "hover:border-primary/50 cursor-pointer",
           localError ? "border-red-500 bg-red-50 dark:bg-red-950/20" : ""
         )}
@@ -187,11 +187,11 @@ const FileUploader = ({
           <div className="flex flex-col items-center gap-4 cursor-default" onClick={(e) => e.stopPropagation()}>
             <div className="relative group">
                {isImage(currentUrl) ? (
-                 <div className="h-32 w-32 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 relative shadow-sm">
+                 <div className="h-32 w-32 rounded-lg overflow-hidden border border-border bg-background relative shadow-sm">
                     <img src={currentUrl} alt="Preview" className="h-full w-full object-contain" />
                  </div>
                ) : (
-                 <div className="h-32 w-32 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 shadow-sm">
+                 <div className="h-32 w-32 rounded-lg flex items-center justify-center bg-muted border border-border text-muted-foreground shadow-sm">
                     <FileText className="h-12 w-12" />
                  </div>
                )}
@@ -205,7 +205,7 @@ const FileUploader = ({
                  <X className="h-3 w-3" />
                </Button>
             </div>
-            <div className="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate px-2">
+            <div className="text-sm text-muted-foreground max-w-xs truncate px-2">
                <a href={currentUrl} target="_blank" rel="noreferrer" className="hover:underline text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1">
                  Visualizar Arquivo <FileText className="h-3 w-3" />
                </a>
@@ -223,16 +223,16 @@ const FileUploader = ({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 py-4">
-            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-2">
-               {type === 'logo' || type === 'image' ? <ImageIcon className="h-6 w-6 text-slate-500 dark:text-slate-400" /> : <Upload className="h-6 w-6 text-slate-500 dark:text-slate-400" />}
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">
+               {type === 'logo' || type === 'image' ? <ImageIcon className="h-6 w-6 text-muted-foreground" /> : <Upload className="h-6 w-6 text-muted-foreground" />}
             </div>
             <div className="space-y-1">
-               <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+               <p className="text-sm font-medium text-foreground">
                  <span className="text-primary hover:underline">
                    Clique para buscar
                  </span> ou arraste aqui
                </p>
-               <p className="text-xs text-slate-500">
+               <p className="text-xs text-muted-foreground">
                  {(type === 'logo' || type === 'image') && `PNG, JPG ou GIF (Max. ${config.maxSizeMB}MB)`}
                  {type === 'documento' && `PDF ou DOC (Max. ${config.maxSizeMB}MB)`}
                  {type === 'comprovante' && `PDF, PNG ou JPG (Max. ${config.maxSizeMB}MB)`}
@@ -241,7 +241,7 @@ const FileUploader = ({
             
             {localError && (
               <div className="mt-4 flex flex-col items-center gap-2 w-full">
-                <div className="text-xs text-red-600 dark:text-red-400 flex items-start gap-1 text-left bg-red-50 p-2 rounded w-full">
+                <div className="text-xs text-red-600 dark:text-red-400 flex items-start gap-1 text-left bg-red-50 dark:bg-red-950/30 p-2 rounded w-full">
                   <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <span>{localError}</span>
                 </div>
@@ -263,13 +263,13 @@ const FileUploader = ({
         )}
 
         {isUploading && (
-           <div className="absolute inset-0 bg-white/90 dark:bg-slate-950/90 flex flex-col items-center justify-center rounded-lg z-20 backdrop-blur-sm">
+           <div className="absolute inset-0 bg-background/90 flex flex-col items-center justify-center rounded-lg z-20 backdrop-blur-sm">
               <Loader2 className="h-8 w-8 text-primary animate-spin mb-3" />
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-3">
+              <p className="text-sm font-medium text-foreground mb-3">
                 {progress >= 100 ? 'Finalizando...' : `Enviando... ${Math.floor(progress)}%`}
               </p>
               
-              <div className="w-2/3 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+              <div className="w-2/3 h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-primary transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}

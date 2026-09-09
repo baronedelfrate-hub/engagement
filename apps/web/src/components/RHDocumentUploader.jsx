@@ -68,7 +68,7 @@ const RHDocumentUploader = ({ onUploadComplete, className }) => {
   };
 
   return (
-    <div className={cn("border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer relative", className)} onClick={() => fileInputRef.current?.click()}>
+    <div className={cn("border-2 border-dashed border-border rounded-lg p-6 text-center hover:bg-muted transition-colors cursor-pointer relative", className)} onClick={() => fileInputRef.current?.click()}>
       <input 
         type="file" 
         className="hidden" 
@@ -80,13 +80,13 @@ const RHDocumentUploader = ({ onUploadComplete, className }) => {
       {isUploading ? (
         <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-          <span className="text-sm text-slate-500">Enviando... {progress}%</span>
+          <span className="text-sm text-muted-foreground">Enviando... {progress}%</span>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-2">
-          <Upload className="h-8 w-8 text-slate-400" />
-          <p className="text-sm font-medium text-slate-700">Clique para selecionar ou arraste o arquivo</p>
-          <p className="text-xs text-slate-500">PDF, Imagens, DOC (Max 20MB)</p>
+          <Upload className="h-8 w-8 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">Clique para selecionar ou arraste o arquivo</p>
+          <p className="text-xs text-muted-foreground">PDF, Imagens, DOC (Max 20MB)</p>
         </div>
       )}
     </div>

@@ -14,13 +14,13 @@ export const getPhaseLabel = (fase) => {
 
 export const getPhaseColor = (fase) => {
   const map = {
-    'B1': 'bg-blue-100 text-blue-800 border-blue-200',
-    'B2': 'bg-green-100 text-green-800 border-green-200',
-    'B3': 'bg-purple-100 text-purple-800 border-purple-200',
-    'B4': 'bg-orange-100 text-orange-800 border-orange-200',
-    'B5': 'bg-pink-100 text-pink-800 border-pink-200'
+    'B1': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800',
+    'B2': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800',
+    'B3': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800',
+    'B4': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800',
+    'B5': 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-800'
   };
-  return map[fase] || 'bg-gray-100 text-gray-800 border-gray-200';
+  return map[fase] || 'bg-muted text-foreground border-border';
 };
 
 export const calculatePhaseProgress = (activities) => {

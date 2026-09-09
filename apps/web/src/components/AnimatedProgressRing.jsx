@@ -16,7 +16,7 @@ const AnimatedProgressRing = ({ progress, size = 60, strokeWidth = 4, color = "#
           r={radius}
           cx={size / 2}
           cy={size / 2}
-          className="text-slate-700/20"
+          className="text-muted-foreground/20"
         />
         <motion.circle
           initial={{ strokeDashoffset: circumference }}

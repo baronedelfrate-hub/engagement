@@ -353,26 +353,26 @@ function DRE() {
                 <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-sm text-right min-w-[800px]">
                         <thead>
-                            <tr className="bg-slate-100 dark:bg-slate-800 border-b dark:border-slate-700">
+                            <tr className="bg-muted border-b border-border">
                                 <th className="px-4 py-3 text-left">Período</th>
                                 <th className="px-4 py-3">RECEITAS</th>
                                 <th className="px-4 py-3">(-) CUSTOS DOS SERVIÇOS</th>
-                                <th className="px-4 py-3 font-bold bg-slate-200 dark:bg-slate-700">(=) MARGEM CONTRIB.</th>
+                                <th className="px-4 py-3 font-bold bg-muted">(=) MARGEM CONTRIB.</th>
                                 <th className="px-4 py-3">(-) DESPESAS OPERACIONAIS</th>
-                                <th className="px-4 py-3 font-bold bg-slate-200 dark:bg-slate-700">(=) EBITDA</th>
+                                <th className="px-4 py-3 font-bold bg-muted">(=) EBITDA</th>
                                 <th className="px-4 py-3">(-) NÃO OPERACIONAIS</th>
                                 <th className="px-4 py-3 font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">(=) LUCRO LÍQUIDO</th>
                             </tr>
                         </thead>
                         <tbody>
                             {dreData.map((row, i) => (
-                                <tr key={i} className="border-b dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <tr key={i} className="border-b border-border hover:bg-muted transition-colors">
                                     <td className="px-4 py-3 text-left font-medium">{row.name}</td>
                                     <td className="px-4 py-3 text-blue-600 dark:text-blue-400">{row.Receitas.toFixed(2)}</td>
                                     <td className="px-4 py-3 text-red-500">({row.CustosServicos.toFixed(2)})</td>
-                                    <td className="px-4 py-3 font-bold bg-slate-50 dark:bg-slate-800/80">{row.MargemContribuicao.toFixed(2)}</td>
+                                    <td className="px-4 py-3 font-bold bg-muted">{row.MargemContribuicao.toFixed(2)}</td>
                                     <td className="px-4 py-3 text-red-500">({row.DespesasOperacionais.toFixed(2)})</td>
-                                    <td className={`px-4 py-3 font-bold bg-slate-50 dark:bg-slate-800/80 ${row.EBITDA >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{row.EBITDA.toFixed(2)}</td>
+                                    <td className={`px-4 py-3 font-bold bg-muted ${row.EBITDA >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>{row.EBITDA.toFixed(2)}</td>
                                     <td className="px-4 py-3 text-red-500">({row.NaoOperacionais.toFixed(2)})</td>
                                     <td className={`px-4 py-3 font-bold ${row.LucroLiquido >= 0 ? 'text-green-700 dark:text-green-500' : 'text-red-700 dark:text-red-500'} bg-blue-50 dark:bg-blue-900/20`}>{row.LucroLiquido.toFixed(2)}</td>
                                 </tr>

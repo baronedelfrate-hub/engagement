@@ -159,7 +159,7 @@ function PontoEquilibrio() {
                             value={simValues.variableCostPct} 
                             onChange={e => setSimValues({...simValues, variableCostPct: parseFloat(e.target.value) || 0})}
                         />
-                        <span className="text-slate-500">%</span>
+                        <span className="text-muted-foreground">%</span>
                     </div>
                 </div>
                 
@@ -182,24 +182,24 @@ function PontoEquilibrio() {
         <Card className="lg:col-span-2">
             <CardHeader><CardTitle>Resultados do Ponto de Equilíbrio</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm text-blue-600 font-medium uppercase">PE Financeiro (Valor)</span>
-                    <span className="text-3xl font-bold text-blue-800 mt-2">R$ {peValue.toFixed(2)}</span>
-                    <span className="text-xs text-blue-500 mt-1">Necessário faturar para zerar</span>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 dark:bg-blue-950/30 dark:border-blue-900 flex flex-col items-center justify-center text-center">
+                    <span className="text-sm text-blue-600 dark:text-blue-400 font-medium uppercase">PE Financeiro (Valor)</span>
+                    <span className="text-3xl font-bold text-blue-800 dark:text-blue-400 mt-2">R$ {peValue.toFixed(2)}</span>
+                    <span className="text-xs text-blue-500 dark:text-blue-400 mt-1">Necessário faturar para zerar</span>
                 </div>
-                <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm text-slate-600 font-medium uppercase">% da Receita Atual</span>
+                <div className="bg-muted p-4 rounded-lg border border-border flex flex-col items-center justify-center text-center">
+                    <span className="text-sm text-muted-foreground font-medium uppercase">% da Receita Atual</span>
                     <span className={`text-3xl font-bold mt-2 ${pePercent > 100 ? 'text-red-600' : 'text-green-600'}`}>
                         {pePercent.toFixed(1)}%
                     </span>
-                    <span className="text-xs text-slate-500 mt-1">Capacidade utilizada</span>
+                    <span className="text-xs text-muted-foreground mt-1">Capacidade utilizada</span>
                 </div>
-                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 flex flex-col items-center justify-center text-center">
-                    <span className="text-sm text-purple-600 font-medium uppercase">PE (Unidades*)</span>
-                    <span className="text-3xl font-bold text-purple-800 mt-2">
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 dark:bg-purple-950/30 dark:border-purple-900 flex flex-col items-center justify-center text-center">
+                    <span className="text-sm text-purple-600 dark:text-purple-400 font-medium uppercase">PE (Unidades*)</span>
+                    <span className="text-3xl font-bold text-purple-800 dark:text-purple-400 mt-2">
                         {(peValue / (simValues.revenue > 0 ? (simValues.revenue / 1000) : 1)).toFixed(0)} u
                     </span>
-                    <span className="text-xs text-purple-500 mt-1">*Estimado (Tkt Médio R$ {(simValues.revenue/1000).toFixed(0)})</span>
+                    <span className="text-xs text-purple-500 dark:text-purple-400 mt-1">*Estimado (Tkt Médio R$ {(simValues.revenue/1000).toFixed(0)})</span>
                 </div>
             </CardContent>
             <CardContent className="h-[300px] mt-4">

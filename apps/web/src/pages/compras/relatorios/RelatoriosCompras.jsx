@@ -303,7 +303,7 @@ const RelatoriosCompras = () => {
                 <div className="xl:col-span-1 space-y-6">
                     {/* Source Selection */}
                     <Card>
-                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-slate-500">Fonte de Dados</CardTitle></CardHeader>
+                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-muted-foreground">Fonte de Dados</CardTitle></CardHeader>
                         <CardContent>
                             <Select value={source} onValueChange={setSource}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -321,7 +321,7 @@ const RelatoriosCompras = () => {
                     {/* Filters */}
                     <Card>
                         <CardHeader className="py-3 flex flex-row items-center justify-between">
-                            <CardTitle className="text-sm uppercase text-slate-500">Filtros</CardTitle>
+                            <CardTitle className="text-sm uppercase text-muted-foreground">Filtros</CardTitle>
                             <Button variant="ghost" size="xs" onClick={resetFilters}><FilterX className="h-4 w-4" /></Button>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -387,7 +387,7 @@ const RelatoriosCompras = () => {
 
                     {/* Templates */}
                     <Card>
-                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-slate-500">Templates</CardTitle></CardHeader>
+                        <CardHeader className="py-3"><CardTitle className="text-sm uppercase text-muted-foreground">Templates</CardTitle></CardHeader>
                         <CardContent>
                             <div className="flex gap-2 mb-3">
                                 <Input placeholder="Nome..." value={templateName} onChange={e => setTemplateName(e.target.value)} className="h-8 text-xs" />
@@ -395,11 +395,11 @@ const RelatoriosCompras = () => {
                             </div>
                             <div className="max-h-32 overflow-y-auto space-y-1">
                                 {savedTemplates.map(t => (
-                                    <div key={t.id} onClick={() => handleLoadTemplate(t)} className="text-xs p-1.5 hover:bg-slate-100 rounded cursor-pointer truncate border border-transparent hover:border-slate-200">
+                                    <div key={t.id} onClick={() => handleLoadTemplate(t)} className="text-xs p-1.5 hover:bg-muted rounded cursor-pointer truncate border border-transparent hover:border-border">
                                         {t.name}
                                     </div>
                                 ))}
-                                {savedTemplates.length === 0 && <span className="text-xs text-slate-400 italic">Nenhum template salvo.</span>}
+                                {savedTemplates.length === 0 && <span className="text-xs text-muted-foreground italic">Nenhum template salvo.</span>}
                             </div>
                         </CardContent>
                     </Card>
@@ -439,9 +439,9 @@ const RelatoriosCompras = () => {
                     </div>
 
                     {/* Toolbar */}
-                    <div className="bg-white p-4 rounded-lg border shadow-sm flex flex-wrap justify-between items-center gap-4">
+                    <div className="bg-background p-4 rounded-lg border shadow-sm flex flex-wrap justify-between items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs font-normal text-slate-500">
+                            <Badge variant="outline" className="text-xs font-normal text-muted-foreground">
                                 {filteredData.length} registros
                             </Badge>
                         </div>
@@ -451,14 +451,14 @@ const RelatoriosCompras = () => {
                             </Button>
                             <Button 
                                 variant="outline" 
-                                className="gap-2 hover:text-red-600 hover:border-red-200"
+                                className="gap-2 hover:text-red-600 hover:border-red-200 dark:hover:text-red-400 dark:hover:border-red-800"
                                 onClick={() => exportToPDF(filteredData, getActiveColumns(), `Relatório Compras - ${source}`, generateDesc())}
                             >
                                 <FileText className="h-4 w-4" /> PDF
                             </Button>
                             <Button 
                                 variant="outline" 
-                                className="gap-2 hover:text-green-600 hover:border-green-200"
+                                className="gap-2 hover:text-green-600 hover:border-green-200 dark:hover:text-green-400 dark:hover:border-green-800"
                                 onClick={() => exportToExcel(filteredData, getActiveColumns(), `Relatório Compras - ${source}`, generateDesc())}
                             >
                                 <FileSpreadsheet className="h-4 w-4" /> Excel
@@ -470,7 +470,7 @@ const RelatoriosCompras = () => {
                     <Card className="overflow-hidden min-h-[500px] flex flex-col">
                         <div className="overflow-x-auto flex-1">
                             <table className="w-full text-sm text-left">
-                                <thead className="bg-slate-100 text-slate-600 font-medium border-b">
+                                <thead className="bg-muted text-muted-foreground font-medium border-b">
                                     <tr>
                                         {getActiveColumns().map(col => (
                                             <th key={col.id} className="px-4 py-3 whitespace-nowrap text-xs uppercase tracking-wider">
@@ -479,11 +479,11 @@ const RelatoriosCompras = () => {
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100">
+                                <tbody className="divide-y divide-border">
                                     {paginatedData.map((row, idx) => (
-                                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                        <tr key={idx} className="hover:bg-muted transition-colors">
                                             {getActiveColumns().map(col => (
-                                                <td key={col.id} className="px-4 py-2 whitespace-nowrap text-slate-700">
+                                                <td key={col.id} className="px-4 py-2 whitespace-nowrap text-foreground">
                                                     {renderCell(row, col)}
                                                 </td>
                                             ))}
@@ -491,7 +491,7 @@ const RelatoriosCompras = () => {
                                     ))}
                                     {paginatedData.length === 0 && (
                                         <tr>
-                                            <td colSpan={getActiveColumns().length} className="p-12 text-center text-slate-400">
+                                            <td colSpan={getActiveColumns().length} className="p-12 text-center text-muted-foreground">
                                                 <div className="flex flex-col items-center gap-2">
                                                     <Search className="h-10 w-10 opacity-20" />
                                                     <p>Nenhum dado encontrado.</p>
@@ -504,8 +504,8 @@ const RelatoriosCompras = () => {
                         </div>
                         
                         {/* Pagination */}
-                        <div className="p-4 border-t bg-slate-50 flex items-center justify-between">
-                            <span className="text-xs text-slate-500">
+                        <div className="p-4 border-t bg-muted flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">
                                 Página {previewPage} de {totalPages || 1}
                             </span>
                             <div className="flex gap-1">
@@ -554,14 +554,14 @@ const renderCell = (row, col) => {
     }
     if (col.type === 'status') {
         const colors = {
-            'Aberto': 'bg-blue-100 text-blue-600',
-            'Recebido': 'bg-green-100 text-green-600',
-            'Concluida': 'bg-green-100 text-green-600',
-            'Cancelado': 'bg-red-100 text-red-600',
-            'Pendente': 'bg-yellow-100 text-yellow-800',
-            'Rejeitada': 'bg-red-100 text-red-800'
+            'Aberto': 'bg-blue-100 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+            'Recebido': 'bg-green-100 text-green-600 dark:bg-green-950/30 dark:text-green-400',
+            'Concluida': 'bg-green-100 text-green-600 dark:bg-green-950/30 dark:text-green-400',
+            'Cancelado': 'bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400',
+            'Pendente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400',
+            'Rejeitada': 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-400'
         };
-        return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[val] || 'bg-gray-100'}`}>{val}</span>;
+        return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[val] || 'bg-muted'}`}>{val}</span>;
     }
     return val;
 };

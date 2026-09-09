@@ -157,9 +157,9 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
         <div 
             className={`
                 border-2 border-dashed rounded-lg p-8 text-center transition-all
-                ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-slate-400'}
-                ${file && !errorLog ? 'bg-green-50 border-green-500' : ''}
-                ${errorLog ? 'bg-red-50 border-red-300' : ''}
+                ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border hover:border-border'}
+                ${file && !errorLog ? 'bg-green-50 border-green-500 dark:bg-green-950/30' : ''}
+                ${errorLog ? 'bg-red-50 border-red-300 dark:bg-red-950/30 dark:border-red-800' : ''}
             `}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -175,34 +175,34 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
             />
             
             {file ? (
-                <div className="flex flex-col items-center gap-2 text-green-700">
-                    <div className={`h-12 w-12 rounded-full ${errorLog ? 'bg-red-100 text-red-600' : 'bg-green-100'} flex items-center justify-center`}>
+                <div className="flex flex-col items-center gap-2 text-green-700 dark:text-green-400">
+                    <div className={`h-12 w-12 rounded-full ${errorLog ? 'bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400' : 'bg-green-100 dark:bg-green-950/30'} flex items-center justify-center`}>
                         {errorLog ? <XCircle className="h-6 w-6" /> : <Check className="h-6 w-6" />}
                     </div>
                     <p className="font-medium text-sm truncate max-w-[200px]">{file.name}</p>
                     
                     {parsedPreview && !errorLog && (
-                        <div className="bg-white/60 p-3 rounded text-xs text-left w-full mt-2 border border-green-200 shadow-sm">
+                        <div className="bg-background/60 p-3 rounded text-xs text-left w-full mt-2 border border-green-200 dark:border-green-900 shadow-sm">
                             <div className="grid grid-cols-2 gap-1">
-                                <span className="text-slate-500">Nota:</span> <span className="font-bold text-slate-800">{parsedPreview.numero}</span>
-                                <span className="text-slate-500">Emitente:</span> <span className="font-bold text-slate-800 truncate">{parsedPreview.emitente_nome?.substring(0, 15)}...</span>
-                                <span className="text-slate-500">Valor:</span> <span className="font-bold text-green-700">R$ {parsedPreview.valor_total?.toFixed(2)}</span>
+                                <span className="text-muted-foreground">Nota:</span> <span className="font-bold text-foreground">{parsedPreview.numero}</span>
+                                <span className="text-muted-foreground">Emitente:</span> <span className="font-bold text-foreground truncate">{parsedPreview.emitente_nome?.substring(0, 15)}...</span>
+                                <span className="text-muted-foreground">Valor:</span> <span className="font-bold text-green-700 dark:text-green-400">R$ {parsedPreview.valor_total?.toFixed(2)}</span>
                             </div>
                             {newSupplierDetected && (
-                                <div className="mt-2 pt-2 border-t border-green-200 flex items-center gap-2 text-blue-600 font-semibold animate-pulse">
+                                <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-900 flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold animate-pulse">
                                     <UserPlus className="h-4 w-4" /> Novo Fornecedor Detectado
                                 </div>
                             )}
                         </div>
                     )}
 
-                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); setErrorLog(null); setParsedPreview(null); }} className="text-slate-500 hover:text-red-700 h-auto p-1 mt-2">
+                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); setErrorLog(null); setParsedPreview(null); }} className="text-muted-foreground hover:text-red-700 h-auto p-1 mt-2">
                         Trocar arquivo
                     </Button>
                 </div>
             ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-500">
-                    <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-2">
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">
                         <Upload className="h-6 w-6" />
                     </div>
                     <p className="font-medium text-sm">Arraste o XML aqui ou clique</p>
@@ -214,7 +214,7 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
         </div>
 
         {errorLog && (
-            <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-800 flex gap-2 items-start animate-in slide-in-from-top-2">
+            <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-800 flex gap-2 items-start animate-in slide-in-from-top-2 dark:bg-red-950/30 dark:border-red-900 dark:text-red-400">
                 <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <div className="break-all">
                     <strong>Falha:</strong>

@@ -14,8 +14,8 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
   };
 
   const getOriginBadge = () => {
-      if (nota.origem === 'IMPORTADO_XML') return <Badge variant="outline" className="text-[9px] h-4 px-1 bg-purple-50 text-purple-700 border-purple-200">XML</Badge>;
-      if (nota.origem === 'MANUAL') return <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-50 text-amber-700 border-amber-200">Manual</Badge>;
+      if (nota.origem === 'IMPORTADO_XML') return <Badge variant="outline" className="text-[9px] h-4 px-1 bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-800">XML</Badge>;
+      if (nota.origem === 'MANUAL') return <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800">Manual</Badge>;
       return null;
   };
 
@@ -37,8 +37,8 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`
-            bg-white p-3 rounded-lg shadow-sm border mb-3 relative group
-            ${snapshot.isDragging ? 'shadow-xl rotate-2 z-50 ring-2 ring-primary' : 'hover:shadow-md border-slate-200'}
+            bg-background p-3 rounded-lg shadow-sm border mb-3 relative group
+            ${snapshot.isDragging ? 'shadow-xl rotate-2 z-50 ring-2 ring-primary' : 'hover:shadow-md border-border'}
           `}
           onClick={() => onClick(nota)}
         >
@@ -51,32 +51,32 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
                     </Badge>
                     {getOriginBadge()}
                     {isRateioPresent && (
-                        <div className="flex items-center text-[9px] text-blue-600 gap-0.5 bg-blue-50 px-1 rounded border border-blue-100" title="Possui rateio de custo">
+                        <div className="flex items-center text-[9px] text-blue-600 gap-0.5 bg-blue-50 px-1 rounded border border-blue-100 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-900" title="Possui rateio de custo">
                             <PieChart className="h-3 w-3" />
                         </div>
                     )}
                 </div>
-                <h4 className="font-bold text-sm text-slate-800 leading-tight mb-0.5 truncate max-w-[180px]" title={nota.emitente_nome}>
+                <h4 className="font-bold text-sm text-foreground leading-tight mb-0.5 truncate max-w-[180px]" title={nota.emitente_nome}>
                     {nota.emitente_nome}
                 </h4>
-                <div className="text-[10px] text-slate-500">
+                <div className="text-[10px] text-muted-foreground">
                     Nº {nota.numero}
                 </div>
             </div>
             
             {nota.pedido_compra_id && (
-                 <div className="bg-blue-100 text-blue-700 p-1 rounded-full" title="Pedido Vinculado">
+                 <div className="bg-blue-100 text-blue-700 p-1 rounded-full dark:bg-blue-950/30 dark:text-blue-400" title="Pedido Vinculado">
                     <Link className="h-3 w-3" />
                  </div>
             )}
           </div>
 
-          <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
-             <div className="flex items-center gap-1 text-xs font-mono font-bold text-slate-700">
-                <DollarSign className="h-3 w-3 text-slate-400" />
+          <div className="flex justify-between items-center mt-2 pt-2 border-t border-border">
+             <div className="flex items-center gap-1 text-xs font-mono font-bold text-foreground">
+                <DollarSign className="h-3 w-3 text-muted-foreground" />
                 {parseFloat(nota.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
              </div>
-             <div className="flex items-center gap-1 text-[10px] text-slate-400">
+             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 {nota.data_emissao ? new Date(nota.data_emissao).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' }) : '-'}
              </div>

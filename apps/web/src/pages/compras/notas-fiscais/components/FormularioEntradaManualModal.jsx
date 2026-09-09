@@ -187,7 +187,7 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
 
             {errorLog && (
-                <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-800 flex gap-2 items-start">
+                <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-800 flex gap-2 items-start dark:bg-red-950/30 dark:border-red-900 dark:text-red-400">
                     <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <div>
                         <strong>Falha ao Salvar:</strong>

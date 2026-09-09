@@ -125,7 +125,7 @@ function EntradaNotasFiscaisPage() {
                     onClick={() => setActiveTab('kanban')}
                     className={`
                         flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all
-                        ${activeTab === 'kanban' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:bg-white/50 hover:text-foreground'}
+                        ${activeTab === 'kanban' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'}
                     `}
                 >
                     <Kanban className="h-4 w-4"/> Quadro Kanban
@@ -134,7 +134,7 @@ function EntradaNotasFiscaisPage() {
                     onClick={() => setActiveTab('lista')}
                     className={`
                         flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all
-                        ${activeTab === 'lista' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:bg-white/50 hover:text-foreground'}
+                        ${activeTab === 'lista' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'}
                     `}
                 >
                     <List className="h-4 w-4"/> Lista Geral

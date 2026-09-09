@@ -57,9 +57,9 @@ const SelecionarColunasCompras = ({ isOpen, onClose, allColumns, selectedColumnI
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="flex items-center gap-3 p-2 bg-slate-50 border rounded-md hover:bg-slate-100 transition-colors"
+                          className="flex items-center gap-3 p-2 bg-muted border rounded-md hover:bg-muted transition-colors"
                         >
-                          <div {...provided.dragHandleProps} className="cursor-move text-slate-400 hover:text-slate-600">
+                          <div {...provided.dragHandleProps} className="cursor-move text-muted-foreground hover:text-muted-foreground">
                             <GripVertical className="h-4 w-4" />
                           </div>
                           <Checkbox 

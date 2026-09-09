@@ -156,9 +156,9 @@ function PedidosCompraList() {
         header: 'Status',
         render: (item) => (
             <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                ${item.status === 'Recebido' ? 'bg-green-100 text-green-700 border border-green-200' : 
-                  item.status === 'Parcialmente Recebido' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' : 
-                  'bg-blue-100 text-blue-700 border border-blue-200'}`}>
+                ${item.status === 'Recebido' ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' :
+                  item.status === 'Parcialmente Recebido' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800' :
+                  'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800'}`}>
                 {item.status || 'Aberto'}
             </span>
         )
@@ -171,10 +171,10 @@ function PedidosCompraList() {
       header: 'Docs',
       render: (item) => (
         <div className="flex gap-1">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600 hover:bg-blue-50/20" onClick={(e) => { e.stopPropagation(); handlePDF(item); }}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600 hover:bg-blue-50/20 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={(e) => { e.stopPropagation(); handlePDF(item); }}>
                 <FileText className="h-4 w-4" />
             </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50/20" onClick={(e) => { e.stopPropagation(); handleWhatsApp(item); }}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50/20 dark:text-green-400 dark:hover:bg-green-950/30" onClick={(e) => { e.stopPropagation(); handleWhatsApp(item); }}>
                 <MessageSquare className="h-4 w-4" />
             </Button>
         </div>

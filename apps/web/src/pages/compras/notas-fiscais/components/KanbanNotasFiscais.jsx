@@ -3,11 +3,11 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import CardNotaFiscal from './CardNotaFiscal';
 
 const COLUMNS = [
-  { id: 'Pendente', title: 'Pendente', color: 'bg-slate-100' },
-  { id: 'Em_Conferencia', title: 'Em Conferência', color: 'bg-blue-50' },
-  { id: 'Em_Entrada', title: 'Em Entrada', color: 'bg-orange-50' },
-  { id: 'Concluida', title: 'Concluída', color: 'bg-green-50' },
-  { id: 'Rejeitada', title: 'Rejeitada', color: 'bg-red-50' },
+  { id: 'Pendente', title: 'Pendente', color: 'bg-muted' },
+  { id: 'Em_Conferencia', title: 'Em Conferência', color: 'bg-blue-50 dark:bg-blue-950/30' },
+  { id: 'Em_Entrada', title: 'Em Entrada', color: 'bg-orange-50 dark:bg-orange-950/30' },
+  { id: 'Concluida', title: 'Concluída', color: 'bg-green-50 dark:bg-green-950/30' },
+  { id: 'Rejeitada', title: 'Rejeitada', color: 'bg-red-50 dark:bg-red-950/30' },
 ];
 
 const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick }) => {
@@ -23,9 +23,9 @@ const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick }) => {
         <div className="flex flex-nowrap h-full gap-4 w-max px-2">
           {COLUMNS.map(column => (
             <div key={column.id} className={`flex-shrink-0 w-[320px] flex flex-col rounded-xl ${column.color} border border-transparent h-full max-h-full`}>
-              <div className="p-4 font-bold text-slate-700 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10">
+              <div className="p-4 font-bold text-foreground flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10">
                   {column.title}
-                  <span className="bg-white/50 px-2 py-0.5 rounded-full text-xs text-slate-500">
+                  <span className="bg-background/50 px-2 py-0.5 rounded-full text-xs text-muted-foreground">
                       {columnsData[column.id]?.length || 0}
                   </span>
               </div>
@@ -34,7 +34,7 @@ const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick }) => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`flex-1 p-3 overflow-y-auto overflow-x-hidden min-h-[150px] transition-colors ${snapshot.isDraggingOver ? 'bg-slate-200/50' : ''}`}
+                    className={`flex-1 p-3 overflow-y-auto overflow-x-hidden min-h-[150px] transition-colors ${snapshot.isDraggingOver ? 'bg-muted' : ''}`}
                   >
                     {columnsData[column.id]?.map((nota, index) => (
                       <CardNotaFiscal 

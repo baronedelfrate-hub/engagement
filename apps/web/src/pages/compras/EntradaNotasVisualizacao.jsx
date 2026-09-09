@@ -65,8 +65,8 @@ const EntradaNotasVisualizacao = () => {
       accessor: 'emitente_nome',
       render: (row) => (
         <div className="flex flex-col">
-          <span className="font-medium text-slate-700">{row.emitente_nome}</span>
-          <span className="text-xs text-slate-500">{row.emitente_cnpj}</span>
+          <span className="font-medium text-foreground">{row.emitente_nome}</span>
+          <span className="text-xs text-muted-foreground">{row.emitente_cnpj}</span>
         </div>
       )
     },
@@ -89,12 +89,12 @@ const EntradaNotasVisualizacao = () => {
       accessor: 'status',
       render: (row) => {
         const colors = {
-          'Pendente': 'bg-yellow-100 text-yellow-800',
-          'Concluida': 'bg-green-100 text-green-800',
-          'Rejeitada': 'bg-red-100 text-red-800',
-          'Em_Entrada': 'bg-blue-100 text-blue-800'
+          'Pendente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400',
+          'Concluida': 'bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400',
+          'Rejeitada': 'bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-400',
+          'Em_Entrada': 'bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400'
         };
-        return <Badge className={`${colors[row.status] || 'bg-slate-100'} border-none`}>{row.status}</Badge>;
+        return <Badge className={`${colors[row.status] || 'bg-muted'} border-none`}>{row.status}</Badge>;
       }
     },
     {

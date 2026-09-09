@@ -142,7 +142,7 @@ const MatchingModal = ({ isOpen, onClose, nota, onMatchSuccess }) => {
                      <Label className="text-xs text-blue-600 dark:text-blue-400">Pedido Selecionado</Label>
                      <div className="font-bold text-lg">#{selectedPedido.numeroPedido || selectedPedido.id}</div>
                      <div className="text-sm text-muted-foreground">{getFornecedorName(selectedPedido.fornecedorId)}</div>
-                     <div className="text-slate-600 dark:text-slate-300 font-mono">
+                     <div className="text-muted-foreground font-mono">
                          R$ {(selectedPedido.itens || []).reduce((acc, i) => acc + parseFloat(i.valorTotal || 0), 0).toFixed(2)}
                      </div>
                 </div>
@@ -183,7 +183,7 @@ const MatchingModal = ({ isOpen, onClose, nota, onMatchSuccess }) => {
                             onClick={() => setSelectedPedido(p)}
                             className={`
                                 cursor-pointer p-3 rounded border transition-colors flex justify-between items-center
-                                ${selectedPedido?.id === p.id ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500' : 'bg-card border-border hover:bg-muted'}
+                                ${selectedPedido?.id === p.id ? 'bg-blue-50 border-blue-500 ring-1 ring-blue-500 dark:bg-blue-950/30 text-foreground' : 'bg-card border-border hover:bg-muted'}
                             `}
                         >
                              <div>
@@ -247,7 +247,7 @@ const MatchingModal = ({ isOpen, onClose, nota, onMatchSuccess }) => {
                                 onClick={() => setSelectedPedido(p)}
                                 className={`
                                     cursor-pointer p-2 rounded border transition-colors flex justify-between items-center text-sm
-                                    ${selectedPedido?.id === p.id ? 'bg-blue-50 border-blue-500' : 'bg-card border-border hover:bg-muted'}
+                                    ${selectedPedido?.id === p.id ? 'bg-blue-50 border-blue-500 dark:bg-blue-950/30 text-foreground' : 'bg-card border-border hover:bg-muted'}
                                 `}
                             >
                                  <div className="flex flex-col">

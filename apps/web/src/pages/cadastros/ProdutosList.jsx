@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { produtoService } from '@/services/produtoService';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import {
   Select,
@@ -19,12 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
-  AlertCircle,
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   Package,
   Loader2
 } from 'lucide-react';
@@ -49,6 +47,8 @@ const ProdutosList = () => {
   const [data, setData] = useState([]);
   const [tiposMap, setTiposMap] = useState({});
   const [tiposList, setTiposList] = useState([]);
+  const [categoriasMap, setCategoriasMap] = useState({});
+  const [categoriasList, setCategoriasList] = useState([]);
   const [filters, setFilters] = useState({
     search: '',
     tipo: 'all',
@@ -56,59 +56,65 @@ const ProdutosList = () => {
     categoria: 'all'
   });
   const [deleteId, setDeleteId] = useState(null);
-  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetchTiposAndData();
+    fetchData();
   }, [filters]);
 
-  const fetchTiposAndData = async () => {
+  const fetchData = async () => {
     setLoading(true);
-    
-    // Fetch Tipos de Produto for mapping
     try {
-      const { data: tiposData } = await supabase.from('tipo_produto').select('id, nome');
-      if (tiposData) {
-        const map = {};
-        tiposData.forEach(t => { map[t.id] = t.nome; });
-        setTiposMap(map);
-        setTiposList(tiposData);
-      }
-    } catch (e) {
-      console.error("Failed to load tipos", e);
-    }
+      const [tiposRes, categoriasRes] = await Promise.all([
+        supabase.from('tipo_produto').select('id, nome'),
+        supabase.from('categorias').select('id, nome'),
+      ]);
 
-    const result = await produtoService.list(filters);
-    if (result.success) {
-      setData(result.data);
-      // Extract unique categories for filter
-      const uniqueCats = [...new Set(result.data.map(p => p.categoria).filter(Boolean))];
-      setCategories(uniqueCats);
-    } else {
-      toast({ title: "Erro", description: result.error, variant: "destructive" });
+      if (tiposRes.data) {
+        const map = {};
+        tiposRes.data.forEach(t => { map[t.id] = t.nome; });
+        setTiposMap(map);
+        setTiposList(tiposRes.data);
+      }
+      if (categoriasRes.data) {
+        const map = {};
+        categoriasRes.data.forEach(c => { map[c.id] = c.nome; });
+        setCategoriasMap(map);
+        setCategoriasList(categoriasRes.data);
+      }
+
+      let query = supabase.from('produtos').select('*').order('nome', { ascending: true });
+      if (filters.tipo !== 'all') query = query.eq('tipo_produto_id', filters.tipo);
+      if (filters.status !== 'all') query = query.eq('ativo', filters.status === 'Ativo');
+      if (filters.categoria !== 'all') query = query.eq('categoria_id', filters.categoria);
+      if (filters.search) {
+        query = query.or(`nome.ilike.%${filters.search}%,sku.ilike.%${filters.search}%,codigo_barras.ilike.%${filters.search}%`);
+      }
+
+      const { data: produtosData, error } = await query;
+      if (error) throw error;
+      setData(produtosData || []);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+      toast({ title: "Erro", description: error.message || "Não foi possível carregar os produtos.", variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    const result = await produtoService.delete(deleteId);
-    if (result.success) {
-      toast({ title: "Sucesso", description: "Produto excluído com sucesso", variant: "success" });
-      fetchTiposAndData();
+    const { error } = await supabase.from('produtos').delete().eq('id', deleteId);
+    if (error) {
+      toast({ title: "Erro", description: error.message || "Não foi possível excluir.", variant: "destructive" });
     } else {
-      toast({ title: "Erro", description: result.error, variant: "destructive" });
+      toast({ title: "Sucesso", description: "Produto excluído com sucesso" });
+      fetchData();
     }
     setDeleteId(null);
   };
 
-  const getTipoName = (tipoIdOrName) => {
-    if (!tipoIdOrName) return '-';
-    // If it's an ID mapped in our table
-    if (tiposMap[tipoIdOrName]) return tiposMap[tipoIdOrName];
-    // If it's a legacy string value
-    return tipoIdOrName;
-  };
+  const getTipoName = (id) => tiposMap[id] || '-';
+  const getCategoriaName = (id) => categoriasMap[id] || '-';
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-6 min-h-screen bg-muted">
@@ -138,9 +144,9 @@ const ProdutosList = () => {
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
             />
           </div>
-          
-          <Select 
-            value={filters.tipo} 
+
+          <Select
+            value={filters.tipo}
             onValueChange={(val) => setFilters(prev => ({ ...prev, tipo: val }))}
           >
             <SelectTrigger className="bg-background text-foreground border-border">
@@ -151,14 +157,11 @@ const ProdutosList = () => {
               {tiposList.map(t => (
                 <SelectItem key={t.id} value={t.id}>{t.nome}</SelectItem>
               ))}
-              <SelectItem value="Produto Revenda">Revenda (Legado)</SelectItem>
-              <SelectItem value="Produto Fabricado">Fabricado (Legado)</SelectItem>
-              <SelectItem value="Serviço">Serviço (Legado)</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select 
-            value={filters.status} 
+          <Select
+            value={filters.status}
             onValueChange={(val) => setFilters(prev => ({ ...prev, status: val }))}
           >
             <SelectTrigger className="bg-background text-foreground border-border">
@@ -171,8 +174,8 @@ const ProdutosList = () => {
             </SelectContent>
           </Select>
 
-          <Select 
-            value={filters.categoria} 
+          <Select
+            value={filters.categoria}
             onValueChange={(val) => setFilters(prev => ({ ...prev, categoria: val }))}
           >
             <SelectTrigger className="bg-background text-foreground border-border">
@@ -180,8 +183,8 @@ const ProdutosList = () => {
             </SelectTrigger>
             <SelectContent className="bg-background text-foreground">
               <SelectItem value="all">Todas as Categorias</SelectItem>
-              {categories.map((cat, idx) => (
-                <SelectItem key={idx} value={cat}>{cat}</SelectItem>
+              {categoriasList.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.nome}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -225,9 +228,9 @@ const ProdutosList = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-foreground">{item.codigo_interno || '-'}</TableCell>
-                    <TableCell className="text-foreground">{getTipoName(item.tipo)}</TableCell>
-                    <TableCell className="text-foreground">{item.categoria || '-'}</TableCell>
+                    <TableCell className="text-foreground">{item.sku || '-'}</TableCell>
+                    <TableCell className="text-foreground">{getTipoName(item.tipo_produto_id)}</TableCell>
+                    <TableCell className="text-foreground">{getCategoriaName(item.categoria_id)}</TableCell>
                     <TableCell className="text-right font-medium text-foreground">
                       {formatCurrency(item.preco_venda)}
                     </TableCell>
@@ -241,8 +244,8 @@ const ProdutosList = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={item.status === 'Ativo' ? 'success' : 'secondary'} className={item.status === 'Ativo' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
-                        {item.status}
+                      <Badge variant={item.ativo ? 'success' : 'secondary'} className={item.ativo ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-muted text-foreground'}>
+                        {item.ativo ? 'Ativo' : 'Inativo'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right text-foreground">

@@ -67,7 +67,7 @@ export default function NfeEmissionForm() {
         supabase.from('empresas').select('id, razao_social').eq('ativo', true),
         supabase.from('clientes').select('id, nome'),
         supabase.from('pedidos_venda').select('id, numero'),
-        supabase.from('produtos').select('id, nome, preco_venda, ncm').eq('status', 'Ativo'),
+        supabase.from('produtos').select('id, nome, preco_venda, ncm').eq('ativo', true),
         supabase.from('condicoes_pagamento').select('id, nome').eq('ativo', true),
         supabase.from('tipos_pagamento').select('id, nome').eq('ativo', true)
       ]);

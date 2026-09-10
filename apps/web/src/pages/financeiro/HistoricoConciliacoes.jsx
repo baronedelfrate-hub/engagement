@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { storage } from '@/lib/storage';
 
 const HistoricoConciliacoes = () => {
     // This would list past reconciliation sessions

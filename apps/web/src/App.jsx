@@ -16,7 +16,6 @@ import SetPassword from '@/pages/auth/SetPassword';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { SuperAdminRoute } from '@/components/SuperAdminRoute';
 import { initializeF5Data } from '@/lib/f5_data_seed';
-import { initializeFinanceData } from '@/lib/finance_data_seed';
 import { initializeBPOData } from '@/lib/bpo_data_seed';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -266,7 +265,6 @@ const AnimatedRoutes = () => {
   useEffect(() => {
     try {
       initializeF5Data();
-      initializeFinanceData();
       initializeBPOData();
     } catch (e) {
       console.error("Initialization failed:", e);

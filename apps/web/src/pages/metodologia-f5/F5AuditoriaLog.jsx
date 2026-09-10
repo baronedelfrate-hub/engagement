@@ -4,26 +4,42 @@ import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { 
-    Select, 
-    SelectContent, 
-    SelectItem, 
-    SelectTrigger, 
-    SelectValue 
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
 } from '@/components/ui/select';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { F5_PERMISSIONS } from '@/lib/permissions';
 import PermissionGate from '@/components/PermissionGate';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 function F5AuditoriaLog() {
+    const { toast } = useToast();
     const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filterUser, setFilterUser] = useState('');
     const [filterAction, setFilterAction] = useState('ALL');
 
-    const loadLogs = () => {
-        const allLogs = storage.get('LOGS_AUDITORIA') || [];
-        setLogs(allLogs);
+    const loadLogs = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('audit_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(200);
+            if (error) throw error;
+            setLogs(data || []);
+        } catch (error) {
+            console.error('Error loading audit logs:', error);
+            toast({ title: 'Erro', description: 'Não foi possível carregar os logs de auditoria.', variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -31,8 +47,8 @@ function F5AuditoriaLog() {
     }, []);
 
     const filteredLogs = logs.filter(log => {
-        const matchUser = filterUser ? log.usuario_id.toLowerCase().includes(filterUser.toLowerCase()) : true;
-        const matchAction = (filterAction && filterAction !== 'ALL') ? log.acao.includes(filterAction) : true;
+        const matchUser = filterUser ? (log.user_id || '').toLowerCase().includes(filterUser.toLowerCase()) : true;
+        const matchAction = (filterAction && filterAction !== 'ALL') ? log.acao?.includes(filterAction) : true;
         return matchUser && matchAction;
     });
 
@@ -52,9 +68,9 @@ function F5AuditoriaLog() {
                         </CardHeader>
                         <CardContent className="flex gap-4">
                             <div className="flex-1">
-                                <Input 
-                                    placeholder="Filtrar por Usuário (ID)" 
-                                    value={filterUser} 
+                                <Input
+                                    placeholder="Filtrar por Usuário (ID)"
+                                    value={filterUser}
                                     onChange={e => setFilterUser(e.target.value)}
                                     icon={<Search className="h-4 w-4 text-muted-foreground"/>}
                                 />
@@ -92,12 +108,18 @@ function F5AuditoriaLog() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y bg-background">
-                                        {filteredLogs.map(log => (
+                                        {loading ? (
+                                            <tr>
+                                                <td colSpan="6" className="p-8 text-center text-muted-foreground">
+                                                    <Loader2 className="h-5 w-5 animate-spin inline-block mr-2" /> Carregando...
+                                                </td>
+                                            </tr>
+                                        ) : filteredLogs.map(log => (
                                             <tr key={log.id} className="hover:bg-muted transition-colors">
                                                 <td className="p-4 text-muted-foreground whitespace-nowrap">
-                                                    {new Date(log.data_hora).toLocaleString()}
+                                                    {new Date(log.created_at).toLocaleString()}
                                                 </td>
-                                                <td className="p-4 font-medium text-foreground">{log.usuario_id}</td>
+                                                <td className="p-4 font-medium text-foreground">{log.user_id || '-'}</td>
                                                 <td className="p-4">
                                                     <span className={`text-xs px-2 py-1 rounded-full font-bold border ${
                                                         log.acao === 'DELETE' ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-800' :
@@ -107,14 +129,14 @@ function F5AuditoriaLog() {
                                                         {log.acao}
                                                     </span>
                                                 </td>
-                                                <td className="p-4 text-muted-foreground">{log.tabela_afetada}</td>
-                                                <td className="p-4 text-muted-foreground text-xs">{log.ip}</td>
-                                                <td className="p-4 text-muted-foreground max-w-md truncate" title={log.details}>
-                                                    {log.details || '-'}
+                                                <td className="p-4 text-muted-foreground">{log.tabela}</td>
+                                                <td className="p-4 text-muted-foreground text-xs">{log.ip_address}</td>
+                                                <td className="p-4 text-muted-foreground max-w-md truncate" title={log.valores_novos?.message || JSON.stringify(log.valores_novos || {})}>
+                                                    {log.valores_novos?.message || (log.valores_novos ? JSON.stringify(log.valores_novos) : '-')}
                                                 </td>
                                             </tr>
                                         ))}
-                                        {filteredLogs.length === 0 && (
+                                        {!loading && filteredLogs.length === 0 && (
                                             <tr>
                                                 <td colSpan="6" className="p-8 text-center text-muted-foreground">Nenhum registro encontrado.</td>
                                             </tr>

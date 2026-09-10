@@ -1,4 +1,4 @@
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 
 // F5 Methodology Permissions
 export const F5_PERMISSIONS = {
@@ -20,7 +20,7 @@ export const FINANCE_PERMISSIONS = {
   CASHFLOW_VIEW: 'reports.cashflow.view',
   REGISTER_PAYMENT: 'accounts.ap.register_payment',
   REGISTER_RECEIPT: 'accounts.ar.register_receipt',
-  REVERSE_ENTRY: 'accounts.ap.reverse' 
+  REVERSE_ENTRY: 'accounts.ap.reverse'
 };
 
 // Fiscal Module Permissions
@@ -35,59 +35,68 @@ export const FISCAL_PERMISSIONS = {
   PARAMETROS: 'gestao.fiscal.parametros'
 };
 
-// Mock current user ID (In a real app, this comes from Auth Context)
-const CURRENT_USER_ID = 'ADM001'; 
-
 /**
- * Checks if the current user has a specific permission
+ * Checks if the currently logged-in user has a specific permission.
+ *
+ * Fail-open by design: se não houver usuário logado, se o usuário for
+ * superadmin, ou se ele não tiver nenhuma role/permissão configurada nas
+ * tabelas role_permissions/user_roles (hoje vazias para todo mundo),
+ * o acesso é liberado — mesmo comportamento "default aberto" que o
+ * código antigo já tinha (rodando sobre dados mock que nunca batiam com
+ * usuário real). Isso evita trancar usuários reais fora do módulo F5
+ * antes de alguém popular a matriz de permissões em F5ConfigPermissions.
+ *
  * @param {string} permissionCode - The permission code to check
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export const hasPermission = (permissionCode) => {
-  // 1. Get Current User
-  const users = storage.get('USUARIOS') || [];
-  const user = users.find(u => u.codigo === CURRENT_USER_ID || u.id === CURRENT_USER_ID);
-  
-  if (!user) return true; // Default to true for dev/demo if no user system active
-  if (!user.ativo) return false; 
+export const hasPermission = async (permissionCode) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return true;
 
-  // 2. Get User Roles
-  const userRoles = storage.get('USER_ROLES')?.filter(ur => ur.user_id === user.id) || [];
-  // If no roles defined in mock, assume admin for demo
-  if (userRoles.length === 0) return true; 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    if (profile?.role === 'superadmin') return true;
 
-  // 3. Get Permissions
-  const rolePermissions = storage.get('ROLE_PERMISSIONS') || [];
-  const permissions = storage.get('PERMISSOES') || [];
+    const { data: userRoles } = await supabase
+      .from('user_roles')
+      .select('role_id')
+      .eq('user_id', user.id);
+    if (!userRoles || userRoles.length === 0) return true;
 
-  // 4. Check
-  const hasAccess = userRoles.some(ur => {
-    const rp = rolePermissions.filter(p => p.role_id === ur.role_id);
-    return rp.some(p => {
-      const permDef = permissions.find(def => def.id === p.permission_id);
-      return permDef && (permDef.codigo === 'admin.full_access' || permDef.codigo === permissionCode);
+    const roleIds = userRoles.map((ur) => ur.role_id);
+    const { data: rolePerms } = await supabase
+      .from('role_permissions')
+      .select('permissions(codigo)')
+      .in('role_id', roleIds);
+
+    return (rolePerms || []).some((rp) => {
+      const codigo = rp.permissions?.codigo;
+      return codigo === 'admin.full_access' || codigo === permissionCode;
     });
-  });
-
-  return hasAccess;
+  } catch (error) {
+    console.error('[hasPermission] Erro ao verificar permissão, liberando por padrão:', error);
+    return true;
+  }
 };
 
-export const logAudit = (action, entity, entityId, details = {}) => {
-  const logEntry = {
-    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    usuario_id: CURRENT_USER_ID,
-    acao: action,
-    tabela_afetada: entity,
-    registro_id: entityId,
-    dados_antes: details.before ? JSON.stringify(details.before) : null,
-    dados_depois: details.after ? JSON.stringify(details.after) : null,
-    data_hora: new Date().toISOString(),
-    ip: '127.0.0.1',
-    details: details.message || ''
-  };
-
-  const logs = storage.get('LOGS_AUDITORIA') || [];
-  storage.set('LOGS_AUDITORIA', [logEntry, ...logs]);
+export const logAudit = async (action, entity, entityId, details = {}) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from('audit_logs').insert({
+      user_id: user?.id || null,
+      acao: action,
+      tabela: entity,
+      registro_id: entityId || null,
+      valores_antigos: details.before || null,
+      valores_novos: details.after || (details.message ? { message: details.message } : null),
+    });
+  } catch (error) {
+    console.error('[logAudit] Falha ao registrar log de auditoria:', error);
+  }
 };
 
 // Alias for backward compatibility

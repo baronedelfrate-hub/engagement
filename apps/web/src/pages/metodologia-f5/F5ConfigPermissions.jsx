@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { storage } from '@/lib/storage';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/customSupabaseClient';
 import { F5_PERMISSIONS, logF5Audit } from '@/lib/permissions';
 import { useToast } from '@/components/ui/use-toast';
 import PermissionGate from '@/components/PermissionGate';
@@ -12,48 +12,82 @@ import { Shield } from 'lucide-react';
 
 function F5ConfigPermissions() {
     const { toast } = useToast();
+    const [loading, setLoading] = useState(true);
     const [roles, setRoles] = useState([]);
     const [permissions, setPermissions] = useState([]);
     const [rolePermissions, setRolePermissions] = useState([]);
 
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const [rolesRes, permsRes, rolePermsRes] = await Promise.all([
+                supabase.from('roles').select('*').order('nome', { ascending: true }),
+                supabase.from('permissions').select('*'),
+                supabase.from('role_permissions').select('*'),
+            ]);
+            if (rolesRes.error) throw rolesRes.error;
+            if (permsRes.error) throw permsRes.error;
+            if (rolePermsRes.error) throw rolePermsRes.error;
+            setRoles(rolesRes.data || []);
+            setPermissions(permsRes.data || []);
+            setRolePermissions(rolePermsRes.data || []);
+        } catch (error) {
+            console.error('Error loading permissions data:', error);
+            toast({ title: 'Erro', description: 'Não foi possível carregar as permissões.', variant: 'destructive' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        setRoles(storage.get('ROLES'));
-        setPermissions(storage.get('PERMISSOES'));
-        setRolePermissions(storage.get('ROLE_PERMISSIONS'));
+        loadData();
     }, []);
 
     const f5PermissionsList = Object.values(F5_PERMISSIONS);
 
-    const handlePermissionToggle = (roleId, permCode) => {
-        // Find permission ID from code
-        const permDef = permissions.find(p => p.codigo === permCode);
-        if (!permDef) return;
+    const ensurePermissionDef = async (permCode) => {
+        const existing = permissions.find(p => p.codigo === permCode);
+        if (existing) return existing;
 
-        const existingEntry = rolePermissions.find(rp => rp.role_id === roleId && rp.permission_id === permDef.id);
+        const { data, error } = await supabase
+            .from('permissions')
+            .insert({ codigo: permCode, modulo: 'F5' })
+            .select()
+            .single();
+        if (error) throw error;
+        setPermissions(prev => [...prev, data]);
+        return data;
+    };
 
-        let updatedRolePerms;
-        if (existingEntry) {
-            // Remove
-            updatedRolePerms = rolePermissions.filter(rp => rp.id !== existingEntry.id);
-        } else {
-            // Add
-            const newEntry = {
-                id: `rp_${Date.now()}_${Math.random()}`,
-                role_id: roleId,
-                permission_id: permDef.id,
-                tipo: 'Allow'
-            };
-            updatedRolePerms = [...rolePermissions, newEntry];
+    const handlePermissionToggle = async (roleId, permCode) => {
+        try {
+            const permDef = await ensurePermissionDef(permCode);
+
+            const existingEntry = rolePermissions.find(rp => rp.role_id === roleId && rp.permission_id === permDef.id);
+
+            if (existingEntry) {
+                const { error } = await supabase.from('role_permissions').delete().eq('id', existingEntry.id);
+                if (error) throw error;
+                setRolePermissions(prev => prev.filter(rp => rp.id !== existingEntry.id));
+            } else {
+                const { data, error } = await supabase
+                    .from('role_permissions')
+                    .insert({ role_id: roleId, permission_id: permDef.id })
+                    .select()
+                    .single();
+                if (error) throw error;
+                setRolePermissions(prev => [...prev, data]);
+            }
+
+            logF5Audit('UPDATE', 'PERMISSIONS', roleId, {
+                message: `Toggled permission ${permCode} for role ${roleId}`
+            });
+
+            toast({ title: "Permissões Atualizadas" });
+        } catch (error) {
+            console.error('Error toggling permission:', error);
+            toast({ title: 'Erro', description: error.message || 'Não foi possível atualizar a permissão.', variant: 'destructive' });
         }
-
-        setRolePermissions(updatedRolePerms);
-        storage.set('ROLE_PERMISSIONS', updatedRolePerms);
-        
-        logF5Audit('UPDATE', 'PERMISSIONS', roleId, { 
-            message: `Toggled permission ${permCode} for role ${roleId}` 
-        });
-        
-        toast({ title: "Permissões Atualizadas" });
     };
 
     const isChecked = (roleId, permCode) => {
@@ -73,6 +107,13 @@ function F5ConfigPermissions() {
                         <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-blue-500"/> Matriz de Permissões por Função (Role)</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                            </div>
+                        ) : roles.length === 0 ? (
+                            <p className="text-sm text-muted-foreground py-8 text-center">Nenhuma função (role) cadastrada ainda. Cadastre roles em Admin &gt; Funções.</p>
+                        ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm border-collapse">
                                 <thead>
@@ -89,7 +130,7 @@ function F5ConfigPermissions() {
                                             <td className="p-3 border-b font-medium text-foreground">
                                                 {permCode}
                                                 <p className="text-xs text-muted-foreground font-normal">
-                                                    {permCode === 'f5.view' ? 'Acesso de leitura aos projetos' : 
+                                                    {permCode === 'f5.view' ? 'Acesso de leitura aos projetos' :
                                                      permCode === 'f5.edit' ? 'Editar dados e status' :
                                                      permCode === 'f5.upload' ? 'Enviar documentos' :
                                                      permCode === 'f5.kpi.manage' ? 'Configurar KPIs' :
@@ -98,7 +139,7 @@ function F5ConfigPermissions() {
                                             </td>
                                             {roles.map(role => (
                                                 <td key={`${role.id}-${permCode}`} className="p-3 border-b text-center">
-                                                    <Checkbox 
+                                                    <Checkbox
                                                         checked={isChecked(role.id, permCode)}
                                                         onCheckedChange={() => handlePermissionToggle(role.id, permCode)}
                                                     />
@@ -109,6 +150,7 @@ function F5ConfigPermissions() {
                                 </tbody>
                             </table>
                         </div>
+                        )}
                     </CardContent>
                 </Card>
             </PermissionGate>

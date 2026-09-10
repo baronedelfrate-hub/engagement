@@ -6,7 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 function InventarioList() {
@@ -15,14 +15,29 @@ function InventarioList() {
   const [inventarios, setInventarios] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setInventarios(storage.get('INVENTARIO'));
-    setProdutos(storage.get('PRODUTOS'));
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [inventariosRes, produtosRes] = await Promise.all([
+        supabase.from('inventario').select('*').order('data_contagem', { ascending: false }),
+        supabase.from('produtos').select('id, nome')
+      ]);
+      if (inventariosRes.error) throw inventariosRes.error;
+      if (produtosRes.error) throw produtosRes.error;
+      setInventarios(inventariosRes.data || []);
+      setProdutos(produtosRes.data || []);
+    } catch (error) {
+      console.error('[InventarioList] Erro ao carregar dados:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar o inventário.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getProdutoName = (id) => {
@@ -34,24 +49,28 @@ function InventarioList() {
     navigate(`/estoque/inventario/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este registro?')) {
-      storage.delete('INVENTARIO', id);
-      loadData();
+      const { error } = await supabase.from('inventario').delete().eq('id', id);
+      if (error) {
+        toast({ title: 'Erro', description: error.message || 'Não foi possível excluir.', variant: 'destructive' });
+        return;
+      }
+      await loadData();
       toast({ title: "Inventário excluído", description: "Registro removido com sucesso." });
     }
   };
 
   const filteredInventarios = inventarios.filter(inv =>
-    getProdutoName(inv.produtoId).toLowerCase().includes(searchTerm.toLowerCase())
+    getProdutoName(inv.produto_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
-    { header: 'Produto', render: (item) => getProdutoName(item.produtoId) },
-    { header: 'Qtd Contada', accessor: 'quantidadeContada' },
-    { header: 'Qtd Sistema', accessor: 'quantidadeSistema' },
+    { header: 'Produto', render: (item) => getProdutoName(item.produto_id) },
+    { header: 'Qtd Contada', accessor: 'quantidade_contada' },
+    { header: 'Qtd Sistema', accessor: 'quantidade_sistema' },
     { header: 'Diferença', accessor: 'diferenca' },
-    { header: 'Data Contagem', render: (item) => new Date(item.dataContagem).toLocaleDateString() }
+    { header: 'Data Contagem', render: (item) => item.data_contagem ? new Date(item.data_contagem).toLocaleDateString() : '-' }
   ];
 
   return (
@@ -74,6 +93,7 @@ function InventarioList() {
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        loading={loading}
         emptyMessage="Nenhum inventário registrado"
       />
     </>

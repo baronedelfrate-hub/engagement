@@ -512,10 +512,15 @@ const AnimatedRoutes = () => {
           <Route path="/clientes-bpo/cadastro-clientes/:id" element={<ProtectedLayout><PageTransition><BPOClientesCadastroForm /></PageTransition></ProtectedLayout>} />
 
           <Route path="/estoque/entrada" element={<ProtectedLayout><PageTransition><EntradaEstoqueList /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/entrada/novo" element={<ProtectedLayout><PageTransition><EntradaEstoqueForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/entrada/:id" element={<ProtectedLayout><PageTransition><EntradaEstoqueForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/movimentacao" element={<ProtectedLayout><PageTransition><MovimentacaoEstoqueList /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/inventario" element={<ProtectedLayout><PageTransition><InventarioList /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/inventario/novo" element={<ProtectedLayout><PageTransition><InventarioForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/inventario/:id" element={<ProtectedLayout><PageTransition><InventarioForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/reservas" element={<ProtectedLayout><PageTransition><ReservasList /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/transferencias" element={<ProtectedLayout><PageTransition><TransferenciasList /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/transferencias/novo" element={<ProtectedLayout><PageTransition><TransferenciasForm /></PageTransition></ProtectedLayout>} />
 
           <Route path="/compras/pedidos" element={<ProtectedLayout><PageTransition><PedidosCompraList /></PageTransition></ProtectedLayout>} />
           <Route path="/compras/notas-fiscais" element={<ProtectedLayout><PageTransition><EntradaNotasFiscaisPage /></PageTransition></ProtectedLayout>} />

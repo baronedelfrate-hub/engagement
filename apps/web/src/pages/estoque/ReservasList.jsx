@@ -1,25 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Bookmark } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
+import { useToast } from '@/components/ui/use-toast';
 
 function ReservasList() {
+  const { toast } = useToast();
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [produtos, setProdutos] = useState([]);
   const [pedidos, setPedidos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const loadData = () => {
-    setItems(storage.get('RESERVAS'));
-    setProdutos(storage.get('PRODUTOS'));
-    setPedidos(storage.get('PEDIDOS'));
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [reservasRes, produtosRes, pedidosRes] = await Promise.all([
+        supabase.from('reservas').select('*').order('data_reserva', { ascending: false }),
+        supabase.from('produtos').select('id, nome'),
+        supabase.from('pedidos_venda').select('id')
+      ]);
+      if (reservasRes.error) throw reservasRes.error;
+      if (produtosRes.error) throw produtosRes.error;
+      if (pedidosRes.error) throw pedidosRes.error;
+      setItems(reservasRes.data || []);
+      setProdutos(produtosRes.data || []);
+      setPedidos(pedidosRes.data || []);
+    } catch (error) {
+      console.error('[ReservasList] Erro ao carregar dados:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar as reservas.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getProdutoName = (id) => {
@@ -32,20 +50,20 @@ function ReservasList() {
       return p ? `Pedido #${id.slice(0,8)}` : 'Manual';
   };
 
-  // Read-only list, no edit/delete action exposed directly here for safety, 
+  // Read-only list, no edit/delete action exposed directly here for safety,
   // as reservations are tied to Orders mostly.
-  const handleEdit = () => {}; 
+  const handleEdit = () => {};
   const handleDelete = () => {};
 
   const filteredItems = items.filter(item =>
-    getProdutoName(item.produtoId).toLowerCase().includes(searchTerm.toLowerCase())
+    getProdutoName(item.produto_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
-    { header: 'Produto', render: (item) => getProdutoName(item.produtoId) },
+    { header: 'Produto', render: (item) => getProdutoName(item.produto_id) },
     { header: 'Qtd Reservada', accessor: 'quantidade' },
-    { header: 'Origem', render: (item) => getPedidoInfo(item.pedidoId) },
-    { header: 'Data', render: (item) => new Date(item.dataReserva).toLocaleDateString() },
+    { header: 'Origem', render: (item) => getPedidoInfo(item.pedido_id) },
+    { header: 'Data', render: (item) => item.data_reserva ? new Date(item.data_reserva).toLocaleDateString() : '-' },
     { header: 'Status', accessor: 'status' }
   ];
 
@@ -64,6 +82,7 @@ function ReservasList() {
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        loading={loading}
         emptyMessage="Nenhuma reserva ativa"
       />
     </>

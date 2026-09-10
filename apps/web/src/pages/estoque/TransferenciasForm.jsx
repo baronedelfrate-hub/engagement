@@ -7,16 +7,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 function TransferenciasForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [produtos, setProdutos] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    produtoId: '',
+    produto_id: '',
     quantidade: '',
     origem: '',
     destino: '',
@@ -25,24 +28,37 @@ function TransferenciasForm() {
   });
 
   useEffect(() => {
-    setProdutos(storage.get('PRODUTOS'));
+    const fetchProdutos = async () => {
+      const { data, error } = await supabase.from('produtos').select('id, nome');
+      if (error) {
+        console.error('[TransferenciasForm] Erro ao carregar produtos:', error);
+        return;
+      }
+      setProdutos(data || []);
+    };
+    fetchProdutos();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Just record the transfer document. 
+    setSaving(true);
+
+    // Just record the transfer document.
     // In a real system with multi-warehouse, we'd decrease stock in Origin Warehouse and increase in Dest Warehouse.
-    // Since our Produto entity only has one 'estoque' and one 'localizacao' field currently, 
-    // this is mostly for record keeping or updating the main 'localizacao' text if it's a full move.
-    
-    storage.add('TRANSFERENCIAS', formData);
-    
-    // Optional: Update product location if it's a full move (logic assumption)
-    // or just log it. We will just log it to TRANSFERENCIAS storage as requested.
-    
-    toast({ title: "Transferência Registrada", description: "Movimentação salva com sucesso." });
-    navigate('/estoque/transferencias');
+    // Since our Produto entity only has one 'estoque' field currently,
+    // this is mostly for record keeping.
+    try {
+      const { error } = await insertWithCompanyId('transferencias', formData);
+      if (error) throw error;
+
+      toast({ title: "Transferência Registrada", description: "Movimentação salva com sucesso." });
+      navigate('/estoque/transferencias');
+    } catch (error) {
+      console.error('[TransferenciasForm] Erro ao salvar transferência:', error);
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -61,17 +77,17 @@ function TransferenciasForm() {
                 <div className="col-span-2 space-y-2">
                   <Label>Produto</Label>
                   <select
-                    name="produtoId"
-                    value={formData.produtoId}
+                    name="produto_id"
+                    value={formData.produto_id}
                     onChange={handleChange}
                     required
                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                   >
                     <option value="">Selecione...</option>
-                    {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} (Local: {p.localizacao || 'N/A'})</option>)}
+                    {produtos.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
                   </select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label>Local de Origem</Label>
                   <Input name="origem" value={formData.origem} onChange={handleChange} placeholder="Ex: Armazém A" required />
@@ -92,7 +108,10 @@ function TransferenciasForm() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => navigate('/estoque/transferencias')}>Cancelar</Button>
-                <Button type="submit">Salvar Transferência</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  Salvar Transferência
+                </Button>
               </div>
             </CardContent>
           </Card>

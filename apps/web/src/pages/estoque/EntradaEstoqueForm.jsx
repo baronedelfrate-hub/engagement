@@ -7,7 +7,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 function EntradaEstoqueForm() {
@@ -15,37 +17,89 @@ function EntradaEstoqueForm() {
   const { id } = useParams();
   const { toast } = useToast();
   const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(!!id);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
-    produtoId: '',
+    produto_id: '',
     quantidade: '',
-    data: new Date().toISOString().split('T')[0],
-    documentoOrigem: ''
+    data_entrada: new Date().toISOString().split('T')[0],
+    referencia: ''
   });
 
   useEffect(() => {
-    setProdutos(storage.get('PRODUTOS'));
+    fetchProdutos();
     if (id) {
-      const entry = storage.getById('ENTRADA_ESTOQUE', id);
-      if (entry) setFormData(entry);
+      loadEntrada();
     }
   }, [id]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (id) {
-      storage.update('ENTRADA_ESTOQUE', id, formData);
-      toast({ title: "Sucesso", description: "Entrada atualizada." });
-    } else {
-      storage.add('ENTRADA_ESTOQUE', formData);
-      toast({ title: "Sucesso", description: "Entrada criada." });
+  const fetchProdutos = async () => {
+    const { data, error } = await supabase.from('produtos').select('id, nome');
+    if (error) {
+      console.error('[EntradaEstoqueForm] Erro ao carregar produtos:', error);
+      return;
     }
-    navigate('/estoque/entrada');
+    setProdutos(data || []);
+  };
+
+  const loadEntrada = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('entradas_estoque')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      setFormData({
+        produto_id: data.produto_id || '',
+        quantidade: data.quantidade ?? '',
+        data_entrada: data.data_entrada || new Date().toISOString().split('T')[0],
+        referencia: data.referencia || ''
+      });
+    } catch (error) {
+      console.error('[EntradaEstoqueForm] Erro ao carregar entrada:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar esta entrada.', variant: 'destructive' });
+      navigate('/estoque/entrada');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (id) {
+        const { error } = await supabase.from('entradas_estoque').update(formData).eq('id', id);
+        if (error) throw error;
+        toast({ title: "Sucesso", description: "Entrada atualizada." });
+      } else {
+        const { error } = await insertWithCompanyId('entradas_estoque', formData);
+        if (error) throw error;
+        toast({ title: "Sucesso", description: "Entrada criada." });
+      }
+      navigate('/estoque/entrada');
+    } catch (error) {
+      console.error('[EntradaEstoqueForm] Erro ao salvar entrada:', error);
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -66,8 +120,8 @@ function EntradaEstoqueForm() {
                 <div className="space-y-2">
                   <Label>Produto</Label>
                   <select
-                    name="produtoId"
-                    value={formData.produtoId}
+                    name="produto_id"
+                    value={formData.produto_id}
                     onChange={handleChange}
                     required
                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -90,8 +144,8 @@ function EntradaEstoqueForm() {
                   <Label>Data</Label>
                   <Input
                     type="date"
-                    name="data"
-                    value={formData.data}
+                    name="data_entrada"
+                    value={formData.data_entrada}
                     onChange={handleChange}
                     required
                   />
@@ -99,8 +153,8 @@ function EntradaEstoqueForm() {
                 <div className="space-y-2">
                   <Label>Documento de Origem</Label>
                   <Input
-                    name="documentoOrigem"
-                    value={formData.documentoOrigem}
+                    name="referencia"
+                    value={formData.referencia}
                     onChange={handleChange}
                   />
                 </div>
@@ -109,7 +163,10 @@ function EntradaEstoqueForm() {
                 <Button type="button" variant="outline" onClick={() => navigate('/estoque/entrada')}>
                   Cancelar
                 </Button>
-                <Button type="submit">Salvar</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  Salvar
+                </Button>
               </div>
             </CardContent>
           </Card>

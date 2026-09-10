@@ -39,7 +39,7 @@ const CRUDForm = ({
     const initial = {};
     fields.forEach(field => {
       initial[field.name] = initialData[field.name] || '';
-      if (field.type === 'boolean') {
+      if (field.type === 'boolean' || field.type === 'switch') {
           initial[field.name] = initialData[field.name] === undefined ? true : initialData[field.name];
       }
     });

@@ -34,7 +34,7 @@ export const useFinanceiroDropdowns = () => {
             supabase.from('fornecedores').select('id, nome, cnpj').order('nome'),
             supabase.from('empresas').select('id, razao_social, nome_fantasia, cnpj').eq('ativo', true).order('nome_fantasia'),
             supabase.from('bancos').select('id, nome, codigo, agencia, conta').eq('ativo', true).order('nome'),
-            supabase.from('centros_custo').select('id, nome').eq('ativo', true).order('nome'),
+            supabase.from('centros_custo').select('id, codigo, nome').eq('ativo', true).order('nome'),
             supabase.from('categorias').select('id, nome').eq('ativo', true).order('nome'),
             supabase.from('subcategorias').select('id, nome, categoria_id').eq('ativo', true).order('nome'),
             supabase.from('projetos').select('id, nome').order('nome'),

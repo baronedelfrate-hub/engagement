@@ -27,18 +27,23 @@ const FluxoCaixaMovimentacoesList = () => {
   useEffect(() => { fetchData(); }, []);
 
   const columns = [
-    { header: 'Data', accessorKey: 'data', cell: ({ row }) => new Date(row.data).toLocaleDateString() },
-    { 
-        header: 'Tipo', 
+    { header: 'Data', accessorKey: 'data_movimentacao', cell: ({ row }) => new Date(row.data_movimentacao).toLocaleDateString() },
+    {
+        header: 'Tipo',
         accessorKey: 'tipo',
-        cell: ({ row }) => <Badge variant={row.tipo === 'entrada' ? 'success' : 'destructive'}>{row.tipo === 'entrada' ? 'Entrada' : 'Saída'}</Badge>
+        cell: ({ row }) => <Badge variant={row.tipo === 'Receita' ? 'success' : 'destructive'}>{row.tipo === 'Receita' ? 'Entrada' : 'Saída'}</Badge>
     },
-    { 
-        header: 'Valor', 
+    {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <Badge variant={row.status === 'Realizado' ? 'default' : 'secondary'}>{row.status}</Badge>
+    },
+    {
+        header: 'Valor',
         accessorKey: 'valor',
-        cell: ({ row }) => <span className={row.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}>R$ {parseFloat(row.valor).toFixed(2)}</span>
+        cell: ({ row }) => <span className={row.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}>R$ {parseFloat(row.valor).toFixed(2)}</span>
     },
-    { header: 'Categoria', accessorKey: 'categoria_id' },
+    { header: 'Categoria', accessorKey: 'categoria' },
     { header: 'Descrição', accessorKey: 'descricao' },
   ];
 

@@ -6,16 +6,12 @@ import { Label } from '@/components/ui/label';
 
 const AVAILABLE_COLUMNS = [
   { id: 'data', label: 'Data' },
-  { id: 'descricao', label: 'Descrição' },
+  { id: 'tipo', label: 'Tipo (Entrada/Saída)' },
+  { id: 'status', label: 'Status (Previsto/Realizado)' },
   { id: 'categoria', label: 'Categoria' },
-  { id: 'dreGroup', label: 'Grupo DRE' },
-  { id: 'valor_previsto', label: 'Valor Previsto' },
-  { id: 'valor_realizado', label: 'Valor Realizado' },
-  { id: 'diferenca', label: 'Diferença (Real - Prev)' },
-  { id: 'status', label: 'Status' },
-  { id: 'conta', label: 'Conta Bancária' },
   { id: 'centroCusto', label: 'Centro de Custo' },
-  { id: 'projeto', label: 'Projeto' },
+  { id: 'descricao', label: 'Descrição' },
+  { id: 'valor', label: 'Valor' },
 ];
 
 const SelecionarColunasFluxo = ({ isOpen, onClose, selectedColumns, onSave }) => {
@@ -26,7 +22,7 @@ const SelecionarColunasFluxo = ({ isOpen, onClose, selectedColumns, onSave }) =>
   }, [selectedColumns, isOpen]);
 
   const toggleColumn = (id) => {
-    setLocalSelection(prev => 
+    setLocalSelection(prev =>
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
@@ -40,8 +36,8 @@ const SelecionarColunasFluxo = ({ isOpen, onClose, selectedColumns, onSave }) =>
         <div className="grid grid-cols-2 gap-4 py-4">
           {AVAILABLE_COLUMNS.map((col) => (
             <div key={col.id} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`col-${col.id}`} 
+              <Checkbox
+                id={`col-${col.id}`}
                 checked={localSelection.includes(col.id)}
                 onCheckedChange={() => toggleColumn(col.id)}
               />

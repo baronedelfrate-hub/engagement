@@ -380,6 +380,13 @@ const AnimatedRoutes = () => {
           <Route path="/financeiro/movimentacoes/novo" element={<ProtectedLayout><PageTransition><MovimentacoesFinanceirasForm /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/movimentacoes/:id" element={<ProtectedLayout><PageTransition><MovimentacoesFinanceirasForm /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa" element={<ProtectedLayout><PageTransition><FluxoCaixaDashboard /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesList /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes/novo" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes/:id" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasList /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias/novo" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias/:id" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/relatorios" element={<ProtectedLayout><PageTransition><RelatoriosFluxoCaixa /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/baixas" element={<ProtectedLayout><PageTransition><BaixasPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/conciliacao-bancaria" element={<ProtectedLayout><PageTransition><ConciliacaoBancariaPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/importar-extrato" element={<ProtectedLayout><PageTransition><ImportarExtratoPage /></PageTransition></ProtectedLayout>} />

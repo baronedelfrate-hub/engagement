@@ -1,72 +1,80 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PageHeader from '@/components/PageHeader';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Download, Filter, Plus } from 'lucide-react';
+import { Loader2, Plus, Settings, FileBarChart, ListTree } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FluxoCaixaTabela from './FluxoCaixaTabela';
-import { generateTimelineData } from './fluxoCaixaUtils';
+import { fetchFluxoCaixaData, formatCurrency } from './fluxoCaixaUtils';
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
 import EditarPrevistoModal from './components/EditarPrevistoModal';
-import { toast } from '@/components/ui/use-toast';
-import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
 
 function FluxoCaixaDashboard() {
-  const [timelineData, setTimelineData] = useState([]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [matrixData, setMatrixData] = useState(null);
+  const [chartTimeline, setChartTimeline] = useState([]);
+  const [movimentacoes, setMovimentacoes] = useState([]);
+  const [centrosCusto, setCentrosCusto] = useState([]);
+
   const [isDrilldownModalOpen, setIsDrilldownModalOpen] = useState(false);
-  const [drilldownData, setDrilldownData] = useState(null);
+  const [drilldownItems, setDrilldownItems] = useState([]);
+  const [drilldownTitle, setDrilldownTitle] = useState('');
+
   const [isEditarPrevistoModalOpen, setIsEditarPrevistoModalOpen] = useState(false);
   const [editarPrevistoData, setEditarPrevistoData] = useState(null);
-  
-  // New Filters State using Hook
-  const { empresas, bancos, centrosCusto } = useFinanceiroDropdowns();
-  const [filters, setFilters] = useState({ empresaId: 'all', bancoId: 'all' });
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchFluxoCaixaData(60);
+      setMatrixData(result.matrix);
+      setChartTimeline(result.chartTimeline);
+      setMovimentacoes(result.movimentacoes);
+      setCentrosCusto(result.centrosCusto);
+    } catch (error) {
+      console.error('[FluxoCaixaDashboard] Erro ao carregar dados:', error);
+      toast({ title: "Erro", description: "Não foi possível carregar o fluxo de caixa.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    // Here we would ideally fetch real data filtered by empresa/banco
-    setTimelineData(generateTimelineData(60));
-  }, [filters]);
+    loadData();
+  }, [loadData]);
 
-  const handleCellClick = useCallback((date, categoryId, type) => {
-    const mockDetails = [
-      { id: 1, descricao: `${type} de ${categoryId} em ${date} - Item 1`, valor: 1234.56, status: 'Pago' },
-      { id: 2, descricao: `${type} de ${categoryId} em ${date} - Item 2`, valor: 789.01, status: 'Aberto' },
-    ];
+  const handleCellClick = useCallback((row, day, type) => {
+    const status = type === 'previsto' ? 'Previsto' : 'Realizado';
+    const items = movimentacoes.filter(m => {
+      const rowId = m.centro_custo_id || 'sem-centro';
+      return rowId === row.id && m.data_movimentacao === day.key && m.status === status;
+    }).map(m => ({
+      data: m.data_movimentacao,
+      descricao: m.descricao,
+      categoria: m.categoria,
+      tipo: m.status?.toUpperCase(),
+      valor: m.tipo === 'Despesa' ? -parseFloat(m.valor || 0) : parseFloat(m.valor || 0),
+    }));
 
-    setDrilldownData({ date, categoryId, type, details: mockDetails });
+    setDrilldownItems(items);
+    setDrilldownTitle(`${row.name} — ${day.label} (${status})`);
     setIsDrilldownModalOpen(true);
-  }, []);
+  }, [movimentacoes]);
 
-  const handleOpenEditarPrevistoModal = useCallback((date, categoryId, currentValue) => {
-    setEditarPrevistoData({ date, categoryId, currentValue });
+  const handleOpenEditarPrevistoModal = useCallback((row, day) => {
+    setEditarPrevistoData(row && day ? { centroCustoId: row.id, dayKey: day.key } : null);
     setIsEditarPrevistoModalOpen(true);
   }, []);
 
-  const handleSavePrevisto = useCallback((date, categoryId, newValue) => {
-    setTimelineData(prevData => {
-      return prevData.map(day => {
-        if (day.date === date) {
-          return {
-            ...day,
-            [categoryId]: {
-              ...day[categoryId],
-              previsto: parseFloat(newValue)
-            }
-          };
-        }
-        return day;
-      });
-    });
-    toast({
-      title: "Previsto atualizado com sucesso!",
-      description: `O valor previsto para ${categoryId} em ${date} foi atualizado.`,
-      variant: "success",
-    });
-    setIsEditarPrevistoModalOpen(false);
-  }, []);
+  const totalDias = chartTimeline.length;
+  const ultimoDia = totalDias > 0 ? chartTimeline[totalDias - 1] : null;
 
   return (
     <>
@@ -77,77 +85,90 @@ function FluxoCaixaDashboard() {
 
       <PageHeader
         title="Fluxo de Caixa"
-        description="Visualize e projete os movimentos financeiros da sua empresa."
+        description="Visualize e projete os movimentos financeiros da sua empresa (próximos 60 dias)."
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/movimentacoes')} className="gap-2">
+              <ListTree className="h-4 w-4" /> Movimentações
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/config-categorias')} className="gap-2">
+              <Settings className="h-4 w-4" /> Categorias
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/relatorios')} className="gap-2">
+              <FileBarChart className="h-4 w-4" /> Relatórios
+            </Button>
+            <Button onClick={() => handleOpenEditarPrevistoModal(null, null)} className="gap-2">
+              <Plus className="h-4 w-4" /> Nova Entrada
+            </Button>
+          </div>
+        }
       />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-6 min-w-0"
       >
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-background p-4 rounded-lg border border-border">
-          <div className="flex gap-4 items-center w-full md:w-auto">
-             <div className="w-48">
-                 <Select value={filters.empresaId} onValueChange={v => setFilters({...filters, empresaId: v})}>
-                    <SelectTrigger><SelectValue placeholder="Empresa" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todas as Empresas</SelectItem>
-                        {empresas.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
-                    </SelectContent>
-                 </Select>
-             </div>
-             <div className="w-48">
-                 <Select value={filters.bancoId} onValueChange={v => setFilters({...filters, bancoId: v})}>
-                    <SelectTrigger><SelectValue placeholder="Banco" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os Bancos</SelectItem>
-                        {bancos.map(b => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
-                    </SelectContent>
-                 </Select>
-             </div>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => toast({title: "Nova Entrada", description: "Em breve"})}>
-              <Plus className="mr-2 h-4 w-4" /> Nova Entrada
-            </Button>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Previsto (60 dias)</p>
+              <h3 className="text-xl font-mono font-bold text-blue-600">{formatCurrency(ultimoDia?.saldoFinal?.previsto)}</h3>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Realizado (60 dias)</p>
+              <h3 className="text-xl font-mono font-bold text-emerald-600">{formatCurrency(ultimoDia?.saldoFinal?.realizado)}</h3>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground uppercase font-bold">Diferença</p>
+              <h3 className="text-xl font-mono font-bold text-foreground">{formatCurrency((ultimoDia?.saldoFinal?.realizado || 0) - (ultimoDia?.saldoFinal?.previsto || 0))}</h3>
+            </CardContent>
+          </Card>
         </div>
 
-        <Tabs defaultValue="tabela" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-muted">
-            <TabsTrigger value="tabela">Tabela de Fluxo</TabsTrigger>
-            <TabsTrigger value="graficos">Gráficos de Fluxo</TabsTrigger>
-          </TabsList>
-          <TabsContent value="tabela" className="mt-4">
-            <FluxoCaixaTabela 
-              timeline={timelineData} 
-              onCellClick={handleCellClick} 
-              onEditPrevistoClick={handleOpenEditarPrevistoModal} 
-            />
-          </TabsContent>
-          <TabsContent value="graficos" className="mt-4">
-            <FluxoCaixaDashboardChart timeline={timelineData} />
-          </TabsContent>
-        </Tabs>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 border rounded-lg bg-background">
+            <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+            <p className="text-sm text-muted-foreground">Carregando fluxo de caixa...</p>
+          </div>
+        ) : (
+          <Tabs defaultValue="tabela" className="w-full min-w-0">
+            <TabsList className="grid w-full grid-cols-2 bg-muted">
+              <TabsTrigger value="tabela">Tabela de Fluxo</TabsTrigger>
+              <TabsTrigger value="graficos">Gráficos de Fluxo</TabsTrigger>
+            </TabsList>
+            <TabsContent value="tabela" className="mt-4">
+              <FluxoCaixaTabela
+                data={matrixData}
+                onCellClick={handleCellClick}
+              />
+            </TabsContent>
+            <TabsContent value="graficos" className="mt-4">
+              <FluxoCaixaDashboardChart timeline={chartTimeline} />
+            </TabsContent>
+          </Tabs>
+        )}
       </motion.div>
 
-      {drilldownData && (
-        <DrilldownModal
-          isOpen={isDrilldownModalOpen}
-          onClose={() => setIsDrilldownModalOpen(false)}
-          data={drilldownData}
-        />
-      )}
+      <DrilldownModal
+        isOpen={isDrilldownModalOpen}
+        onClose={() => setIsDrilldownModalOpen(false)}
+        items={drilldownItems}
+        title={drilldownTitle}
+      />
 
-      {editarPrevistoData && (
-        <EditarPrevistoModal
-          isOpen={isEditarPrevistoModalOpen}
-          onClose={() => setIsEditarPrevistoModalOpen(false)}
-          data={editarPrevistoData}
-          onSave={handleSavePrevisto}
-        />
-      )}
+      <EditarPrevistoModal
+        isOpen={isEditarPrevistoModalOpen}
+        onClose={() => setIsEditarPrevistoModalOpen(false)}
+        data={editarPrevistoData}
+        centrosCusto={centrosCusto}
+        onSave={loadData}
+      />
     </>
   );
 }

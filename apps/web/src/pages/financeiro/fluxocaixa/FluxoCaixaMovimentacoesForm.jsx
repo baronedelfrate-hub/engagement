@@ -12,9 +12,10 @@ const FluxoCaixaMovimentacoesForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({});
-  
-  // Use centralized hook
-  const { categorias, centrosCusto, empresas, loading: loadingDropdowns } = useFinanceiroDropdowns();
+
+  // Use centralized hook (só centrosCusto é usado de verdade aqui - o resto do hook
+  // busca dropdowns de outras entidades financeiras que não se aplicam a este formulário)
+  const { centrosCusto, loading: loadingDropdowns } = useFinanceiroDropdowns();
 
   useEffect(() => {
     if (id) {
@@ -60,29 +61,29 @@ const FluxoCaixaMovimentacoesForm = () => {
 
   const fields = [
     { name: 'data_movimentacao', label: 'Data', type: 'date', required: true },
-    { 
-        name: 'tipo', 
-        label: 'Tipo', 
-        type: 'select', 
-        options: [{ label: 'Entrada', value: 'entrada' }, { label: 'Saída', value: 'saida' }],
-        required: true 
+    {
+        name: 'tipo',
+        label: 'Tipo',
+        type: 'select',
+        options: [{ label: 'Entrada (Receita)', value: 'Receita' }, { label: 'Saída (Despesa)', value: 'Despesa' }],
+        required: true
+    },
+    {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [{ label: 'Previsto', value: 'Previsto' }, { label: 'Realizado', value: 'Realizado' }],
+        required: true
     },
     { name: 'valor', label: 'Valor', type: 'number', step: '0.01', required: true },
-    { 
-        name: 'empresa_id', 
-        label: 'Empresa', 
-        type: 'select', 
-        options: empresas.map(e => ({ label: e.nome, value: e.id })), 
-        required: true 
-    },
-    { 
-        name: 'centro_custo_id', 
-        label: 'Centro de Custo', 
-        type: 'select', 
-        options: centrosCusto.map(c => ({ label: c.nome, value: c.id })),
+    { name: 'categoria', label: 'Categoria', required: true, placeholder: 'Ex: Faturamento de Vendas' },
+    {
+        name: 'centro_custo_id',
+        label: 'Centro de Custo',
+        type: 'select',
+        options: centrosCusto.map(c => ({ label: `${c.codigo} - ${c.nome}`, value: c.id })),
     },
     { name: 'descricao', label: 'Descrição', type: 'textarea', required: true, fullWidth: true },
-    { name: 'observacoes', label: 'Observações', type: 'textarea', fullWidth: true },
   ];
 
   return (

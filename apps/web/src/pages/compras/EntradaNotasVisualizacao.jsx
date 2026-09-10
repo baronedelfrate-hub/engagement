@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import FormularioEntradaManualModal from '@/pages/compras/notas-fiscais/components/FormularioEntradaManualModal';
@@ -14,73 +12,81 @@ const EntradaNotasVisualizacao = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [notas, setNotas] = useState([]);
+  const [fornecedoresMap, setFornecedoresMap] = useState({});
   const [loading, setLoading] = useState(true);
-  
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedNota, setSelectedNota] = useState(null);
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true);
-    // Using NOTAS_FISCAIS_ENTRADA as the source of truth for "Entrada de Notas"
-    const data = storage.get('NOTAS_FISCAIS_ENTRADA') || [];
-    // Sort by newest
-    const sorted = data.sort((a, b) => new Date(b.data_emissao) - new Date(a.data_emissao));
-    setNotas(sorted);
-    setLoading(false);
+    try {
+      const [notasRes, fornecedoresRes] = await Promise.all([
+        supabase.from('notas_fiscais_entrada').select('*').order('data_emissao', { ascending: false }),
+        supabase.from('fornecedores').select('id, nome, fantasia, cnpj'),
+      ]);
+      if (notasRes.error) throw notasRes.error;
+      const map = {};
+      (fornecedoresRes.data || []).forEach(f => { map[f.id] = f; });
+      setFornecedoresMap(map);
+      setNotas(notasRes.data || []);
+    } catch (error) {
+      console.error('[EntradaNotasVisualizacao] Erro ao carregar dados:', error);
+      toast({ title: "Erro", description: "Não foi possível carregar as notas fiscais.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir esta nota? Isso pode afetar contas a pagar vinculadas.')) {
-      storage.delete('NOTAS_FISCAIS_ENTRADA', id);
-      // Optional: Delete related Payables? For safety, we keep them or manual cleanup might be needed.
-      // Just deleting the note for now as requested.
+      const { error } = await supabase.from('notas_fiscais_entrada').delete().eq('id', id);
+      if (error) {
+        toast({ title: "Erro", description: error.message || "Não foi possível excluir.", variant: "destructive" });
+        return;
+      }
       toast({ title: "Sucesso", description: "Nota excluída com sucesso." });
       loadData();
     }
   };
 
-  const handleEdit = (nota) => {
-    setSelectedNota(nota);
-    setIsModalOpen(true);
-  };
-
   const handleCreate = () => {
-    setSelectedNota(null);
     setIsModalOpen(true);
   };
 
   const columns = [
     {
       header: 'Número',
-      accessor: 'numero',
-      render: (row) => <span className="font-mono font-bold">{row.numero}</span>
+      accessor: 'numero_nfe',
+      render: (row) => <span className="font-mono font-bold">{row.numero_nfe}</span>
     },
     {
       header: 'Fornecedor',
-      accessor: 'emitente_nome',
-      render: (row) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-foreground">{row.emitente_nome}</span>
-          <span className="text-xs text-muted-foreground">{row.emitente_cnpj}</span>
-        </div>
-      )
+      render: (row) => {
+        const f = fornecedoresMap[row.fornecedor_id];
+        return (
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground">{f?.fantasia || f?.nome || '-'}</span>
+            <span className="text-xs text-muted-foreground">{f?.cnpj}</span>
+          </div>
+        );
+      }
     },
     {
       header: 'Emissão',
       accessor: 'data_emissao',
-      render: (row) => new Date(row.data_emissao).toLocaleDateString()
+      render: (row) => row.data_emissao ? new Date(row.data_emissao).toLocaleDateString() : '-'
     },
     {
       header: 'Valor',
       accessor: 'valor_total',
       render: (row) => (
         <span className="font-bold text-emerald-600">
-          R$ {parseFloat(row.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          R$ {parseFloat(row.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
         </span>
       )
     },
@@ -103,9 +109,6 @@ const EntradaNotasVisualizacao = () => {
         <div className="flex justify-end gap-2">
           <Button variant="ghost" size="icon" onClick={() => navigate(`/compras/entrada-notas/${row.id}`)} title="Visualizar Detalhes">
             <Eye className="h-4 w-4 text-blue-500" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(row)} title="Editar">
-            <Edit className="h-4 w-4 text-amber-500" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => handleDelete(row.id)} title="Excluir">
             <Trash2 className="h-4 w-4 text-red-500" />
@@ -135,7 +138,6 @@ const EntradaNotasVisualizacao = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={loadData}
-        notaToEdit={selectedNota}
       />
     </>
   );

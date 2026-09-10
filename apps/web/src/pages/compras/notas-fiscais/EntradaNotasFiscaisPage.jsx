@@ -10,7 +10,7 @@ import FormularioEntradaManualModal from './components/FormularioEntradaManualMo
 import MatchingModal from './components/MatchingModal';
 import RecebimentoNFeModal from './components/RecebimentoNFeModal';
 import { useToast } from '@/components/ui/use-toast';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { DatabaseSchemaValidator } from '@/lib/databaseSchemaValidator';
 import { NotaFiscalLogger } from '@/lib/notaFiscalLogger';
 import EntradaNotasVisualizacao from '@/pages/compras/EntradaNotasVisualizacao';
@@ -18,13 +18,15 @@ import EntradaNotasVisualizacao from '@/pages/compras/EntradaNotasVisualizacao';
 function EntradaNotasFiscaisPage() {
   const { toast } = useToast();
   const [notas, setNotas] = useState([]);
+  const [fornecedoresMap, setFornecedoresMap] = useState({});
+  const [notasComRateio, setNotasComRateio] = useState(new Set());
   const [schemaErrors, setSchemaErrors] = useState([]);
-  
+
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
   const [isMatchingOpen, setIsMatchingOpen] = useState(false);
   const [isRecebimentoOpen, setIsRecebimentoOpen] = useState(false);
-  
+
   const [selectedNota, setSelectedNota] = useState(null);
   const [activeTab, setActiveTab] = useState('kanban');
 
@@ -42,12 +44,27 @@ function EntradaNotasFiscaisPage() {
     }
   };
 
-  const loadData = () => {
-    const data = storage.get('NOTAS_FISCAIS_ENTRADA') || [];
-    setNotas(data);
+  const loadData = async () => {
+    try {
+      const [notasRes, fornecedoresRes, rateiosRes] = await Promise.all([
+        supabase.from('notas_fiscais_entrada').select('*').order('created_at', { ascending: false }),
+        supabase.from('fornecedores').select('id, nome, fantasia'),
+        supabase.from('nf_rateio').select('nota_id'),
+      ]);
+      if (notasRes.error) throw notasRes.error;
+
+      const map = {};
+      (fornecedoresRes.data || []).forEach(f => { map[f.id] = f.fantasia || f.nome; });
+      setFornecedoresMap(map);
+      setNotasComRateio(new Set((rateiosRes.data || []).map(r => r.nota_id)));
+      setNotas(notasRes.data || []);
+    } catch (error) {
+      console.error('[EntradaNotasFiscaisPage] Erro ao carregar dados:', error);
+      toast({ title: "Erro", description: "Não foi possível carregar as notas fiscais.", variant: "destructive" });
+    }
   };
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
@@ -58,15 +75,18 @@ function EntradaNotasFiscaisPage() {
     setNotas(updatedNotas);
 
     const nota = notas.find(n => n.id === draggableId);
-    
+
     if (newStatus === 'Em_Entrada') {
          setSelectedNota(nota);
          setIsRecebimentoOpen(true);
     }
 
-    setTimeout(() => {
-         storage.update('NOTAS_FISCAIS_ENTRADA', draggableId, { status: newStatus });
-    }, 50);
+    const { error } = await supabase.from('notas_fiscais_entrada').update({ status: newStatus }).eq('id', draggableId);
+    if (error) {
+      console.error('[EntradaNotasFiscaisPage] Erro ao atualizar status:', error);
+      toast({ title: "Erro", description: "Não foi possível salvar a mudança de status.", variant: "destructive" });
+      loadData();
+    }
   };
 
   const handleCardClick = (nota) => {
@@ -140,7 +160,7 @@ function EntradaNotasFiscaisPage() {
                     <List className="h-4 w-4"/> Lista Geral
                 </button>
             </div>
-            
+
             <div className="text-xs text-muted-foreground hidden sm:block">
                {activeTab === 'kanban' ? `${notas.length} notas no quadro` : 'Visualização em lista detalhada'}
             </div>
@@ -149,10 +169,12 @@ function EntradaNotasFiscaisPage() {
         <div className="flex-1 overflow-hidden flex flex-col relative">
             {activeTab === 'kanban' && (
                 <div className="flex-1 h-full overflow-x-auto overflow-y-hidden animate-in fade-in duration-300 slide-in-from-left-2">
-                    <KanbanNotasFiscais 
-                        notas={notas} 
-                        onDragEnd={handleDragEnd} 
+                    <KanbanNotasFiscais
+                        notas={notas}
+                        onDragEnd={handleDragEnd}
                         onCardClick={handleCardClick}
+                        notasComRateio={notasComRateio}
+                        fornecedoresMap={fornecedoresMap}
                     />
                 </div>
             )}
@@ -165,9 +187,9 @@ function EntradaNotasFiscaisPage() {
         </div>
       </div>
 
-      <UploadXMLModal 
-        isOpen={isUploadOpen} 
-        onClose={() => setIsUploadOpen(false)} 
+      <UploadXMLModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
         onUploadSuccess={loadData}
       />
 
@@ -176,8 +198,8 @@ function EntradaNotasFiscaisPage() {
         onClose={() => setIsManualEntryOpen(false)}
         onSuccess={loadData}
       />
-      
-      <MatchingModal 
+
+      <MatchingModal
         isOpen={isMatchingOpen}
         onClose={() => { setIsMatchingOpen(false); setSelectedNota(null); }}
         nota={selectedNota}

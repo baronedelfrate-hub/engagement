@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Upload, Check, AlertCircle, Loader2, XCircle, FileCode, UserPlus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 import { XmlParsingService } from '@/lib/xmlParsingService';
-import { NotaFiscalInsertionService } from '@/lib/notaFiscalInsertionService';
 
 const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
   const { toast } = useToast();
@@ -71,11 +71,11 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
                 const data = XmlParsingService.parseNFe(text);
 
                 // Check Supplier Existence
-                const fornecedores = storage.get('FORNECEDORES') || [];
+                const { data: fornecedores } = await supabase.from('fornecedores').select('id, cnpj');
                 const cnpjClean = (data.emitente_cnpj || "").replace(/\D/g, '');
-                
-                let existingSupplier = fornecedores.find(f => f.cnpj && f.cnpj.replace(/\D/g, '') === cnpjClean);
-                
+
+                let existingSupplier = (fornecedores || []).find(f => f.cnpj && f.cnpj.replace(/\D/g, '') === cnpjClean);
+
                 if (!existingSupplier && cnpjClean.length > 0) {
                     setNewSupplierDetected(true);
                     data._newSupplierData = {
@@ -108,37 +108,56 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
     setErrorLog(null);
     try {
         let supplierId = null;
-        const fornecedores = storage.get('FORNECEDORES') || [];
+        const { data: fornecedores } = await supabase.from('fornecedores').select('id, cnpj');
         const cnpjClean = (parsedPreview.emitente_cnpj || "").replace(/\D/g, '');
-        let existingSupplier = fornecedores.find(f => f.cnpj && f.cnpj.replace(/\D/g, '') === cnpjClean);
+        let existingSupplier = (fornecedores || []).find(f => f.cnpj && f.cnpj.replace(/\D/g, '') === cnpjClean);
 
         if (existingSupplier) {
             supplierId = existingSupplier.id;
         } else if (parsedPreview._newSupplierData) {
-            const newSupplier = {
-                id: storage.uuid(),
-                razao_social: parsedPreview._newSupplierData.nome,
-                nome_fantasia: parsedPreview._newSupplierData.nome,
+            const { data: newSupplier, error: supplierError } = await insertWithCompanyId('fornecedores', {
+                nome: parsedPreview._newSupplierData.nome,
+                fantasia: parsedPreview._newSupplierData.nome,
                 cnpj: parsedPreview.emitente_cnpj,
                 ativo: true,
-                criado_em: new Date().toISOString()
-            };
-            storage.add('FORNECEDORES', newSupplier);
+            }, { chain: (q) => q.select().single() });
+            if (supplierError) throw supplierError;
             supplierId = newSupplier.id;
         }
 
-        // Call Insertion Service
-        const dbResult = await NotaFiscalInsertionService.processInvoice(parsedPreview, supplierId);
+        // Cria a nota em Pendente — entra no Kanban pra conferência/classificação/entrada.
+        const { data: nota, error: notaError } = await insertWithCompanyId('notas_fiscais_entrada', {
+            numero_nfe: parsedPreview.numero,
+            serie: parsedPreview.serie,
+            chave_nfe: parsedPreview.chave_nfe || null,
+            fornecedor_id: supplierId,
+            data_emissao: parsedPreview.data_emissao ? parsedPreview.data_emissao.split('T')[0] : new Date().toISOString().split('T')[0],
+            valor_total: parsedPreview.valor_total,
+            status: 'Pendente',
+            tipo_nota: 'DANFE',
+            origem: 'IMPORTADO_XML',
+        }, { chain: (q) => q.select().single() });
+        if (notaError) throw notaError;
 
-        if (dbResult.success) {
-          toast({ 
-            title: "Importação Concluída", 
-            description: `Conta a Pagar ID: ${dbResult.conta_pagar.id} e ${dbResult.entradas_estoque.length} itens de estoque registrados.`,
-            className: "bg-green-600 text-white" 
-          });
-          onUploadSuccess();
-          onClose();
+        if (parsedPreview.itens?.length > 0) {
+            const { error: itensError } = await insertWithCompanyId('notas_fiscais_itens', parsedPreview.itens.map(item => ({
+                nfe_id: nota.id,
+                codigo: item.codigo,
+                descricao: item.descricao,
+                quantidade: item.quantidade,
+                preco_unitario: item.valor_unitario,
+                valor_total: item.valor_total,
+            })));
+            if (itensError) throw itensError;
         }
+
+        toast({
+          title: "Importação Concluída",
+          description: `Nota ${nota.numero_nfe} adicionada ao quadro para conferência.`,
+          className: "bg-green-600 text-white"
+        });
+        onUploadSuccess();
+        onClose();
 
     } catch (err) {
         setErrorLog("Erro de Inserção DB: " + err.message);
@@ -153,8 +172,8 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
         <DialogHeader>
           <DialogTitle>Importar XML da Nota</DialogTitle>
         </DialogHeader>
-        
-        <div 
+
+        <div
             className={`
                 border-2 border-dashed rounded-lg p-8 text-center transition-all
                 ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border hover:border-border'}
@@ -166,21 +185,21 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
             onDragOver={handleDrag}
             onDrop={handleDrop}
         >
-            <input 
-                type="file" 
+            <input
+                type="file"
                 ref={fileInputRef}
-                accept=".xml" 
-                className="hidden" 
+                accept=".xml"
+                className="hidden"
                 onChange={(e) => validateAndSetFile(e.target.files[0])}
             />
-            
+
             {file ? (
                 <div className="flex flex-col items-center gap-2 text-green-700 dark:text-green-400">
                     <div className={`h-12 w-12 rounded-full ${errorLog ? 'bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400' : 'bg-green-100 dark:bg-green-950/30'} flex items-center justify-center`}>
                         {errorLog ? <XCircle className="h-6 w-6" /> : <Check className="h-6 w-6" />}
                     </div>
                     <p className="font-medium text-sm truncate max-w-[200px]">{file.name}</p>
-                    
+
                     {parsedPreview && !errorLog && (
                         <div className="bg-background/60 p-3 rounded text-xs text-left w-full mt-2 border border-green-200 dark:border-green-900 shadow-sm">
                             <div className="grid grid-cols-2 gap-1">
@@ -225,9 +244,9 @@ const UploadXMLModal = ({ isOpen, onClose, onUploadSuccess }) => {
 
         <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isProcessing}>Cancelar</Button>
-            <Button 
-                onClick={handleConfirmImport} 
-                disabled={!file || isProcessing || errorLog || !parsedPreview} 
+            <Button
+                onClick={handleConfirmImport}
+                disabled={!file || isProcessing || errorLog || !parsedPreview}
                 className="gap-2 bg-green-600 hover:bg-green-700"
             >
                 {isProcessing ? (

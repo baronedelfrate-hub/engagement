@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Layers, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { storage } from '@/lib/storage';
-import { NotaFiscalInsertionService } from '@/lib/notaFiscalInsertionService';
+import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 
 const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
   const { toast } = useToast();
@@ -19,7 +19,6 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
     numero: '',
     serie: '',
     data_emissao: new Date().toISOString().split('T')[0],
-    data_vencimento: new Date().toISOString().split('T')[0],
     fornecedor_id: '',
     valor_total: '',
     itens: []
@@ -29,12 +28,12 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setFornecedores(storage.get('FORNECEDORES') || []);
+      supabase.from('fornecedores').select('id, nome, fantasia').eq('ativo', true).order('nome')
+        .then(({ data }) => setFornecedores(data || []));
       setFormData({
         numero: '',
         serie: '',
         data_emissao: new Date().toISOString().split('T')[0],
-        data_vencimento: new Date().toISOString().split('T')[0],
         fornecedor_id: '',
         valor_total: '',
         itens: []
@@ -43,7 +42,7 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
       setIsProcessing(false);
     }
   }, [isOpen]);
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -56,7 +55,7 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
     }
     const itemTotal = parseFloat(newItem.quantidade) * parseFloat(newItem.valor_unitario);
     const item = { ...newItem, valor_total: itemTotal, id: Date.now().toString() };
-    
+
     setFormData(prev => {
         const newItens = [...prev.itens, item];
         const newTotal = newItens.reduce((acc, i) => acc + i.valor_total, 0);
@@ -83,22 +82,37 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
     setErrorLog(null);
 
     try {
-        const payload = {
-            ...formData,
+        const { data: nota, error: notaError } = await insertWithCompanyId('notas_fiscais_entrada', {
+            numero_nfe: formData.numero,
+            serie: formData.serie,
+            fornecedor_id: formData.fornecedor_id,
+            data_emissao: formData.data_emissao,
             valor_total: parseFloat(formData.valor_total || 0),
-        };
+            status: 'Pendente',
+            tipo_nota: 'DANFE',
+            origem: 'MANUAL',
+        }, { chain: (q) => q.select().single() });
+        if (notaError) throw notaError;
 
-        const dbResult = await NotaFiscalInsertionService.processInvoice(payload, formData.fornecedor_id);
-
-        if (dbResult.success) {
-            toast({ 
-                title: "Nota Registrada", 
-                description: `Criada com sucesso. Conta a Pagar ID: ${dbResult.conta_pagar.id}`,
-                className: "bg-green-600 text-white" 
-            });
-            onSuccess();
-            onClose();
+        if (formData.itens.length > 0) {
+            const { error: itensError } = await insertWithCompanyId('notas_fiscais_itens', formData.itens.map(item => ({
+                nfe_id: nota.id,
+                codigo: item.codigo,
+                descricao: item.descricao,
+                quantidade: parseFloat(item.quantidade),
+                preco_unitario: parseFloat(item.valor_unitario),
+                valor_total: item.valor_total,
+            })));
+            if (itensError) throw itensError;
         }
+
+        toast({
+            title: "Nota Registrada",
+            description: `Nota ${nota.numero_nfe} adicionada ao quadro para conferência.`,
+            className: "bg-green-600 text-white"
+        });
+        onSuccess();
+        onClose();
     } catch (err) {
         setErrorLog("Erro de Banco de Dados: " + err.message);
     } finally {
@@ -120,7 +134,7 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
                     <Select value={formData.fornecedor_id} onValueChange={(val) => setFormData(prev => ({ ...prev, fornecedor_id: val }))}>
                         <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                         <SelectContent>
-                            {fornecedores.map(f => <SelectItem key={f.id} value={f.id}>{f.razao_social || f.nome}</SelectItem>)}
+                            {fornecedores.map(f => <SelectItem key={f.id} value={f.id}>{f.fantasia || f.nome}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -137,10 +151,6 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
                     <Input type="date" name="data_emissao" value={formData.data_emissao} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
-                    <Label>Vencimento *</Label>
-                    <Input type="date" name="data_vencimento" value={formData.data_vencimento} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
                     <Label>Valor Total (R$) *</Label>
                     <Input type="number" name="valor_total" value={formData.valor_total} onChange={handleInputChange} readOnly />
                 </div>
@@ -150,7 +160,7 @@ const FormularioEntradaManualModal = ({ isOpen, onClose, onSuccess }) => {
                 <div className="flex items-center justify-between">
                     <h4 className="font-bold text-sm text-muted-foreground">Itens da Nota</h4>
                 </div>
-                
+
                 <div className="grid grid-cols-12 gap-2 items-end">
                      <div className="col-span-5">
                         <Label className="text-xs">Descrição</Label>

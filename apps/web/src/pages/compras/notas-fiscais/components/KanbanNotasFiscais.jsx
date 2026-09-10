@@ -10,7 +10,7 @@ const COLUMNS = [
   { id: 'Rejeitada', title: 'Rejeitada', color: 'bg-red-50 dark:bg-red-950/30' },
 ];
 
-const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick }) => {
+const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick, notasComRateio = new Set(), fornecedoresMap = {} }) => {
   // Group notas by status
   const columnsData = COLUMNS.reduce((acc, col) => {
     acc[col.id] = notas.filter(n => n.status === col.id);
@@ -37,11 +37,13 @@ const KanbanNotasFiscais = ({ notas, onDragEnd, onCardClick }) => {
                     className={`flex-1 p-3 overflow-y-auto overflow-x-hidden min-h-[150px] transition-colors ${snapshot.isDraggingOver ? 'bg-muted' : ''}`}
                   >
                     {columnsData[column.id]?.map((nota, index) => (
-                      <CardNotaFiscal 
-                          key={nota.id} 
-                          nota={nota} 
-                          index={index} 
+                      <CardNotaFiscal
+                          key={nota.id}
+                          nota={nota}
+                          index={index}
                           onClick={onCardClick}
+                          hasRateio={notasComRateio.has(nota.id)}
+                          fornecedorNome={fornecedoresMap[nota.fornecedor_id]}
                       />
                     ))}
                     {provided.placeholder}

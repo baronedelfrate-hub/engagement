@@ -3,9 +3,8 @@ import { motion } from 'framer-motion';
 import { Draggable } from '@hello-pangea/dnd';
 import { FileText, Calendar, DollarSign, Link, AlertTriangle, Receipt, Building2, PieChart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { storage } from '@/lib/storage';
 
-const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
+const CardNotaFiscal = ({ nota, index, onClick, onAction, hasRateio = false, fornecedorNome = '' }) => {
   
   const getIcon = () => {
       if (nota.tipo_nota === 'NFSe') return <FileText className="h-3 w-3" />;
@@ -18,14 +17,6 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
       if (nota.origem === 'MANUAL') return <Badge variant="outline" className="text-[9px] h-4 px-1 bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800">Manual</Badge>;
       return null;
   };
-
-  // Check if rateios exist
-  const hasRateio = () => {
-      const allRateios = storage.get('NF_RATEIO') || [];
-      return allRateios.some(r => r.nota_id === nota.id);
-  };
-
-  const isRateioPresent = hasRateio();
 
   return (
     <Draggable draggableId={nota.id} index={index}>
@@ -50,17 +41,17 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction }) => {
                         {nota.tipo_nota || 'DANFE'}
                     </Badge>
                     {getOriginBadge()}
-                    {isRateioPresent && (
+                    {hasRateio && (
                         <div className="flex items-center text-[9px] text-blue-600 gap-0.5 bg-blue-50 px-1 rounded border border-blue-100 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-900" title="Possui rateio de custo">
                             <PieChart className="h-3 w-3" />
                         </div>
                     )}
                 </div>
-                <h4 className="font-bold text-sm text-foreground leading-tight mb-0.5 truncate max-w-[180px]" title={nota.emitente_nome}>
-                    {nota.emitente_nome}
+                <h4 className="font-bold text-sm text-foreground leading-tight mb-0.5 truncate max-w-[180px]" title={fornecedorNome}>
+                    {fornecedorNome || 'Fornecedor não identificado'}
                 </h4>
                 <div className="text-[10px] text-muted-foreground">
-                    Nº {nota.numero}
+                    Nº {nota.numero_nfe}
                 </div>
             </div>
             

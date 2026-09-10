@@ -5,7 +5,7 @@ import PageHeader from '@/components/PageHeader';
 import GlassCard from '@/components/GlassCard';
 import { CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Users, Truck, Package, Wrench, TrendingUp, DollarSign, Database, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import AnimatedDivider from '@/components/AnimatedDivider';
 import { Button } from '@/components/ui/button';
@@ -28,16 +28,25 @@ function Dashboard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    setTimeout(() => {
-        setStats({
-        clientes: storage.get('CLIENTES').length,
-        fornecedores: storage.get('FORNECEDORES').length,
-        produtos: storage.get('PRODUTOS').length,
-        servicos: storage.get('SERVICOS').length
-        });
-        setLoading(false);
-    }, 800);
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    setLoading(true);
+    const [clientes, fornecedores, produtos, servicos] = await Promise.all([
+      supabase.from('clientes').select('id', { count: 'exact', head: true }),
+      supabase.from('fornecedores').select('id', { count: 'exact', head: true }),
+      supabase.from('produtos').select('id', { count: 'exact', head: true }),
+      supabase.from('servicos').select('id', { count: 'exact', head: true }),
+    ]);
+    setStats({
+      clientes: clientes.count || 0,
+      fornecedores: fornecedores.count || 0,
+      produtos: produtos.count || 0,
+      servicos: servicos.count || 0
+    });
+    setLoading(false);
+  };
 
   const handleTestConnection = async () => {
     setIsTesting(true);

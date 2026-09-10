@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 
 function PontoEquilibrio() {
   // Base values from DRE (using last month as baseline)
@@ -28,35 +28,31 @@ function PontoEquilibrio() {
     loadBaseData();
   }, []);
 
-  const loadBaseData = () => {
+  const loadBaseData = async () => {
     // Logic similar to DRE but taking last month
-    const receitas = storage.get('CONTAS_RECEBER');
-    const despesas = storage.get('CONTAS_PAGAR');
-    const savedConfig = storage.get('DRE_CONFIG') || { variableCategories: [] };
-    const variableCatIds = Array.isArray(savedConfig) ? savedConfig : (savedConfig.variableCategories || []);
-
     const now = new Date();
     // Let's take last full month for stable data
     const startOfMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const startStr = startOfMonth.toISOString().split('T')[0];
+    const endStr = endOfMonth.toISOString().split('T')[0];
 
-    const monthReceitas = receitas.filter(r => {
-        const d = new Date(r.dataEmissao);
-        return d >= startOfMonth && d <= endOfMonth;
-    });
-    
-    const monthDespesas = despesas.filter(d => {
-        const date = new Date(d.dataEmissao);
-        return date >= startOfMonth && date <= endOfMonth;
-    });
+    const [{ data: monthReceitas }, { data: monthDespesas }] = await Promise.all([
+      supabase.from('contas_receber').select('valor_original').gte('data_emissao', startStr).lte('data_emissao', endStr),
+      supabase.from('contas_pagar').select('valor_original, categoria_id').gte('data_emissao', startStr).lte('data_emissao', endStr),
+    ]);
 
-    const revenue = monthReceitas.reduce((acc, curr) => acc + parseFloat(curr.valorTotal || 0), 0);
+    // Nota: DRE_CONFIG (categorias marcadas como custo variável) ainda não existe no schema real,
+    // então por padrão toda despesa entra como custo fixo até essa configuração existir.
+    const variableCatIds = [];
+
+    const revenue = (monthReceitas || []).reduce((acc, curr) => acc + parseFloat(curr.valor_original || 0), 0);
     let variableCost = 0;
     let fixedCost = 0;
 
-    monthDespesas.forEach(d => {
-        const val = parseFloat(d.valorTotal || 0);
-        if (variableCatIds.includes(d.categoriaId)) {
+    (monthDespesas || []).forEach(d => {
+        const val = parseFloat(d.valor_original || 0);
+        if (variableCatIds.includes(d.categoria_id)) {
             variableCost += val;
         } else {
             fixedCost += val;

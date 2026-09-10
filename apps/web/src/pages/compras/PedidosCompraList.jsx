@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileText, MessageSquare, BarChart2, RefreshCw, Filter, X } from 'lucide-react';
+import { Plus, BarChart2, RefreshCw, Filter, X, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
-import { generatePDF, generateWhatsAppLink } from '@/lib/documents';
 import {
   Dialog,
   DialogContent,
@@ -28,11 +27,10 @@ function PedidosCompraList() {
   const { toast } = useToast();
   const [pedidos, setPedidos] = useState([]);
   const [filteredPedidos, setFilteredPedidos] = useState([]);
-  
-  // Search & Filters
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFornecedor, setSelectedFornecedor] = useState('all');
-  
+
   const [fornecedores, setFornecedores] = useState([]);
   const [isReportsOpen, setIsReportsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,29 +47,31 @@ function PedidosCompraList() {
 
     const term = searchTerm.toLowerCase();
     const filtered = pedidos.filter(pedido => {
-      const fornecedorName = (getFornecedorName(pedido.fornecedorId) || '').toLowerCase();
-      const numero = (pedido.numeroPedido || '').toLowerCase();
+      const fornecedorName = (getFornecedorName(pedido.fornecedor_id) || '').toLowerCase();
+      const numero = (pedido.numero || '').toLowerCase();
       const id = (pedido.id || '').toLowerCase();
-      
+
       const matchesSearch = fornecedorName.includes(term) || numero.includes(term) || id.includes(term);
-      const matchesFornecedor = selectedFornecedor === 'all' || pedido.fornecedorId === selectedFornecedor;
+      const matchesFornecedor = selectedFornecedor === 'all' || pedido.fornecedor_id === selectedFornecedor;
 
       return matchesSearch && matchesFornecedor;
     });
     setFilteredPedidos(filtered);
   }, [searchTerm, selectedFornecedor, pedidos, fornecedores]);
 
-  const loadData = () => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      console.log('Loading Purchase Orders...');
-      const pedidosData = storage.get('PEDIDOS_COMPRA') || [];
-      const fornecedoresData = storage.get('FORNECEDORES') || [];
-      
-      setPedidos(pedidosData);
-      setFornecedores(fornecedoresData);
+      const [{ data: pedidosData, error: pedidosError }, { data: fornecedoresData }] = await Promise.all([
+        supabase.from('pedidos_compra').select('*').order('created_at', { ascending: false }),
+        supabase.from('fornecedores').select('id, nome'),
+      ]);
+      if (pedidosError) throw pedidosError;
+
+      setPedidos(pedidosData || []);
+      setFornecedores(fornecedoresData || []);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('[PedidosCompraList] Erro ao carregar dados:', error);
       toast({
         title: "Erro ao carregar",
         description: "Não foi possível carregar os pedidos de compra.",
@@ -84,17 +84,18 @@ function PedidosCompraList() {
 
   const getFornecedorName = (id) => {
     const fornecedor = fornecedores.find(f => f.id === id);
-    return fornecedor ? (fornecedor.nome || fornecedor.razao_social || 'Fornecedor sem nome') : 'Fornecedor não encontrado';
+    return fornecedor ? (fornecedor.nome || 'Fornecedor sem nome') : 'Fornecedor não encontrado';
   };
 
   const handleEdit = (id) => {
     navigate(`/compras/pedidos/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este pedido de compra?')) {
       try {
-        storage.delete('PEDIDOS_COMPRA', id);
+        const { error } = await supabase.from('pedidos_compra').delete().eq('id', id);
+        if (error) throw error;
         loadData();
         toast({
           title: "Pedido excluído",
@@ -103,83 +104,58 @@ function PedidosCompraList() {
       } catch (error) {
         toast({
           title: "Erro ao excluir",
-          description: "Ocorreu um erro ao tentar excluir o pedido.",
+          description: error.message || "Ocorreu um erro ao tentar excluir o pedido.",
           variant: "destructive"
         });
       }
     }
   };
 
-  const handlePDF = (pedido) => {
-    try {
-      const fornecedorName = getFornecedorName(pedido.fornecedorId);
-      generatePDF('Pedido Compra', pedido, fornecedorName);
-      toast({ title: "PDF Gerado", description: "O download iniciará em instantes." });
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Erro no PDF", description: "Não foi possível gerar o PDF.", variant: "destructive" });
-    }
-  };
-
-  const handleWhatsApp = (pedido) => {
-    try {
-      const fornecedorName = getFornecedorName(pedido.fornecedorId);
-      const link = generateWhatsAppLink('Pedido Compra', pedido, fornecedorName);
-      window.open(link, '_blank');
-    } catch (error) {
-      console.error(error);
-      toast({ title: "Erro no WhatsApp", description: "Não foi possível gerar o link.", variant: "destructive" });
-    }
-  };
-
   // Reports Logic
   const totalByFornecedor = pedidos.reduce((acc, curr) => {
-    const name = getFornecedorName(curr.fornecedorId);
-    const total = (curr.itens || []).reduce((s, i) => s + parseFloat(i.valorTotal || 0), 0);
-    acc[name] = (acc[name] || 0) + total;
+    const name = getFornecedorName(curr.fornecedor_id);
+    acc[name] = (acc[name] || 0) + parseFloat(curr.valor_total || 0);
     return acc;
   }, {});
 
-  const divergentOrders = pedidos.filter(p => p.divergencias && p.divergencias.length > 0);
-
   const columns = [
-    { header: 'Nº Pedido', accessor: 'numeroPedido' },
-    { 
-      header: 'Fornecedor', 
-      render: (item) => getFornecedorName(item.fornecedorId)
-    },
-    { 
-      header: 'Data Emissão', 
-      render: (item) => item.dataEmissao ? new Date(item.dataEmissao).toLocaleDateString() : '-'
+    { header: 'Nº Pedido', accessor: 'numero' },
+    {
+      header: 'Fornecedor',
+      render: (item) => getFornecedorName(item.fornecedor_id)
     },
     {
-        header: 'Status',
-        render: (item) => (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium 
-                ${item.status === 'Recebido' ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' :
-                  item.status === 'Parcialmente Recebido' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800' :
-                  'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800'}`}>
-                {item.status || 'Aberto'}
-            </span>
-        )
+      header: 'Data Pedido',
+      render: (item) => item.data_pedido ? new Date(item.data_pedido).toLocaleDateString() : '-'
+    },
+    {
+      header: 'Status',
+      render: (item) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium
+                ${item.status === 'Concluido' ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800' :
+            item.status === 'Em_Entrada' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-800' :
+              'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800'}`}>
+          {item.status || 'Aberto'}
+        </span>
+      )
     },
     {
       header: 'Total',
-      render: (item) => `R$ ${(item.itens || []).reduce((acc, curr) => acc + parseFloat(curr.valorTotal || 0), 0).toFixed(2)}`
+      render: (item) => `R$ ${parseFloat(item.valor_total || 0).toFixed(2)}`
     },
     {
-      header: 'Docs',
+      header: 'Ações',
       render: (item) => (
         <div className="flex gap-1">
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600 hover:bg-blue-50/20 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={(e) => { e.stopPropagation(); handlePDF(item); }}>
-                <FileText className="h-4 w-4" />
-            </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-50/20 dark:text-green-400 dark:hover:bg-green-950/30" onClick={(e) => { e.stopPropagation(); handleWhatsApp(item); }}>
-                <MessageSquare className="h-4 w-4" />
-            </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(item.id)} title="Editar">
+            <Pencil className="h-4 w-4 text-blue-500" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} title="Excluir">
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
         </div>
       )
-    }
+    },
   ];
 
   return (
@@ -195,14 +171,14 @@ function PedidosCompraList() {
         action={
           <div className="flex gap-2">
             <Button variant="outline" onClick={loadData} title="Recarregar dados">
-               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
             <Button variant="outline" onClick={() => setIsReportsOpen(true)} className="gap-2">
-                <BarChart2 className="h-4 w-4" /> Relatórios
+              <BarChart2 className="h-4 w-4" /> Relatórios
             </Button>
             <Button onClick={() => navigate('/compras/pedidos/novo')} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Pedido
+              <Plus className="h-4 w-4" />
+              Novo Pedido
             </Button>
           </div>
         }
@@ -210,78 +186,60 @@ function PedidosCompraList() {
 
       <div className="bg-card p-4 rounded-xl shadow-sm border border-border space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2">
-                <SearchBar
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  placeholder="Buscar por número ou ID..."
-                />
-            </div>
-            <div className="flex gap-2 items-center">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedFornecedor} onValueChange={setSelectedFornecedor}>
-                    <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Filtrar por Fornecedor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos os Fornecedores</SelectItem>
-                        {fornecedores.map(f => (
-                            <SelectItem key={f.id} value={f.id}>{f.nome || f.razao_social}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                {selectedFornecedor !== 'all' && (
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedFornecedor('all')}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                )}
-            </div>
+          <div className="md:col-span-2">
+            <SearchBar
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar por número ou ID..."
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={selectedFornecedor} onValueChange={setSelectedFornecedor}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filtrar por Fornecedor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Fornecedores</SelectItem>
+                {fornecedores.map(f => (
+                  <SelectItem key={f.id} value={f.id}>{f.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedFornecedor !== 'all' && (
+              <Button variant="ghost" size="icon" onClick={() => setSelectedFornecedor('all')}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       <DataTable
-          data={filteredPedidos}
-          columns={columns}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          loading={isLoading}
-          emptyMessage="Nenhum pedido de compra encontrado"
+        data={filteredPedidos}
+        columns={columns}
+        loading={isLoading}
+        emptyMessage="Nenhum pedido de compra encontrado"
       />
 
       <Dialog open={isReportsOpen} onOpenChange={setIsReportsOpen}>
-        <DialogContent className="max-w-3xl bg-card text-card-foreground">
-            <DialogHeader>
-                <DialogTitle>Relatórios de Compras</DialogTitle>
-            </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                <div className="border border-border rounded-lg p-4 bg-muted/30">
-                    <h3 className="font-bold mb-3 text-sm">Total Comprado por Fornecedor</h3>
-                    <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                        {Object.entries(totalByFornecedor).length > 0 ? Object.entries(totalByFornecedor).map(([name, total]) => (
-                            <div key={name} className="flex justify-between text-sm border-b border-border pb-1">
-                                <span className="text-muted-foreground">{name}</span>
-                                <span className="font-mono font-bold">R$ {total.toFixed(2)}</span>
-                            </div>
-                        )) : <p className="text-xs text-muted-foreground">Sem dados.</p>}
-                    </div>
-                </div>
-                <div className="border border-red-200 rounded-lg p-4 bg-red-50/10 dark:bg-red-900/10">
-                    <h3 className="font-bold mb-3 text-sm text-red-600 dark:text-red-400">Compras com Divergência</h3>
-                    <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                        {divergentOrders.length > 0 ? divergentOrders.map(p => (
-                            <div key={p.id} className="text-sm border-b border-red-100 dark:border-red-900/30 pb-2 mb-2">
-                                <div className="font-medium text-red-600 dark:text-red-400">Pedido #{p.numeroPedido}</div>
-                                <p className="text-xs text-red-500/70">{getFornecedorName(p.fornecedorId)}</p>
-                                <ul className="list-disc list-inside text-xs text-red-500 mt-1">
-                                    {p.divergencias.map((d, i) => (
-                                        <li key={i}>{d.justificativa}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )) : <p className="text-xs text-muted-foreground">Nenhuma divergência registrada.</p>}
-                    </div>
-                </div>
+        <DialogContent className="max-w-lg bg-card text-card-foreground">
+          <DialogHeader>
+            <DialogTitle>Relatórios de Compras</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="border border-border rounded-lg p-4 bg-muted/30">
+              <h3 className="font-bold mb-3 text-sm">Total Comprado por Fornecedor</h3>
+              <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                {Object.entries(totalByFornecedor).length > 0 ? Object.entries(totalByFornecedor).map(([name, total]) => (
+                  <div key={name} className="flex justify-between text-sm border-b border-border pb-1">
+                    <span className="text-muted-foreground">{name}</span>
+                    <span className="font-mono font-bold">R$ {total.toFixed(2)}</span>
+                  </div>
+                )) : <p className="text-xs text-muted-foreground">Sem dados.</p>}
+              </div>
             </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

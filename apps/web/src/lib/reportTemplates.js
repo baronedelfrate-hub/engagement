@@ -1,5 +1,3 @@
-import { storage } from '@/lib/storage';
-
 const TEMPLATE_STORAGE_KEY = 'erp_report_templates';
 
 export const saveTemplate = (name, config) => {

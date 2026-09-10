@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 import { useToast } from '@/components/ui/use-toast';
 
-const EditarPrevistoModal = ({ isOpen, onClose, onSuccess }) => {
+const EditarPrevistoModal = ({ isOpen, onClose, onSave }) => {
   const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     descricao: '',
     valor: '',
@@ -16,26 +18,31 @@ const EditarPrevistoModal = ({ isOpen, onClose, onSuccess }) => {
     tipo: 'SAIDA' // ENTRADA or SAIDA
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.descricao || !formData.valor) return;
 
-    // Create a manual Provision (Conta a Pagar/Receber)
-    const collection = formData.tipo === 'ENTRADA' ? 'CONTAS_RECEBER' : 'CONTAS_PAGAR';
-    const newItem = {
-        id: `manual_${Date.now()}`,
-        numeroTitulo: `MAN-${Date.now()}`,
-        descricao: formData.descricao,
-        valorTotal: parseFloat(formData.valor),
-        dataVencimento: formData.dataVencimento,
-        status: 'Aberto',
-        categoriaNome: 'Manual',
-        createdAt: new Date().toISOString()
-    };
+    setSaving(true);
+    try {
+      const tabela = formData.tipo === 'ENTRADA' ? 'contas_receber' : 'contas_pagar';
+      const { error } = await insertWithCompanyId(tabela, {
+        numero: `MAN-${Date.now()}`,
+        observacoes: formData.descricao,
+        valor_original: parseFloat(formData.valor),
+        data_emissao: new Date().toISOString().split('T')[0],
+        data_vencimento: formData.dataVencimento,
+        status: 'Pendente',
+      });
+      if (error) throw error;
 
-    storage.add(collection, newItem);
-    toast({ title: "Lançamento Previsto Criado", description: "O item foi adicionado ao fluxo." });
-    onSuccess();
-    onClose();
+      toast({ title: "Lançamento Previsto Criado", description: "O item foi adicionado ao fluxo." });
+      onSave?.();
+      onClose();
+    } catch (error) {
+      console.error('[EditarPrevistoModal] Erro ao salvar lançamento:', error);
+      toast({ title: "Erro", description: "Não foi possível salvar o lançamento.", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -70,7 +77,7 @@ const EditarPrevistoModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
         <DialogFooter>
             <Button variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button onClick={handleSubmit}>Salvar</Button>
+            <Button onClick={handleSubmit} disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

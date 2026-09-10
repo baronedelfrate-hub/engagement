@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 const TributosPage = () => {
@@ -17,9 +17,11 @@ const TributosPage = () => {
   const [tributos, setTributos] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     nome: '',
     codigo: '',
@@ -33,14 +35,24 @@ const TributosPage = () => {
   }, []);
 
   useEffect(() => {
-    setFilteredData(tributos.filter(item => 
+    setFilteredData(tributos.filter(item =>
       item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
     ));
   }, [searchTerm, tributos]);
 
-  const loadData = () => {
-    setTributos(storage.get('TRIBUTOS') || []);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from('tributos').select('*').order('nome', { ascending: true });
+      if (error) throw error;
+      setTributos(data || []);
+    } catch (error) {
+      console.error('Error loading tributos:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar os tributos.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenModal = (item = null) => {
@@ -54,26 +66,42 @@ const TributosPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Confirmar exclusão?')) {
-      storage.delete('TRIBUTOS', id);
+      const { error } = await supabase.from('tributos').delete().eq('id', id);
+      if (error) {
+        toast({ title: 'Erro', description: error.message || 'Não foi possível excluir.', variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Sucesso', description: 'Registro removido.' });
-      loadData();
+      await loadData();
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.nome) {
       toast({ title: 'Erro', description: 'Preencha o nome.', variant: 'destructive' });
       return;
     }
 
-    if (editingId) storage.update('TRIBUTOS', editingId, { ...formData, atualizado_por: 'ADM001' });
-    else storage.add('TRIBUTOS', { ...formData, criado_por: 'ADM001' });
-    
-    toast({ title: 'Sucesso', description: 'Salvo com sucesso.' });
-    setIsModalOpen(false);
-    loadData();
+    setSaving(true);
+    try {
+      if (editingId) {
+        const { error } = await supabase.from('tributos').update(formData).eq('id', editingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('tributos').insert(formData);
+        if (error) throw error;
+      }
+      toast({ title: 'Sucesso', description: 'Salvo com sucesso.' });
+      setIsModalOpen(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error saving tributo:', error);
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const columns = [
@@ -133,7 +161,7 @@ const TributosPage = () => {
       </div>
 
       <div className="rounded-lg border border-border bg-background overflow-hidden">
-        <DataTable columns={columns} data={filteredData} />
+        <DataTable columns={columns} data={filteredData} loading={loading} />
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -174,7 +202,10 @@ const TributosPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" className="border-border text-foreground hover:bg-muted" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit}>Salvar</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Salvar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

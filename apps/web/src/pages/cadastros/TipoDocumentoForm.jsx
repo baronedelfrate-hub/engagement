@@ -6,49 +6,76 @@ import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 function TipoDocumentoForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
+  const [loading, setLoading] = useState(!!id);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    codigo: '',
+    sigla: '',
     nome: '',
-    categoria: '',
-    descricao: ''
+    ativo: true
   });
 
   useEffect(() => {
     if (id) {
-      const tipo = storage.getById('TIPO_DOCUMENTO', id);
-      if (tipo) {
-        setFormData(tipo);
-      }
+      loadTipo();
     }
   }, [id]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (id) {
-      storage.update('TIPO_DOCUMENTO', id, formData);
-      toast({
-        title: "Tipo de documento atualizado",
-        description: "Os dados do tipo de documento foram atualizados com sucesso.",
-      });
-    } else {
-      storage.add('TIPO_DOCUMENTO', formData);
-      toast({
-        title: "Tipo de documento criado",
-        description: "O novo tipo de documento foi cadastrado com sucesso.",
-      });
+  const loadTipo = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('tipos_documento')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      setFormData(data);
+    } catch (error) {
+      console.error('Error loading tipo de documento:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar este tipo de documento.', variant: 'destructive' });
+      navigate('/cadastros/tipo-documento');
+    } finally {
+      setLoading(false);
     }
-    
-    navigate('/cadastros/tipo-documento');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      if (id) {
+        const { error } = await supabase.from('tipos_documento').update(formData).eq('id', id);
+        if (error) throw error;
+        toast({
+          title: "Tipo de documento atualizado",
+          description: "Os dados do tipo de documento foram atualizados com sucesso.",
+        });
+      } else {
+        const { error } = await supabase.from('tipos_documento').insert(formData);
+        if (error) throw error;
+        toast({
+          title: "Tipo de documento criado",
+          description: "O novo tipo de documento foi cadastrado com sucesso.",
+        });
+      }
+      navigate('/cadastros/tipo-documento');
+    } catch (error) {
+      console.error('Error saving tipo de documento:', error);
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -57,6 +84,14 @@ function TipoDocumentoForm() {
       [e.target.name]: e.target.value
     });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -84,17 +119,6 @@ function TipoDocumentoForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="codigo">Código *</Label>
-                  <Input
-                    id="codigo"
-                    name="codigo"
-                    value={formData.codigo}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="nome">Nome *</Label>
                   <Input
                     id="nome"
@@ -107,25 +131,23 @@ function TipoDocumentoForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="categoria">Categoria</Label>
+                  <Label htmlFor="sigla">Sigla</Label>
                   <Input
-                    id="categoria"
-                    name="categoria"
-                    value={formData.categoria}
+                    id="sigla"
+                    name="sigla"
+                    value={formData.sigla || ''}
                     onChange={handleChange}
-                    placeholder="Ex: Fiscal, Administrativo"
+                    placeholder="Ex: NF, RPA, BOLETO"
                   />
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="descricao">Descrição</Label>
-                  <Textarea
-                    id="descricao"
-                    name="descricao"
-                    value={formData.descricao}
-                    onChange={handleChange}
-                    rows={3}
+                <div className="flex items-center space-x-2 md:col-span-2">
+                  <Switch
+                    id="ativo"
+                    checked={formData.ativo}
+                    onCheckedChange={(checked) => setFormData({ ...formData, ativo: checked })}
                   />
+                  <Label htmlFor="ativo">Ativo</Label>
                 </div>
               </div>
 
@@ -133,7 +155,8 @@ function TipoDocumentoForm() {
                 <Button type="button" variant="outline" onClick={() => navigate('/cadastros/tipo-documento')}>
                   Cancelar
                 </Button>
-                <Button type="submit">
+                <Button type="submit" disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                   {id ? 'Atualizar' : 'Cadastrar'}
                 </Button>
               </div>

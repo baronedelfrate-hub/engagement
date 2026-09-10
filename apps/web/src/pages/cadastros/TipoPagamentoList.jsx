@@ -5,8 +5,9 @@ import { Plus } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 function TipoPagamentoList() {
@@ -14,24 +15,41 @@ function TipoPagamentoList() {
   const { toast } = useToast();
   const [tipos, setTipos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadTipos();
   }, []);
 
-  const loadTipos = () => {
-    const data = storage.get('TIPO_PAGAMENTO');
-    setTipos(data || []);
+  const loadTipos = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('tipos_pagamento')
+        .select('*')
+        .order('nome', { ascending: true });
+      if (error) throw error;
+      setTipos(data || []);
+    } catch (error) {
+      console.error('Error loading tipos de pagamento:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar os tipos de pagamento.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEdit = (id) => {
     navigate(`/cadastros/tipo-pagamento/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este tipo de pagamento?')) {
-      storage.delete('TIPO_PAGAMENTO', id);
-      loadTipos();
+      const { error } = await supabase.from('tipos_pagamento').delete().eq('id', id);
+      if (error) {
+        toast({ title: 'Erro', description: error.message || 'Não foi possível excluir.', variant: 'destructive' });
+        return;
+      }
+      await loadTipos();
       toast({
         title: "Tipo de pagamento excluído",
         description: "O tipo de pagamento foi removido com sucesso.",
@@ -40,25 +58,27 @@ function TipoPagamentoList() {
   };
 
   const filteredTipos = tipos.filter(tipo =>
-    tipo.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tipo.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
+    tipo.nome?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
-    { 
-      header: 'Código', 
-      accessor: 'codigo',
-      render: (row) => <span className="text-foreground font-mono">{row.codigo}</span>
-    },
-    { 
-      header: 'Nome', 
+    {
+      header: 'Nome',
       accessor: 'nome',
       render: (row) => <span className="text-foreground font-medium">{row.nome}</span>
     },
-    { 
-      header: 'Descrição', 
+    {
+      header: 'Descrição',
       accessor: 'descricao',
       render: (row) => <span className="text-foreground">{row.descricao}</span>
+    },
+    {
+      header: 'Status',
+      render: (row) => (
+        <Badge variant={row.ativo ? 'default' : 'secondary'}>
+          {row.ativo ? 'Ativo' : 'Inativo'}
+        </Badge>
+      )
     }
   ];
 
@@ -84,7 +104,7 @@ function TipoPagamentoList() {
         <SearchBar
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Buscar por nome ou código..."
+          placeholder="Buscar por nome..."
           className="bg-background border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
@@ -95,6 +115,7 @@ function TipoPagamentoList() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
           emptyMessage={<span className="text-muted-foreground">Nenhum tipo de pagamento cadastrado</span>}
         />
       </div>

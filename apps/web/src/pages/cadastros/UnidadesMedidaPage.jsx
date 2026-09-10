@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Loader2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 const UnidadesMedidaPage = () => {
@@ -16,9 +16,11 @@ const UnidadesMedidaPage = () => {
   const [unidades, setUnidades] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     nome: '',
     simbolo: '',
@@ -31,17 +33,26 @@ const UnidadesMedidaPage = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = unidades.filter(item => 
+    const filtered = unidades.filter(item =>
       item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.simbolo?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredData(filtered);
   }, [searchTerm, unidades]);
 
-  const loadData = () => {
-    const data = storage.get('UNIDADES_MEDIDA') || [];
-    setUnidades(data);
-    setFilteredData(data);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from('unidades_medida').select('*').order('nome', { ascending: true });
+      if (error) throw error;
+      setUnidades(data || []);
+      setFilteredData(data || []);
+    } catch (error) {
+      console.error('Error loading unidades de medida:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar as unidades de medida.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenModal = (unidade = null) => {
@@ -60,29 +71,43 @@ const UnidadesMedidaPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir esta unidade?')) {
-      storage.delete('UNIDADES_MEDIDA', id);
+      const { error } = await supabase.from('unidades_medida').delete().eq('id', id);
+      if (error) {
+        toast({ title: 'Erro', description: error.message || 'Não foi possível excluir.', variant: 'destructive' });
+        return;
+      }
       toast({ title: 'Sucesso', description: 'Unidade removida com sucesso.' });
-      loadData();
+      await loadData();
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.nome || !formData.simbolo) {
       toast({ title: 'Erro', description: 'Nome e Símbolo são obrigatórios.', variant: 'destructive' });
       return;
     }
 
-    if (editingId) {
-      storage.update('UNIDADES_MEDIDA', editingId, { ...formData, atualizado_por: 'ADM001' });
-      toast({ title: 'Sucesso', description: 'Unidade atualizada.' });
-    } else {
-      storage.add('UNIDADES_MEDIDA', { ...formData, criado_por: 'ADM001' });
-      toast({ title: 'Sucesso', description: 'Unidade cadastrada.' });
+    setSaving(true);
+    try {
+      if (editingId) {
+        const { error } = await supabase.from('unidades_medida').update(formData).eq('id', editingId);
+        if (error) throw error;
+        toast({ title: 'Sucesso', description: 'Unidade atualizada.' });
+      } else {
+        const { error } = await supabase.from('unidades_medida').insert(formData);
+        if (error) throw error;
+        toast({ title: 'Sucesso', description: 'Unidade cadastrada.' });
+      }
+      setIsModalOpen(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error saving unidade de medida:', error);
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
-    setIsModalOpen(false);
-    loadData();
   };
 
   const columns = [
@@ -138,7 +163,7 @@ const UnidadesMedidaPage = () => {
       </div>
 
       <div className="rounded-lg border border-border bg-background overflow-hidden">
-        <DataTable columns={columns} data={filteredData} />
+        <DataTable columns={columns} data={filteredData} loading={loading} />
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -171,7 +196,10 @@ const UnidadesMedidaPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" className="border-border text-foreground hover:bg-muted" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit}>Salvar</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleSubmit} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Salvar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

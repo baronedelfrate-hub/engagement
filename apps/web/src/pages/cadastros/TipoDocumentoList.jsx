@@ -5,8 +5,9 @@ import { Plus } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { storage } from '@/lib/storage';
+import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
 function TipoDocumentoList() {
@@ -14,24 +15,41 @@ function TipoDocumentoList() {
   const { toast } = useToast();
   const [tipos, setTipos] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadTipos();
   }, []);
 
-  const loadTipos = () => {
-    const data = storage.get('TIPO_DOCUMENTO');
-    setTipos(data || []);
+  const loadTipos = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('tipos_documento')
+        .select('*')
+        .order('nome', { ascending: true });
+      if (error) throw error;
+      setTipos(data || []);
+    } catch (error) {
+      console.error('Error loading tipos de documento:', error);
+      toast({ title: 'Erro', description: 'Não foi possível carregar os tipos de documento.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEdit = (id) => {
     navigate(`/cadastros/tipo-documento/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir este tipo de documento?')) {
-      storage.delete('TIPO_DOCUMENTO', id);
-      loadTipos();
+      const { error } = await supabase.from('tipos_documento').delete().eq('id', id);
+      if (error) {
+        toast({ title: 'Erro', description: error.message || 'Não foi possível excluir.', variant: 'destructive' });
+        return;
+      }
+      await loadTipos();
       toast({
         title: "Tipo de documento excluído",
         description: "O tipo de documento foi removido com sucesso.",
@@ -41,29 +59,27 @@ function TipoDocumentoList() {
 
   const filteredTipos = tipos.filter(tipo =>
     tipo.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tipo.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
+    tipo.sigla?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
-    { 
-      header: 'Código', 
-      accessor: 'codigo',
-      render: (row) => <span className="text-foreground font-mono">{row.codigo}</span>
+    {
+      header: 'Sigla',
+      accessor: 'sigla',
+      render: (row) => <span className="text-foreground font-mono">{row.sigla}</span>
     },
-    { 
-      header: 'Nome', 
+    {
+      header: 'Nome',
       accessor: 'nome',
       render: (row) => <span className="text-foreground font-medium">{row.nome}</span>
     },
-    { 
-      header: 'Categoria', 
-      accessor: 'categoria',
-      render: (row) => <span className="text-foreground">{row.categoria}</span>
-    },
-    { 
-      header: 'Descrição', 
-      accessor: 'descricao',
-      render: (row) => <span className="text-foreground">{row.descricao}</span>
+    {
+      header: 'Status',
+      render: (row) => (
+        <Badge variant={row.ativo ? 'default' : 'secondary'}>
+          {row.ativo ? 'Ativo' : 'Inativo'}
+        </Badge>
+      )
     }
   ];
 
@@ -89,7 +105,7 @@ function TipoDocumentoList() {
         <SearchBar
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Buscar por nome ou código..."
+          placeholder="Buscar por nome ou sigla..."
           className="bg-background border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
@@ -100,6 +116,7 @@ function TipoDocumentoList() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          loading={loading}
           emptyMessage={<span className="text-muted-foreground">Nenhum tipo de documento cadastrado</span>}
         />
       </div>

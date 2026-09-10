@@ -243,7 +243,7 @@ export const erpServices = {
   condicoesPagamento: genericService('condicoes_pagamento'),
   tiposDocumento: genericService('tipos_documento'),
   unidadesMedida: genericService('unidades_medida'),
-  origem: genericService('origem'),
+  origem: genericService('origens'),
   tributos: genericService('tributos'),
 
   // Vendas

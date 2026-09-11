@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight, Eye, Edit, RotateCcw, Send } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Eye, Edit, RotateCcw } from 'lucide-react';
 import { format } from 'date-fns';
+import { useFechamentoMensal } from '@/hooks/useFechamentoMensal';
+import { useAuthContext } from '@/contexts/AuthContext';
 
-export default function UltimosFechamentos({ data = [] }) {
+export default function UltimosFechamentos({ data = [], onRefresh }) {
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
   const totalPages = Math.ceil(data.length / rowsPerPage);
+  const navigate = useNavigate();
+  const { reopenClosing } = useFechamentoMensal();
+  const { user } = useAuthContext();
 
   const paginatedData = data.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
@@ -20,6 +26,12 @@ export default function UltimosFechamentos({ data = [] }) {
     if (s === 'aberto' || s === 'em aberto' || s === 'pendente') return <Badge className="bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800">Aberto</Badge>;
     if (s === 'em andamento') return <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800">Em andamento</Badge>;
     return <Badge variant="outline">{status}</Badge>;
+  };
+
+  const handleReopen = async (id) => {
+    if (!window.confirm('Reabrir este fechamento? O status voltará para "Em andamento".')) return;
+    const success = await reopenClosing(id, user?.id);
+    if (success) onRefresh?.();
   };
 
   return (
@@ -63,21 +75,18 @@ export default function UltimosFechamentos({ data = [] }) {
                       <Badge variant="secondary" className="bg-muted text-foreground">{row.documentos || 0}</Badge>
                     </TableCell>
                     <TableCell className="text-right flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600" title="Visualizar">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-blue-600" title="Visualizar" onClick={() => navigate(`/contabilidade/fechamento/${row.id}`)}>
                         <Eye className="w-4 h-4" />
                       </Button>
-                      {row.status?.toLowerCase() === 'aberto' ? (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" title="Editar">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-orange-600" title="Reabrir">
+                      {row.status?.toLowerCase() === 'concluído' ? (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-orange-600" title="Reabrir" onClick={() => handleReopen(row.id)}>
                           <RotateCcw className="w-4 h-4" />
                         </Button>
+                      ) : (
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-emerald-600" title="Editar" onClick={() => navigate(`/contabilidade/fechamento/${row.id}/editar`)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-indigo-600" title="Enviar Contabilidade">
-                        <Send className="w-4 h-4" />
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -85,7 +94,7 @@ export default function UltimosFechamentos({ data = [] }) {
             </TableBody>
           </Table>
         </div>
-        
+
         {totalPages > 1 && (
           <div className="flex items-center justify-end space-x-2 p-4 border-t border-border">
             <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>

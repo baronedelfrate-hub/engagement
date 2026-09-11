@@ -264,7 +264,6 @@ export const erpServices = {
   contasPagarBaixas: genericService('contas_pagar_baixas'),
   contasReceber: genericService('contas_receber'),
   contasReceberBaixas: genericService('contas_receber_baixas'),
-  movimentacoesFinanceiras: genericService('movimentacoes_financeiras'),
   conciliacoesBancarias: genericService('conciliacoes_bancarias'),
 
   // Fluxo de Caixa

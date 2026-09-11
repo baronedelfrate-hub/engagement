@@ -113,8 +113,8 @@ export default function ContabilidadeDashboard() {
           <UltimosDocumentosEnviados data={grids.ultimosDocumentos} />
 
           {/* Bottom grids */}
-          <UltimosFechamentos data={grids.ultimosFechamentos} />
-          <UltimosRelatorios data={grids.ultimosRelatorios} />
+          <UltimosFechamentos data={grids.ultimosFechamentos} onRefresh={refreshData} />
+          <UltimosRelatorios data={grids.ultimosRelatorios} onRefresh={refreshData} />
         </div>
 
       </div>

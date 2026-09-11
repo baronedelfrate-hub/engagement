@@ -133,13 +133,13 @@ export const ContabilidadeProvider = ({ children }) => {
 
       let ultimosRelatoriosGrid = [
         ...(apuracoesData || []).map(a => ({
-          id: a.id, tipo: `Apuração ${a.tipo_imposto}`, descricao: `Apuração do período ${a.periodo_referencia}`, data_geracao: a.created_at, periodo: a.periodo_referencia, status: a.status || 'Concluído'
+          id: a.id, origem: 'apuracao', tipo: `Apuração ${a.tipo_imposto}`, descricao: `Apuração do período ${a.periodo_referencia}`, data_geracao: a.created_at, periodo: a.periodo_referencia, status: a.status || 'Concluído'
         })),
         ...dedupeByCompetencia(dreData).map(d => ({
-          id: `dre-${d.empresa_id}-${d.competencia}`, tipo: 'DRE', descricao: 'Demonstração do Resultado do Exercício', data_geracao: d.created_at, periodo: formatCompetencia(d.competencia), status: 'Disponível'
+          id: `dre-${d.empresa_id}-${d.competencia}`, origem: 'dre-balancete', tipo: 'DRE', descricao: 'Demonstração do Resultado do Exercício', data_geracao: d.created_at, periodo: formatCompetencia(d.competencia), status: 'Disponível'
         })),
         ...dedupeByCompetencia(balanceteData).map(b => ({
-          id: `bal-${b.empresa_id}-${b.competencia}`, tipo: 'Balancete', descricao: 'Balancete de Verificação', data_geracao: b.created_at, periodo: formatCompetencia(b.competencia), status: 'Disponível'
+          id: `bal-${b.empresa_id}-${b.competencia}`, origem: 'dre-balancete', tipo: 'Balancete', descricao: 'Balancete de Verificação', data_geracao: b.created_at, periodo: formatCompetencia(b.competencia), status: 'Disponível'
         }))
       ].sort((a, b) => new Date(b.data_geracao) - new Date(a.data_geracao));
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { format } from 'date-fns';
 
 export default function PendenciasDoMes({ data = [] }) {
   const [page, setPage] = useState(0);
+  const navigate = useNavigate();
   const rowsPerPage = 5;
   const totalPages = Math.ceil(data.length / rowsPerPage);
 
@@ -61,9 +63,15 @@ export default function PendenciasDoMes({ data = [] }) {
                     <TableCell>{getStatusBadge(row.status)}</TableCell>
                     <TableCell className="text-muted-foreground">{row.responsavel}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30">
-                        Resolver
-                      </Button>
+                      {row.tipo === 'Lançamento Contábil' ? (
+                        <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={() => navigate(`/contabilidade/lancamentos/${row.id}/editar`)}>
+                          Resolver
+                        </Button>
+                      ) : (
+                        <Button variant="ghost" size="sm" disabled title="Ainda não existe uma tela de gestão de conciliações contábeis" className="text-muted-foreground">
+                          Resolver
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

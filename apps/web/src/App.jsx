@@ -52,8 +52,6 @@ import ContasReceberList from '@/pages/financeiro/ContasReceberList';
 import ContasReceberForm from '@/pages/financeiro/ContasReceberForm';
 import MovimentacaoFinanceiraPage from '@/pages/financeiro/MovimentacaoFinanceiraPage';
 import NovaMovimentacaoPage from '@/pages/financeiro/NovaMovimentacaoPage';
-import MovimentacoesFinanceirasList from '@/pages/financeiro/MovimentacoesFinanceirasList';
-import MovimentacoesFinanceirasForm from '@/pages/financeiro/MovimentacoesFinanceirasForm';
 import ImportarExtratoPage from '@/pages/financeiro/ImportarExtratoPage';
 import ConciliacaoBancariaPage from '@/pages/financeiro/ConciliacaoBancariaPage';
 import FluxoCaixaDashboard from '@/pages/financeiro/fluxocaixa/FluxoCaixaDashboard';
@@ -372,9 +370,6 @@ const AnimatedRoutes = () => {
           <Route path="/financeiro/cobranca/dashboard" element={<ProtectedLayout><PageTransition><CobrancaDashboardIntegrated /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira/nova" element={<ProtectedLayout><PageTransition><NovaMovimentacaoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira" element={<ProtectedLayout><PageTransition><MovimentacaoFinanceiraPage /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/movimentacoes" element={<ProtectedLayout><PageTransition><MovimentacoesFinanceirasList /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/movimentacoes/novo" element={<ProtectedLayout><PageTransition><MovimentacoesFinanceirasForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/movimentacoes/:id" element={<ProtectedLayout><PageTransition><MovimentacoesFinanceirasForm /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa" element={<ProtectedLayout><PageTransition><FluxoCaixaDashboard /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa/movimentacoes" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesList /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa/movimentacoes/novo" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesForm /></PageTransition></ProtectedLayout>} />

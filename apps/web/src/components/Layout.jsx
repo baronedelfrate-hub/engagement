@@ -92,6 +92,7 @@ const navigation = [
           { name: 'Documentos para Contab.', href: '/contabilidade/documentos', icon: FolderOpen },
           { name: 'Lançamentos Contábeis', href: '/contabilidade/lancamentos', icon: Edit3 },
           { name: 'Pendências', href: '/contabilidade/pendencias' },
+          { name: 'Conciliações', href: '/contabilidade/conciliacoes', icon: GitFork },
           { name: 'DRE/Balancete', href: '/contabilidade/dre-balancete' },
           { name: 'Parâmetros Contábeis', href: '/contabilidade/parametros', icon: Sliders },
         ],

@@ -68,7 +68,7 @@ export default function PendenciasDoMes({ data = [] }) {
                           Resolver
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" disabled title="Ainda não existe uma tela de gestão de conciliações contábeis" className="text-muted-foreground">
+                        <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30" onClick={() => navigate(`/contabilidade/conciliacoes/${row.id}`)}>
                           Resolver
                         </Button>
                       )}

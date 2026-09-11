@@ -78,7 +78,7 @@ export default function SummaryCardsGrid({ summary }) {
       </Card>
 
       {/* Card 5 - Conciliações Pendentes */}
-      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-blue-500 bg-background" onClick={() => navigate('/contabilidade/pendencias')}>
+      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-blue-500 bg-background" onClick={() => navigate('/contabilidade/conciliacoes')}>
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>

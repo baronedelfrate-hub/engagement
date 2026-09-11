@@ -62,9 +62,9 @@ export const ContabilidadeProvider = ({ children }) => {
       // Bases queries
       let nfeQuery = supabase.from('nfe_produtos').select('id, integrado_contabil, created_at, status');
       let nfseQuery = supabase.from('nfse_servicos').select('id, integrado_contabil, created_at, status');
-      let fechamentosQuery = supabase.from('fechamentos_contabeis').select('*');
-      let lancamentosQuery = supabase.from('lancamentos_contabeis').select('*, responsavel_id');
-      let conciliacoesQuery = supabase.from('conciliacoes_contabeis').select('*, responsavel_id');
+      let fechamentosQuery = supabase.from('fechamentos_contabeis').select('*, responsavel:users!fechamentos_contabeis_responsavel_id_fkey(nome)');
+      let lancamentosQuery = supabase.from('lancamentos_contabeis').select('*, responsavel:users!lancamentos_contabeis_responsavel_id_fkey(nome)');
+      let conciliacoesQuery = supabase.from('conciliacoes_contabeis').select('*, responsavel:users!conciliacoes_contabeis_responsavel_id_fkey(nome)');
       let docsEnviadosQuery = supabase.from('documentos_contabilidade').select('*').order('data_envio', { ascending: false }).limit(20);
       let apuracoesQuery = supabase.from('apuracao_impostos').select('*').order('created_at', { ascending: false }).limit(20);
       let todosDocsQuery = supabase.from('documentos_contabilidade').select('empresa_id, competencia');
@@ -107,8 +107,8 @@ export const ContabilidadeProvider = ({ children }) => {
       const concPendentes = (conciliacoesData || []).filter(c => c.status?.toLowerCase() === 'pendente');
 
       let pendenciasMesGrid = [
-        ...(lancPendentes || []).map(l => ({ id: l.id, tipo: 'Lançamento Contábil', descricao: l.descricao, data: l.data, status: l.status, responsavel: 'Sistema' })),
-        ...(concPendentes || []).map(c => ({ id: c.id, tipo: 'Conciliação ' + c.tipo, descricao: `Pendente conciliação ${c.tipo}`, data: c.data_criacao, status: c.status, responsavel: 'Sistema' }))
+        ...(lancPendentes || []).map(l => ({ id: l.id, tipo: 'Lançamento Contábil', descricao: l.descricao, data: l.data, status: l.status, responsavel: l.responsavel?.nome || '-' })),
+        ...(concPendentes || []).map(c => ({ id: c.id, tipo: 'Conciliação ' + c.tipo, descricao: `Pendente conciliação ${c.tipo}`, data: c.data_criacao, status: c.status, responsavel: c.responsavel?.nome || '-' }))
       ].sort((a, b) => new Date(b.data) - new Date(a.data));
 
       if (filtros.status !== 'Todos') {
@@ -117,7 +117,7 @@ export const ContabilidadeProvider = ({ children }) => {
 
       let ultimosFechamentosGrid = (fechamentosData || []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(f => {
         const documentos = (todosDocsData || []).filter(d => d.empresa_id === f.empresa_id && d.competencia === f.competencia).length;
-        return { id: f.id, periodo: formatCompetencia(f.competencia), data_fechamento: f.data_fechamento, status: f.status, responsavel: 'Admin', documentos };
+        return { id: f.id, periodo: formatCompetencia(f.competencia), data_fechamento: f.data_fechamento, status: f.status, responsavel: f.responsavel?.nome || '-', documentos };
       });
 
       // Relatórios disponíveis: apurações reais + competências que já têm DRE/Balancete real gerado

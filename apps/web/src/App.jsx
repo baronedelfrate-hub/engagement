@@ -138,6 +138,8 @@ import LancamentosContabeisPage from '@/pages/contabilidade/LancamentosContabeis
 import LancamentosContabeisForm from '@/pages/contabilidade/lancamentos/LancamentosContabeisForm';
 import LancamentosContabeisDetail from '@/pages/contabilidade/lancamentos/LancamentosContabeisDetail';
 import PendenciasContabeisPage from '@/pages/contabilidade/PendenciasContabeisPage';
+import ConciliacoesContabeisList from '@/pages/contabilidade/conciliacoes/ConciliacoesContabeisList';
+import ConciliacoesContabeisForm from '@/pages/contabilidade/conciliacoes/ConciliacoesContabeisForm';
 import DREBalanceteDetailPage from '@/pages/contabilidade/DREBalanceteDetailPage';
 import ParametrosContabeisPage from '@/pages/contabilidade/parametros/ParametrosContabeisPage';
 
@@ -424,6 +426,9 @@ const AnimatedRoutes = () => {
                   <Route path="lancamentos/:id" element={<PageTransition><LancamentosContabeisDetail /></PageTransition>} />
                   <Route path="lancamentos/:id/editar" element={<PageTransition><LancamentosContabeisForm /></PageTransition>} />
                   <Route path="pendencias/*" element={<PageTransition><PendenciasContabeisPage /></PageTransition>} />
+                  <Route path="conciliacoes" element={<PageTransition><ConciliacoesContabeisList /></PageTransition>} />
+                  <Route path="conciliacoes/novo" element={<PageTransition><ConciliacoesContabeisForm /></PageTransition>} />
+                  <Route path="conciliacoes/:id" element={<PageTransition><ConciliacoesContabeisForm /></PageTransition>} />
                   <Route path="dre-balancete" element={<PageTransition><DREBalanceteDetailPage /></PageTransition>} />
                   <Route path="parametros" element={<PageTransition><ParametrosContabeisPage /></PageTransition>} />
                   <Route path="" element={<Navigate to="dashboard" replace />} />

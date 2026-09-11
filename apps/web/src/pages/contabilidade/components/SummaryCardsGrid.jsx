@@ -27,7 +27,7 @@ export default function SummaryCardsGrid({ summary }) {
       </Card>
 
       {/* Card 2 - Fechamentos em Aberto */}
-      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-red-500 bg-background" onClick={() => navigate('/contabilidade/fechamento-mensal')}>
+      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-red-500 bg-background" onClick={() => navigate('/contabilidade/fechamento')}>
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
@@ -96,7 +96,7 @@ export default function SummaryCardsGrid({ summary }) {
       </Card>
 
       {/* Card 6 - Relatórios Disponíveis */}
-      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-emerald-500 bg-background" onClick={() => navigate('/contabilidade/relatorios')}>
+      <Card className="hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-t-4 border-t-emerald-500 bg-background" onClick={() => navigate('/contabilidade/dre-balancete')}>
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>

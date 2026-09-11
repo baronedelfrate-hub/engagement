@@ -140,7 +140,6 @@ import LancamentosContabeisPage from '@/pages/contabilidade/LancamentosContabeis
 import LancamentosContabeisForm from '@/pages/contabilidade/lancamentos/LancamentosContabeisForm';
 import LancamentosContabeisDetail from '@/pages/contabilidade/lancamentos/LancamentosContabeisDetail';
 import PendenciasContabeisPage from '@/pages/contabilidade/PendenciasContabeisPage';
-import RelatoriosContabeis from '@/pages/contabilidade/RelatoriosContabeis';
 import DREBalanceteDetailPage from '@/pages/contabilidade/DREBalanceteDetailPage';
 import ParametrosContabeisPage from '@/pages/contabilidade/parametros/ParametrosContabeisPage';
 
@@ -417,10 +416,6 @@ const AnimatedRoutes = () => {
               <ContabilidadeContextWrapper>
                 <Routes>
                   <Route path="dashboard" element={<PageTransition><ContabilidadeDashboard /></PageTransition>} />
-                  <Route path="fechamento-mensal" element={<PageTransition><FechamentoMensalList /></PageTransition>} />
-                  <Route path="fechamento-mensal/novo" element={<PageTransition><FechamentoMensalForm /></PageTransition>} />
-                  <Route path="fechamento-mensal/:id" element={<PageTransition><FechamentoMensalDetail /></PageTransition>} />
-                  <Route path="fechamento-mensal/:id/editar" element={<PageTransition><FechamentoMensalForm /></PageTransition>} />
                   <Route path="fechamento" element={<PageTransition><FechamentoMensalList /></PageTransition>} />
                   <Route path="fechamento/novo" element={<PageTransition><FechamentoMensalForm /></PageTransition>} />
                   <Route path="fechamento/:id" element={<PageTransition><FechamentoMensalDetail /></PageTransition>} />
@@ -436,7 +431,6 @@ const AnimatedRoutes = () => {
                   <Route path="pendencias/*" element={<PageTransition><PendenciasContabeisPage /></PageTransition>} />
                   <Route path="dre-balancete" element={<PageTransition><DREBalanceteDetailPage /></PageTransition>} />
                   <Route path="parametros" element={<PageTransition><ParametrosContabeisPage /></PageTransition>} />
-                  <Route path="relatorios" element={<PageTransition><RelatoriosContabeis /></PageTransition>} />
                   <Route path="" element={<Navigate to="dashboard" replace />} />
                 </Routes>
               </ContabilidadeContextWrapper>

@@ -37,7 +37,6 @@ import {
   FolderClosed,
   Calendar,
   AlertCircle,
-  FileSpreadsheet,
   PieChart,
   Activity,
   ListChecks,
@@ -156,7 +155,6 @@ const DynamicClientMenu = ({ isSidebarOpen }) => {
         { label: 'Documentos Contábeis', path: 'documentos', icon: FolderClosed },
         { label: 'Fechamento Mensal', path: 'fechamento', icon: Calendar },
         { label: 'Pendências Contábeis', path: 'pendencias', icon: AlertCircle },
-        { label: 'Relatórios Contábeis', path: 'relatorios', icon: FileSpreadsheet },
         { label: 'DRE/Balancete', path: 'dre-balancete', icon: PieChart }
       ]
     },

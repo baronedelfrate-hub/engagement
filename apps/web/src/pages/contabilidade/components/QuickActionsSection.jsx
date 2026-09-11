@@ -9,14 +9,14 @@ export default function QuickActionsSection() {
   return (
     <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
       <Button 
-        onClick={() => navigate('/contabilidade/balancete')} 
+        onClick={() => navigate('/contabilidade/dre-balancete')}
         className="rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 h-12 px-5 flex items-center gap-2 transition-transform hover:scale-105"
       >
         <Scale className="w-4 h-4" /> <span className="hidden sm:inline">Ver Balancete</span>
       </Button>
 
       <Button 
-        onClick={() => navigate('/contabilidade/dre')} 
+        onClick={() => navigate('/contabilidade/dre-balancete')}
         className="rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 h-12 px-5 flex items-center gap-2 transition-transform hover:scale-105"
       >
         <BarChart3 className="w-4 h-4" /> <span className="hidden sm:inline">Ver DRE</span>
@@ -37,7 +37,7 @@ export default function QuickActionsSection() {
       </Button>
 
       <Button 
-        onClick={() => navigate('/contabilidade/fechamento-mensal')} 
+        onClick={() => navigate('/contabilidade/fechamento/novo')}
         className="rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 h-14 px-6 flex items-center gap-2 transition-transform hover:scale-105 text-base font-semibold"
       >
         <Plus className="w-5 h-5" /> <Calendar className="w-5 h-5 ml-[-4px]" /> <span className="hidden sm:inline">Novo Fechamento</span>

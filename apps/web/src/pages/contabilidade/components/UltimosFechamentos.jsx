@@ -17,7 +17,7 @@ export default function UltimosFechamentos({ data = [] }) {
     if (!status) return null;
     const s = status.toLowerCase();
     if (s === 'fechado' || s === 'concluído') return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800">Fechado</Badge>;
-    if (s === 'aberto' || s === 'pendente') return <Badge className="bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800">Aberto</Badge>;
+    if (s === 'aberto' || s === 'em aberto' || s === 'pendente') return <Badge className="bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-800">Aberto</Badge>;
     if (s === 'em andamento') return <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-800">Em andamento</Badge>;
     return <Badge variant="outline">{status}</Badge>;
   };

@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   Calendar, Plus, Trash2, Receipt, CheckCircle2, Loader2
 } from 'lucide-react';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const FORMAS_PAGAMENTO = [
     { id: 'boleto', label: 'Boleto Bancário' },
@@ -315,7 +316,7 @@ const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
                             </div>
                             <div>
                                 <Label className="text-xs text-muted-foreground">Data Emissão</Label>
-                                <div className="text-foreground">{nota.data_emissao ? new Date(nota.data_emissao).toLocaleDateString() : '-'}</div>
+                                <div className="text-foreground">{formatDateOnly(nota.data_emissao)}</div>
                             </div>
                             <div className="col-span-2">
                                 <Label className="text-xs text-muted-foreground">Origem</Label>
@@ -393,7 +394,7 @@ const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
                                 <div key={pag.id} className="flex items-center justify-between bg-background p-3 rounded border border-border shadow-sm">
                                     <div className="flex gap-4 items-center">
                                         <Badge variant="secondary" className="uppercase bg-muted text-foreground border-border">{pag.tipo}</Badge>
-                                        <span className="font-bold text-sm text-foreground">{new Date(pag.dataVencimento).toLocaleDateString()}</span>
+                                        <span className="font-bold text-sm text-foreground">{formatDateOnly(pag.dataVencimento)}</span>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <span className="font-mono font-bold text-lg text-foreground">R$ {pag.valor.toFixed(2)}</span>

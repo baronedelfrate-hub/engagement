@@ -52,8 +52,15 @@ const CRUDForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("📝 Submitting form data:", formData);
-    onSubmit(formData);
+    // Campos de data/número vazios devem virar null, não "" (Postgres rejeita "" para esses tipos)
+    const sanitized = { ...formData };
+    fields.forEach(field => {
+      if ((field.type === 'date' || field.type === 'number' || field.type === 'select') && sanitized[field.name] === '') {
+        sanitized[field.name] = null;
+      }
+    });
+    console.log("📝 Submitting form data:", sanitized);
+    onSubmit(sanitized);
   };
 
   const renderField = (field) => {

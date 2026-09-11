@@ -4,6 +4,7 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const FluxoCaixaMovimentacoesList = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const FluxoCaixaMovimentacoesList = () => {
   useEffect(() => { fetchData(); }, []);
 
   const columns = [
-    { header: 'Data', accessorKey: 'data_movimentacao', cell: ({ row }) => new Date(row.data_movimentacao).toLocaleDateString() },
+    { header: 'Data', accessorKey: 'data_movimentacao', cell: ({ row }) => formatDateOnly(row.data_movimentacao) },
     {
         header: 'Tipo',
         accessorKey: 'tipo',

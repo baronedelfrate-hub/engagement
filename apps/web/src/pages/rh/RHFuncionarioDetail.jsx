@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Edit } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { formatCPF } from '@/lib/rhUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 // Subcomponents (Placeholders for now, will implement logic inside or separate files)
 import RHDocumentosList from './components/RHDocumentosList'; 
@@ -57,7 +58,7 @@ const RHFuncionarioDetail = () => {
              <div><p className="text-sm text-muted-foreground">CPF</p><p className="font-medium">{formatCPF(employee.cpf)}</p></div>
              <div><p className="text-sm text-muted-foreground">Cargo</p><p className="font-medium">{employee.cargo?.nome || '-'}</p></div>
              <div><p className="text-sm text-muted-foreground">Departamento</p><p className="font-medium">{employee.departamento?.nome || '-'}</p></div>
-             <div><p className="text-sm text-muted-foreground">Admissão</p><p className="font-medium">{new Date(employee.data_admissao).toLocaleDateString()}</p></div>
+             <div><p className="text-sm text-muted-foreground">Admissão</p><p className="font-medium">{formatDateOnly(employee.data_admissao)}</p></div>
              <div><p className="text-sm text-muted-foreground">Status</p><p className="font-medium">{employee.status}</p></div>
              <div><p className="text-sm text-muted-foreground">Salário</p><p className="font-medium">R$ {Number(employee.salario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p></div>
           </CardContent>

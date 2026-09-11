@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { calculateExamStatus, getAlertColor } from '@/lib/rhUtils';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHExamesList = ({ funcionarioId }) => {
   const [items, setItems] = useState([]);
@@ -76,7 +77,7 @@ const RHExamesList = ({ funcionarioId }) => {
                             <p className="font-medium">{item.tipo_exame}</p>
                             <Badge className={getAlertColor(status)} variant="outline">{status}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Realizado: {new Date(item.data_exame).toLocaleDateString()} | Vencimento: {item.proxima_data ? new Date(item.proxima_data).toLocaleDateString() : '-'}</p>
+                        <p className="text-xs text-muted-foreground">Realizado: {formatDateOnly(item.data_exame)} | Vencimento: {formatDateOnly(item.proxima_data)}</p>
                     </div>
                     <div className="flex gap-2">
                         {item.arquivo_url && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>}

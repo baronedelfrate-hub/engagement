@@ -7,6 +7,7 @@ import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
+import { formatDateOnly } from '@/lib/dateUtils';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Dialog,
@@ -126,7 +127,7 @@ function PedidosCompraList() {
     },
     {
       header: 'Data Pedido',
-      render: (item) => item.data_pedido ? new Date(item.data_pedido).toLocaleDateString() : '-'
+      render: (item) => formatDateOnly(item.data_pedido)
     },
     {
       header: 'Status',

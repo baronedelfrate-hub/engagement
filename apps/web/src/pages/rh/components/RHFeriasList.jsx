@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHFeriasList = ({ funcionarioId }) => {
   const [items, setItems] = useState([]);
@@ -61,7 +62,7 @@ const RHFeriasList = ({ funcionarioId }) => {
             <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-background">
                 <div>
                     <div className="flex items-center gap-2">
-                        <p className="font-medium">{new Date(item.data_inicio).toLocaleDateString()} a {new Date(item.data_fim).toLocaleDateString()}</p>
+                        <p className="font-medium">{formatDateOnly(item.data_inicio)} a {formatDateOnly(item.data_fim)}</p>
                         <Badge variant="outline">{item.status}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">{item.dias_gozados} dias</p>

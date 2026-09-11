@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { formatDateOnly } from '@/lib/dateUtils';
 import { Button } from '@/components/ui/button';
 import ProjetosReportsFilters from './ProjetosReportsFilters';
 import ProjetosReportsSummary from './ProjetosReportsSummary';
@@ -294,9 +295,9 @@ export default function ProjetosReports() {
                           <TableRow key={p.id}>
                             <TableCell className="font-medium">{p.nome}</TableCell>
                             <TableCell>{p.cliente?.nome || '-'}</TableCell>
-                            <TableCell>{p.data_inicio ? new Date(p.data_inicio).toLocaleDateString('pt-BR') : '-'}</TableCell>
+                            <TableCell>{formatDateOnly(p.data_inicio)}</TableCell>
                             <TableCell className={isOverdue ? 'text-red-600 font-medium' : ''}>
-                              {p.data_fim ? new Date(p.data_fim).toLocaleDateString('pt-BR') : '-'}
+                              {formatDateOnly(p.data_fim)}
                               {isOverdue && <span className="ml-2 text-xs">(Atrasado)</span>}
                             </TableCell>
                             <TableCell>{formatCurrency(p.orcamento)}</TableCell>

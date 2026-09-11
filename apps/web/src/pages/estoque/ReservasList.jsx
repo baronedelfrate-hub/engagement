@@ -5,6 +5,7 @@ import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function ReservasList() {
   const { toast } = useToast();
@@ -63,7 +64,7 @@ function ReservasList() {
     { header: 'Produto', render: (item) => getProdutoName(item.produto_id) },
     { header: 'Qtd Reservada', accessor: 'quantidade' },
     { header: 'Origem', render: (item) => getPedidoInfo(item.pedido_id) },
-    { header: 'Data', render: (item) => item.data_reserva ? new Date(item.data_reserva).toLocaleDateString() : '-' },
+    { header: 'Data', render: (item) => formatDateOnly(item.data_reserva) },
     { header: 'Status', accessor: 'status' }
   ];
 

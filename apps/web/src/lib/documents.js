@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { formatDateOnly } from './dateUtils';
 
 const COMPANY_INFO = {
   name: "ERP Pro Enterprise",
@@ -31,8 +32,8 @@ export const generatePDF = (type, data, entityName) => {
   
   doc.setFontSize(10);
   doc.setTextColor(60, 60, 60);
-  doc.text(`Data: ${new Date(data.dataEmissao).toLocaleDateString()}`, 140, 28);
-  if (data.validade) doc.text(`Validade: ${new Date(data.validade).toLocaleDateString()}`, 140, 33);
+  doc.text(`Data: ${formatDateOnly(data.dataEmissao)}`, 140, 28);
+  if (data.validade) doc.text(`Validade: ${formatDateOnly(data.validade)}`, 140, 33);
 
   // Entity Info (Client/Supplier)
   doc.setDrawColor(200);
@@ -85,7 +86,7 @@ export const generatePDF = (type, data, entityName) => {
 
 export const generateWhatsAppLink = (type, data, entityName) => {
   const total = data.itens.reduce((acc, curr) => acc + parseFloat(curr.valorTotal), 0);
-  const date = new Date(data.dataEmissao).toLocaleDateString();
+  const date = formatDateOnly(data.dataEmissao);
   const number = data.numeroPedido || data.id.slice(0,8);
 
   const text = `*${COMPANY_INFO.name}*\n\n` +

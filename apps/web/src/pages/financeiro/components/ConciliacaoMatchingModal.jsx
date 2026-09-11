@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, Link as LinkIcon, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, onConfirm, loading }) => {
   if (!systemRecord || !ofxRecord) return null;
@@ -34,7 +35,7 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
                   <div className="space-y-2">
                       <div>
                           <p className="text-xs text-muted-foreground">Data</p>
-                          <p className="text-sm font-medium">{new Date(systemRecord.data_baixa).toLocaleDateString('pt-BR')}</p>
+                          <p className="text-sm font-medium">{formatDateOnly(systemRecord.data_baixa)}</p>
                       </div>
                       <div>
                           <p className="text-xs text-muted-foreground">Descrição</p>
@@ -55,7 +56,7 @@ const ConciliacaoMatchingModal = ({ isOpen, onClose, systemRecord, ofxRecord, on
                   <div className="space-y-2">
                       <div>
                           <p className="text-xs text-muted-foreground">Data</p>
-                          <p className="text-sm font-medium">{new Date(ofxRecord.data_transacao).toLocaleDateString('pt-BR')}</p>
+                          <p className="text-sm font-medium">{formatDateOnly(ofxRecord.data_transacao)}</p>
                       </div>
                       <div>
                           <p className="text-xs text-muted-foreground">Descrição</p>

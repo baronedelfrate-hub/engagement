@@ -111,7 +111,7 @@ function CondicaoPagamentoList() {
         <DataTable
           data={filteredCondicoes}
           columns={columns}
-          onEdit={handleEdit}
+          onEdit={(row) => handleEdit(row.id)}
           onDelete={handleDelete}
           loading={loading}
           emptyMessage="Nenhuma condição de pagamento cadastrada"

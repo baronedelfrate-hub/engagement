@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import DataTable from '@/components/DataTable';
 import { useToast } from '@/components/ui/use-toast';
 import { calculateExamStatus, getAlertColor } from '@/lib/rhUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHMedicinaOcupacional = () => {
   const { toast } = useToast();
@@ -29,8 +30,8 @@ const RHMedicinaOcupacional = () => {
   const columns = [
     { header: 'Funcionário', accessorKey: 'funcionario.nome_completo', cell: ({row}) => row.funcionario?.nome_completo || '-' },
     { header: 'Tipo Exame', accessorKey: 'tipo_exame' },
-    { header: 'Data Realização', accessorKey: 'data_exame', cell: ({row}) => new Date(row.data_exame).toLocaleDateString() },
-    { header: 'Próximo Vencimento', accessorKey: 'proxima_data', cell: ({row}) => row.proxima_data ? new Date(row.proxima_data).toLocaleDateString() : '-' },
+    { header: 'Data Realização', accessorKey: 'data_exame', cell: ({row}) => formatDateOnly(row.data_exame) },
+    { header: 'Próximo Vencimento', accessorKey: 'proxima_data', cell: ({row}) => formatDateOnly(row.proxima_data) },
     { 
       header: 'Status Vencimento', 
       accessorKey: 'status',

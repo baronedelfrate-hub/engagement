@@ -7,6 +7,7 @@ import DataTable from '@/components/DataTable';
 import { useToast } from '@/components/ui/use-toast';
 import { CheckCircle2, ArrowRightCircle, Loader2, RotateCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 import BaixasFilters from './components/BaixasFilters';
 import RegistrarBaixaModal from './components/RegistrarBaixaModal';
@@ -142,7 +143,7 @@ const BaixasPage = () => {
       { 
           header: 'Vencimento', 
           accessorKey: 'data_vencimento', 
-          cell: ({ row }) => <span className="text-muted-foreground">{row.data_vencimento ? new Date(row.data_vencimento).toLocaleDateString('pt-BR') : '-'}</span> 
+          cell: ({ row }) => <span className="text-muted-foreground">{formatDateOnly(row.data_vencimento)}</span>
       },
       { 
           header: 'Valor', 

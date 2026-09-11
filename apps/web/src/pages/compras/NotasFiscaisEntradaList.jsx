@@ -4,6 +4,7 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const NotasFiscaisEntradaList = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const NotasFiscaisEntradaList = () => {
   const columns = [
     { header: 'Número', accessorKey: 'numero', sortable: true },
     { header: 'Série', accessorKey: 'serie' },
-    { header: 'Emissão', accessorKey: 'data_emissao', cell: ({ row }) => new Date(row.data_emissao).toLocaleDateString() },
+    { header: 'Emissão', accessorKey: 'data_emissao', cell: ({ row }) => formatDateOnly(row.data_emissao) },
     { header: 'Fornecedor', accessorKey: 'fornecedor_id' },
     { header: 'Valor Total', accessorKey: 'valor_total', cell: ({ row }) => `R$ ${parseFloat(row.valor_total).toFixed(2)}` },
     { 

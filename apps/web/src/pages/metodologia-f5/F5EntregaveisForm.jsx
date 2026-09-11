@@ -51,15 +51,14 @@ const F5EntregaveisForm = () => {
 
   const fields = [
     { name: 'nome', label: 'Nome do Entregável', required: true, fullWidth: true },
-    { name: 'etapa_f5_id', label: 'Etapa F5', type: 'select', options: etapas, required: true },
+    { name: 'etapa_id', label: 'Etapa F5', type: 'select', options: etapas, required: true },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
     { name: 'data_entrega', label: 'Data de Entrega', type: 'date', required: true },
-    { name: 'responsavel', label: 'Responsável', type: 'text' },
-    { 
-        name: 'status', 
-        label: 'Status', 
-        type: 'select', 
-        options: [{ label: 'Planejado', value: 'planejado' }, { label: 'Em Desenvolvimento', value: 'em_desenvolvimento' }, { label: 'Entregue', value: 'entregue' }, { label: 'Aprovado', value: 'aprovado' }] 
+    {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [{ label: 'Planejado', value: 'Planejado' }, { label: 'Em Desenvolvimento', value: 'Em Desenvolvimento' }, { label: 'Entregue', value: 'Entregue' }, { label: 'Aprovado', value: 'Aprovado' }]
     },
   ];
 

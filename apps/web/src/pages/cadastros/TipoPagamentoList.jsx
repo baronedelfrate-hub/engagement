@@ -113,7 +113,7 @@ function TipoPagamentoList() {
         <DataTable
           data={filteredTipos}
           columns={columns}
-          onEdit={handleEdit}
+          onEdit={(row) => handleEdit(row.id)}
           onDelete={handleDelete}
           loading={loading}
           emptyMessage={<span className="text-muted-foreground">Nenhum tipo de pagamento cadastrado</span>}

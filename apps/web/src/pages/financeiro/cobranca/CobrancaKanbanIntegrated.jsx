@@ -10,6 +10,7 @@ import CobrancaFiltersIntegrated from './CobrancaFiltersIntegrated';
 import CobrancaCardModalIntegrated from './CobrancaCardModalIntegrated';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaKanbanIntegrated = () => {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ const CobrancaKanbanIntegrated = () => {
 
                                     <div className="flex flex-col gap-1.5">
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>Venc: {new Date(item.data_vencimento).toLocaleDateString()}</span>
+                                            <span>Venc: {formatDateOnly(item.data_vencimento)}</span>
                                             <span className={`${item.dias_ate_vencimento < 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                                 {item.dias_ate_vencimento < 0 ? `${Math.abs(item.dias_ate_vencimento)}d atraso` : `${item.dias_ate_vencimento}d prazo`}
                                             </span>

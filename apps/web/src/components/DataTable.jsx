@@ -8,21 +8,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Pencil, Trash2 } from "lucide-react";
 import { tableStyles } from "@/lib/tableStyles";
 import { cn } from "@/lib/utils";
 
-export function DataTable({ 
-  columns, 
-  data, 
-  searchColumn = "nome", 
+export function DataTable({
+  columns,
+  data,
+  searchColumn = "nome",
   searchPlaceholder = "Filtrar...",
   loading = false,
-  emptyMessage = "Nenhum resultado encontrado"
+  emptyMessage = "Nenhum resultado encontrado",
+  onEdit,
+  onDelete
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Só renderiza a coluna nativa de Ações se o consumidor passar onEdit/onDelete
+  // e ainda não tiver sua própria coluna "Ações" manual (evita duplicidade).
+  const hasManualActionsColumn = columns.some((column) => column.header === 'Ações');
+  const showActionsColumn = (onEdit || onDelete) && !hasManualActionsColumn;
+  const columnCount = columns.length + (showActionsColumn ? 1 : 0);
 
   const safeData = Array.isArray(data) ? data : [];
   
@@ -66,13 +74,16 @@ export function DataTable({
                   {column.header}
                 </TableHead>
               ))}
+              {showActionsColumn && (
+                <TableHead className="text-right text-foreground font-semibold bg-muted/50">Ações</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
                Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i} className="border-b border-border">
-                   {columns.map((col, j) => (
+                   {Array.from({ length: columnCount }).map((_, j) => (
                      <TableCell key={j} className="text-foreground">
                        <div className="h-4 w-full bg-muted animate-pulse rounded" />
                      </TableCell>
@@ -81,10 +92,10 @@ export function DataTable({
               ))
             ) : paginatedData.length > 0 ? (
               paginatedData.map((row, rowIndex) => {
-                const uniqueKey = row.id 
-                  ? `${row.id}-${startIndex + rowIndex}` 
+                const uniqueKey = row.id
+                  ? `${row.id}-${startIndex + rowIndex}`
                   : `row-${startIndex + rowIndex}`;
-                
+
                 return (
                   <TableRow key={uniqueKey} className="border-b border-border hover:bg-muted/50">
                     {columns.map((column, colIndex) => (
@@ -92,12 +103,28 @@ export function DataTable({
                         {column.cell ? column.cell({ row }) : (column.render ? column.render(row) : row[column.accessorKey || column.accessor])}
                       </TableCell>
                     ))}
+                    {showActionsColumn && (
+                      <TableCell className="text-foreground p-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {onEdit && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(row)} title="Editar">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {onDelete && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(row.id)} title="Excluir">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })
             ) : (
               <TableRow className="border-b border-border">
-                <TableCell colSpan={columns.length} className="text-foreground text-center py-8">
+                <TableCell colSpan={columnCount} className="text-foreground text-center py-8">
                   <div className="flex flex-col items-center justify-center">
                     <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
                       <Search className="h-6 w-6 text-muted-foreground" />

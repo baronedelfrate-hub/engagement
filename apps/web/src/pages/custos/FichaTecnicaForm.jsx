@@ -4,14 +4,21 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDForm from '@/components/CRUDForm';
 import { useToast } from '@/components/ui/use-toast';
 
-const FichasCustoForm = () => {
+const FichaTecnicaForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({});
+  const [produtos, setProdutos] = useState([]);
 
   useEffect(() => {
+    const loadDependencies = async () => {
+        const res = await erpServices.produtos.list({ limit: 200 });
+        if (res.success) setProdutos(res.data.map(p => ({ label: `${p.nome}${p.sku ? ' (' + p.sku + ')' : ''}`, value: p.id })));
+    };
+    loadDependencies();
+
     if (id) {
       setLoading(true);
       erpServices.fichasCusto.read(id).then(res => {
@@ -25,13 +32,13 @@ const FichasCustoForm = () => {
   const handleSubmit = async (formData) => {
     setLoading(true);
     try {
-        const res = id 
-            ? await erpServices.fichasCusto.update(id, formData) 
+        const res = id
+            ? await erpServices.fichasCusto.update(id, formData)
             : await erpServices.fichasCusto.create(formData);
 
         if (res.success) {
-          toast({ title: 'Sucesso', description: 'Ficha salva.', variant: 'success' });
-          navigate('/custos/fichas-custo');
+          toast({ title: 'Sucesso', description: 'Ficha técnica salva.', variant: 'success' });
+          navigate('/custos/ficha-tecnica');
         } else {
           toast({ title: 'Erro', description: res.error, variant: 'destructive' });
         }
@@ -43,24 +50,31 @@ const FichasCustoForm = () => {
   };
 
   const fields = [
-    { name: 'codigo', label: 'Código da Ficha', required: true },
-    { name: 'descricao', label: 'Descrição', required: true, fullWidth: true },
-    { name: 'data_vigencia', label: 'Data de Vigência', type: 'date', required: true },
-    { name: 'status', label: 'Ativo', type: 'select', options: [{ label: 'Ativo', value: 'ativo' }, { label: 'Inativo', value: 'inativo' }] },
+    { name: 'numero', label: 'Número da Ficha', required: true },
+    { name: 'produto_id', label: 'Produto', type: 'select', options: produtos, required: true },
+    { name: 'data_criacao', label: 'Data de Criação', type: 'date' },
+    { name: 'valor_total', label: 'Custo Total (R$)', type: 'number', step: '0.01' },
+    {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [{ label: 'Rascunho', value: 'Rascunho' }, { label: 'Ativa', value: 'Ativa' }, { label: 'Inativa', value: 'Inativa' }]
+    },
+    { name: 'observacoes', label: 'Observações', type: 'textarea', fullWidth: true },
   ];
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <CRUDForm
-        title={id ? "Editar Ficha de Custo" : "Nova Ficha de Custo"}
+        title={id ? "Editar Ficha Técnica" : "Nova Ficha Técnica"}
         fields={fields}
         initialData={initialData}
         loading={loading}
         onSubmit={handleSubmit}
-        onCancel={() => navigate('/custos/fichas-custo')}
+        onCancel={() => navigate('/custos/ficha-tecnica')}
       />
     </div>
   );
 };
 
-export default FichasCustoForm;
+export default FichaTecnicaForm;

@@ -8,6 +8,7 @@ import { Trash2, Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHDependentesForm = ({ funcionarioId }) => {
   const { toast } = useToast();
@@ -79,7 +80,7 @@ const RHDependentesForm = ({ funcionarioId }) => {
           <div key={dep.id} className="flex items-center justify-between p-3 border rounded-md bg-card">
             <div>
               <p className="font-medium">{dep.nome}</p>
-              <p className="text-xs text-muted-foreground">{dep.parentesco} • {dep.data_nascimento ? new Date(dep.data_nascimento).toLocaleDateString() : 'N/I'}</p>
+              <p className="text-xs text-muted-foreground">{dep.parentesco} • {dep.data_nascimento ? formatDateOnly(dep.data_nascimento) : 'N/I'}</p>
             </div>
             <Button variant="ghost" size="icon" onClick={() => handleDelete(dep.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
           </div>

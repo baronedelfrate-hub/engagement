@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Draggable } from '@hello-pangea/dnd';
 import { FileText, Calendar, DollarSign, Link, AlertTriangle, Receipt, Building2, PieChart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CardNotaFiscal = ({ nota, index, onClick, onAction, hasRateio = false, fornecedorNome = '' }) => {
   
@@ -69,7 +70,7 @@ const CardNotaFiscal = ({ nota, index, onClick, onAction, hasRateio = false, for
              </div>
              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                {nota.data_emissao ? new Date(nota.data_emissao).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' }) : '-'}
+                {formatDateOnly(nota.data_emissao, { day: '2-digit', month: '2-digit' })}
              </div>
           </div>
           

@@ -1,34 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import PageHeader from '@/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  CheckSquare, 
-  Target, 
-  CheckCircle2, 
-  Upload, 
-  FileText, 
-  Trash2, 
-  BarChart, 
-  Calendar as CalendarIcon,
-  Save,
-  Download,
-  ChevronDown,
-  ChevronUp
+import { erpServices } from '@/lib/erpServices';
+import {
+  CheckSquare,
+  Target,
+  CheckCircle2,
+  Upload,
+  FileText,
+  Trash2
 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
-// Helper component for the top cards
-const StatusCard = ({ title, value, total, percent, color, icon: Icon }) => {
-  const progress = total > 0 ? (value / total) * 100 : percent || 0;
-  
+const StatusCard = ({ title, value, total, percent, plain, color, icon: Icon }) => {
+  const progress = plain ? (value > 0 ? 100 : 0) : total !== undefined ? (total > 0 ? (value / total) * 100 : 0) : percent || 0;
+
   return (
     <Card className="border-none shadow-sm bg-background text-foreground">
       <CardContent className="p-6">
@@ -36,7 +27,9 @@ const StatusCard = ({ title, value, total, percent, color, icon: Icon }) => {
           <div>
             <p className="text-sm text-muted-foreground font-medium mb-1">{title}</p>
             <div className="flex items-baseline gap-1">
-               {total !== undefined ? (
+               {plain ? (
+                 <span className="text-3xl font-bold text-foreground">{value}</span>
+               ) : total !== undefined ? (
                  <>
                    <span className="text-3xl font-bold text-foreground">{value}</span>
                    <span className="text-lg text-muted-foreground font-medium">/ {total}</span>
@@ -50,12 +43,12 @@ const StatusCard = ({ title, value, total, percent, color, icon: Icon }) => {
             <Icon className="h-6 w-6" />
           </div>
         </div>
-        
+
         <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-          <div 
-            className={cn("h-full rounded-full transition-all duration-500", 
+          <div
+            className={cn("h-full rounded-full transition-all duration-500",
               color === 'blue' ? "bg-blue-600" : color === 'green' ? "bg-emerald-500" : "bg-indigo-600"
-            )} 
+            )}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -69,132 +62,139 @@ const F5EtapaDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [stage, setStage] = useState(null);
+  const [projectName, setProjectName] = useState('');
   const [checklists, setChecklists] = useState([]);
   const [kpis, setKpis] = useState([]);
-  const [showExtraSettings, setShowExtraSettings] = useState(false);
-  const [projectName, setProjectName] = useState('');
+  const [entregaveis, setEntregaveis] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock deliverables
-  const [deliverables, setDeliverables] = useState([]);
-  const TARGET_DELIVERABLES = 3; 
-
-  useEffect(() => {
-    const allStages = JSON.parse(localStorage.getItem('f5_etapas') || '[]');
-    const foundStage = allStages.find(s => s.id === id);
-    
-    if (!foundStage) {
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    const stageRes = await erpServices.f5Etapas.read(id);
+    if (!stageRes.success) {
       toast({ title: "Erro", description: "Etapa não encontrada", variant: "destructive" });
+      setLoading(false);
       return;
     }
-    setStage(foundStage);
+    setStage(stageRes.data);
 
-    const allProjects = JSON.parse(localStorage.getItem('f5_projetos') || '[]');
-    const proj = allProjects.find(p => p.id === foundStage.projeto_id);
-    if (proj) setProjectName(proj.nome);
-
-    const allChecklists = JSON.parse(localStorage.getItem('f5_checklists') || '[]');
-    setChecklists(allChecklists.filter(c => c.etapa_id === id));
-
-    const allKpis = JSON.parse(localStorage.getItem('f5_kpis') || '[]');
-    setKpis(allKpis.filter(k => k.etapa_id === id));
-
-    // Simulated deliverables for now as they are not in seed
-    setDeliverables([
-      { id: 'del1', nome: 'Relatório Inicial.pdf', size: '2.4 MB', data: new Date().toISOString() }
+    const [projetoRes, checklistsRes, entregaveisRes] = await Promise.all([
+      stageRes.data.projeto_id ? erpServices.f5Projetos.read(stageRes.data.projeto_id) : Promise.resolve({ success: false }),
+      erpServices.f5Checklists.list({ limit: 100, filters: { etapa_id: id } }),
+      erpServices.f5Entregaveis.list({ limit: 50, filters: { etapa_id: id } })
     ]);
 
-  }, [id]);
+    if (projetoRes.success) {
+      setProjectName(projetoRes.data.nome);
+      const kpisRes = await erpServices.f5Kpis.list({ limit: 50, filters: { projeto_id: projetoRes.data.id } });
+      if (kpisRes.success) setKpis(kpisRes.data);
+    }
 
-  const toggleChecklist = (checklistId) => {
-    const allChecklists = JSON.parse(localStorage.getItem('f5_checklists') || '[]');
-    const updatedAll = allChecklists.map(c => {
-      if (c.id === checklistId) {
-        return { ...c, status: c.status === 'Concluído' ? 'Pendente' : 'Concluído' };
-      }
-      return c;
+    if (checklistsRes.success) setChecklists(checklistsRes.data);
+    if (entregaveisRes.success) setEntregaveis(entregaveisRes.data);
+
+    setLoading(false);
+  }, [id, toast]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const toggleChecklist = async (checklistItem) => {
+    const novoConcluido = !checklistItem.concluido;
+    const res = await erpServices.f5Checklists.update(checklistItem.id, {
+      concluido: novoConcluido,
+      data_conclusao: novoConcluido ? new Date().toISOString() : null
     });
-    localStorage.setItem('f5_checklists', JSON.stringify(updatedAll));
-    setChecklists(updatedAll.filter(c => c.etapa_id === id));
-    
-    // Recalculate progress
-    const stageChecklists = updatedAll.filter(c => c.etapa_id === id);
-    const completed = stageChecklists.filter(c => c.status === 'Concluído').length;
-    const newProgress = Math.round((completed / stageChecklists.length) * 100);
-    
-    const allStages = JSON.parse(localStorage.getItem('f5_etapas') || '[]');
-    const updatedStages = allStages.map(s => s.id === id ? { ...s, percentual_conclusao: newProgress } : s);
-    localStorage.setItem('f5_etapas', JSON.stringify(updatedStages));
-    setStage(prev => ({ ...prev, percentual_conclusao: newProgress }));
+    if (res.success) {
+      setChecklists(prev => prev.map(c => c.id === checklistItem.id ? res.data : c));
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
   };
 
-  const handleUpload = () => {
-    const title = prompt("Nome do arquivo entregável:");
+  const handleUpload = async () => {
+    const title = window.prompt("Nome do entregável:");
     if (!title) return;
-    const newDel = {
-      id: Date.now().toString(),
-      nome: title.endsWith('.pdf') ? title : `${title}.pdf`,
-      size: '1.5 MB',
-      data: new Date().toISOString()
-    };
-    setDeliverables([...deliverables, newDel]);
-    toast({ title: "Upload concluído", description: "Arquivo anexado com sucesso." });
+    const res = await erpServices.f5Entregaveis.create({
+      etapa_id: id,
+      nome: title,
+      status: 'Planejado',
+      data_entrega: new Date().toISOString().slice(0, 10)
+    });
+    if (res.success) {
+      setEntregaveis(prev => [res.data, ...prev]);
+      toast({ title: "Entregável criado", description: "Registro salvo com sucesso." });
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
   };
 
-  if (!stage) return <div>Carregando...</div>;
+  const handleDeleteEntregavel = async (entregavelId) => {
+    if (!window.confirm('Excluir este entregável?')) return;
+    const res = await erpServices.f5Entregaveis.delete(entregavelId);
+    if (res.success) {
+      setEntregaveis(prev => prev.filter(e => e.id !== entregavelId));
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
+  };
 
-  const completedCount = checklists.filter(c => c.status === 'Concluído').length;
+  if (loading) return <div className="p-8 text-muted-foreground">Carregando...</div>;
+  if (!stage) return <div className="p-8 text-muted-foreground">Etapa não encontrada.</div>;
+
+  const completedCount = checklists.filter(c => c.concluido).length;
+  const percentualConclusao = checklists.length > 0 ? Math.round((completedCount / checklists.length) * 100) : 0;
 
   return (
     <>
       <Helmet><title>{stage.nome} - Detalhe</title></Helmet>
-      
+
       <div className="mb-8">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate(-1)} 
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/metodologia-f5/etapas')}
           className="mb-4 text-muted-foreground hover:text-foreground pl-0 hover:bg-transparent"
         >
-          ← Voltar para Projeto
+          ← Voltar para Etapas
         </Button>
         <div className="flex items-center gap-3 mb-2">
-            <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">ETAPA {stage.ordem}</span>
-            <span className="text-muted-foreground text-sm">{projectName}</span>
+            {stage.numero && <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">ETAPA {stage.numero}</span>}
+            {projectName && <span className="text-muted-foreground text-sm">{projectName}</span>}
         </div>
         <h1 className="text-3xl font-bold text-foreground mb-2">{stage.nome}</h1>
         <p className="text-muted-foreground text-lg max-w-3xl">{stage.descricao}</p>
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="space-y-8 pb-12"
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatusCard 
-            title="Atividades Realizadas" 
-            value={completedCount} 
+          <StatusCard
+            title="Atividades Realizadas"
+            value={completedCount}
             total={checklists.length}
             color="blue"
             icon={CheckSquare}
           />
-          <StatusCard 
-            title="Entregáveis Validados" 
-            value={deliverables.length} 
-            total={TARGET_DELIVERABLES}
+          <StatusCard
+            title="Entregáveis"
+            value={entregaveis.length}
+            plain
             color="green"
             icon={Target}
           />
-          <StatusCard 
-            title="Conclusão da Etapa" 
-            value={stage.percentual_conclusao}
-            percent={stage.percentual_conclusao}
+          <StatusCard
+            title="Conclusão da Etapa"
+            value={percentualConclusao}
+            percent={percentualConclusao}
             color="indigo"
             icon={CheckCircle2}
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
               <CheckSquare className="h-5 w-5 text-blue-400" />
@@ -202,27 +202,31 @@ const F5EtapaDetail = () => {
             </div>
 
             <div className="space-y-3">
+              {checklists.length === 0 && (
+                <p className="text-muted-foreground text-sm">Nenhum item de checklist cadastrado para esta etapa.</p>
+              )}
               {checklists.map(item => (
-                <motion.div 
-                  key={item.id} 
+                <motion.div
+                  key={item.id}
                   className={cn(
                     "flex items-start gap-4 p-4 rounded-lg transition-all duration-200 group border",
-                    item.status === 'Concluído' 
-                      ? "bg-muted border-border opacity-75" 
+                    item.concluido
+                      ? "bg-muted border-border opacity-75"
                       : "bg-background border-border shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800"
                   )}
                 >
                   <div className="pt-1">
-                    <Checkbox 
-                      checked={item.status === 'Concluído'} 
-                      onCheckedChange={() => toggleChecklist(item.id)}
+                    <Checkbox
+                      checked={!!item.concluido}
+                      onCheckedChange={() => toggleChecklist(item)}
                       className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600 h-5 w-5"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className={cn("text-base font-medium cursor-pointer select-none block", item.status === 'Concluído' ? "text-muted-foreground line-through" : "text-foreground")}>
-                      {item.descricao}
+                    <label className={cn("text-base font-medium cursor-pointer select-none block", item.concluido ? "text-muted-foreground line-through" : "text-foreground")}>
+                      {item.item}
                     </label>
+                    {item.descricao && <p className="text-sm text-muted-foreground mt-1">{item.descricao}</p>}
                   </div>
                 </motion.div>
               ))}
@@ -232,32 +236,32 @@ const F5EtapaDetail = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
               <FileText className="h-5 w-5 text-blue-400" />
-              <h2>Documentos & Evidências</h2>
+              <h2>Entregáveis</h2>
             </div>
 
             <div className="bg-background rounded-xl p-6 shadow-sm border border-border">
-              <div 
+              <div
                 onClick={handleUpload}
                 className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted transition-colors cursor-pointer group mb-6"
               >
                 <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-50 group-hover:text-blue-600 dark:group-hover:bg-blue-950/30 dark:group-hover:text-blue-400 transition-colors text-muted-foreground">
                   <Upload className="h-6 w-6" />
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">Arraste arquivos aqui</p>
-                <Button variant="outline" size="sm">Selecionar</Button>
+                <p className="text-sm text-muted-foreground mb-2">Registrar novo entregável</p>
+                <Button variant="outline" size="sm">Adicionar</Button>
               </div>
 
               <div className="space-y-3">
-                {deliverables.map(del => (
+                {entregaveis.map(del => (
                   <div key={del.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
                     <div className="h-10 w-10 bg-background rounded-lg flex items-center justify-center border border-border text-blue-600 shrink-0">
                       <FileText className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{del.nome}</p>
-                      <p className="text-xs text-muted-foreground">{del.size}</p>
+                      <p className="text-xs text-muted-foreground">{del.status}</p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-600" onClick={() => handleDeleteEntregavel(del.id)}>
                        <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -267,23 +271,19 @@ const F5EtapaDetail = () => {
           </div>
         </div>
 
-        {/* KPIs Section */}
         {kpis.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-xl font-bold text-foreground mb-4">Indicadores de Performance (KPIs)</h3>
+            <h3 className="text-xl font-bold text-foreground mb-4">Indicadores de Performance (KPIs do Projeto)</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {kpis.map(kpi => (
                 <Card key={kpi.id} className="bg-card border-border">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <span className="text-muted-foreground text-sm">{kpi.nome_kpi}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${kpi.tendencia === 'Alta' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                        {kpi.tendencia}
-                      </span>
+                      <span className="text-muted-foreground text-sm">{kpi.nome}</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-foreground">{kpi.valor_atual}</span>
-                      <span className="text-sm text-muted-foreground">/ Meta: {kpi.meta}</span>
+                      <span className="text-2xl font-bold text-foreground">{kpi.valor_atual ?? '-'}</span>
+                      <span className="text-sm text-muted-foreground">{kpi.unidade} / Meta: {kpi.valor_meta ?? '-'} {kpi.unidade}</span>
                     </div>
                   </CardContent>
                 </Card>

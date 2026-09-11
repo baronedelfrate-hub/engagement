@@ -12,6 +12,7 @@ import RelatoriosFinanceirosFilters from '@/pages/financeiro/relatorios/componen
 import RelatoriosFinanceirosReportHeader from '@/pages/financeiro/relatorios/components/RelatoriosFinanceirosReportHeader';
 import RelatoriosFinanceirosSummaries from '@/pages/financeiro/relatorios/components/RelatoriosFinanceirosSummaries';
 import { exportToExcel, exportToPDF } from '@/pages/financeiro/relatorios/components/RelatoriosFinanceirosExportUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const SOURCE_COLUMNS = {
   'CONTAS_PAGAR': [
@@ -180,7 +181,7 @@ const RelatoriosFinanceiros = () => {
   }, 0) + (filters.dataInicio || filters.dataFim ? 1 : 0);
 
   const dateRangeStr = (filters.dataInicio || filters.dataFim) 
-    ? `${filters.dataInicio ? new Date(filters.dataInicio).toLocaleDateString('pt-BR') : 'Início'} até ${filters.dataFim ? new Date(filters.dataFim).toLocaleDateString('pt-BR') : 'Fim'}`
+    ? `${filters.dataInicio ? formatDateOnly(filters.dataInicio) : 'Início'} até ${filters.dataFim ? formatDateOnly(filters.dataFim) : 'Fim'}`
     : null;
 
   const handleExportPDF = async () => {

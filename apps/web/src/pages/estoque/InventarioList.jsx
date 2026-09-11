@@ -8,6 +8,7 @@ import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function InventarioList() {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ function InventarioList() {
     { header: 'Qtd Contada', accessor: 'quantidade_contada' },
     { header: 'Qtd Sistema', accessor: 'quantidade_sistema' },
     { header: 'Diferença', accessor: 'diferenca' },
-    { header: 'Data Contagem', render: (item) => item.data_contagem ? new Date(item.data_contagem).toLocaleDateString() : '-' }
+    { header: 'Data Contagem', render: (item) => formatDateOnly(item.data_contagem) }
   ];
 
   return (
@@ -91,7 +92,7 @@ function InventarioList() {
       <DataTable
         data={filteredInventarios}
         columns={columns}
-        onEdit={handleEdit}
+        onEdit={(row) => handleEdit(row.id)}
         onDelete={handleDelete}
         loading={loading}
         emptyMessage="Nenhum inventário registrado"

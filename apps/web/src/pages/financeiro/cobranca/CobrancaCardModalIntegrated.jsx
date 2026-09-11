@@ -10,6 +10,7 @@ import { Save, XCircle, Calendar, Phone, Mail, User, Wallet, Building2, Tag, Fil
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaCardModalIntegrated = ({ isOpen, onClose, card, onSuccess }) => {
   const { updateStatusCobranca, markAsRecovered } = useCobrancaIntegrated();
@@ -95,7 +96,7 @@ const CobrancaCardModalIntegrated = ({ isOpen, onClose, card, onSuccess }) => {
                     </div>
                     <div>
                         <span className="text-xs text-muted-foreground block">Vencimento</span>
-                        <span className="text-foreground">{new Date(card.data_vencimento).toLocaleDateString()}</span>
+                        <span className="text-foreground">{formatDateOnly(card.data_vencimento)}</span>
                     </div>
                     <div className="col-span-2">
                          <span className="text-xs text-muted-foreground block">Contato</span>

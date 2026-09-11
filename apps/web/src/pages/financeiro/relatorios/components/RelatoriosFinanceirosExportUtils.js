@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const LOGO_URL = "https://horizons-cdn.hostinger.com/43ae158d-775e-48c7-b200-7254194a0f9e/af31af53b69a979ae681cddadfef2c25.png";
 
@@ -72,7 +73,7 @@ export const exportToExcel = async (data, columns, reportTitle, filtersDescripti
   data.forEach(row => {
       const rowData = columns.map(col => {
           let val = row[col.id];
-          if (col.type === 'date' && val) return new Date(val).toLocaleDateString('pt-BR');
+          if (col.type === 'date' && val) return formatDateOnly(val);
           if (col.type === 'currency') return parseFloat(val || 0);
           return val || '-';
       });
@@ -116,7 +117,7 @@ export const exportToExcel = async (data, columns, reportTitle, filtersDescripti
 
   const isPagar = source === 'CONTAS_PAGAR';
   
-  const byDia = groupData(data, i => i.data_vencimento, i => i.data_vencimento ? new Date(i.data_vencimento).toLocaleDateString('pt-BR') : 'Sem Data');
+  const byDia = groupData(data, i => i.data_vencimento, i => i.data_vencimento ? formatDateOnly(i.data_vencimento) : 'Sem Data');
   const byEntidade = groupData(data, i => isPagar ? i.fornecedor_id : i.cliente_id, i => isPagar ? i.fornecedor_nome : i.cliente_nome);
   const byCategoria = groupData(data, i => i.categoria_id, i => i.categoria_nome);
   const byCentro = groupData(data, i => i.centro_custo_id, i => i.centro_custo_nome);
@@ -155,7 +156,7 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
   const tableRows = data.map(row => {
       return columns.map(col => {
           let val = row[col.id];
-          if (col.type === 'date' && val) return new Date(val).toLocaleDateString('pt-BR');
+          if (col.type === 'date' && val) return formatDateOnly(val);
           if (col.type === 'currency') return formatCurrency(val);
           return val || '-';
       });
@@ -193,7 +194,7 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
       });
   };
 
-  const byDia = groupData(data, i => i.data_vencimento, i => i.data_vencimento ? new Date(i.data_vencimento).toLocaleDateString('pt-BR') : 'Sem Data');
+  const byDia = groupData(data, i => i.data_vencimento, i => i.data_vencimento ? formatDateOnly(i.data_vencimento) : 'Sem Data');
   const byEntidade = groupData(data, i => isPagar ? i.fornecedor_id : i.cliente_id, i => isPagar ? i.fornecedor_nome : i.cliente_nome);
   const byCategoria = groupData(data, i => i.categoria_id, i => i.categoria_nome);
   const byCentro = groupData(data, i => i.centro_custo_id, i => i.centro_custo_nome);

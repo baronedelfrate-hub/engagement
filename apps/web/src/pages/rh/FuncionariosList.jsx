@@ -4,6 +4,7 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const FuncionariosList = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const FuncionariosList = () => {
     { header: 'Nome Completo', accessorKey: 'nome', sortable: true },
     { header: 'Cargo', accessorKey: 'cargo' },
     { header: 'Departamento', accessorKey: 'departamento' },
-    { header: 'Admissão', accessorKey: 'data_admissao', cell: ({ row }) => new Date(row.data_admissao).toLocaleDateString() },
+    { header: 'Admissão', accessorKey: 'data_admissao', cell: ({ row }) => formatDateOnly(row.data_admissao) },
     { 
         header: 'Status', 
         accessorKey: 'status',

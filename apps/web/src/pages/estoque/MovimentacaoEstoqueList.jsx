@@ -8,6 +8,7 @@ import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function MovimentacaoEstoqueList() {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ function MovimentacaoEstoqueList() {
             )}
         </div>
     )},
-    { header: 'Data', render: (item) => item.data ? new Date(item.data).toLocaleDateString() : '-' },
+    { header: 'Data', render: (item) => formatDateOnly(item.data) },
     { header: 'Motivo', accessor: 'motivo' }
   ];
 
@@ -146,7 +147,7 @@ function MovimentacaoEstoqueList() {
       <DataTable
         data={filteredMovimentacoes}
         columns={columns}
-        onEdit={handleEdit}
+        onEdit={(row) => handleEdit(row.id)}
         onDelete={handleDelete}
         loading={loading}
         emptyMessage="Nenhuma movimentação registrada"

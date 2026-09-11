@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Search, Loader2, ChevronRight, FileText } from 'lucide-react';
 import { usePedidoSearch } from '@/hooks/usePedidoSearch';
 import PedidoItemsDisplay from './PedidoItemsDisplay';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 export default function SearchPedidoModal({ isOpen, onClose, onSelect, type = 'produto' }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +87,7 @@ export default function SearchPedidoModal({ isOpen, onClose, onSelect, type = 'p
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-semibold">R$ {(pedido.valor_total || 0).toFixed(2)}</div>
-                    <div className="text-xs text-muted-foreground">{new Date(pedido.data_emissao).toLocaleDateString('pt-BR')}</div>
+                    <div className="text-xs text-muted-foreground">{formatDateOnly(pedido.data_emissao)}</div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground ml-4" />
                 </div>

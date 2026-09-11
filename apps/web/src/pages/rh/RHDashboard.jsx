@@ -6,6 +6,7 @@ import { Users, AlertTriangle, CalendarCheck, FileCheck, DollarSign, Heart, Brie
 import { calculateExamStatus } from '@/lib/rhUtils';
 import PageHeader from '@/components/PageHeader';
 import { useNavigate } from 'react-router-dom';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHDashboard = () => {
     const navigate = useNavigate();
@@ -110,7 +111,7 @@ const RHDashboard = () => {
                                 <div key={h.id} className="flex items-center justify-between border-b pb-2 last:border-0" onClick={() => navigate(`/rh/funcionarios/${h.id}`)}>
                                     <div>
                                         <p className="font-medium cursor-pointer hover:underline">{h.nome_completo}</p>
-                                        <p className="text-xs text-muted-foreground">{new Date(h.data_admissao).toLocaleDateString()}</p>
+                                        <p className="text-xs text-muted-foreground">{formatDateOnly(h.data_admissao)}</p>
                                     </div>
                                     <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded dark:bg-green-950/30 dark:text-green-400">Novo</div>
                                 </div>

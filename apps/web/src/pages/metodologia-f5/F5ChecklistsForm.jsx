@@ -50,8 +50,8 @@ const F5ChecklistsForm = () => {
   };
 
   const fields = [
-    { name: 'nome', label: 'Nome do Checklist', required: true, fullWidth: true },
-    { name: 'etapa_f5_id', label: 'Etapa F5', type: 'select', options: etapas, required: true },
+    { name: 'item', label: 'Item do Checklist', required: true, fullWidth: true },
+    { name: 'etapa_id', label: 'Etapa F5', type: 'select', options: etapas, required: true },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
   ];
 

@@ -129,6 +129,7 @@ const navigation = [
         isNested: true,
         children: [
           { name: 'Ficha Técnica', href: '/custos/ficha-tecnica' },
+          { name: 'Itens de Custo', href: '/custos/fichas-custo-itens' },
         ],
       },
       {
@@ -184,6 +185,10 @@ const navigation = [
           { name: 'Diagnóstico F1', href: '/metodologia-f5/diagnostico-f1' },
           { name: 'Histórico F1', href: '/metodologia-f5/historico' },
           { name: 'Projetos F5', href: '/metodologia-f5/projetos' },
+          { name: 'Etapas F5', href: '/metodologia-f5/etapas' },
+          { name: 'Checklists F5', href: '/metodologia-f5/checklists' },
+          { name: 'KPIs F5', href: '/metodologia-f5/kpis' },
+          { name: 'Entregáveis F5', href: '/metodologia-f5/entregaveis' },
           { name: 'Relatórios F5', href: '/metodologia-f5/relatorios' },
           { name: 'Permissões', href: '/metodologia-f5/permissoes' },
           { name: 'Logs de Auditoria', href: '/metodologia-f5/auditoria' },

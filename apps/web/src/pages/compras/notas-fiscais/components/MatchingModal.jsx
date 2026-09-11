@@ -10,6 +10,7 @@ import { insertWithCompanyId } from '@/lib/companyUtils';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const MatchingModal = ({ isOpen, onClose, nota, onMatchSuccess }) => {
   const { toast } = useToast();
@@ -188,7 +189,7 @@ const MatchingModal = ({ isOpen, onClose, nota, onMatchSuccess }) => {
                                      #{p.numero || p.id}
                                      <Badge className="bg-green-500 text-white text-[10px]">Alta Probabilidade</Badge>
                                  </div>
-                                 <div className="text-xs text-muted-foreground">Emissão: {p.data_pedido ? new Date(p.data_pedido).toLocaleDateString() : '-'}</div>
+                                 <div className="text-xs text-muted-foreground">Emissão: {formatDateOnly(p.data_pedido)}</div>
                                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                     <Building2 className="h-3 w-3" /> {getFornecedorName(p.fornecedor_id)}
                                  </div>

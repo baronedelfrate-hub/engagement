@@ -12,6 +12,7 @@ import 'jspdf-autotable';
 import PermissionGate from '@/components/PermissionGate';
 import { F5_PERMISSIONS, logF5Audit } from '@/lib/permissions';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 // Progresso de uma etapa é calculado a partir dos itens de checklist concluídos
 // (não existe coluna percentual_conclusao no schema real de f5_etapas/f5_projetos).
@@ -155,7 +156,7 @@ function F5Relatorios() {
         s.nome,
         progress === null ? 'Sem checklist' : `${progress}%`,
         s.status || '-',
-        s.data_fim ? new Date(s.data_fim).toLocaleDateString() : '-'
+        formatDateOnly(s.data_fim)
       ];
     });
 

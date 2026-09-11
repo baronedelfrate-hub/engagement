@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Clock, CheckCircle2, History } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHControlePontoPage = () => {
   const { toast } = useToast();
@@ -82,7 +83,7 @@ const RHControlePontoPage = () => {
                 ) : (
                   pontos.map(p => (
                     <TableRow key={p.id}>
-                      <TableCell>{new Date(p.data_registro).toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDateOnly(p.data_registro)}</TableCell>
                       <TableCell>{p.funcionario?.nome_completo || 'Sistema'}</TableCell>
                       <TableCell>{p.hora_entrada ? new Date(p.hora_entrada).toLocaleTimeString() : '-'}</TableCell>
                       <TableCell>{p.hora_saida ? new Date(p.hora_saida).toLocaleTimeString() : '-'}</TableCell>

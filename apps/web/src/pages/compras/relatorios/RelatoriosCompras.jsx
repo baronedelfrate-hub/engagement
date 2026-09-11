@@ -16,6 +16,7 @@ import { exportToExcel, exportToPDF } from '@/lib/exportUtils';
 import SelecionarColunasCompras from './components/SelecionarColunasCompras';
 import { saveTemplate, getTemplates } from '@/lib/reportTemplates';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 // Full superset of all possible columns for any source
 const ALL_COLUMNS_DEF = [
@@ -448,7 +449,7 @@ const renderCell = (row, col) => {
     if (val === null || val === undefined) return '-';
 
     if (col.type === 'date') {
-        return new Date(val).toLocaleDateString('pt-BR');
+        return formatDateOnly(val);
     }
     if (col.type === 'currency') {
         return parseFloat(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

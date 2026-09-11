@@ -13,6 +13,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useCobrancaIntegrated } from '@/hooks/useCobrancaIntegrated';
 import CobrancaCardModalIntegrated from './cobranca/CobrancaCardModalIntegrated';
 import { calculatePhaseFromDueDate } from '@/lib/cobrancaService';
+import { formatDateOnly } from '@/lib/dateUtils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 function ContasReceberList() {
@@ -146,7 +147,7 @@ function ContasReceberList() {
             </div>
         )
     },
-    { header: 'Vencimento', accessorKey: 'data_vencimento', cell: ({ row }) => <span className="text-muted-foreground text-sm">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
+    { header: 'Vencimento', accessorKey: 'data_vencimento', cell: ({ row }) => <span className="text-muted-foreground text-sm">{formatDateOnly(row.data_vencimento)}</span> },
     {
         header: 'Status',
         id: 'status_cobranca',

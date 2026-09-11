@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const FluxoCaixaDashboardChart = ({ timeline }) => {
   if (!timeline || timeline.length === 0) {
@@ -13,8 +14,8 @@ const FluxoCaixaDashboardChart = ({ timeline }) => {
 
   // Transform data for Recharts
   const data = timeline.map(day => ({
-    date: new Date(day.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-    fullDate: new Date(day.date).toLocaleDateString('pt-BR'),
+    date: formatDateOnly(day.date, { day: '2-digit', month: '2-digit' }),
+    fullDate: formatDateOnly(day.date),
     saldoPrevisto: day.saldoFinal?.previsto || 0,
     saldoRealizado: day.saldoFinal?.realizado || 0,
     entradasPrevisto: day.entradas?.previsto || 0,

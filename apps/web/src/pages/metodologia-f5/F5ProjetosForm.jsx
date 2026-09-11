@@ -10,12 +10,12 @@ const F5ProjetosForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({});
-  const [clientes, setClientes] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   useEffect(() => {
     const loadDependencies = async () => {
-        const res = await erpServices.clientes.list({ limit: 100 });
-        if (res.success) setClientes(res.data.map(c => ({ label: c.nome_fantasia || c.razao_social, value: c.id })));
+        const res = await erpServices.users.list({ limit: 100 });
+        if (res.success) setUsuarios(res.data.map(u => ({ label: u.nome, value: u.id })));
     };
     loadDependencies();
 
@@ -51,17 +51,16 @@ const F5ProjetosForm = () => {
 
   const fields = [
     { name: 'nome', label: 'Nome do Projeto', required: true, fullWidth: true },
-    { name: 'cliente_id', label: 'Cliente', type: 'select', options: clientes, required: true },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
     { name: 'data_inicio', label: 'Data Início', type: 'date', required: true },
-    { 
-        name: 'fase_atual', 
-        label: 'Fase Atual', 
-        type: 'select', 
-        options: [{ label: 'F1 - Diagnóstico', value: 'F1' }, { label: 'F2 - Estruturação', value: 'F2' }, { label: 'F3 - Acompanhamento', value: 'F3' }, { label: 'F4 - Planejamento', value: 'F4' }, { label: 'F5 - Governança', value: 'F5' }] 
+    { name: 'data_fim', label: 'Data Fim (Previsão)', type: 'date' },
+    {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [{ label: 'Planejado', value: 'Planejado' }, { label: 'Em Andamento', value: 'Em Andamento' }, { label: 'Concluído', value: 'Concluído' }, { label: 'Pausado', value: 'Pausado' }]
     },
-    { name: 'responsavel', label: 'Consultor Responsável', type: 'text' },
-    { name: 'ativo', label: 'Ativo', type: 'switch' },
+    { name: 'responsavel_id', label: 'Consultor Responsável', type: 'select', options: usuarios },
   ];
 
   return (

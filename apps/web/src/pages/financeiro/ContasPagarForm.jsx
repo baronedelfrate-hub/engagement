@@ -15,6 +15,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
 import { generateParcelaRecords } from '@/lib/parcelamentoUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ContasPagarForm = () => {
   const { id } = useParams();
@@ -327,7 +328,7 @@ const ContasPagarForm = () => {
                         </Select>
                       </div>
                   </div>
-                  {previewParcelas.length > 0 && (<div className="border border-border rounded-lg overflow-hidden bg-background"><div className="bg-muted px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2"><Calculator className="h-3 w-3" /> Simulação de Parcelas</div><table className="w-full text-sm"><thead className="bg-background/50 text-muted-foreground border-b border-border"><tr><th className="px-4 py-2 text-left w-20">#</th><th className="px-4 py-2 text-left">Vencimento</th><th className="px-4 py-2 text-left">Valor</th></tr></thead><tbody className="divide-y divide-border">{previewParcelas.map((p) => (<tr key={p.parcela_atual}><td className="px-4 py-2 font-mono text-muted-foreground">{p.parcela_atual}</td><td className="px-4 py-2 text-muted-foreground">{new Date(p.data_vencimento).toLocaleDateString()}</td><td className="px-4 py-2 text-emerald-400 font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}</td></tr>))}</tbody></table></div>)}
+                  {previewParcelas.length > 0 && (<div className="border border-border rounded-lg overflow-hidden bg-background"><div className="bg-muted px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2"><Calculator className="h-3 w-3" /> Simulação de Parcelas</div><table className="w-full text-sm"><thead className="bg-background/50 text-muted-foreground border-b border-border"><tr><th className="px-4 py-2 text-left w-20">#</th><th className="px-4 py-2 text-left">Vencimento</th><th className="px-4 py-2 text-left">Valor</th></tr></thead><tbody className="divide-y divide-border">{previewParcelas.map((p) => (<tr key={p.parcela_atual}><td className="px-4 py-2 font-mono text-muted-foreground">{p.parcela_atual}</td><td className="px-4 py-2 text-muted-foreground">{formatDateOnly(p.data_vencimento)}</td><td className="px-4 py-2 text-emerald-400 font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}</td></tr>))}</tbody></table></div>)}
               </CardContent>
           )}
       </Card>

@@ -15,7 +15,7 @@ const FichasCustoItensForm = () => {
   useEffect(() => {
     const loadDependencies = async () => {
         const res = await erpServices.fichasCusto.list({ limit: 100 });
-        if (res.success) setFichas(res.data.map(f => ({ label: f.descricao, value: f.id })));
+        if (res.success) setFichas(res.data.map(f => ({ label: f.numero, value: f.id })));
     };
     loadDependencies();
 
@@ -56,11 +56,10 @@ const FichasCustoItensForm = () => {
   };
 
   const fields = [
-    { name: 'ficha_custo_id', label: 'Ficha de Custo', type: 'select', options: fichas, required: true },
+    { name: 'ficha_id', label: 'Ficha de Custo', type: 'select', options: fichas, required: true },
     { name: 'descricao', label: 'Descrição do Item', required: true, fullWidth: true },
     { name: 'quantidade', label: 'Quantidade', type: 'number', required: true },
     { name: 'valor_unitario', label: 'Valor Unitário', type: 'number', step: '0.01', required: true },
-    { name: 'observacoes', label: 'Observações', type: 'textarea', fullWidth: true },
   ];
 
   return (

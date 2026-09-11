@@ -51,12 +51,11 @@ const F5KPIsForm = () => {
 
   const fields = [
     { name: 'nome', label: 'Nome do Indicador', required: true, fullWidth: true },
-    { name: 'projeto_f5_id', label: 'Projeto F5', type: 'select', options: projetos, required: true },
-    { name: 'meta', label: 'Meta', type: 'number', step: '0.01' },
+    { name: 'projeto_id', label: 'Projeto F5', type: 'select', options: projetos, required: true },
+    { name: 'valor_meta', label: 'Meta', type: 'number', step: '0.01' },
     { name: 'valor_atual', label: 'Valor Atual', type: 'number', step: '0.01' },
+    { name: 'unidade', label: 'Unidade', placeholder: 'Ex: %, R$, un' },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
-    { name: 'data_inicio', label: 'Início Medição', type: 'date' },
-    { name: 'data_fim', label: 'Fim Medição', type: 'date' },
   ];
 
   return (

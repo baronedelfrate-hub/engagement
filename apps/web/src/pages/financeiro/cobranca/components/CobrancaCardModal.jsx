@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
   const { updateCobranca, addCobrancaHistorico, deleteCobranca } = useCobranca();
@@ -112,7 +113,7 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
           </DialogTitle>
           <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-2">
             <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Vencimento: {new Date(card.data_vencimento).toLocaleDateString()}</span>
+              <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Vencimento: {formatDateOnly(card.data_vencimento)}</span>
               <span className="font-bold text-lg text-emerald-400">{formatCurrency(card.valor)}</span>
             </div>
             <div className="flex items-center gap-4">
@@ -134,7 +135,7 @@ const CobrancaCardModal = ({ isOpen, onClose, card, onSuccess }) => {
                 <span className="text-muted-foreground">({phaseInfo.status_label})</span>
             </div>
             <p className="text-xs text-muted-foreground ml-6">
-                Vencimento: {new Date(card.data_vencimento).toLocaleDateString()} | Hoje: {new Date().toLocaleDateString()}
+                Vencimento: {formatDateOnly(card.data_vencimento)} | Hoje: {new Date().toLocaleDateString()}
             </p>
         </div>
 

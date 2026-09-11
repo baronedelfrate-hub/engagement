@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { TrendingUp, TrendingDown, DollarSign, Layers, Users, MapPin } from 'lucide-react';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const COLORS = ['#ea580c', '#1e3a8a', '#3b82f6', '#f97316', '#64748b']; // Orange, Navy, Blue, Light Orange, Slate
 
@@ -37,7 +38,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                 if (isSettled) groupObj[k].pago += val; else groupObj[k].pendente += val;
             };
 
-            const diaFormatado = item.data_vencimento ? new Date(item.data_vencimento).toLocaleDateString('pt-BR') : 'Sem Data';
+            const diaFormatado = item.data_vencimento ? formatDateOnly(item.data_vencimento) : 'Sem Data';
             addGroup(byDia, item.data_vencimento, diaFormatado);
             
             const entidadeId = isPagar ? item.fornecedor_id : item.cliente_id;

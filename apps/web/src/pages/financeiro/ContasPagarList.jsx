@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import ContasPagarParcelasModal from './components/ContasPagarParcelasModal';
 import { Input } from '@/components/ui/input';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ContasPagarList = () => {
   const navigate = useNavigate();
@@ -130,7 +131,7 @@ const ContasPagarList = () => {
         )
     },
     { header: "Valor", accessorKey: "valor_original", cell: ({ row }) => <span className="font-medium text-foreground">R$ {parseFloat(row.valor_original).toFixed(2)}</span> },
-    { header: "Vencimento", accessorKey: "data_vencimento", cell: ({ row }) => <span className="text-muted-foreground">{new Date(row.data_vencimento).toLocaleDateString()}</span> },
+    { header: "Vencimento", accessorKey: "data_vencimento", cell: ({ row }) => <span className="text-muted-foreground">{formatDateOnly(row.data_vencimento)}</span> },
     {
       header: "Status",
       accessorKey: "status",

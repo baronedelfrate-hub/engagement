@@ -6,6 +6,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2, CheckCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
   const [parcelas, setParcelas] = useState([]);
@@ -114,7 +115,7 @@ const ContasPagarParcelasModal = ({ isOpen, onClose, grupoId }) => {
                                 {parcelas.map((p) => (
                                     <tr key={p.id} className="hover:bg-muted/50 transition-colors">
                                         <td className="px-4 py-3 font-medium text-muted-foreground">{p.parcela_atual}/{p.numero_parcelas}</td>
-                                        <td className="px-4 py-3">{new Date(p.data_vencimento).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3">{formatDateOnly(p.data_vencimento)}</td>
                                         <td className="px-4 py-3 font-medium">
                                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}
                                         </td>

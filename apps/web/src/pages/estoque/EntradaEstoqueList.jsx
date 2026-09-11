@@ -8,6 +8,7 @@ import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function EntradaEstoqueList() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ function EntradaEstoqueList() {
     },
     {
       header: 'Data',
-      render: (item) => item.data_entrada ? new Date(item.data_entrada).toLocaleDateString() : '-'
+      render: (item) => formatDateOnly(item.data_entrada)
     },
     {
       header: 'Documento',
@@ -116,7 +117,7 @@ function EntradaEstoqueList() {
       <DataTable
         data={filteredEntradas}
         columns={columns}
-        onEdit={handleEdit}
+        onEdit={(row) => handleEdit(row.id)}
         onDelete={handleDelete}
         loading={loading}
         emptyMessage="Nenhuma entrada registrada"

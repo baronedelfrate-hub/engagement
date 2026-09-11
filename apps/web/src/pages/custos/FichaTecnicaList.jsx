@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Download, BarChart3, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Download, BarChart3, Trash2, Pencil, Plus } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
@@ -9,8 +10,10 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function FichaTecnicaList() {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [fichas, setFichas] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,14 +100,19 @@ function FichaTecnicaList() {
     { header: 'Número', accessor: 'numero' },
     { header: 'Produto', render: (item) => item.produtos?.nome || '-' },
     { header: 'Status', render: (item) => <span className="bg-muted px-2 py-1 rounded text-xs font-mono">{item.status || '-'}</span> },
-    { header: 'Data Criação', render: (item) => item.data_criacao ? new Date(item.data_criacao).toLocaleDateString() : '-' },
+    { header: 'Data Criação', render: (item) => formatDateOnly(item.data_criacao) },
     { header: 'Custo Total', render: (item) => `R$ ${parseFloat(item.valor_total || 0).toFixed(2)}` },
     {
       header: 'Ações',
       render: (item) => (
-        <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} title="Excluir">
-          <Trash2 className="h-4 w-4 text-red-500" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/custos/ficha-tecnica/${item.id}`)} title="Editar">
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)} title="Excluir">
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </div>
       )
     }
   ];
@@ -122,6 +130,9 @@ function FichaTecnicaList() {
             </Button>
             <Button variant="outline" onClick={exportCSV} className="gap-2">
               <Download className="h-4 w-4" /> CSV
+            </Button>
+            <Button onClick={() => navigate('/custos/ficha-tecnica/novo')} className="gap-2">
+              <Plus className="h-4 w-4" /> Nova Ficha
             </Button>
           </div>
         }

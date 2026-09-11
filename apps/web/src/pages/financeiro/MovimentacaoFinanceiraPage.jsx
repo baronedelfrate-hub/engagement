@@ -11,15 +11,18 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import MovimentacaoDetailModal from './components/MovimentacaoDetailModal';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const MovimentacaoFinanceiraPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { company_id, loading: authLoading } = useAuthContext();
-  
+
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalState, setModalState] = useState({ open: false, id: null, mode: 'view' });
   
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('Todos');
@@ -258,7 +261,7 @@ const MovimentacaoFinanceiraPage = () => {
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
                         </td>
                         <td className="px-6 py-4 text-foreground">
-                          {row.data_vencimento ? new Date(row.data_vencimento).toLocaleDateString() : '-'}
+                          {formatDateOnly(row.data_vencimento)}
                         </td>
                         <td className="px-6 py-4 font-medium text-foreground">
                           R$ {parseFloat(row.valor_total || 0).toFixed(2)}
@@ -277,10 +280,10 @@ const MovimentacaoFinanceiraPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border">
-                              <DropdownMenuItem onClick={() => toast({ title: "Visualizar", description: "Função não implementada ainda." })}>
+                              <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'view' })}>
                                 <Eye className="mr-2 h-4 w-4" /> Visualizar
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toast({ title: "Editar", description: "Função não implementada ainda." })}>
+                              <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
                                 <Pencil className="mr-2 h-4 w-4" /> Editar
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDelete(row.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
@@ -298,6 +301,14 @@ const MovimentacaoFinanceiraPage = () => {
           </div>
         </>
       )}
+
+      <MovimentacaoDetailModal
+        open={modalState.open}
+        mode={modalState.mode}
+        movimentacaoId={modalState.id}
+        onOpenChange={(open) => setModalState((prev) => ({ ...prev, open }))}
+        onSaved={loadData}
+      />
     </div>
   );
 };

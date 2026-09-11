@@ -202,11 +202,10 @@ import BPOClientesCadastroList from '@/pages/bpo/BPOClientesCadastroList';
 import BPOClientesCadastroForm from '@/pages/bpo/BPOClientesCadastroForm';
 import DRE from '@/pages/controladoria/DRE';
 import PontoEquilibrio from '@/pages/controladoria/PontoEquilibrio';
-import FichasCustoList from '@/pages/custos/FichasCustoList';
-import FichasCustoForm from '@/pages/custos/FichasCustoForm';
 import FichasCustoItensList from '@/pages/custos/FichasCustoItensList';
 import FichasCustoItensForm from '@/pages/custos/FichasCustoItensForm';
 import FichaTecnicaList from '@/pages/custos/FichaTecnicaList';
+import FichaTecnicaForm from '@/pages/custos/FichaTecnicaForm';
 import RHDashboard from '@/pages/rh/RHDashboard';
 import RHFuncionariosList from '@/pages/rh/RHFuncionariosList';
 import RHFuncionariosForm from '@/pages/rh/RHFuncionariosForm';
@@ -456,7 +455,11 @@ const AnimatedRoutes = () => {
           <Route path="/controladoria/ponto-equilibrio" element={<ProtectedLayout><PageTransition><PontoEquilibrio /></PageTransition></ProtectedLayout>} />
           
           <Route path="/custos/ficha-tecnica" element={<ProtectedLayout><PageTransition><FichaTecnicaList /></PageTransition></ProtectedLayout>} />
-          <Route path="/custos/fichas-custo" element={<ProtectedLayout><PageTransition><FichasCustoList /></PageTransition></ProtectedLayout>} />
+          <Route path="/custos/ficha-tecnica/novo" element={<ProtectedLayout><PageTransition><FichaTecnicaForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/custos/ficha-tecnica/:id" element={<ProtectedLayout><PageTransition><FichaTecnicaForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/custos/fichas-custo-itens" element={<ProtectedLayout><PageTransition><FichasCustoItensList /></PageTransition></ProtectedLayout>} />
+          <Route path="/custos/fichas-custo-itens/novo" element={<ProtectedLayout><PageTransition><FichasCustoItensForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/custos/fichas-custo-itens/:id" element={<ProtectedLayout><PageTransition><FichasCustoItensForm /></PageTransition></ProtectedLayout>} />
 
           {/* Rotas de Admin (Requer SuperAdminRoute) */}
           <Route path="/admin" element={<SuperAdminRoute><ProtectedLayout><PageTransition><AdminDashboard /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
@@ -494,6 +497,21 @@ const AnimatedRoutes = () => {
           <Route path="/metodologia-f5/diagnostico-f1" element={<ProtectedLayout><PageTransition><F1Diagnosis /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/historico" element={<ProtectedLayout><PageTransition><HistoricoF1 /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/projetos" element={<ProtectedLayout><PageTransition><F5ProjetosList /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/projetos/novo" element={<ProtectedLayout><PageTransition><F5ProjetosForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/projetos/:id" element={<ProtectedLayout><PageTransition><F5ProjetosForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/etapas" element={<ProtectedLayout><PageTransition><F5EtapasList /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/etapas/novo" element={<ProtectedLayout><PageTransition><F5EtapasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/etapas/:id" element={<ProtectedLayout><PageTransition><F5EtapasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/etapas/:id/detalhe" element={<ProtectedLayout><PageTransition><F5EtapaDetail /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/checklists" element={<ProtectedLayout><PageTransition><F5ChecklistsList /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/checklists/novo" element={<ProtectedLayout><PageTransition><F5ChecklistsForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/checklists/:id" element={<ProtectedLayout><PageTransition><F5ChecklistsForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/kpis" element={<ProtectedLayout><PageTransition><F5KPIsList /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/kpis/novo" element={<ProtectedLayout><PageTransition><F5KPIsForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/kpis/:id" element={<ProtectedLayout><PageTransition><F5KPIsForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/entregaveis" element={<ProtectedLayout><PageTransition><F5EntregaveisList /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/entregaveis/novo" element={<ProtectedLayout><PageTransition><F5EntregaveisForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/entregaveis/:id" element={<ProtectedLayout><PageTransition><F5EntregaveisForm /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/relatorios" element={<ProtectedLayout><PageTransition><F5Relatorios /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/permissoes" element={<ProtectedLayout><PageTransition><F5ConfigPermissions /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/auditoria" element={<ProtectedLayout><PageTransition><F5AuditoriaLog /></PageTransition></ProtectedLayout>} />

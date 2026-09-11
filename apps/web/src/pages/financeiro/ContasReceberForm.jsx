@@ -16,6 +16,7 @@ import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { generateParcelaRecords } from '@/lib/parcelamentoUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function ContasReceberForm() {
   const navigate = useNavigate();
@@ -499,7 +500,7 @@ function ContasReceberForm() {
                                         {previewParcelas.map((p) => (
                                             <tr key={p.parcela_atual}>
                                                 <td className="px-4 py-2 font-mono text-muted-foreground">{p.parcela_atual}</td>
-                                                <td className="px-4 py-2 text-muted-foreground">{new Date(p.data_vencimento).toLocaleDateString()}</td>
+                                                <td className="px-4 py-2 text-muted-foreground">{formatDateOnly(p.data_vencimento)}</td>
                                                 <td className="px-4 py-2 text-emerald-400 font-medium">
                                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.valor_original)}
                                                 </td>

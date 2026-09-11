@@ -10,6 +10,7 @@ import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2 } from 'lucide-r
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import SelecionarColunasFluxo from './components/SelecionarColunasFluxo';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RelatoriosFluxoCaixa = () => {
   const [filters, setFilters] = useState({
@@ -221,7 +222,7 @@ const RelatoriosFluxoCaixa = () => {
                                 ) : (
                                     data.map((item) => (
                                         <TableRow key={item.id} className="hover:bg-muted">
-                                            {selectedColumns.includes('data') && <TableCell className="font-mono text-xs">{new Date(item.data_movimentacao).toLocaleDateString('pt-BR')}</TableCell>}
+                                            {selectedColumns.includes('data') && <TableCell className="font-mono text-xs">{formatDateOnly(item.data_movimentacao)}</TableCell>}
                                             {selectedColumns.includes('tipo') && (
                                                 <TableCell>
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.tipo === 'Receita' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'}`}>

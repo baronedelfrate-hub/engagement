@@ -11,6 +11,7 @@ import CobrancaListView from './components/CobrancaListView';
 import { Helmet } from 'react-helmet';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaKanban = () => {
   const { fetchAllCobranca, updateAllPhases, loading: apiLoading } = useCobranca();
@@ -164,7 +165,7 @@ const CobrancaKanban = () => {
                       
                       <div className="flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                          <p className="text-xs text-muted-foreground">Venc: {new Date(item.data_vencimento).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground">Venc: {formatDateOnly(item.data_vencimento)}</p>
                           {getDueDateBadge(item.dias_ate_vencimento)}
                         </div>
                         

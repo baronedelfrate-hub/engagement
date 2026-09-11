@@ -114,7 +114,7 @@ function TipoDocumentoList() {
         <DataTable
           data={filteredTipos}
           columns={columns}
-          onEdit={handleEdit}
+          onEdit={(row) => handleEdit(row.id)}
           onDelete={handleDelete}
           loading={loading}
           emptyMessage={<span className="text-muted-foreground">Nenhum tipo de documento cadastrado</span>}

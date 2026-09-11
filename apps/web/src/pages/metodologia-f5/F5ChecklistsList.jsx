@@ -3,32 +3,44 @@ import { useNavigate } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const F5ChecklistsList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState([]);
+  const [etapas, setEtapas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await erpServices.f5Checklists.list({ limit: 50 });
+    const [res, etapasRes] = await Promise.all([
+      erpServices.f5Checklists.list({ limit: 50 }),
+      erpServices.f5Etapas.list({ limit: 100 })
+    ]);
     if (res.success) {
       setData(res.data);
     } else {
       toast({ title: 'Erro', description: res.error, variant: 'destructive' });
     }
+    if (etapasRes.success) setEtapas(etapasRes.data);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
+  const getEtapaNome = (id) => etapas.find(e => e.id === id)?.nome || '-';
+
   const columns = [
-    { header: 'Nome', accessorKey: 'nome', sortable: true },
-    { header: 'Etapa', accessorKey: 'etapa_f5_id' },
-    { header: 'Total Itens', accessorKey: 'total_itens' },
-    { header: 'Concluídos', accessorKey: 'itens_concluidos' },
-    { header: '% Conclusão', accessorKey: 'percentual_conclusao', cell: ({ row }) => `${row.percentual_conclusao}%` },
+    { header: 'Item', accessorKey: 'item', sortable: true },
+    { header: 'Etapa', cell: ({ row }) => getEtapaNome(row.etapa_id) },
+    { header: 'Descrição', accessorKey: 'descricao' },
+    {
+        header: 'Status',
+        cell: ({ row }) => row.concluido
+          ? <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400">Concluído</Badge>
+          : <Badge variant="outline">Pendente</Badge>
+    },
   ];
 
   return (

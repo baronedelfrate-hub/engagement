@@ -8,6 +8,7 @@ import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { formatCPF } from '@/lib/rhUtils';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHFuncionariosList = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const RHFuncionariosList = () => {
     { header: 'CPF', accessorKey: 'cpf', cell: ({ row }) => formatCPF(row.cpf) },
     { header: 'Cargo', accessorKey: 'cargo.nome', cell: ({ row }) => row.cargo?.nome || '-' },
     { header: 'Departamento', accessorKey: 'departamento.nome', cell: ({ row }) => row.departamento?.nome || '-' },
-    { header: 'Admissão', accessorKey: 'data_admissao', cell: ({ row }) => new Date(row.data_admissao).toLocaleDateString() },
+    { header: 'Admissão', accessorKey: 'data_admissao', cell: ({ row }) => formatDateOnly(row.data_admissao) },
     { 
       header: 'Status', 
       accessorKey: 'status', 

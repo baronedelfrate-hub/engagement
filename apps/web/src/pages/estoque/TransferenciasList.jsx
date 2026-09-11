@@ -8,6 +8,7 @@ import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 function TransferenciasList() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ function TransferenciasList() {
             </div>
         )
     },
-    { header: 'Data', render: (item) => item.data ? new Date(item.data).toLocaleDateString() : '-' },
+    { header: 'Data', render: (item) => formatDateOnly(item.data) },
     { header: 'Status', accessor: 'status' }
   ];
 

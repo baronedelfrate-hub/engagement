@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import SkeletonLoader from '@/components/SkeletonLoader';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) => {
   if (loading) {
@@ -46,7 +47,7 @@ const ConciliacaoBancariaTable = ({ data = [], loading, selectedId, onSelect }) 
               const isConciliado = row?.status_conciliacao === 'Conciliado';
               const isSelected = selectedId === row?.id;
               
-              const dateVal = row?.data_baixa ? new Date(row.data_baixa).toLocaleDateString('pt-BR') : '-';
+              const dateVal = formatDateOnly(row?.data_baixa);
               const valorVal = typeof row?.valor === 'number' ? row.valor : 0;
               
               return (

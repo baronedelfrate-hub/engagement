@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { calculateExamStatus, getAlertColor } from '@/lib/rhUtils';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHNRList = ({ funcionarioId }) => {
   const [items, setItems] = useState([]);
@@ -60,7 +61,7 @@ const RHNRList = ({ funcionarioId }) => {
                             <p className="font-medium">{item.nr_numero}</p>
                             <Badge className={getAlertColor(status)} variant="outline">{status}</Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground">Validade: {new Date(item.data_validade).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground">Validade: {formatDateOnly(item.data_validade)}</p>
                     </div>
                     <div className="flex gap-2">
                         {item.arquivo_url && <Button variant="ghost" size="icon" onClick={() => window.open(item.arquivo_url, '_blank')}><Download className="h-4 w-4"/></Button>}

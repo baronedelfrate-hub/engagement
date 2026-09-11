@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  Building2, 
-  Users, 
-  DollarSign, 
-  BookOpen, 
-  BarChart3,
+import {
+  ChevronRight,
+  ChevronDown,
+  Building2,
+  Users,
   Landmark,
   FolderOpen,
   Target,
@@ -23,24 +20,7 @@ import {
   Banknote,
   Box,
   Scale,
-  Ruler,
-  Receipt,
-  TrendingUp,
-  ArrowDownUp,
-  Wallet,
-  GitMerge,
-  Phone,
-  Download,
-  BarChart2,
-  BookMarked,
-  PenTool,
-  FolderClosed,
-  Calendar,
-  AlertCircle,
-  PieChart,
-  Activity,
-  ListChecks,
-  TrendingDown
+  Ruler
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -105,11 +85,14 @@ const DynamicClientMenu = ({ isSidebarOpen }) => {
     }));
   };
 
-  // Complete menu structure for each client
+  // Menu structure para cada cliente BPO.
+  // Só existe rota real (ClientePageRouter) para /cliente/:id/cadastro/:submenu hoje;
+  // Financeiro/Contabilidade/Controladoria não têm nenhuma tela construída para o portal do cliente,
+  // então não entram aqui até existirem de verdade (evita menu-fantasma).
   const menuStructure = [
     {
       label: 'Cadastro',
-      section: 'cadastros',
+      section: 'cadastro',
       icon: Users,
       items: [
         { label: 'Bancos', path: 'bancos', icon: Landmark },
@@ -128,45 +111,6 @@ const DynamicClientMenu = ({ isSidebarOpen }) => {
         { label: 'Tipo de Produto', path: 'tipo-produto', icon: Box },
         { label: 'Tributos', path: 'tributos', icon: Scale },
         { label: 'Unidades de Medida', path: 'unidades-medida', icon: Ruler }
-      ]
-    },
-    {
-      label: 'Financeiro',
-      section: 'financeiro',
-      icon: DollarSign,
-      items: [
-        { label: 'Contas a Pagar', path: 'contas-pagar', icon: Receipt },
-        { label: 'Contas a Receber', path: 'contas-receber', icon: TrendingUp },
-        { label: 'Movimentações Financeiras', path: 'movimentacoes', icon: ArrowDownUp },
-        { label: 'Fluxo de Caixa', path: 'fluxo-caixa', icon: Wallet },
-        { label: 'Conciliação Bancária', path: 'conciliacao', icon: GitMerge },
-        { label: 'Cobrança', path: 'cobranca', icon: Phone },
-        { label: 'Baixas', path: 'baixas', icon: Download },
-        { label: 'Relatórios Financeiros', path: 'relatorios', icon: BarChart2 }
-      ]
-    },
-    {
-      label: 'Contabilidade',
-      section: 'contabilidade',
-      icon: BookOpen,
-      items: [
-        { label: 'Plano de Contas', path: 'plano-contas', icon: BookMarked },
-        { label: 'Lançamentos Contábeis', path: 'lancamentos', icon: PenTool },
-        { label: 'Documentos Contábeis', path: 'documentos', icon: FolderClosed },
-        { label: 'Fechamento Mensal', path: 'fechamento', icon: Calendar },
-        { label: 'Pendências Contábeis', path: 'pendencias', icon: AlertCircle },
-        { label: 'DRE/Balancete', path: 'dre-balancete', icon: PieChart }
-      ]
-    },
-    {
-      label: 'Controladoria',
-      section: 'controladoria',
-      icon: BarChart3,
-      items: [
-        { label: 'DRE', path: 'dre', icon: Activity },
-        { label: 'Ponto de Equilíbrio', path: 'ponto-equilibrio', icon: TrendingDown },
-        { label: 'Indicadores KPI', path: 'indicadores-kpi', icon: BarChart2 },
-        { label: 'Linhas DRE', path: 'dre-linhas', icon: ListChecks }
       ]
     }
   ];
@@ -237,20 +181,6 @@ const DynamicClientMenu = ({ isSidebarOpen }) => {
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="mt-1 space-y-1 ml-4 border-l-2 border-blue-200 dark:border-blue-800"
                 >
-                  {/* Dashboard Link */}
-                  <button
-                    onClick={() => navigate(`/cliente/${client.id}/dashboard`)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ml-2',
-                      location.pathname === `/cliente/${client.id}/dashboard`
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <span className="h-2 w-2 rounded-full bg-current" />
-                    Dashboard
-                  </button>
-
                   {/* Sections */}
                   {menuStructure.map((section) => {
                     const sectionKey = `${client.id}_${section.section}`;

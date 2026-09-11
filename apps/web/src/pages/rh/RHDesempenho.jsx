@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Edit, Eye } from 'lucide-react';
 import DataTable from '@/components/DataTable';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const RHDesempenho = () => {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ const RHDesempenho = () => {
 
   const columns = [
     { header: 'Funcionário', accessorKey: 'funcionario.nome_completo', cell: ({row}) => row.funcionario?.nome_completo || '-' },
-    { header: 'Data', accessorKey: 'data_avaliacao', cell: ({row}) => new Date(row.data_avaliacao).toLocaleDateString() },
+    { header: 'Data', accessorKey: 'data_avaliacao', cell: ({row}) => formatDateOnly(row.data_avaliacao) },
     { header: 'Avaliador', accessorKey: 'avaliador.nome', cell: ({row}) => row.avaliador?.nome || '-' },
     { header: 'Pontuação', accessorKey: 'pontuacao', cell: ({row}) => <span className="font-bold">{row.pontuacao || 'N/A'}</span> },
     { header: 'Ações', id: 'actions', cell: ({row}) => (

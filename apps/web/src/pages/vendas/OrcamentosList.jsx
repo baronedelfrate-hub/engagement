@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useConversaoOrcamento } from '@/hooks/useConversaoOrcamento';
 import ConversaoDialog from '@/components/ConversaoDialog';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const OrcamentosList = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ const OrcamentosList = () => {
   const columns = [
     { header: 'Número', accessorKey: 'numero', sortable: true },
     { header: 'Cliente', accessorKey: 'cliente.nome', cell: ({ row }) => row.cliente?.nome || '-' },
-    { header: 'Data Emissão', accessorKey: 'data_emissao', cell: ({ row }) => new Date(row.data_emissao).toLocaleDateString() },
+    { header: 'Data Emissão', accessorKey: 'data_emissao', cell: ({ row }) => formatDateOnly(row.data_emissao) },
     { 
         header: 'Valor Total', 
         accessorKey: 'valor_total',

@@ -18,6 +18,7 @@ import { FileText, FileCheck, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatDateOnly } from '@/lib/dateUtils';
 import { Badge } from '@/components/ui/badge';
 import PedidosVendaFiscalFilters from './components/PedidosVendaFiscalFilters';
 import GerarNFModal from './components/GerarNFModal';
@@ -151,7 +152,7 @@ export default function PedidosVendaFiscalPage() {
                 <TableRow key={item.id} className="hover:bg-muted/50 transition-colors">
                   <TableCell className="font-medium text-primary">{item.numero}</TableCell>
                   <TableCell>{item.clientes?.nome}</TableCell>
-                  <TableCell>{new Date(item.data_emissao).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell>{formatDateOnly(item.data_emissao)}</TableCell>
                   <TableCell className="font-medium">R$ {(item.valor_total || 0).toFixed(2)}</TableCell>
                   <TableCell>{getStatusBadge(item.status_pedido || item.status)}</TableCell>
                   <TableCell className="text-right">

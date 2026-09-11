@@ -7,6 +7,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import FormularioEntradaManualModal from '@/pages/compras/notas-fiscais/components/FormularioEntradaManualModal';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const EntradaNotasVisualizacao = () => {
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const EntradaNotasVisualizacao = () => {
     {
       header: 'Emissão',
       accessor: 'data_emissao',
-      render: (row) => row.data_emissao ? new Date(row.data_emissao).toLocaleDateString() : '-'
+      render: (row) => formatDateOnly(row.data_emissao)
     },
     {
       header: 'Valor',

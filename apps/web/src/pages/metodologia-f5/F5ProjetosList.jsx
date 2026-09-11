@@ -4,36 +4,44 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const F5ProjetosList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [data, setData] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await erpServices.f5Projetos.list({ limit: 50 });
+    const [res, usersRes] = await Promise.all([
+      erpServices.f5Projetos.list({ limit: 50 }),
+      erpServices.users.list({ limit: 100 })
+    ]);
     if (res.success) {
       setData(res.data);
     } else {
       toast({ title: 'Erro', description: res.error, variant: 'destructive' });
     }
+    if (usersRes.success) setUsuarios(usersRes.data);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, []);
 
+  const getResponsavelNome = (id) => usuarios.find(u => u.id === id)?.nome || '-';
+
   const columns = [
     { header: 'Nome', accessorKey: 'nome', sortable: true },
-    { header: 'Cliente', accessorKey: 'cliente_id' },
-    { 
-        header: 'Fase Atual', 
-        accessorKey: 'fase_atual',
-        cell: ({ row }) => <Badge>{row.fase_atual}</Badge>
+    { header: 'Responsável', cell: ({ row }) => getResponsavelNome(row.responsavel_id) },
+    { header: 'Início', accessorKey: 'data_inicio', cell: ({ row }) => formatDateOnly(row.data_inicio) },
+    { header: 'Fim', accessorKey: 'data_fim', cell: ({ row }) => formatDateOnly(row.data_fim) },
+    {
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ row }) => <Badge variant="outline">{row.status || '-'}</Badge>
     },
-    { header: 'Início', accessorKey: 'data_inicio', cell: ({ row }) => new Date(row.data_inicio).toLocaleDateString() },
-    { header: 'Progresso', accessorKey: 'progresso', cell: ({ row }) => `${row.progresso}%` },
   ];
 
   return (

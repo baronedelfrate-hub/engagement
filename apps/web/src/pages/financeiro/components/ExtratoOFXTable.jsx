@@ -6,6 +6,7 @@ import { CheckCircle2, AlertCircle, UploadCloud } from 'lucide-react';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ExtratoOFXTable = ({ data = [], loading, selectedId, onSelect }) => {
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ const ExtratoOFXTable = ({ data = [], loading, selectedId, onSelect }) => {
               const isConciliado = row?.status_conciliacao === 'Conciliado';
               const isSelected = selectedId === row?.id;
               
-              const dateVal = row?.data_transacao ? new Date(row.data_transacao).toLocaleDateString('pt-BR') : '-';
+              const dateVal = formatDateOnly(row?.data_transacao);
               const valorVal = typeof row?.valor === 'number' ? row.valor : 0;
               
               return (

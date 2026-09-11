@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table } from 'lucide-react';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const DrilldownModal = ({ isOpen, onClose, items, title }) => {
   return (
@@ -26,7 +27,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                 <tbody className="divide-y">
                     {items && items.length > 0 ? items.map((item, idx) => (
                         <tr key={idx} className="hover:bg-muted">
-                            <td className="p-3">{new Date(item.data).toLocaleDateString('pt-BR')}</td>
+                            <td className="p-3">{formatDateOnly(item.data)}</td>
                             <td className="p-3 font-medium">{item.descricao}</td>
                             <td className="p-3 text-muted-foreground">{item.categoria}</td>
                             <td className="p-3 text-xs">

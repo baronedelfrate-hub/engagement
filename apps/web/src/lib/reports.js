@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { formatDateOnly } from './dateUtils';
 
 /**
  * Generates a CSV file that opens in Excel.
@@ -25,7 +26,7 @@ export const exportToExcel = (data, filename, type) => {
     const row = [
       item.displayNumero || item.numeroTitulo,
       item.entidadeNome || (type === 'PAGAR' ? item.fornecedorNome : item.clienteNome),
-      new Date(item.displayVencimento || item.dataVencimento).toLocaleDateString('pt-BR'),
+      formatDateOnly(item.displayVencimento || item.dataVencimento),
       (item.displayValor || item.valorTotal || 0).toFixed(2).replace('.', ','),
       item.displayStatus || item.status,
       item.categoriaNome || '',
@@ -91,7 +92,7 @@ export const generateRelatorioFinanceiroPDF = (data, title, type) => {
     const ticketData = [
       ticket.displayNumero || ticket.numeroTitulo,
       ticket.entidadeNome || (type === 'PAGAR' ? ticket.fornecedorNome : ticket.clienteNome),
-      new Date(ticket.displayVencimento || ticket.dataVencimento).toLocaleDateString('pt-BR'),
+      formatDateOnly(ticket.displayVencimento || ticket.dataVencimento),
       valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
       status
     ];

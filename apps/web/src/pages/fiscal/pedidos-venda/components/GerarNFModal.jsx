@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Loader2, FileText, ShoppingBag, Briefcase } from 'lucide-react';
 import { useGerarNF } from '@/hooks/useGerarNF';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 export default function GerarNFModal({ isOpen, onClose, pedido }) {
   const { isLoading, hasProducts, hasServices, generateNFe, generateNFSe } = useGerarNF(pedido?.id);
@@ -34,7 +35,7 @@ export default function GerarNFModal({ isOpen, onClose, pedido }) {
               
               <div className="text-muted-foreground">Data Emissão:</div>
               <div className="font-medium text-right">
-                {new Date(pedido.data_emissao).toLocaleDateString('pt-BR')}
+                {formatDateOnly(pedido.data_emissao)}
               </div>
               
               <div className="text-muted-foreground">Valor Total:</div>

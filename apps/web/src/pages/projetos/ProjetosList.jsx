@@ -4,6 +4,7 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const ProjetosList = () => {
   const navigate = useNavigate();
@@ -26,8 +27,8 @@ const ProjetosList = () => {
 
   const columns = [
     { header: 'Nome', accessorKey: 'nome', sortable: true },
-    { header: 'Início', accessorKey: 'data_inicio', cell: ({ row }) => row.data_inicio ? new Date(row.data_inicio).toLocaleDateString() : '-' },
-    { header: 'Fim', accessorKey: 'data_fim', cell: ({ row }) => row.data_fim ? new Date(row.data_fim).toLocaleDateString() : '-' },
+    { header: 'Início', accessorKey: 'data_inicio', cell: ({ row }) => formatDateOnly(row.data_inicio) },
+    { header: 'Fim', accessorKey: 'data_fim', cell: ({ row }) => formatDateOnly(row.data_fim) },
     { 
         header: 'Status', 
         accessorKey: 'status',

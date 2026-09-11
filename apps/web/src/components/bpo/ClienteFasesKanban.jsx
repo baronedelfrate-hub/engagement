@@ -7,6 +7,7 @@ import { PHASE_NAMES, STATUS_COLORS } from '@/lib/bpoE5PhaseConfig';
 import { Edit, Calendar, User, AlertCircle } from 'lucide-react';
 import { isRequiredFileUploaded } from '@/lib/bpoE5FileValidator';
 import { motion } from 'framer-motion';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 export default function ClienteFasesKanban({ fases, arquivos, onEditFase }) {
   console.log('[ClienteFasesKanban] Kanban renderizado, Fases:', fases?.length);
@@ -72,9 +73,9 @@ export default function ClienteFasesKanban({ fases, arquivos, onEditFase }) {
               <div className="flex items-center text-xs text-muted-foreground">
                 <Calendar className="w-4 h-4 mr-1.5 text-muted-foreground" />
                 <span>
-                  {faseData.data_inicio ? new Date(faseData.data_inicio).toLocaleDateString() : 'A iniciar'} 
+                  {faseData.data_inicio ? formatDateOnly(faseData.data_inicio) : 'A iniciar'}
                   {' - '} 
-                  {faseData.data_conclusao ? new Date(faseData.data_conclusao).toLocaleDateString() : 'Em aberto'}
+                  {faseData.data_fim ? formatDateOnly(faseData.data_fim) : 'Em aberto'}
                 </span>
               </div>
               <div className="flex items-center text-xs text-muted-foreground">

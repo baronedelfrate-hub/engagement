@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency, PHASES, calculatePhaseByDueDate } from '@/lib/cobrancaService';
 import { Edit } from 'lucide-react';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaListView = ({ items, onEdit }) => {
   
@@ -47,7 +48,7 @@ const CobrancaListView = ({ items, onEdit }) => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-foreground font-mono">{formatCurrency(item.valor)}</TableCell>
-                <TableCell className="text-muted-foreground">{new Date(item.data_vencimento).toLocaleDateString()}</TableCell>
+                <TableCell className="text-muted-foreground">{formatDateOnly(item.data_vencimento)}</TableCell>
                 <TableCell>
                     {getDueDateBadge(item.data_vencimento)}
                 </TableCell>

@@ -2,6 +2,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { formatDateOnly } from './dateUtils';
 
 // Helper to get company info (mock)
 const getCompanyInfo = () => ({
@@ -124,7 +125,7 @@ export const exportToPDF = (data, columns, reportTitle, filtersDescription) => {
   const tableBody = data.map(item => {
     return columns.map(col => {
       let val = item[col.id];
-      if (col.type === 'date' && val) return new Date(val).toLocaleDateString('pt-BR');
+      if (col.type === 'date' && val) return formatDateOnly(val);
       if (col.type === 'currency') return parseFloat(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       if (col.type === 'status') return val; // Could translate/map here
       return val;

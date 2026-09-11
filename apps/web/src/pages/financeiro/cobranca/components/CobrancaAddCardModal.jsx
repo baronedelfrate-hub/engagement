@@ -11,6 +11,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { Loader2, Plus } from 'lucide-react';
 import { formatCurrency, getPhaseSequence, PHASES } from '@/lib/cobrancaService';
 import { useToast } from '@/components/ui/use-toast';
+import { formatDateOnly } from '@/lib/dateUtils';
 
 const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
   const { createCobranca } = useCobranca();
@@ -126,7 +127,7 @@ const CobrancaAddCardModal = ({ isOpen, onClose, onSuccess }) => {
                <SelectContent className="bg-background border-border text-foreground">
                  {contasReceber.map(c => (
                    <SelectItem key={c.id} value={c.id}>
-                     {c.numero} - {formatCurrency(c.valor_original)} (Venc: {new Date(c.data_vencimento).toLocaleDateString()})
+                     {c.numero} - {formatCurrency(c.valor_original)} (Venc: {formatDateOnly(c.data_vencimento)})
                    </SelectItem>
                  ))}
                </SelectContent>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search, Eye, Edit, Trash2, Plus, AlertCircle, RefreshCcw, CheckCircle2, FileText } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
+import { formatDateOnly } from '@/lib/dateUtils';
 import { usePendenciasContabeis } from '@/contexts/PendenciasContabeisContext';
 import { 
   getStatusColor, 
@@ -241,7 +242,7 @@ export default function PendenciasContabeisList() {
                       </TableCell>
                       <TableCell>
                         <div className={`text-sm font-medium ${overdue ? 'text-red-600' : 'text-foreground'}`}>
-                          {new Date(item.prazo).toLocaleDateString('pt-BR')}
+                          {formatDateOnly(item.prazo)}
                         </div>
                       </TableCell>
                       <TableCell>

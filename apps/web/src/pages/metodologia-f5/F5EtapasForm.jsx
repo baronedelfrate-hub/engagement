@@ -51,17 +51,17 @@ const F5EtapasForm = () => {
 
   const fields = [
     { name: 'nome', label: 'Nome da Etapa', required: true, fullWidth: true },
-    { name: 'projeto_f5_id', label: 'Projeto F5', type: 'select', options: projetos, required: true },
+    { name: 'projeto_id', label: 'Projeto F5', type: 'select', options: projetos, required: true },
+    { name: 'numero', label: 'Número/Ordem', placeholder: 'Ex: 1' },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
-    { name: 'data_inicio', label: 'Data Início', type: 'date', required: true },
+    { name: 'data_inicio', label: 'Data Início', type: 'date' },
     { name: 'data_fim', label: 'Data Fim', type: 'date' },
-    { 
-        name: 'status', 
-        label: 'Status', 
-        type: 'select', 
-        options: [{ label: 'Planejado', value: 'planejado' }, { label: 'Em Andamento', value: 'em_andamento' }, { label: 'Concluído', value: 'concluido' }] 
+    {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        options: [{ label: 'Planejado', value: 'Planejado' }, { label: 'Em Andamento', value: 'Em Andamento' }, { label: 'Concluído', value: 'Concluído' }]
     },
-    { name: 'responsavel', label: 'Responsável', type: 'text' },
   ];
 
   return (

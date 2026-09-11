@@ -220,9 +220,9 @@ const Sidebar = ({ onClose }) => {
             { title: "NF-e (Produtos)", path: "/fiscal/nfe", icon: FileText },
             { title: "NFS-e (Serviços)", path: "/fiscal/nfse", icon: FileText },
             { title: "Manifestação de NF", path: "/fiscal/manifestacao", icon: ClipboardList },
-            { title: "Entrada de NF", path: "/fiscal/entrada-fiscal", icon: Upload },
+            { title: "Entrada de NF", path: "/fiscal/entrada-nf", icon: Upload },
             { title: "Apuração de Impostos", path: "/fiscal/apuracao-impostos", icon: Calculator },
-            { title: "Parâmetros Fiscais", path: "/fiscal/parametrizacao", icon: Settings },
+            { title: "Parâmetros Fiscais", path: "/fiscal/parametros-fiscais", icon: Settings },
         ]
     },
     {

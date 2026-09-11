@@ -113,7 +113,6 @@ import RelatoriosVendas from '@/pages/vendas/relatorios/RelatoriosVendas';
 
 import FiscalDashboard from '@/pages/fiscal/FiscalDashboard';
 import PedidosVendaFiscalPage from '@/pages/fiscal/pedidos-venda/PedidosVendaFiscalPage';
-import NfeLista from '@/pages/fiscal/NfeLista';
 import NfeProductsPage from '@/pages/fiscal/nfe-produtos/NfeProductsPage';
 import NfeEmissionForm from '@/pages/fiscal/nfe-produtos/NfeEmissionForm';
 import NfeDetailView from '@/pages/fiscal/nfe-produtos/NfeDetailView';
@@ -122,11 +121,9 @@ import NfseServicosFormPage from '@/pages/fiscal/nfse-servicos/NfseServicosFormP
 import NfseServicosDetailView from '@/pages/fiscal/nfse-servicos/NfseServicosDetailView';
 import ManifestacaoNFPage from '@/pages/fiscal/manifestacao-nf/ManifestacaoNFPage';
 import ManifestacaoNFDetail from '@/pages/fiscal/manifestacao-nf/ManifestacaoNFDetail';
-import EntradaFiscalLista from '@/pages/fiscal/EntradaFiscalLista';
 import EntradaNFList from '@/pages/fiscal/entrada-nf/EntradaNFList';
 import EntradaNFForm from '@/pages/fiscal/entrada-nf/EntradaNFForm';
 import EntradaNFDetail from '@/pages/fiscal/entrada-nf/EntradaNFDetail';
-import ParametrizacaoFiscal from '@/pages/fiscal/ParametrizacaoFiscal';
 import ParametrosFiscaisPage from '@/pages/fiscal/parametros-fiscais/ParametrosFiscaisPage';
 import ApuracaoImpostosListPage from '@/pages/fiscal/apuracao-impostos/ApuracaoImpostosListPage';
 import ApuracaoImpostosFormPage from '@/pages/fiscal/apuracao-impostos/ApuracaoImpostosFormPage';
@@ -409,13 +406,11 @@ const AnimatedRoutes = () => {
           <Route path="/fiscal/entrada-nf/novo" element={<ProtectedLayout><PageTransition><EntradaNFForm /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/entrada-nf/:id" element={<ProtectedLayout><PageTransition><EntradaNFDetail /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/entrada-nf/:id/editar" element={<ProtectedLayout><PageTransition><EntradaNFForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/fiscal/entrada-fiscal" element={<ProtectedLayout><PageTransition><EntradaFiscalLista /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/apuracao-impostos" element={<ProtectedLayout><PageTransition><ApuracaoImpostosListPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/apuracao-impostos/novo" element={<ProtectedLayout><PageTransition><ApuracaoImpostosFormPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/apuracao-impostos/:id" element={<ProtectedLayout><PageTransition><ApuracaoImpostosDetailPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/apuracao-impostos/:id/editar" element={<ProtectedLayout><PageTransition><ApuracaoImpostosFormPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/parametros-fiscais" element={<ProtectedLayout><PageTransition><ParametrosFiscaisPage /></PageTransition></ProtectedLayout>} />
-          <Route path="/fiscal/parametrizacao" element={<ProtectedLayout><PageTransition><ParametrizacaoFiscal /></PageTransition></ProtectedLayout>} />
 
           <Route path="/contabilidade/*" element={
             <ProtectedLayout>

@@ -43,7 +43,7 @@ function MovimentacaoEstoqueForm() {
     const { data, error } = await supabase
       .from('produtos')
       .select('id, nome, estoque_atual')
-      .eq('status', 'Ativo')
+      .eq('ativo', true)
       .eq('controla_estoque', true);
     if (error) {
       console.error('[MovimentacaoEstoqueForm] Erro ao carregar produtos:', error);

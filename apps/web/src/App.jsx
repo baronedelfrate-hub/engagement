@@ -525,6 +525,8 @@ const AnimatedRoutes = () => {
           <Route path="/estoque/entrada/novo" element={<ProtectedLayout><PageTransition><EntradaEstoqueForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/entrada/:id" element={<ProtectedLayout><PageTransition><EntradaEstoqueForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/movimentacao" element={<ProtectedLayout><PageTransition><MovimentacaoEstoqueList /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/movimentacao/novo" element={<ProtectedLayout><PageTransition><MovimentacaoEstoqueForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/estoque/movimentacao/:id" element={<ProtectedLayout><PageTransition><MovimentacaoEstoqueForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/inventario" element={<ProtectedLayout><PageTransition><InventarioList /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/inventario/novo" element={<ProtectedLayout><PageTransition><InventarioForm /></PageTransition></ProtectedLayout>} />
           <Route path="/estoque/inventario/:id" element={<ProtectedLayout><PageTransition><InventarioForm /></PageTransition></ProtectedLayout>} />

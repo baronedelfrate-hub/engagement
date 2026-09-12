@@ -51,11 +51,6 @@ function ReservasList() {
       return p ? `Pedido #${id.slice(0,8)}` : 'Manual';
   };
 
-  // Read-only list, no edit/delete action exposed directly here for safety,
-  // as reservations are tied to Orders mostly.
-  const handleEdit = () => {};
-  const handleDelete = () => {};
-
   const filteredItems = items.filter(item =>
     getProdutoName(item.produto_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -81,8 +76,6 @@ function ReservasList() {
       <DataTable
         data={filteredItems}
         columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
         loading={loading}
         emptyMessage="Nenhuma reserva ativa"
       />

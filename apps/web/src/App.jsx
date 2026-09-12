@@ -185,11 +185,8 @@ import BPODashboard from '@/pages/bpo/BPODashboard';
 import BPOClientesList from '@/pages/bpo/BPOClientesList';
 import BPOClientesForm from '@/pages/bpo/BPOClientesForm';
 import ClienteFasesPage from '@/pages/bpo/ClienteFasesPage';
-import BPOClienteFasesPage from '@/pages/bpo/BPOClienteFasesPage';
-import BPOClienteFaseForm from '@/pages/bpo/BPOClienteFaseForm';
 import BPOClienteDetail from '@/pages/bpo/BPOClienteDetail';
 import BPOFaseDetail from '@/pages/bpo/BPOFaseDetail';
-import ClientesBPOPage from '@/pages/bpo/ClientesBPOPage';
 import BPOClientesCadastroList from '@/pages/bpo/BPOClientesCadastroList';
 import BPOClientesCadastroForm from '@/pages/bpo/BPOClientesCadastroForm';
 import DRE from '@/pages/controladoria/DRE';
@@ -296,10 +293,8 @@ const AnimatedRoutes = () => {
           
           <Route path="/operacao/bpo-e5/clientes-bpo" element={<ProtectedLayout><PageTransition><BPOClientesList /></PageTransition></ProtectedLayout>} />
           <Route path="/operacao/bpo-e5/clientes-bpo/novo" element={<ProtectedLayout><PageTransition><BPOClientesForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/operacao/bpo-e5/clientes-bpo/:cliente_id/fases-bpo" element={<ProtectedLayout><PageTransition><BPOClienteFasesPage /></PageTransition></ProtectedLayout>} />
           <Route path="/operacao/bpo-e5/clientes/:cliente_id/fases" element={<ProtectedLayout><PageTransition><ClienteFasesPage /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/clientes/:cliente_id/fases" element={<ProtectedLayout><PageTransition><ClienteFasesPage /></PageTransition></ProtectedLayout>} />
-          <Route path="/operacao/bpo-e5/clientes-bpo/:cliente_id/fases/:fase_id/editar" element={<ProtectedLayout><PageTransition><BPOClienteFaseForm /></PageTransition></ProtectedLayout>} />
 
           <Route path="/cadastros/bancos" element={<ProtectedLayout><PageTransition><BancosList /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/bancos/novo" element={<ProtectedLayout><PageTransition><BancosForm /></PageTransition></ProtectedLayout>} />
@@ -511,7 +506,9 @@ const AnimatedRoutes = () => {
 
           <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><BPODashboard /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><BPOClientesList /></PageTransition></ProtectedLayout>} />
-          <Route path="/clientes-bpo" element={<ProtectedLayout><PageTransition><ClientesBPOPage /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><BPOClienteDetail /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/fase/:faseId" element={<ProtectedLayout><PageTransition><BPOFaseDetail /></PageTransition></ProtectedLayout>} />
+          <Route path="/clientes-bpo" element={<ProtectedLayout><Navigate to="/clientes-bpo/cadastro-clientes" replace /></ProtectedLayout>} />
           <Route path="/clientes-bpo/cadastro-clientes" element={<ProtectedLayout><PageTransition><BPOClientesCadastroList /></PageTransition></ProtectedLayout>} />
           <Route path="/clientes-bpo/cadastro-clientes/novo" element={<ProtectedLayout><PageTransition><BPOClientesCadastroForm /></PageTransition></ProtectedLayout>} />
           <Route path="/clientes-bpo/cadastro-clientes/:id" element={<ProtectedLayout><PageTransition><BPOClientesCadastroForm /></PageTransition></ProtectedLayout>} />

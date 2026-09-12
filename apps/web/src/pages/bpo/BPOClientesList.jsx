@@ -113,7 +113,7 @@ const BPOClientesList = () => {
           data={data}
           columns={columns}
           loading={loading}
-          onEdit={(row) => handleNavigateToFases(row.cliente?.id)} 
+          onEdit={(row) => navigate(`/bpo/cliente/${row.id}`)}
           onDelete={async (id) => {
             if (window.confirm('Tem certeza? Isso apagará todo o histórico BPO deste cliente.')) {
                 await supabase.from('bpo_clientes').delete().eq('id', id);

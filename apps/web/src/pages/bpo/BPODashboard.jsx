@@ -27,25 +27,22 @@ const BPODashboard = () => {
       const { data: allClients } = await supabase
         .from('bpo_clientes')
         .select(`
-            *, 
-            cliente:clientes(nome), 
+            *,
+            cliente:clientes(nome),
             responsavel:users(nome)
         `);
 
-      // Mock calculation of "Current Phase" based on Logic: Earliest non-completed phase or B5
-      // This requires fetching phases status. 
-      // For dashboard performance, usually a view or denormalized field is better.
-      // We will fetch all phases and process in JS for this constrained environment.
-      
-      const { data: allPhases } = await supabase.from('bpo_fases').select('*');
-      
+      // Fase atual real vem de cliente_fases (metodologia BPO E5 -- upload de arquivo por fase,
+      // status calculado automaticamente), chaveada por clientes.id (bpo_clientes.cliente_id).
+      const { data: allPhases } = await supabase.from('cliente_fases').select('cliente_id, fase, status');
+
       const clientPhaseMap = {};
       const phaseCounts = { B1: 0, B2: 0, B3: 0, B4: 0, B5: 0 };
 
       allClients?.forEach(cli => {
-        const phases = allPhases?.filter(p => p.bpo_cliente_id === cli.id).sort((a, b) => a.fase.localeCompare(b.fase));
+        const phases = allPhases?.filter(p => p.cliente_id === cli.cliente_id).sort((a, b) => a.fase.localeCompare(b.fase));
         const current = phases?.find(p => p.status !== 'Concluído') || phases?.[phases.length - 1]; // First pending or last
-        
+
         const phaseName = current?.fase || 'B1';
         clientPhaseMap[cli.id] = phaseName;
         if(phaseCounts[phaseName] !== undefined) phaseCounts[phaseName]++;

@@ -248,9 +248,7 @@ export const erpServices = {
 
   // Vendas
   orcamentos: genericService('orcamentos'),
-  orcamentoItens: genericService('orcamento_itens'),
   pedidosVenda: genericService('pedidos_venda'),
-  pedidosVendaItens: genericService('pedidos_venda_itens'),
 
   // Compras
   pedidosCompra: genericService('pedidos_compra'),

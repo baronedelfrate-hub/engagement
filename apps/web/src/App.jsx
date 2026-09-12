@@ -101,12 +101,8 @@ import TipoProdutoForm from '@/pages/cadastros/TipoProdutoForm';
 
 import OrcamentosList from '@/pages/vendas/OrcamentosList';
 import OrcamentosForm from '@/pages/vendas/OrcamentosForm';
-import OrcamentoItensList from '@/pages/vendas/OrcamentoItensList';
-import OrcamentoItensForm from '@/pages/vendas/OrcamentoItensForm';
 import PedidosList from '@/pages/vendas/PedidosList';
 import PedidosForm from '@/pages/vendas/PedidosForm';
-import PedidosItensList from '@/pages/vendas/PedidosItensList';
-import PedidosItensForm from '@/pages/vendas/PedidosItensForm';
 import RelatoriosVendas from '@/pages/vendas/relatorios/RelatoriosVendas';
 
 import FiscalDashboard from '@/pages/fiscal/FiscalDashboard';

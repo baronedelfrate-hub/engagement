@@ -4,18 +4,24 @@ import { RefreshCcw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ReferenceLine } from 'recharts';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/customSupabaseClient';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 function PontoEquilibrio() {
+  const { company_id } = useAuthContext();
+
   // Base values from DRE (using last month as baseline)
   const [baseValues, setBaseValues] = useState({
     revenue: 0,
     variableCost: 0,
     fixedCost: 0
   });
+  const [hasRealData, setHasRealData] = useState(true);
 
   // Simulation State
   const [simValues, setSimValues] = useState({
@@ -25,8 +31,8 @@ function PontoEquilibrio() {
   });
 
   useEffect(() => {
-    loadBaseData();
-  }, []);
+    if (company_id) loadBaseData();
+  }, [company_id]);
 
   const loadBaseData = async () => {
     // Logic similar to DRE but taking last month
@@ -37,14 +43,15 @@ function PontoEquilibrio() {
     const startStr = startOfMonth.toISOString().split('T')[0];
     const endStr = endOfMonth.toISOString().split('T')[0];
 
-    const [{ data: monthReceitas }, { data: monthDespesas }] = await Promise.all([
-      supabase.from('contas_receber').select('valor_original').gte('data_emissao', startStr).lte('data_emissao', endStr),
-      supabase.from('contas_pagar').select('valor_original, categoria_id').gte('data_emissao', startStr).lte('data_emissao', endStr),
+    const [{ data: monthReceitas }, { data: monthDespesas }, { data: categorias }] = await Promise.all([
+      supabase.from('contas_receber').select('valor_original').eq('company_id', company_id).gte('data_emissao', startStr).lte('data_emissao', endStr),
+      supabase.from('contas_pagar').select('valor_original, categoria_id').eq('company_id', company_id).gte('data_emissao', startStr).lte('data_emissao', endStr),
+      supabase.from('categorias').select('id, grupo_dre').eq('company_id', company_id),
     ]);
 
-    // Nota: DRE_CONFIG (categorias marcadas como custo variável) ainda não existe no schema real,
-    // então por padrão toda despesa entra como custo fixo até essa configuração existir.
-    const variableCatIds = [];
+    // Custo variável = categorias classificadas como "Custo dos Serviços" (categorias.grupo_dre),
+    // já que esse é o custo que escala com o volume vendido. O resto entra como custo fixo.
+    const variableCatIds = (categorias || []).filter(c => c.grupo_dre === 'custo_servico').map(c => c.id);
 
     const revenue = (monthReceitas || []).reduce((acc, curr) => acc + parseFloat(curr.valor_original || 0), 0);
     let variableCost = 0;
@@ -59,18 +66,16 @@ function PontoEquilibrio() {
         }
     });
 
-    // Fallback defaults if zero to allow simulation
-    const finalRevenue = revenue || 100000;
-    const finalVarCost = variableCost || 40000;
-    const finalFixedCost = fixedCost || 30000;
+    const hasData = revenue > 0 || variableCost > 0 || fixedCost > 0;
+    setHasRealData(hasData);
 
-    setBaseValues({ revenue: finalRevenue, variableCost: finalVarCost, fixedCost: finalFixedCost });
-    
+    setBaseValues({ revenue, variableCost, fixedCost });
+
     // Init simulation
     setSimValues({
-        revenue: finalRevenue,
-        variableCostPct: (finalVarCost / finalRevenue) * 100,
-        fixedCost: finalFixedCost
+        revenue,
+        variableCostPct: revenue > 0 ? (variableCost / revenue) * 100 : 0,
+        fixedCost
     });
   };
 
@@ -125,6 +130,16 @@ function PontoEquilibrio() {
             </Button>
         }
       />
+
+      {!hasRealData && (
+        <Alert className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Sem dado real do mês anterior</AlertTitle>
+          <AlertDescription>
+            Não há contas a receber/pagar lançadas no mês anterior para esta empresa. Os valores abaixo começam zerados — digite manualmente para simular um cenário.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Inputs Simulation */}

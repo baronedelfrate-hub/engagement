@@ -80,8 +80,7 @@ function DRE() {
     try {
       console.log('[DRE - Debug] Disparando queries no Supabase para company_id:', currentCompanyId);
       
-      const [resContas, resCat, resReceber, resPagar] = await Promise.all([
-        supabase.from('contas_contabeis').select('*').eq('empresa_id', currentCompanyId),
+      const [resCat, resReceber, resPagar] = await Promise.all([
         supabase.from('categorias').select('*').eq('company_id', currentCompanyId),
         supabase.from('contas_receber').select('*').eq('company_id', currentCompanyId),
         supabase.from('contas_pagar').select('*').eq('company_id', currentCompanyId)
@@ -89,13 +88,11 @@ function DRE() {
 
       if (isTimedOut) return; // Se já deu timeout, não continua
 
-      if (resContas.error) throw new Error(`Erro Contas: ${resContas.error.message}`);
       if (resCat.error) throw new Error(`Erro Categorias: ${resCat.error.message}`);
       if (resReceber.error) throw new Error(`Erro Contas a Receber: ${resReceber.error.message}`);
       if (resPagar.error) throw new Error(`Erro Contas a Pagar: ${resPagar.error.message}`);
 
       console.log('[DRE - Debug] Dados retornados com sucesso:', {
-        contas_contabeis: resContas.data?.length,
         categorias: resCat.data?.length,
         contas_receber: resReceber.data?.length,
         contas_pagar: resPagar.data?.length
@@ -137,21 +134,29 @@ function DRE() {
            totalReceitas += safeParse(r.valor_original);
         });
 
-        // Categorize Despesas
+        // Categorize Despesas: usa a classificação real (categorias.grupo_dre) sempre que a categoria
+        // já foi classificada. Categorias ainda não classificadas caem num match de texto no nome
+        // como aproximação (mesma heurística de antes), só como fallback.
         monthDespesas.forEach(d => {
             const val = safeParse(d.valor_original);
             const category = resCat.data?.find(c => c.id === d.categoria_id);
-            
-            const categoryName = (category?.nome || '').toLowerCase();
-            
-            if (categoryName.includes('custo') || categoryName.includes('serviço') || categoryName.includes('servico')) {
+            const grupo = category?.grupo_dre;
+
+            if (grupo === 'custo_servico') {
                totalCustosServicos += val;
-            } else if (categoryName.includes('despesa') || categoryName.includes('operacional') || categoryName.includes('administrativa')) {
-               totalDespesasOperacionais += val;
-            } else if (categoryName.includes('imposto') || categoryName.includes('juro') || categoryName.includes('multa') || categoryName.includes('nao operacional') || categoryName.includes('não operacional')) {
+            } else if (grupo === 'nao_operacional') {
                totalNaoOperacionais += val;
-            } else {
+            } else if (grupo === 'despesa_operacional') {
                totalDespesasOperacionais += val;
+            } else {
+               const categoryName = (category?.nome || '').toLowerCase();
+               if (categoryName.includes('custo') || categoryName.includes('serviço') || categoryName.includes('servico')) {
+                  totalCustosServicos += val;
+               } else if (categoryName.includes('imposto') || categoryName.includes('juro') || categoryName.includes('multa') || categoryName.includes('nao operacional') || categoryName.includes('não operacional')) {
+                  totalNaoOperacionais += val;
+               } else {
+                  totalDespesasOperacionais += val;
+               }
             }
         });
 

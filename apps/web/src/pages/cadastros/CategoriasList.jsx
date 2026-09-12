@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
+import { Badge } from '@/components/ui/badge';
+
+const GRUPO_DRE_LABELS = {
+  custo_servico: 'Custo dos Serviços',
+  despesa_operacional: 'Despesa Operacional',
+  nao_operacional: 'Não Operacional',
+};
 
 const CategoriasList = () => {
   const navigate = useNavigate();
@@ -24,10 +31,17 @@ const CategoriasList = () => {
       sortable: true,
       cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>
     },
-    { 
-      header: 'Descrição', 
+    {
+      header: 'Descrição',
       accessorKey: 'descricao',
       cell: ({ row }) => <span className="text-foreground">{row.descricao}</span>
+    },
+    {
+      header: 'Grupo no DRE',
+      accessorKey: 'grupo_dre',
+      cell: ({ row }) => row.grupo_dre
+        ? <Badge variant="outline">{GRUPO_DRE_LABELS[row.grupo_dre] || row.grupo_dre}</Badge>
+        : <span className="text-muted-foreground text-xs">Não classificada</span>
     },
   ];
 

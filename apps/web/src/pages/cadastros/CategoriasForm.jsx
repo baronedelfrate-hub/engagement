@@ -37,6 +37,16 @@ const CategoriasForm = () => {
   const fields = [
     { name: 'nome', label: 'Nome da Categoria', required: true, fullWidth: true },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
+    {
+      name: 'grupo_dre',
+      label: 'Grupo no DRE',
+      type: 'select',
+      options: [
+        { label: 'Custo dos Serviços', value: 'custo_servico' },
+        { label: 'Despesa Operacional', value: 'despesa_operacional' },
+        { label: 'Não Operacional', value: 'nao_operacional' },
+      ],
+    },
     { name: 'ativo', label: 'Ativo', type: 'boolean' },
   ];
 

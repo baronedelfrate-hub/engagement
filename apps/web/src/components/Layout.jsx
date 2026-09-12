@@ -109,9 +109,10 @@ const navigation = [
           { name: 'Benefícios', href: '/rh/beneficios' },
           { name: 'Medicina Ocupacional', href: '/rh/medicina-ocupacional' },
           { name: 'Análise de Desempenho', href: '/rh/desempenho' },
-          { name: 'Políticas e Manuais', href: '/rh/descricao-cargos' },
+          { name: 'Políticas e Manuais', href: '/rh/politicas-manuais' },
           { name: 'Descrição de Cargos', href: '/rh/descricao-cargos' },
           { name: 'Organogramas', href: '/rh/organogramas' },
+          { name: 'Convenção Coletiva', href: '/rh/convencao-coletiva' },
         ]
       },
       {

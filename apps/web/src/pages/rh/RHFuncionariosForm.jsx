@@ -35,28 +35,18 @@ const RHFuncionariosForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState([]);
-  const [depts, setDepts] = useState([]);
   const [activeTab, setActiveTab] = useState("pessoais");
-  
+
   const [formData, setFormData] = useState({
     nome_completo: '', cpf: '', rg: '', data_nascimento: '', sexo: '', estado_civil: '',
     rua: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '', cep: '',
     telefone: '', celular: '', email: '',
-    cargo_id: '', departamento_id: '', data_admissao: '', salario: '', tipo_contrato: 'CLT', jornada: '8h', status: 'Ativo'
+    cargo: '', departamento: '', data_admissao: '', salario: '', tipo_contrato: 'CLT', jornada: '8h', status: 'Ativo'
   });
 
   useEffect(() => {
-    loadOptions();
     if (id && id !== 'novo') loadData();
   }, [id]);
-
-  const loadOptions = async () => {
-    const { data: r } = await supabase.from('roles').select('id, nome');
-    setRoles(r || []);
-    const { data: d } = await supabase.from('times').select('id, nome');
-    setDepts(d || []);
-  };
 
   const loadData = async () => {
     setLoading(true);
@@ -191,18 +181,8 @@ const RHFuncionariosForm = () => {
           <TabsContent value="profissional" className="space-y-4 mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Data Admissão *</Label><Input type="date" name="data_admissao" value={formData.data_admissao || ''} onChange={handleChange} required /></div>
-              <div className="space-y-2"><Label>Cargo</Label>
-                <Select value={formData.cargo_id || ''} onValueChange={v => handleSelectChange('cargo_id', v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>{roles.map(r => <SelectItem key={r.id} value={r.id}>{r.nome}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2"><Label>Departamento</Label>
-                <Select value={formData.departamento_id || ''} onValueChange={v => handleSelectChange('departamento_id', v)}>
-                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                  <SelectContent>{depts.map(d => <SelectItem key={d.id} value={d.id}>{d.nome}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+              <div className="space-y-2"><Label>Cargo</Label><Input name="cargo" value={formData.cargo || ''} onChange={handleChange} placeholder="Ex: Analista Financeiro Jr." /></div>
+              <div className="space-y-2"><Label>Departamento</Label><Input name="departamento" value={formData.departamento || ''} onChange={handleChange} placeholder="Ex: Financeiro" /></div>
               <div className="space-y-2"><Label>Salário (R$)</Label><Input type="number" step="0.01" name="salario" value={formData.salario || ''} onChange={handleChange} /></div>
               <div className="space-y-2"><Label>Tipo de Contrato</Label>
                 <Select value={formData.tipo_contrato || 'CLT'} onValueChange={v => handleSelectChange('tipo_contrato', v)}>

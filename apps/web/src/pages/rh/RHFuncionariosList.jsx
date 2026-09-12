@@ -23,7 +23,7 @@ const RHFuncionariosList = () => {
     setLoading(true);
     const { data: res, error } = await supabase
       .from('rh_funcionarios')
-      .select(`*, cargo:roles(nome), departamento:times(nome)`) // Assuming cargo links to roles and dept to times for simplicity, adjust if specific tables exist
+      .select('*')
       .order('nome_completo');
     
     if (res) setData(res);
@@ -33,8 +33,8 @@ const RHFuncionariosList = () => {
   const columns = [
     { header: 'Nome', accessorKey: 'nome_completo' },
     { header: 'CPF', accessorKey: 'cpf', cell: ({ row }) => formatCPF(row.cpf) },
-    { header: 'Cargo', accessorKey: 'cargo.nome', cell: ({ row }) => row.cargo?.nome || '-' },
-    { header: 'Departamento', accessorKey: 'departamento.nome', cell: ({ row }) => row.departamento?.nome || '-' },
+    { header: 'Cargo', accessorKey: 'cargo', cell: ({ row }) => row.cargo || '-' },
+    { header: 'Departamento', accessorKey: 'departamento', cell: ({ row }) => row.departamento || '-' },
     { header: 'Admissão', accessorKey: 'data_admissao', cell: ({ row }) => formatDateOnly(row.data_admissao) },
     { 
       header: 'Status', 

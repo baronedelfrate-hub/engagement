@@ -205,6 +205,7 @@ import RHFuncionarioDetail from '@/pages/rh/RHFuncionarioDetail';
 import RHConvencaoColetiva from '@/pages/rh/RHConvencaoColetiva';
 import RHHoleritesPage from '@/pages/rh/RHHoleritesPage';
 import RHBeneficios from '@/pages/rh/RHBeneficios';
+import RHBeneficiosForm from '@/pages/rh/RHBeneficiosForm';
 import RHMedicinaOcupacional from '@/pages/rh/RHMedicinaOcupacional';
 import RHDesempenho from '@/pages/rh/RHDesempenho';
 import RHPoliticasManuais from '@/pages/rh/RHPoliticasManuais';
@@ -436,6 +437,8 @@ const AnimatedRoutes = () => {
           <Route path="/rh/controle-ponto" element={<ProtectedLayout><PageTransition><RHControlePontoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/rh/folha-pagamento" element={<ProtectedLayout><PageTransition><RHHoleritesPage /></PageTransition></ProtectedLayout>} />
           <Route path="/rh/beneficios" element={<ProtectedLayout><PageTransition><RHBeneficios /></PageTransition></ProtectedLayout>} />
+          <Route path="/rh/beneficios/novo" element={<ProtectedLayout><PageTransition><RHBeneficiosForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/rh/beneficios/:id" element={<ProtectedLayout><PageTransition><RHBeneficiosForm /></PageTransition></ProtectedLayout>} />
           <Route path="/rh/medicina-ocupacional" element={<ProtectedLayout><PageTransition><RHMedicinaOcupacional /></PageTransition></ProtectedLayout>} />
           <Route path="/rh/desempenho" element={<ProtectedLayout><PageTransition><RHDesempenho /></PageTransition></ProtectedLayout>} />
           <Route path="/rh/politicas-manuais" element={<ProtectedLayout><PageTransition><RHPoliticasManuais /></PageTransition></ProtectedLayout>} />

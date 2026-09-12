@@ -31,7 +31,7 @@ const RHFuncionarioDetail = () => {
     setLoading(true);
     const { data } = await supabase
       .from('rh_funcionarios')
-      .select(`*, cargo:roles(nome), departamento:times(nome), centro:centros_custo(nome)`)
+      .select(`*, centro:centros_custo(nome)`)
       .eq('id', id)
       .single();
     
@@ -56,8 +56,8 @@ const RHFuncionarioDetail = () => {
           <CardHeader><CardTitle className="text-2xl">{employee.nome_completo}</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
              <div><p className="text-sm text-muted-foreground">CPF</p><p className="font-medium">{formatCPF(employee.cpf)}</p></div>
-             <div><p className="text-sm text-muted-foreground">Cargo</p><p className="font-medium">{employee.cargo?.nome || '-'}</p></div>
-             <div><p className="text-sm text-muted-foreground">Departamento</p><p className="font-medium">{employee.departamento?.nome || '-'}</p></div>
+             <div><p className="text-sm text-muted-foreground">Cargo</p><p className="font-medium">{employee.cargo || '-'}</p></div>
+             <div><p className="text-sm text-muted-foreground">Departamento</p><p className="font-medium">{employee.departamento || '-'}</p></div>
              <div><p className="text-sm text-muted-foreground">Admissão</p><p className="font-medium">{formatDateOnly(employee.data_admissao)}</p></div>
              <div><p className="text-sm text-muted-foreground">Status</p><p className="font-medium">{employee.status}</p></div>
              <div><p className="text-sm text-muted-foreground">Salário</p><p className="font-medium">R$ {Number(employee.salario || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p></div>

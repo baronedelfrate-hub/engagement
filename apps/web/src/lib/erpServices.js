@@ -276,12 +276,6 @@ export const erpServices = {
   fichasCusto: genericService('fichas_custo'),
   fichasCustoItens: genericService('fichas_custo_itens'),
 
-  // RH
-  funcionarios: genericService('funcionarios'),
-  pontoRegistros: genericService('ponto_registros'),
-  ferias: genericService('ferias'),
-  horasExtras: genericService('horas_extras'),
-  beneficios: genericService('beneficios'),
 
   // Projetos
   projetos: genericService('projetos'),

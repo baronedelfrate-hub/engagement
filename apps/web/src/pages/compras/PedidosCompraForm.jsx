@@ -12,6 +12,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { insertWithCompanyId } from '@/lib/companyUtils';
 import { useToast } from '@/components/ui/use-toast';
 import { AlertTriangle, Loader2 } from 'lucide-react';
+import PedidosCompraItensSection from './components/PedidosCompraItensSection';
 
 function PedidosCompraForm() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ function PedidosCompraForm() {
   const { toast } = useToast();
 
   const [fornecedores, setFornecedores] = useState([]);
+  const [produtos, setProdutos] = useState([]);
+  const [itens, setItens] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -36,15 +39,18 @@ function PedidosCompraForm() {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const { data: fornecedoresData } = await supabase.from('fornecedores').select('id, nome').order('nome');
+        const [{ data: fornecedoresData }, { data: produtosData }] = await Promise.all([
+          supabase.from('fornecedores').select('id, nome').order('nome'),
+          supabase.from('produtos').select('id, nome, sku, preco_custo').order('nome'),
+        ]);
         setFornecedores(fornecedoresData || []);
+        setProdutos(produtosData || []);
 
         if (id) {
-          const { data: pedido, error: pedidoError } = await supabase
-            .from('pedidos_compra')
-            .select('*')
-            .eq('id', id)
-            .single();
+          const [{ data: pedido, error: pedidoError }, { data: itensData }] = await Promise.all([
+            supabase.from('pedidos_compra').select('*').eq('id', id).single(),
+            supabase.from('pedidos_compra_itens').select('*').eq('pedido_id', id),
+          ]);
           if (pedidoError || !pedido) {
             setError('Pedido de compra não encontrado.');
             toast({ title: 'Erro', description: 'Pedido de compra não encontrado.', variant: 'destructive' });
@@ -58,6 +64,7 @@ function PedidosCompraForm() {
               status: pedido.status || 'Aberto',
               observacoes: pedido.observacoes || '',
             });
+            setItens(itensData || []);
           }
         }
       } catch (e) {
@@ -71,10 +78,16 @@ function PedidosCompraForm() {
     loadInitialData();
   }, [id, toast]);
 
+  const totalItens = itens.reduce((sum, i) => sum + (parseFloat(i.valor_total) || 0), 0);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.fornecedor_id) {
       toast({ title: 'Erro', description: 'Selecione um fornecedor.', variant: 'destructive' });
+      return;
+    }
+    if (itens.some(i => !i.produto_id)) {
+      toast({ title: 'Erro', description: 'Selecione um produto em todos os itens, ou remova a linha vazia.', variant: 'destructive' });
       return;
     }
 
@@ -85,20 +98,39 @@ function PedidosCompraForm() {
         fornecedor_id: formData.fornecedor_id,
         data_pedido: formData.data_pedido || null,
         data_entrega: formData.data_entrega || null,
-        valor_total: parseFloat(formData.valor_total) || 0,
+        valor_total: itens.length > 0 ? totalItens : (parseFloat(formData.valor_total) || 0),
         status: formData.status,
         observacoes: formData.observacoes || null,
       };
 
+      let pedidoId = id;
       if (!id) {
-        const { error } = await insertWithCompanyId('pedidos_compra', payload);
+        const { data: created, error } = await insertWithCompanyId('pedidos_compra', payload, { chain: (q) => q.select().single() });
         if (error) throw error;
+        pedidoId = created?.id;
         toast({ title: 'Pedido criado', description: 'O novo pedido de compra foi cadastrado com sucesso.' });
       } else {
         const { error } = await supabase.from('pedidos_compra').update(payload).eq('id', id);
         if (error) throw error;
         toast({ title: 'Pedido atualizado', description: 'Os dados do pedido de compra foram atualizados com sucesso.' });
       }
+
+      if (pedidoId) {
+        await supabase.from('pedidos_compra_itens').delete().eq('pedido_id', pedidoId);
+        if (itens.length > 0) {
+          const itensToInsert = itens.map(i => ({
+            pedido_id: pedidoId,
+            produto_id: i.produto_id,
+            quantidade: parseFloat(i.quantidade) || 0,
+            preco_unitario: parseFloat(i.preco_unitario) || 0,
+            desconto: parseFloat(i.desconto) || 0,
+            valor_total: parseFloat(i.valor_total) || 0,
+          }));
+          const { error: itensError } = await insertWithCompanyId('pedidos_compra_itens', itensToInsert);
+          if (itensError) throw itensError;
+        }
+      }
+
       navigate('/compras/pedidos');
     } catch (error) {
       console.error('[PedidosCompraForm] Erro ao salvar:', error);
@@ -238,15 +270,21 @@ function PedidosCompraForm() {
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.valor_total}
+                    value={itens.length > 0 ? totalItens.toFixed(2) : formData.valor_total}
                     onChange={handleChange}
+                    disabled={itens.length > 0}
                     required
                     className="bg-background text-foreground"
                   />
+                  {itens.length > 0 && (
+                    <p className="text-xs text-muted-foreground">Calculado automaticamente a partir dos itens abaixo.</p>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          <PedidosCompraItensSection itens={itens} setItens={setItens} produtos={produtos} />
 
           <Card>
             <CardContent className="pt-6">

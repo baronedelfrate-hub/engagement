@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Eye, Edit, Trash2, Plus } from 'lucide-react';
 import DataTable from '@/components/DataTable';
 import { Button } from '@/components/ui/button';
@@ -9,8 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import FormularioEntradaManualModal from '@/pages/compras/notas-fiscais/components/FormularioEntradaManualModal';
 import { formatDateOnly } from '@/lib/dateUtils';
 
-const EntradaNotasVisualizacao = () => {
-  const navigate = useNavigate();
+const EntradaNotasVisualizacao = ({ onViewDetails }) => {
   const { toast } = useToast();
   const [notas, setNotas] = useState([]);
   const [fornecedoresMap, setFornecedoresMap] = useState({});
@@ -108,7 +106,7 @@ const EntradaNotasVisualizacao = () => {
       header: 'Ações',
       render: (row) => (
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(`/compras/entrada-notas/${row.id}`)} title="Visualizar Detalhes">
+          <Button variant="ghost" size="icon" onClick={() => onViewDetails?.(row)} title="Visualizar Detalhes">
             <Eye className="h-4 w-4 text-blue-500" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => handleDelete(row.id)} title="Excluir">

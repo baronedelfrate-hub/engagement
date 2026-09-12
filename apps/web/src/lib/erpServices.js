@@ -255,7 +255,6 @@ export const erpServices = {
   // Compras
   pedidosCompra: genericService('pedidos_compra'),
   pedidosCompraItens: genericService('pedidos_compra_itens'),
-  notasFiscaisEntrada: genericService('notas_fiscais_entrada'),
   notasFiscaisItens: genericService('notas_fiscais_itens'),
   entradasEstoque: genericService('entradas_estoque'),
 

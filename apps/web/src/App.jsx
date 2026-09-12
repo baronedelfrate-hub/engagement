@@ -145,8 +145,6 @@ import ParametrosContabeisPage from '@/pages/contabilidade/parametros/Parametros
 
 import PedidosCompraList from '@/pages/compras/PedidosCompraList';
 import PedidosCompraForm from '@/pages/compras/PedidosCompraForm';
-import NotasFiscaisEntradaList from '@/pages/compras/NotasFiscaisEntradaList';
-import NotasFiscaisEntradaForm from '@/pages/compras/NotasFiscaisEntradaForm';
 import EntradaNotasFiscaisPage from '@/pages/compras/notas-fiscais/EntradaNotasFiscaisPage';
 import RelatoriosCompras from '@/pages/compras/relatorios/RelatoriosCompras';
 import EntradaEstoqueList from '@/pages/estoque/EntradaEstoqueList';

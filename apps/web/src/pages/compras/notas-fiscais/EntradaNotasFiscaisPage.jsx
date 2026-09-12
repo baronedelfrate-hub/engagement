@@ -181,7 +181,7 @@ function EntradaNotasFiscaisPage() {
 
             {activeTab === 'lista' && (
                 <div className="flex-1 h-full overflow-y-auto animate-in fade-in duration-300 slide-in-from-right-2">
-                    <EntradaNotasVisualizacao />
+                    <EntradaNotasVisualizacao onViewDetails={handleCardClick} />
                 </div>
             )}
         </div>

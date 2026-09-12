@@ -82,9 +82,7 @@ export default function AdminDashboard() {
       color: 'text-red-500',
       bgColor: 'bg-red-50 dark:bg-red-950/30',
       links: [
-        { name: 'Config. de Segurança', url: '/admin/seguranca' },
-        { name: 'Logs de Auditoria', url: '/admin/logs' },
-        { name: 'Sessões Ativas', url: '/admin/sessoes' }
+        { name: 'Logs de Auditoria', url: '/admin/logs' }
       ]
     },
     {

@@ -32,8 +32,6 @@ import PermissoesForm from '@/pages/admin/permissoes/PermissoesForm';
 import TimesList from '@/pages/admin/times/TimesList';
 import TimesForm from '@/pages/admin/times/TimesForm';
 import LogsAuditoria from '@/pages/admin/auditoria/LogsAuditoria';
-import SessoesAtivas from '@/pages/admin/sessoes/SessoesAtivas';
-import ConfiguracoesSeguracaForm from '@/pages/admin/seguranca/ConfiguracoesSeguracaForm';
 import SettingsTema from '@/pages/admin/SettingsTema';
 import SupabaseSetup from '@/pages/admin/SupabaseSetup';
 import DatabaseTest from '@/pages/admin/DatabaseTest';
@@ -473,8 +471,6 @@ const AnimatedRoutes = () => {
           <Route path="/admin/times/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/times/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/logs" element={<SuperAdminRoute><ProtectedLayout><PageTransition><LogsAuditoria /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/seguranca" element={<SuperAdminRoute><ProtectedLayout><PageTransition><ConfiguracoesSeguracaForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/sessoes" element={<SuperAdminRoute><ProtectedLayout><PageTransition><SessoesAtivas /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/configuracoes/temas" element={<SuperAdminRoute><ProtectedLayout><PageTransition><SettingsTema /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/supabase-setup" element={<SuperAdminRoute><ProtectedLayout><PageTransition><SupabaseSetup /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/database-test" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DatabaseTest /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

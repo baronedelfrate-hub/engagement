@@ -35,7 +35,8 @@ export const listarUsuarios = async () => {
       nome: user.user_metadata?.nome || 'Sem Nome',
       company_id: user.user_metadata?.company_id || null,
       role: user.user_metadata?.role || 'user',
-      banned_until: user.banned_until
+      banned_until: user.banned_until,
+      last_sign_in_at: user.last_sign_in_at
     }));
   } catch (error) {
     console.error('Erro ao listar usuários:', error);

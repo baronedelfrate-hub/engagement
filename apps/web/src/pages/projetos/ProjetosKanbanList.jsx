@@ -135,7 +135,7 @@ export default function ProjetosKanbanList() {
           <Button variant="outline" size="icon" onClick={fetchProjetos} disabled={loading}>
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => navigate('/projetos/novo')}>
+          <Button onClick={() => navigate('/operacao/projeto/novo')}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Projeto
           </Button>

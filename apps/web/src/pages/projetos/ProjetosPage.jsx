@@ -3,36 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useProjectos } from '@/hooks/useProjectos';
 import ProjetosTable from './ProjetosTable';
 import { Button } from '@/components/ui/button';
-import { Plus, RefreshCw, AlertCircle, FolderOpen, Code } from 'lucide-react';
+import { Plus, RefreshCw, AlertCircle, FolderOpen } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { resolveCompanyId } from '@/lib/companyUtils';
 
 export default function ProjetosPage() {
   const navigate = useNavigate();
   const { projetos, loading, error, refetch, deleteProjeto } = useProjectos();
   const [currentCompanyId, setCurrentCompanyId] = useState(null);
-  const [debugLog, setDebugLog] = useState([]);
-
-  const addDebugLog = (msg, data = null) => {
-      setDebugLog(prev => [...prev, { time: new Date().toISOString(), msg, data }]);
-  };
 
   const loadProjects = useCallback(async () => {
-    addDebugLog("Iniciando loadProjects...");
     const cid = await resolveCompanyId(null);
     setCurrentCompanyId(cid);
-    
-    if (cid) {
-      addDebugLog(`Chamando refetch(companyId: ${cid})`);
-      const results = await refetch(cid);
-      addDebugLog(`Dados recebidos do hook`, results);
-    } else {
-      addDebugLog("⚠️ Nenhum company_id resolvido. Chamando refetch() genérico (fallback)");
-      await refetch(null);
-    }
+    await refetch(cid || null);
   }, [refetch]);
 
   useEffect(() => {
@@ -52,36 +37,12 @@ export default function ProjetosPage() {
           <Button variant="outline" size="icon" onClick={refreshProjects} disabled={loading} title="Recarregar">
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => navigate('/projetos/novo')}>
+          <Button onClick={() => navigate('/operacao/projeto/novo')}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Projeto
           </Button>
         </div>
       </div>
-
-      {window.location.hostname === 'localhost' && (
-          <Card className="bg-slate-900 border-border">
-              <CardHeader className="py-3 flex flex-row items-center gap-2">
-                  <Code className="h-4 w-4 text-emerald-400" />
-                  <CardTitle className="text-sm font-mono text-emerald-400">Console de Debug Rápido (ProjetosPage)</CardTitle>
-              </CardHeader>
-              <CardContent className="py-3 h-48 overflow-y-auto">
-                  <div className="space-y-2">
-                      <div className="text-xs text-muted-foreground border-b border-border pb-2 mb-2">
-                          <div><strong>Company ID Atual:</strong> {currentCompanyId || 'NENHUM (Fallback Ativo)'}</div>
-                          <div><strong>LocalStorage:</strong> {localStorage.getItem('company_id')}</div>
-                          <div><strong>Total Projetos em Memória:</strong> {projetos?.length}</div>
-                      </div>
-                      {debugLog.map((log, i) => (
-                          <div key={i} className="text-xs font-mono text-slate-300">
-                              <span className="text-muted-foreground">[{log.time.split('T')[1].substring(0,8)}]</span> {log.msg}
-                              {log.data && <pre className="ml-4 mt-1 text-muted-foreground">{JSON.stringify(log.data, null, 2)}</pre>}
-                          </div>
-                      ))}
-                  </div>
-              </CardContent>
-          </Card>
-      )}
 
       {error && (
         <Alert variant="destructive">
@@ -110,7 +71,7 @@ export default function ProjetosPage() {
           <div className="text-xs text-muted-foreground mb-6 p-2 bg-muted rounded border">
               Debug: company_id usado na busca = {currentCompanyId || 'NENHUM (Busca Global)'}
           </div>
-          <Button onClick={() => navigate('/projetos/novo')}>
+          <Button onClick={() => navigate('/operacao/projeto/novo')}>
             <Plus className="h-4 w-4 mr-2" />
             Criar meu primeiro projeto
           </Button>

@@ -9,35 +9,28 @@ export const useProjectos = () => {
   const { toast } = useToast();
 
   const fetchProjectos = useCallback(async (companyId) => {
-    console.log(`🔍 [useProjectos] fetchProjectos iniciado. company_id recebido:`, companyId);
     setLoading(true);
     setError(null);
-    
+
+    if (!companyId) {
+      setError('Nenhuma empresa associada ao seu usuário.');
+      setProjetos([]);
+      setLoading(false);
+      return [];
+    }
+
     try {
-      let query = supabase
+      const { data, error: err } = await supabase
         .from('projetos')
         .select(`
           *,
           cliente:clientes(nome)
         `)
+        .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
-      if (companyId) {
-          console.log(`📡 [useProjectos] Aplicando filtro .eq('company_id', '${companyId}')`);
-          query = query.eq('company_id', companyId);
-      } else {
-          console.warn(`⚠️ [useProjectos] company_id está vazio! Buscando TODOS os projetos (Fallback inseguro).`);
-      }
+      if (err) throw err;
 
-      console.log(`🔄 [useProjectos] Executando query no Supabase...`);
-      const { data, error: err } = await query;
-
-      if (err) {
-          console.error('❌ [useProjectos] Erro retornado pelo Supabase:', err);
-          throw err;
-      }
-      
-      console.log(`✅ [useProjectos] Sucesso! Projetos encontrados: ${data?.length || 0}`, data);
       setProjetos(data || []);
       return data || [];
     } catch (err) {
@@ -52,13 +45,14 @@ export const useProjectos = () => {
   }, [toast]);
 
   const deleteProjeto = async (id, companyId) => {
+    if (!companyId) return { success: false, error: new Error('Empresa não identificada.') };
     setLoading(true);
     try {
-      const { error: err } = await supabase.from('projetos').delete().eq('id', id);
+      const { error: err } = await supabase.from('projetos').delete().eq('id', id).eq('company_id', companyId);
       if (err) throw err;
-      
+
       toast({ title: 'Sucesso', description: 'Projeto excluído com sucesso!' });
-      if (companyId) fetchProjectos(companyId);
+      fetchProjectos(companyId);
       return { success: true };
     } catch (err) {
       console.error('❌ [useProjectos] Erro ao excluir projeto:', err);

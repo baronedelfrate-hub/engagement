@@ -69,7 +69,7 @@ export default function ProjetosForm() {
                 title: 'Erro', 
                 description: 'Projeto não encontrado.' 
             });
-            navigate('/projetos');
+            navigate('/operacao/projeto');
         } finally {
             setLoading(false);
         }
@@ -160,7 +160,7 @@ export default function ProjetosForm() {
             description: `Projeto ${isEdit ? 'atualizado' : 'criado'} com sucesso.`,
         });
         
-        navigate('/projetos', { replace: true });
+        navigate('/operacao/projeto', { replace: true });
     } catch (err) {
         console.error("❌ [ProjetosForm] Erro fatal capturado no catch:", err);
         
@@ -189,25 +189,6 @@ export default function ProjetosForm() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      
-      {/* Debug Info apenas em localhost */}
-      {window.location.hostname === 'localhost' && (
-          <Card className="bg-slate-900 border-border">
-              <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-mono text-emerald-400">🐛 Debug Info: ProjetosForm</CardTitle>
-              </CardHeader>
-              <CardContent className="py-3">
-                  <pre className="text-xs text-slate-300 overflow-auto whitespace-pre-wrap">
-                      {JSON.stringify({
-                          resolvedCompanyId,
-                          localStorageCompanyId: localStorage.getItem('company_id'),
-                          payloadPreview: { ...formData, company_id: resolvedCompanyId }
-                      }, null, 2)}
-                  </pre>
-              </CardContent>
-          </Card>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{isEdit ? 'Editar Projeto' : 'Novo Projeto'}</CardTitle>
@@ -298,7 +279,7 @@ export default function ProjetosForm() {
             </div>
 
             <div className="flex justify-end gap-4 pt-6 border-t">
-              <Button type="button" variant="outline" onClick={() => navigate('/projetos')} disabled={loading}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => navigate('/operacao/projeto')} disabled={loading}>Cancelar</Button>
               <Button type="submit" disabled={loading || clientSelectState.disabled || !resolvedCompanyId}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEdit ? 'Salvar Alterações' : 'Criar Projeto'}

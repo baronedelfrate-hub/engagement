@@ -288,8 +288,6 @@ export const erpServices = {
 
   // Projetos
   projetos: genericService('projetos'),
-  projetosKanban: genericService('projetos_kanban'),
-  projetosCards: genericService('projetos_cards'),
 
   // F5
   f5Projetos: genericService('f5_projetos'),

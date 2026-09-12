@@ -76,7 +76,7 @@ export default function ProjetosTable({ projetos, loading, onDelete }) {
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => navigate(`/projetos/${projeto.id}`)}>
+                  <Button variant="ghost" size="icon" onClick={() => navigate(`/operacao/projeto/${projeto.id}`)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive/90" onClick={() => {

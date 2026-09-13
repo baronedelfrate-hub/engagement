@@ -142,6 +142,8 @@ const navigation = [
           { name: 'Dashboard', href: '/admin/dashboard' },
           { name: 'Usuários', href: '/admin/usuarios' },
           { name: 'Times', href: '/admin/times' },
+          { name: 'Faturamento', href: '/admin/faturamento' },
+          { name: 'Planos', href: '/admin/planos' },
           { name: 'Logs de Auditoria', href: '/admin/logs' },
           { name: 'Temas', href: '/configuracoes/temas' },
         ],

@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [companyId, setCompanyId] = useState(null);
   const [companyIdSource, setCompanyIdSource] = useState(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   const fetchProfile = async (userId) => {
     try {
@@ -91,6 +92,24 @@ export const AuthProvider = ({ children }) => {
     return resolvedId;
   };
 
+  const fetchSubscriptionStatus = async (resolvedCompanyId) => {
+    if (!resolvedCompanyId) {
+      setSubscriptionStatus(null);
+      return;
+    }
+    try {
+      const { data } = await supabase
+        .from('saas_assinaturas')
+        .select('status')
+        .eq('empresa_id', resolvedCompanyId)
+        .maybeSingle();
+      setSubscriptionStatus(data?.status ?? null);
+    } catch (e) {
+      // Sem assinatura cadastrada (empresa antiga a este modulo) nao deve bloquear ninguem.
+      setSubscriptionStatus(null);
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
@@ -103,6 +122,7 @@ export const AuthProvider = ({ children }) => {
       setProfile(null);
       setCompanyId(null);
       setCompanyIdSource(null);
+      setSubscriptionStatus(null);
       setLoading(false);
     }
   };
@@ -145,7 +165,8 @@ export const AuthProvider = ({ children }) => {
             const p = await fetchProfile(session.user.id);
             if (mounted) {
               setProfile(p);
-              await resolveCompanyId(session.user, p);
+              const resolvedId = await resolveCompanyId(session.user, p);
+              await fetchSubscriptionStatus(resolvedId);
             }
           }
         }
@@ -173,7 +194,8 @@ export const AuthProvider = ({ children }) => {
             const p = await fetchProfile(session.user.id);
             if (mounted) {
               setProfile(p);
-              await resolveCompanyId(session.user, p);
+              const resolvedId = await resolveCompanyId(session.user, p);
+              await fetchSubscriptionStatus(resolvedId);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -183,6 +205,7 @@ export const AuthProvider = ({ children }) => {
           setProfile(null);
           setCompanyId(null);
           setCompanyIdSource(null);
+          setSubscriptionStatus(null);
         } else if (event === 'USER_DELETED' || event === 'TOKEN_REFRESH_FAILED') {
           await logout();
         }
@@ -206,6 +229,8 @@ export const AuthProvider = ({ children }) => {
 
   const getCompanyId = () => companyId;
 
+  const isSuperAdmin = profile?.role === 'superadmin';
+
   const value = {
     user,
     profile,
@@ -213,7 +238,12 @@ export const AuthProvider = ({ children }) => {
     company_id: companyId,
     companyIdSource,
     getCompanyId,
-    isSuperAdmin: profile?.role === 'superadmin',
+    isSuperAdmin,
+    subscriptionStatus,
+    // Superadmin nunca e bloqueado (precisa poder entrar pra corrigir qualquer assinatura, inclusive a propria).
+    // Empresa sem linha em saas_assinaturas (status null) tambem nao e bloqueada -- fail-open, mesmo padrao
+    // ja usado no resto do app pra nao trancar quem nunca configurou o modulo de billing.
+    isBlockedBySubscription: !isSuperAdmin && ['inadimplente', 'cancelada'].includes(subscriptionStatus),
     loading,
     error,
     logout,

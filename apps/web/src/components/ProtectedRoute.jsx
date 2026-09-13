@@ -4,7 +4,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuthContext();
+  const { user, loading, isBlockedBySubscription } = useAuthContext();
   const location = useLocation();
 
   if (loading) {
@@ -25,6 +25,10 @@ export const ProtectedRoute = ({ children }) => {
       return children;
     }
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isBlockedBySubscription && location.pathname !== '/assinatura-bloqueada') {
+    return <Navigate to="/assinatura-bloqueada" replace />;
   }
 
   return children;

@@ -11,6 +11,7 @@ import { SessionValidator } from '@/components/SessionValidator';
 import Layout from '@/components/Layout';
 import Dashboard from '@/pages/Dashboard';
 import Login from '@/pages/Login';
+import AssinaturaBloqueada from '@/pages/AssinaturaBloqueada';
 import Callback from '@/pages/auth/Callback';
 import SetPassword from '@/pages/auth/SetPassword';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -25,6 +26,9 @@ import '@/lib/testExtratoImport';
 import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
+import BillingList from '@/pages/admin/billing/BillingList';
+import PlanosList from '@/pages/admin/billing/PlanosList';
+import PlanosForm from '@/pages/admin/billing/PlanosForm';
 import TimesList from '@/pages/admin/times/TimesList';
 import TimesForm from '@/pages/admin/times/TimesForm';
 import LogsAuditoria from '@/pages/admin/auditoria/LogsAuditoria';
@@ -259,6 +263,7 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/auth/callback" element={<PageTransition><Callback /></PageTransition>} />
           <Route path="/auth/set-password" element={<PageTransition><SetPassword /></PageTransition>} />
+          <Route path="/assinatura-bloqueada" element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
 
           {/* Rotas Protegidas */}
           <Route path="/" element={<ProtectedLayout><PageTransition><Dashboard /></PageTransition></ProtectedLayout>} />
@@ -458,6 +463,11 @@ const AnimatedRoutes = () => {
           <Route path="/admin/times/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/times/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/logs" element={<SuperAdminRoute><ProtectedLayout><PageTransition><LogsAuditoria /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+
+          <Route path="/admin/faturamento" element={<SuperAdminRoute><ProtectedLayout><PageTransition><BillingList /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/planos" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PlanosList /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/planos/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PlanosForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/planos/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PlanosForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/configuracoes/temas" element={<SuperAdminRoute><ProtectedLayout><PageTransition><SettingsTema /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/supabase-setup" element={<SuperAdminRoute><ProtectedLayout><PageTransition><SupabaseSetup /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/database-test" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DatabaseTest /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

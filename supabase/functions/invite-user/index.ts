@@ -15,7 +15,36 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const { email, nome, company_id, role } = await req.json();
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ success: false, error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: { user: caller } } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (!caller) {
+      return new Response(JSON.stringify({ success: false, error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: callerProfile } = await supabase
+      .from('profiles')
+      .select('role, company_id')
+      .eq('id', caller.id)
+      .single();
+    if (!callerProfile || !['admin', 'superadmin'].includes(callerProfile.role)) {
+      return new Response(JSON.stringify({ success: false, error: 'Apenas administradores podem convidar usuários.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { email, nome, role, company_id: requestedCompanyId } = await req.json();
+    // Admin (não-superadmin) só pode convidar para a própria empresa, mesmo que envie outro company_id.
+    const company_id = callerProfile.role === 'superadmin' ? requestedCompanyId : callerProfile.company_id;
 
     if (!email) {
       throw new Error('O e-mail é obrigatório para enviar o convite.');

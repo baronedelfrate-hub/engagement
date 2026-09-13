@@ -69,7 +69,7 @@ export const useCobranca = () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const userProfile = await supabase.from('users').select('company_id').eq('id', user.id).single();
+      const userProfile = await supabase.from('profiles').select('company_id').eq('id', user.id).single();
       const company_id = userProfile.data?.company_id;
 
       const { data: newRecord, error } = await supabase
@@ -115,7 +115,7 @@ export const useCobranca = () => {
   const addCobrancaHistorico = async (cobrancaId, acao, usuarioId) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const userProfile = await supabase.from('users').select('company_id').eq('id', user.id).single();
+      const userProfile = await supabase.from('profiles').select('company_id').eq('id', user.id).single();
       const company_id = userProfile.data?.company_id;
 
       await supabase.from('cobranca_historico').insert({

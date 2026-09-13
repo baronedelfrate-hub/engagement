@@ -11,7 +11,35 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { email, nome, company_id, role, password } = await req.json();
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: { user: caller } } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (!caller) {
+      return new Response(JSON.stringify({ error: 'Não autenticado.' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: callerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('role, company_id')
+      .eq('id', caller.id)
+      .single();
+    if (!callerProfile || !['admin', 'superadmin'].includes(callerProfile.role)) {
+      return new Response(JSON.stringify({ error: 'Apenas administradores podem criar usuários.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { email, nome, role, password, company_id: requestedCompanyId } = await req.json();
+    // Admin (não-superadmin) só pode criar usuário na própria empresa, mesmo que envie outro company_id.
+    const company_id = callerProfile.role === 'superadmin' ? requestedCompanyId : callerProfile.company_id;
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: email,

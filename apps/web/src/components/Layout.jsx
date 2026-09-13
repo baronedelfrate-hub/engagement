@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, TrendingUp, DollarSign, Package, Briefcase, Users, Settings, 
@@ -407,15 +407,18 @@ const flatNavigation = flattenNavigation(navigation);
 const Layout = ({ children }) => {
   let isSuperAdmin = false;
   let profileName = null;
+  let authLogout = null;
   try {
     const auth = useAuthContext();
     isSuperAdmin = auth?.isSuperAdmin ?? false;
     profileName = auth?.profile?.nome || auth?.user?.email || null;
+    authLogout = auth?.logout;
   } catch (e) {}
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
   const location = useLocation();
+  const navigate = useNavigate();
 
   const currentPage = useMemo(() => {
     const matches = flatNavigation.filter(
@@ -481,9 +484,16 @@ const Layout = ({ children }) => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    window.location.href = '/login';
+    // window.location.href fazia um GET real de pagina inteira pra /login -- em hosts sem
+    // rewrite de SPA pra rotas que nao sejam a raiz (ex: Vercel sem vercel.json), isso
+    // devolve 404 do servidor em vez de deixar o React Router assumir a rota client-side.
+    if (authLogout) {
+      await authLogout();
+    } else {
+      await supabase.auth.signOut();
+      localStorage.clear();
+    }
+    navigate('/login', { replace: true });
   };
 
   return (

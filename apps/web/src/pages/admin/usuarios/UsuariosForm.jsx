@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -23,20 +23,23 @@ import {
 
 const UsuariosForm = ({ mode, userId }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  
+  const presetCompanyId = mode === 'create' ? location.state?.presetCompanyId : null;
+  const presetCompanyName = mode === 'create' ? location.state?.presetCompanyName : null;
+
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(mode === 'edit');
   const [companiesLoading, setCompaniesLoading] = useState(true);
   const [companies, setCompanies] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     senha: '',
     confirmar_senha: '',
-    company_id: '',
-    role: '',
+    company_id: presetCompanyId || '',
+    role: presetCompanyId ? 'admin' : '',
     status: 'ativo'
   });
 
@@ -189,13 +192,20 @@ const UsuariosForm = ({ mode, userId }) => {
         </h2>
       </div>
 
+      {presetCompanyName && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+          <UserPlus className="h-4 w-4 shrink-0" />
+          Empresa <strong>{presetCompanyName}</strong> cadastrada. Agora crie o primeiro administrador dela.
+        </div>
+      )}
+
       <form onSubmit={handleSubmit}>
         <Card className="border shadow-sm">
           <CardHeader>
             <CardTitle>Dados do Usuário</CardTitle>
             <CardDescription>
-              {mode === 'create' 
-                ? 'Preencha os dados do usuário. Você pode definir uma senha agora ou deixá-la em branco para enviar um link de convite.' 
+              {mode === 'create'
+                ? 'Preencha os dados do usuário. Você pode definir uma senha agora ou deixá-la em branco para enviar um link de convite.'
                 : 'Atualize os dados de perfil do usuário.'}
             </CardDescription>
           </CardHeader>

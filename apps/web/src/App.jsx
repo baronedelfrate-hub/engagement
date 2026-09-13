@@ -307,7 +307,7 @@ const AnimatedRoutes = () => {
           <Route path="/cadastros/condicao-pagamento/novo" element={<ProtectedLayout><PageTransition><CondicaoPagamentoForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/condicao-pagamento/:id" element={<ProtectedLayout><PageTransition><CondicaoPagamentoForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/empresas" element={<ProtectedLayout><PageTransition><EmpresasList /></PageTransition></ProtectedLayout>} />
-          <Route path="/cadastros/empresas/novo" element={<ProtectedLayout><PageTransition><EmpresasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/cadastros/empresas/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><EmpresasForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/cadastros/empresas/:id" element={<ProtectedLayout><PageTransition><EmpresasForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/fornecedores" element={<ProtectedLayout><PageTransition><FornecedoresList /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/fornecedores/novo" element={<ProtectedLayout><PageTransition><FornecedoresForm /></PageTransition></ProtectedLayout>} />

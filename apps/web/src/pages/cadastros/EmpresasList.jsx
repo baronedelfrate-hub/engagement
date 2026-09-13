@@ -6,10 +6,12 @@ import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 const EmpresasList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isSuperAdmin } = useAuthContext();
   const [empresas, setEmpresas] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -124,9 +126,9 @@ const EmpresasList = () => {
           pagination={{ page: 1, limit: filteredData.length, total: filteredData.length, totalPages: 1 }}
           onPageChange={() => {}}
           onSearch={handleSearch}
-          onCreate={() => navigate('/cadastros/empresas/novo')}
+          onCreate={isSuperAdmin ? () => navigate('/cadastros/empresas/novo') : undefined}
           onEdit={(row) => navigate(`/cadastros/empresas/${row.id}`)}
-          onDelete={handleDelete}
+          onDelete={isSuperAdmin ? handleDelete : undefined}
         />
       </div>
     </>

@@ -95,7 +95,15 @@ const EmpresasForm = () => {
 
       if (result.success) {
           toast({ title: 'Sucesso', description: `Empresa ${isEditing ? 'atualizada' : 'cadastrada'} com sucesso.` });
-          navigate('/cadastros/empresas');
+          if (isEditing) {
+            navigate('/cadastros/empresas');
+          } else {
+            // Empresa nova ainda nao tem nenhum usuario -- manda direto pra criar o primeiro admin dela,
+            // em vez de deixar isso como um segundo passo manual desconectado.
+            navigate('/admin/usuarios/novo', {
+              state: { presetCompanyId: result.data.id, presetCompanyName: formData.razao_social }
+            });
+          }
       } else {
           throw new Error(result.error);
       }

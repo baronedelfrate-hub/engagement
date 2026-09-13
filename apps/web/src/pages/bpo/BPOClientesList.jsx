@@ -26,7 +26,7 @@ const BPOClientesList = () => {
         .select(`
           *,
           cliente:clientes(id, nome),
-          responsavel:users(nome)
+          responsavel:profiles(nome)
         `)
         .order('created_at', { ascending: false });
 

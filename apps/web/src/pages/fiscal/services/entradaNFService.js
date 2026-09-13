@@ -58,7 +58,7 @@ export const entradaNFService = {
       .from('notas_entrada_historico')
       .select(`
         *,
-        users:usuario_id (nome, email)
+        users:usuario_id (nome)
       `)
       .eq('nota_entrada_id', notaId)
       .order('data_mudanca', { ascending: false });

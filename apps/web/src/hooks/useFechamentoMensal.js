@@ -15,7 +15,7 @@ export function useFechamentoMensal() {
         .select(`
           *,
           empresa:empresas(nome_fantasia, razao_social),
-          responsavel:users!fechamentos_contabeis_responsavel_id_fkey(nome)
+          responsavel:profiles!fechamentos_contabeis_responsavel_id_fkey(nome)
         `)
         .order('created_at', { ascending: false });
 
@@ -49,7 +49,7 @@ export function useFechamentoMensal() {
         .select(`
           *,
           empresa:empresas(nome_fantasia, razao_social),
-          responsavel:users!fechamentos_contabeis_responsavel_id_fkey(nome)
+          responsavel:profiles!fechamentos_contabeis_responsavel_id_fkey(nome)
         `)
         .eq('id', id)
         .single();
@@ -297,7 +297,7 @@ export function useFechamentoMensal() {
         .from('fechamento_historico')
         .select(`
           *,
-          usuario:users!fechamento_historico_usuario_id_fkey(nome)
+          usuario:profiles!fechamento_historico_usuario_id_fkey(nome)
         `)
         .eq('fechamento_id', fechamento_id)
         .order('data_acao', { ascending: false });

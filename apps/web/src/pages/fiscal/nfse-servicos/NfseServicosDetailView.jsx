@@ -354,7 +354,7 @@ export default function NfseServicosDetailView() {
                         <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
                           <span>{formatDate(h.data_mudanca, true)}</span>
                           <span>•</span>
-                          <span>{h.users?.nome || 'Sistema'}</span>
+                          <span>{h.profiles?.nome || 'Sistema'}</span>
                         </div>
                       </div>
                     </div>

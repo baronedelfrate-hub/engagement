@@ -43,7 +43,7 @@ export default function ApuracaoImpostosFormPage() {
     try {
       const [emp, usr] = await Promise.all([
         supabase.from('empresas').select('id, razao_social').eq('ativo', true),
-        supabase.from('users').select('id, nome, email').eq('ativo', true)
+        supabase.from('profiles').select('id, nome')
       ]);
       setDropdowns({
         empresas: emp.data || [],

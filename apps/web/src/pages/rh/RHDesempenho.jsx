@@ -21,7 +21,7 @@ const RHDesempenho = () => {
   const fetchEvals = async () => {
     setLoading(true);
     const { data: res } = await supabase.from('rh_avaliacoes_desempenho')
-      .select('*, funcionario:rh_funcionarios(nome_completo), avaliador:users(nome)');
+      .select('*, funcionario:rh_funcionarios(nome_completo), avaliador:profiles(nome)');
     if (res) setData(res);
     setLoading(false);
   };

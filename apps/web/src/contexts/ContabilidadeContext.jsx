@@ -62,9 +62,9 @@ export const ContabilidadeProvider = ({ children }) => {
       // Bases queries
       let nfeQuery = supabase.from('nfe_produtos').select('id, integrado_contabil, created_at, status');
       let nfseQuery = supabase.from('nfse_servicos').select('id, integrado_contabil, created_at, status');
-      let fechamentosQuery = supabase.from('fechamentos_contabeis').select('*, responsavel:users!fechamentos_contabeis_responsavel_id_fkey(nome)');
-      let lancamentosQuery = supabase.from('lancamentos_contabeis').select('*, responsavel:users!lancamentos_contabeis_responsavel_id_fkey(nome)');
-      let conciliacoesQuery = supabase.from('conciliacoes_contabeis').select('*, responsavel:users!conciliacoes_contabeis_responsavel_id_fkey(nome)');
+      let fechamentosQuery = supabase.from('fechamentos_contabeis').select('*, responsavel:profiles!fechamentos_contabeis_responsavel_id_fkey(nome)');
+      let lancamentosQuery = supabase.from('lancamentos_contabeis').select('*, responsavel:profiles!lancamentos_contabeis_responsavel_id_fkey(nome)');
+      let conciliacoesQuery = supabase.from('conciliacoes_contabeis').select('*, responsavel:profiles!conciliacoes_contabeis_responsavel_id_fkey(nome)');
       let docsEnviadosQuery = supabase.from('documentos_contabilidade').select('*').order('data_envio', { ascending: false }).limit(20);
       let apuracoesQuery = supabase.from('apuracao_impostos').select('*').order('created_at', { ascending: false }).limit(20);
       let todosDocsQuery = supabase.from('documentos_contabilidade').select('empresa_id, competencia');

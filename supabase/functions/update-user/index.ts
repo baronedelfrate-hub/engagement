@@ -55,18 +55,29 @@ Deno.serve(async (req) => {
         });
       }
     }
-    // Admin (não-superadmin) não pode mover o usuário para outra empresa.
+    // Admin (não-superadmin) não pode mover o usuário para outra empresa nem promover ninguém a superadmin.
     const company_id = callerProfile.role === 'superadmin' ? requestedCompanyId : callerProfile.company_id;
+    const finalRole = callerProfile.role === 'superadmin' ? role : (role === 'superadmin' ? 'admin' : role);
 
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(user_id, {
       user_metadata: {
         nome,
         company_id,
-        role
+        role: finalRole
       }
     });
 
     if (error) throw error;
+
+    // auth.users so tem trigger de sincronizacao com profiles no INSERT (handle_new_user).
+    // Sem isso aqui, editar um usuario pela UI mudava so a metadata exibida, nunca o profiles.role
+    // que o RLS e o AuthContext realmente leem -- o usuario editado continuava com o acesso antigo.
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({ nome, company_id, role: finalRole })
+      .eq('id', user_id);
+
+    if (profileError) throw profileError;
 
     return new Response(
       JSON.stringify({ user: data.user, error: null }),

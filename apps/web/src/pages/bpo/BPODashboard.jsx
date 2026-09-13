@@ -29,7 +29,7 @@ const BPODashboard = () => {
         .select(`
             *,
             cliente:clientes(nome),
-            responsavel:users(nome)
+            responsavel:profiles(nome)
         `);
 
       // Fase atual real vem de cliente_fases (metodologia BPO E5 -- upload de arquivo por fase,

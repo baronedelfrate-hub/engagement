@@ -45,7 +45,7 @@ export default function PendenciasContabeisList() {
   const loadDependencies = async () => {
     const [{ data: empData }, { data: usrData }] = await Promise.all([
       supabase.from('empresas').select('id, razao_social, nome_fantasia').eq('ativo', true),
-      supabase.from('users').select('id, nome, email')
+      supabase.from('profiles').select('id, nome')
     ]);
     if (empData) setEmpresas(empData);
     if (usrData) setUsers(usrData);

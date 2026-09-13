@@ -25,7 +25,7 @@ export const PendenciasProvider = ({ children }) => {
         .select(`
           *,
           empresa:empresas(id, razao_social, nome_fantasia),
-          responsavel:users!pendencias_contabeis_responsavel_id_fkey(id, nome, email)
+          responsavel:profiles!pendencias_contabeis_responsavel_id_fkey(id, nome)
         `)
         .order('created_at', { ascending: false });
 
@@ -78,7 +78,7 @@ export const PendenciasProvider = ({ children }) => {
         .select(`
           *,
           empresa:empresas(id, razao_social, nome_fantasia),
-          responsavel:users!pendencias_contabeis_responsavel_id_fkey(id, nome, email)
+          responsavel:profiles!pendencias_contabeis_responsavel_id_fkey(id, nome)
         `)
         .eq('id', id)
         .single();
@@ -218,7 +218,7 @@ export const PendenciasProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('pendencias_historico')
-        .select('*, usuario:users(nome, email)')
+        .select('*, usuario:profiles(nome)')
         .eq('pendencia_id', id)
         .order('data_acao', { ascending: false });
       

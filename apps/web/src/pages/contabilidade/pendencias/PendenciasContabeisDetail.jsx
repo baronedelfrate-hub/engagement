@@ -41,7 +41,7 @@ export default function PendenciasContabeisDetail() {
       const [hist, vinc, { data: uData }] = await Promise.all([
         getHistorico(id),
         getVinculos(id),
-        supabase.from('users').select('id, nome, email')
+        supabase.from('profiles').select('id, nome')
       ]);
       setHistorico(hist);
       setVinculos(vinc);

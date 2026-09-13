@@ -70,7 +70,7 @@ export const nfseServicosService = {
 
     const { data: historico } = await supabase
       .from('nfse_servicos_historico')
-      .select('*, users(nome)')
+      .select('*, profiles(nome)')
       .eq('nfse_servico_id', id)
       .order('data_mudanca', { ascending: false });
 

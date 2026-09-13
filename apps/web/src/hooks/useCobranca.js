@@ -16,9 +16,9 @@ export const useCobranca = () => {
         .select(`
           id, contas_receber_id, cliente_id, valor, data_vencimento, fase, responsavel_id, observacoes, ultima_acao, status, created_at, updated_at,
           cliente:clientes(id, nome, email, telefone),
-          responsavel:users(id, nome, email),
+          responsavel:profiles(id, nome),
           historico:cobranca_historico(
-            id, acao, created_at, usuario:users(id, nome)
+            id, acao, created_at, usuario:profiles(id, nome)
           )
         `)
         .order('created_at', { ascending: false });

@@ -25,7 +25,7 @@ const BPOClienteDetail = () => {
     try {
       const { data: clientData, error: clientError } = await supabase
         .from('bpo_clientes')
-        .select(`*, cliente:clientes(nome, cnpj_cpf), responsavel:users(nome)`)
+        .select(`*, cliente:clientes(nome, cnpj_cpf), responsavel:profiles(nome)`)
         .eq('id', id)
         .single();
       

@@ -132,7 +132,7 @@ export function useFiscalDashboard() {
         .from('apuracao_impostos')
         .select(`
           id, tipo_imposto, periodo_referencia, vencimento, valor_apurado, status,
-          users!apuracao_impostos_responsavel_conferencia_id_fkey(nome)
+          profiles!apuracao_impostos_responsavel_conferencia_id_fkey(nome)
         `)
         .neq('status', 'Pago')
         .lt('vencimento', hoje)
@@ -212,7 +212,7 @@ export function useFiscalDashboard() {
         descricao: `${p.tipo_imposto} referente a ${p.periodo_referencia || 'período não informado'}`,
         data: p.vencimento,
         valor: p.valor_apurado,
-        responsavel: p.users?.nome || 'Não atribuído',
+        responsavel: p.profiles?.nome || 'Não atribuído',
         status: 'Atrasado'
       }));
 

@@ -54,7 +54,7 @@ export const manifestacaoNFService = {
       .from('notas_manifestacao_historico')
       .select(`
         *,
-        users (nome)
+        profiles (nome)
       `)
       .eq('manifestacao_id', id)
       .order('created_at', { ascending: false });

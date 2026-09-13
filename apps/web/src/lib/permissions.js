@@ -38,13 +38,11 @@ export const FISCAL_PERMISSIONS = {
 /**
  * Checks if the currently logged-in user has a specific permission.
  *
- * Fail-open by design: se não houver usuário logado, se o usuário for
- * superadmin, ou se ele não tiver nenhuma role/permissão configurada nas
- * tabelas role_permissions/user_roles (hoje vazias para todo mundo),
- * o acesso é liberado — mesmo comportamento "default aberto" que o
- * código antigo já tinha (rodando sobre dados mock que nunca batiam com
- * usuário real). Isso evita trancar usuários reais fora do módulo F5
- * antes de alguém popular a matriz de permissões em F5ConfigPermissions.
+ * Fail-open por design: sem usuário logado, superadmin, ou sem nenhuma role
+ * atribuída em user_roles (hoje vazia pra todo mundo, e sem UI que a popule —
+ * o controle de acesso real do app está em profiles.role, ver [[project_security_findings]]),
+ * o acesso é liberado. Mantido só para não quebrar o módulo F5, que ainda
+ * chama PermissionGate/hasPermission mas nunca teve como ser configurado de fato.
  *
  * @param {string} permissionCode - The permission code to check
  * @returns {Promise<boolean>}

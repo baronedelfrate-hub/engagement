@@ -40,7 +40,7 @@ export default function PendenciasContabeisForm() {
       setLoading(true);
       const [empRes, usrRes] = await Promise.all([
         supabase.from('empresas').select('id, razao_social, nome_fantasia').eq('ativo', true),
-        supabase.from('users').select('id, nome, email')
+        supabase.from('profiles').select('id, nome')
       ]);
       
       if (empRes.data) setEmpresas(empRes.data);

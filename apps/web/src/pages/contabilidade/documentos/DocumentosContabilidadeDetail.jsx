@@ -44,7 +44,7 @@ export default function DocumentosContabilidadeDetail() {
 
       const { data: hist } = await supabase
         .from('documentos_historico')
-        .select('*, users(nome)')
+        .select('*, profiles(nome)')
         .eq('documento_id', id)
         .order('data_acao', { ascending: false });
       
@@ -255,7 +255,7 @@ export default function DocumentosContabilidadeDetail() {
                             {format(new Date(hist.data_acao), 'dd/MM HH:mm')}
                           </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-1">Por: {hist.users?.nome || 'Sistema'}</p>
+                        <p className="text-xs text-muted-foreground mb-1">Por: {hist.profiles?.nome || 'Sistema'}</p>
                         {hist.observacoes && (
                           <p className="text-xs text-muted-foreground italic bg-muted p-2 rounded mt-1">"{hist.observacoes}"</p>
                         )}

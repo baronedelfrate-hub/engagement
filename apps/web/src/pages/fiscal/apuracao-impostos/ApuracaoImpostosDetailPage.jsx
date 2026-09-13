@@ -153,7 +153,7 @@ export default function ApuracaoImpostosDetailPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-muted p-4 rounded-lg border border-border">
                 <div><p className="text-xs text-muted-foreground mb-1">Período</p><p className="text-base font-medium">{data.periodo_referencia}</p></div>
                 <div><p className="text-xs text-muted-foreground mb-1">Vencimento</p><p className="text-base font-medium">{formatDate(data.vencimento)}</p></div>
-                <div className="md:col-span-2 text-right"><p className="text-xs text-muted-foreground mb-1">Responsável</p><p className="text-base font-medium text-foreground">{data.users?.nome || '-'}</p></div>
+                <div className="md:col-span-2 text-right"><p className="text-xs text-muted-foreground mb-1">Responsável</p><p className="text-base font-medium text-foreground">{data.profiles?.nome || '-'}</p></div>
               </div>
 
               <Separator />
@@ -227,7 +227,7 @@ export default function ApuracaoImpostosDetailPage() {
                         <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
                           <span>{formatDate(h.data_mudanca, true)}</span>
                           <span>•</span>
-                          <span>{h.users?.nome || 'Sistema'}</span>
+                          <span>{h.profiles?.nome || 'Sistema'}</span>
                         </div>
                       </div>
                     </div>

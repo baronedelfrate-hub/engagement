@@ -52,7 +52,7 @@ export const nfeService = {
 
     const { data: historico } = await supabase
       .from('nfe_produtos_historico')
-      .select('*, users(nome)')
+      .select('*, profiles(nome)')
       .eq('nfe_produto_id', id)
       .order('data_mudanca', { ascending: false });
 

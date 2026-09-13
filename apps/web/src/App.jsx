@@ -25,10 +25,6 @@ import '@/lib/testExtratoImport';
 import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
-import RolesList from '@/pages/admin/roles/RolesList';
-import RolesForm from '@/pages/admin/roles/RolesForm';
-import PermissoesList from '@/pages/admin/permissoes/PermissoesList';
-import PermissoesForm from '@/pages/admin/permissoes/PermissoesForm';
 import TimesList from '@/pages/admin/times/TimesList';
 import TimesForm from '@/pages/admin/times/TimesForm';
 import LogsAuditoria from '@/pages/admin/auditoria/LogsAuditoria';
@@ -171,7 +167,6 @@ import F5KPIsForm from '@/pages/metodologia-f5/F5KPIsForm';
 import F5ProjetoDetail from '@/pages/metodologia-f5/F5ProjetoDetail';
 import F5EtapaDetail from '@/pages/metodologia-f5/F5EtapaDetail';
 import F5Relatorios from '@/pages/metodologia-f5/F5Relatorios';
-import F5ConfigPermissions from '@/pages/metodologia-f5/F5ConfigPermissions';
 import F5AuditoriaLog from '@/pages/metodologia-f5/F5AuditoriaLog';
 import F1Diagnosis from '@/pages/metodologia-f5/F1Diagnosis';
 import F1DiagnosisSelector from '@/pages/metodologia-f5/F1DiagnosisSelector';
@@ -459,12 +454,6 @@ const AnimatedRoutes = () => {
           <Route path="/admin/usuarios/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="create" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/:userId" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="edit" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           
-          <Route path="/admin/roles" element={<SuperAdminRoute><ProtectedLayout><PageTransition><RolesList /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/roles/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><RolesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/roles/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><RolesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/permissoes" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PermissoesList /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/permissoes/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PermissoesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
-          <Route path="/admin/permissoes/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PermissoesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/times" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesList /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/times/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/times/:id" element={<SuperAdminRoute><ProtectedLayout><PageTransition><TimesForm /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
@@ -501,7 +490,6 @@ const AnimatedRoutes = () => {
           <Route path="/metodologia-f5/entregaveis/novo" element={<ProtectedLayout><PageTransition><F5EntregaveisForm /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/entregaveis/:id" element={<ProtectedLayout><PageTransition><F5EntregaveisForm /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/relatorios" element={<ProtectedLayout><PageTransition><F5Relatorios /></PageTransition></ProtectedLayout>} />
-          <Route path="/metodologia-f5/permissoes" element={<ProtectedLayout><PageTransition><F5ConfigPermissions /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/auditoria" element={<ProtectedLayout><PageTransition><F5AuditoriaLog /></PageTransition></ProtectedLayout>} />
 
           <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><BPODashboard /></PageTransition></ProtectedLayout>} />

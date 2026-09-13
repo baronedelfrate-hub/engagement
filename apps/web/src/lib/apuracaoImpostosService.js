@@ -6,7 +6,7 @@ export const apuracaoImpostosService = {
       .from('apuracao_impostos')
       .select(`
         *,
-        users!apuracao_impostos_responsavel_conferencia_id_fkey(nome),
+        profiles!apuracao_impostos_responsavel_conferencia_id_fkey(nome),
         apuracao_impostos_origem(*)
       `)
       .order('created_at', { ascending: false });
@@ -25,9 +25,9 @@ export const apuracaoImpostosService = {
       .from('apuracao_impostos')
       .select(`
         *,
-        users!apuracao_impostos_responsavel_conferencia_id_fkey(nome),
+        profiles!apuracao_impostos_responsavel_conferencia_id_fkey(nome),
         apuracao_impostos_origem(*),
-        apuracao_impostos_historico(*, users(nome))
+        apuracao_impostos_historico(*, profiles(nome))
       `)
       .eq('id', id)
       .single();

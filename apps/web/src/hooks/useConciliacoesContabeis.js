@@ -14,7 +14,7 @@ export function useConciliacoesContabeis() {
         .select(`
           *,
           empresa:empresas(nome_fantasia, razao_social),
-          responsavel:users!conciliacoes_contabeis_responsavel_id_fkey(nome)
+          responsavel:profiles!conciliacoes_contabeis_responsavel_id_fkey(nome)
         `)
         .order('created_at', { ascending: false });
 

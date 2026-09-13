@@ -33,7 +33,7 @@ export default function FechamentoMensalForm() {
 
   useEffect(() => {
     const loadDependencies = async () => {
-      const { data } = await supabase.from('users').select('id, nome').eq('ativo', true);
+      const { data } = await supabase.from('profiles').select('id, nome');
       if (data) setUsuarios(data);
     };
     loadDependencies();

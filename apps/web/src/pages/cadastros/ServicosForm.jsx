@@ -209,6 +209,12 @@ const ServicosForm = () => {
         ativo: formData.status === 'ativo'
       };
 
+      // Colunas uuid não aceitam string vazia — precisam ser null quando o campo (opcional) não foi preenchido.
+      const uuidFields = ['categoria_id', 'subcategoria_id', 'centro_custo_id', 'fornecedor_id'];
+      uuidFields.forEach((field) => {
+        if (dataToSave[field] === '') dataToSave[field] = null;
+      });
+
       let error;
       if (id) {
         const res = await supabase.from('servicos').update(dataToSave).eq('id', id);

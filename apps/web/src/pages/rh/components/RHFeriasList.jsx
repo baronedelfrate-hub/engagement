@@ -9,8 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { useToast } from '@/components/ui/use-toast';
 
 const RHFeriasList = ({ funcionarioId }) => {
+  const { toast } = useToast();
   const [items, setItems] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ data_inicio: '', data_fim: '', dias_gozados: 0, arquivo_comprovante: '' });
@@ -23,11 +25,21 @@ const RHFeriasList = ({ funcionarioId }) => {
   };
 
   const handleSave = async () => {
-    await insertWithCompanyId('rh_ferias', { 
-        funcionario_id: funcionarioId, 
+    if (!newItem.data_inicio || !newItem.data_fim) {
+      toast({ title: 'Erro', description: 'Informe as datas de início e fim.', variant: 'destructive' });
+      return;
+    }
+    const { error } = await insertWithCompanyId('rh_ferias', {
+        funcionario_id: funcionarioId,
         ...newItem,
-        status: 'Concluída' 
+        arquivo_comprovante: newItem.arquivo_comprovante || null,
+        status: 'Concluída'
     });
+    if (error) {
+      toast({ title: 'Erro', description: error.message || 'Não foi possível registrar as férias.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sucesso', description: 'Férias registradas.' });
     setModalOpen(false);
     fetchItems();
   };

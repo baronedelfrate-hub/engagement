@@ -117,11 +117,15 @@ export const documentosAutoImportService = {
 
   async importImpostos(empresaId, competencia) {
     try {
+      // A competência vem como yyyy-MM, mas a Apuração grava o período como MM/yyyy
+      const [ano, mes] = competencia.split('-');
+      const periodoApuracao = `${mes}/${ano}`;
+
       const { data: impostos, error } = await supabase
         .from('apuracao_impostos')
         .select('*')
         .eq('empresa_id', empresaId)
-        .eq('periodo_referencia', competencia);
+        .eq('periodo_referencia', periodoApuracao);
 
       if (error) throw error;
       if (!impostos || impostos.length === 0) return 0;

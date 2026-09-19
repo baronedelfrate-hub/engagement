@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-function PageHeader({ title, description, action, showBack = false }) {
+function PageHeader({ title, description, action, actions, showBack = false }) {
   const navigate = useNavigate();
+  // Várias telas passam `actions` (plural); aceitar os dois evita o botão sumir em silêncio
+  const acao = action ?? actions;
 
   return (
     <motion.div
@@ -47,14 +49,14 @@ function PageHeader({ title, description, action, showBack = false }) {
             )}
           </div>
         </div>
-        {action && (
-          <motion.div 
+        {acao && (
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
             className="flex-shrink-0"
           >
-            {action}
+            {acao}
           </motion.div>
         )}
       </div>

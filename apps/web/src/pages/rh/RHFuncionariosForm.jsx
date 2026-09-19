@@ -75,14 +75,20 @@ const RHFuncionariosForm = () => {
       return;
     }
 
+    // Datas e números opcionais vazios precisam ir como null (string vazia é rejeitada pelo Postgres)
+    const payload = { ...formData };
+    ['data_nascimento', 'data_demissao', 'salario'].forEach((campo) => {
+      if (payload[campo] === '') payload[campo] = null;
+    });
+
     setLoading(true);
     try {
       if (id && id !== 'novo') {
-        const { error } = await supabase.from('rh_funcionarios').update(formData).eq('id', id);
+        const { error } = await supabase.from('rh_funcionarios').update(payload).eq('id', id);
         if (error) throw error;
         toast({ title: "Sucesso", description: "Funcionário atualizado com sucesso.", variant: "success" });
       } else {
-        const { data, error } = await insertWithCompanyId('rh_funcionarios', formData, {
+        const { data, error } = await insertWithCompanyId('rh_funcionarios', payload, {
           chain: (query) => query.select().single()
         });
         if (error) throw error;

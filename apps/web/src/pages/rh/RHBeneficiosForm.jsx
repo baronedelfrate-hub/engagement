@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
+import { insertWithCompanyId } from '@/lib/companyUtils';
 import CRUDForm from '@/components/CRUDForm';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -38,9 +39,10 @@ const RHBeneficiosForm = () => {
       ativo: formData.ativo,
     };
 
+    // rh_beneficios isola por company_id: o insert precisa levá-lo (sem isso a RLS rejeita)
     const { error } = id
       ? await supabase.from('rh_beneficios').update(payload).eq('id', id)
-      : await supabase.from('rh_beneficios').insert(payload);
+      : await insertWithCompanyId('rh_beneficios', payload);
 
     if (error) {
       toast({ title: 'Erro', description: error.message || 'Não foi possível salvar.', variant: 'destructive' });

@@ -92,17 +92,27 @@ export const entradaNFService = {
       if (existing) throw new Error('Já existe uma nota com este número e série para esta empresa.');
     }
 
+    // notas_entrada isola por empresa_id (não tem coluna company_id)
     const payload = {
       ...notaData,
-      company_id: notaData.company_id ?? notaData.empresa_id,
       updated_at: new Date().toISOString()
     };
 
     const { data, error } = await upsertWithCompanyId('notas_entrada', payload, {
       chain: (query) => query.select().single()
     });
-      
+
     if (error) throw error;
+
+    if (!isUpdate && data?.id) {
+      const { error: histError } = await insertWithCompanyId('notas_entrada_historico', {
+        nota_entrada_id: data.id,
+        status_anterior: null,
+        status_novo: data.status || 'Pendente'
+      });
+      if (histError) console.error('[entradaNFService] Falha ao registrar histórico:', histError);
+    }
+
     return data;
   },
 

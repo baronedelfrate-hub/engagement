@@ -14,7 +14,7 @@ const RHHoleritesPage = () => {
   const [holerites, setHolerites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [funcionarios, setFuncionarios] = useState([]);
-  const [filtroMesAno, setFiltroMesAno] = useState('');
+  const [filtroMesAno, setFiltroMesAno] = useState('all');
   const [filtroFunc, setFiltroFunc] = useState('all');
 
   // Últimos 12 meses, gerados a partir da data atual (em vez de uma lista fixa que ficava desatualizada)
@@ -36,7 +36,7 @@ const RHHoleritesPage = () => {
 
     let query = supabase.from('rh_holerites').select('*, funcionario:rh_funcionarios(nome_completo)').order('created_at', { ascending: false });
     
-    if (filtroMesAno) query = query.eq('mes_ano', filtroMesAno);
+    if (filtroMesAno && filtroMesAno !== 'all') query = query.eq('mes_ano', filtroMesAno);
     if (filtroFunc && filtroFunc !== 'all') query = query.eq('funcionario_id', filtroFunc);
 
     const { data } = await query;
@@ -80,7 +80,7 @@ const RHHoleritesPage = () => {
              <Select value={filtroMesAno} onValueChange={setFiltroMesAno}>
               <SelectTrigger><SelectValue placeholder="Competência (Mês/Ano)" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="all">Todas</SelectItem>
                 {competencias.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>

@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
+import { useToast } from '@/components/ui/use-toast';
 
 const RHHoleritesList = ({ funcionarioId }) => {
+  const { toast } = useToast();
   const [items, setItems] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ mes_ano: '', valor_bruto: '', valor_liquido: '', arquivo_url: '' });
@@ -21,7 +23,22 @@ const RHHoleritesList = ({ funcionarioId }) => {
   };
 
   const handleSave = async () => {
-    await insertWithCompanyId('rh_holerites', { funcionario_id: funcionarioId, ...newItem });
+    if (!newItem.mes_ano) {
+      toast({ title: 'Erro', description: 'Informe a competência (mês/ano).', variant: 'destructive' });
+      return;
+    }
+    const { error } = await insertWithCompanyId('rh_holerites', {
+      funcionario_id: funcionarioId,
+      ...newItem,
+      valor_bruto: newItem.valor_bruto === '' ? null : newItem.valor_bruto,
+      valor_liquido: newItem.valor_liquido === '' ? null : newItem.valor_liquido,
+      arquivo_url: newItem.arquivo_url || null
+    });
+    if (error) {
+      toast({ title: 'Erro', description: error.message || 'Não foi possível registrar o holerite.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sucesso', description: 'Holerite registrado.' });
     setModalOpen(false);
     fetchItems();
   };

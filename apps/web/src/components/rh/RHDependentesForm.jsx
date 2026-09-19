@@ -31,8 +31,14 @@ const RHDependentesForm = ({ funcionarioId }) => {
       return;
     }
     setLoading(true);
-    const { error } = await insertWithCompanyId('rh_dependentes', { ...novo, funcionario_id: funcionarioId });
-    if (!error) {
+    const { error } = await insertWithCompanyId('rh_dependentes', {
+      ...novo,
+      data_nascimento: novo.data_nascimento || null,
+      funcionario_id: funcionarioId
+    });
+    if (error) {
+      toast({ title: "Erro", description: error.message || "Não foi possível adicionar o dependente.", variant: "destructive" });
+    } else {
       toast({ title: "Sucesso", description: "Dependente adicionado" });
       setNovo({ nome: '', parentesco: '', data_nascimento: '' });
       fetchDependentes();

@@ -193,7 +193,8 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
         </Card>
 
         {/* SEÇÃO 2 - CLIENTE E LOCALIZAÇÃO */}
-        <Card className="shadow-sm border-border h-fit overflow-visible">
+        {/* z-20: o Card é um motion.div (cria contexto de empilhamento próprio); sem isso o card seguinte cobre a lista de municípios */}
+        <Card className="shadow-sm border-border h-fit overflow-visible z-20">
           <CardHeader className="py-3 border-b border-border bg-muted/50">
             <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-600" /> 2. Cliente e Localização

@@ -74,6 +74,21 @@ export const resolveCompanyId = async (user) => {
  * Retorna o mesmo formato { data, error } do Supabase, e aceita encadear
  * `.select()` posteriormente através do parâmetro `chain`.
  */
+// Coluna inexistente: o Postgres devolve 42703, mas o PostgREST responde PGRST204
+// ("Could not find the 'company_id' column ... in the schema cache").
+const faltaColunaCompanyId = (error) => {
+  if (!error) return false;
+  if (error.code === '42703') return true;
+  return error.code === 'PGRST204' && /company_id/.test(error.message || '');
+};
+
+// Remove company_id mesmo quando o chamador o enviou explicitamente.
+const semCompanyId = (row) => {
+  if (!row || typeof row !== 'object' || !('company_id' in row)) return row;
+  const { company_id, ...resto } = row;
+  return resto;
+};
+
 export const insertWithCompanyId = async (tableName, payload, { user = null, chain } = {}) => {
   const rows = Array.isArray(payload) ? payload : [payload];
 
@@ -83,7 +98,8 @@ export const insertWithCompanyId = async (tableName, payload, { user = null, cha
     : await resolveCompanyId(user);
 
   const buildRows = (includeCompanyId) => rows.map((row) => {
-    if (includeCompanyId && companyId && row.company_id === undefined) {
+    if (!includeCompanyId) return semCompanyId(row);
+    if (companyId && row.company_id === undefined) {
       return { ...row, company_id: companyId };
     }
     return row;
@@ -98,7 +114,7 @@ export const insertWithCompanyId = async (tableName, payload, { user = null, cha
 
   let result = await runInsert(true);
 
-  if (result.error && result.error.code === '42703') {
+  if (faltaColunaCompanyId(result.error)) {
     console.warn(`⚠️ [${tableName}] Tabela não possui coluna 'company_id'. Tentando novamente sem ela...`);
     result = await runInsert(false);
   }
@@ -117,7 +133,8 @@ export const upsertWithCompanyId = async (tableName, payload, { user = null, cha
     : await resolveCompanyId(user);
 
   const buildRow = (includeCompanyId) => {
-    if (includeCompanyId && companyId && payload.company_id === undefined) {
+    if (!includeCompanyId) return semCompanyId(payload);
+    if (companyId && payload.company_id === undefined) {
       return { ...payload, company_id: companyId };
     }
     return payload;
@@ -131,7 +148,7 @@ export const upsertWithCompanyId = async (tableName, payload, { user = null, cha
 
   let result = await runUpsert(true);
 
-  if (result.error && result.error.code === '42703') {
+  if (faltaColunaCompanyId(result.error)) {
     console.warn(`⚠️ [${tableName}] Tabela não possui coluna 'company_id'. Tentando novamente sem ela...`);
     result = await runUpsert(false);
   }

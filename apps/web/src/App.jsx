@@ -210,6 +210,7 @@ import RHOrganogramas from '@/pages/rh/RHOrganogramas';
 import RHControlePontoPage from '@/pages/rh/RHControlePontoPage';
 
 import ClientePageRouter from '@/pages/bpo/cadastro/ClientePageRouter';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const PageTransition = ({ children }) => {
   return (
@@ -234,10 +235,13 @@ const ContabilidadeContextWrapper = ({ children }) => {
 };
 
 const ProtectedLayout = ({ children }) => {
+  const location = useLocation();
   return (
     <ProtectedRoute>
       <Layout>
-        {children}
+        <ErrorBoundary resetKey={location.pathname}>
+          {children}
+        </ErrorBoundary>
       </Layout>
     </ProtectedRoute>
   );

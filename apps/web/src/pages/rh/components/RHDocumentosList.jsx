@@ -32,20 +32,25 @@ const RHDocumentosList = ({ funcionarioId, tipo }) => {
   };
 
   const handleSave = async () => {
-    if (!newDoc.nome_arquivo || !newDoc.arquivo_url) return;
-    
+    if (!newDoc.nome_arquivo || !newDoc.arquivo_url) {
+      toast({ title: 'Erro', description: 'Informe o nome e envie o arquivo.', variant: 'destructive' });
+      return;
+    }
+
     const { error } = await insertWithCompanyId('rh_documentos', {
       funcionario_id: funcionarioId,
       tipo_documento: tipo,
       ...newDoc
     });
 
-    if (!error) {
-      toast({ title: 'Sucesso', description: 'Documento salvo.' });
-      setModalOpen(false);
-      setNewDoc({ nome_arquivo: '', arquivo_url: '', descricao: '' });
-      fetchDocs();
+    if (error) {
+      toast({ title: 'Erro', description: error.message || 'Não foi possível salvar o documento.', variant: 'destructive' });
+      return;
     }
+    toast({ title: 'Sucesso', description: 'Documento salvo.' });
+    setModalOpen(false);
+    setNewDoc({ nome_arquivo: '', arquivo_url: '', descricao: '' });
+    fetchDocs();
   };
 
   const handleDelete = async (id) => {

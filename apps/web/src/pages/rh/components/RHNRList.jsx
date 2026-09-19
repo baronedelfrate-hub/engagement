@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { calculateExamStatus, getAlertColor } from '@/lib/rhUtils';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { useToast } from '@/components/ui/use-toast';
 
 const RHNRList = ({ funcionarioId }) => {
+  const { toast } = useToast();
   const [items, setItems] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ nr_numero: '', data_validade: '', arquivo_url: '' });
@@ -24,7 +26,21 @@ const RHNRList = ({ funcionarioId }) => {
   };
 
   const handleSave = async () => {
-    await insertWithCompanyId('rh_nr_controle', { funcionario_id: funcionarioId, ...newItem });
+    if (!newItem.nr_numero) {
+      toast({ title: 'Erro', description: 'Informe o número da NR.', variant: 'destructive' });
+      return;
+    }
+    const { error } = await insertWithCompanyId('rh_nr_controle', {
+      funcionario_id: funcionarioId,
+      ...newItem,
+      data_validade: newItem.data_validade || null,
+      arquivo_url: newItem.arquivo_url || null
+    });
+    if (error) {
+      toast({ title: 'Erro', description: error.message || 'Não foi possível registrar a NR.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sucesso', description: 'NR registrada.' });
     setModalOpen(false);
     fetchItems();
   };

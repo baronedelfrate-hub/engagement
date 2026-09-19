@@ -11,8 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { calculateExamStatus, getAlertColor } from '@/lib/rhUtils';
 import RHDocumentUploader from '@/components/RHDocumentUploader';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { useToast } from '@/components/ui/use-toast';
 
 const RHExamesList = ({ funcionarioId }) => {
+  const { toast } = useToast();
   const [items, setItems] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ tipo_exame: 'Admissional', data_exame: '', proxima_data: '', arquivo_url: '' });
@@ -25,8 +27,23 @@ const RHExamesList = ({ funcionarioId }) => {
   };
 
   const handleSave = async () => {
+    if (!newItem.data_exame) {
+      toast({ title: 'Erro', description: 'Informe a data do exame.', variant: 'destructive' });
+      return;
+    }
     const status = calculateExamStatus(newItem.proxima_data);
-    await insertWithCompanyId('rh_exames_ocupacionais', { funcionario_id: funcionarioId, ...newItem, status });
+    const { error } = await insertWithCompanyId('rh_exames_ocupacionais', {
+      funcionario_id: funcionarioId,
+      ...newItem,
+      proxima_data: newItem.proxima_data || null,
+      arquivo_url: newItem.arquivo_url || null,
+      status
+    });
+    if (error) {
+      toast({ title: 'Erro', description: error.message || 'Não foi possível registrar o exame.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Sucesso', description: 'Exame registrado.' });
     setModalOpen(false);
     fetchItems();
   };

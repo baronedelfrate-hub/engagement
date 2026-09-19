@@ -30,7 +30,9 @@ const RHBeneficiariosForm = ({ funcionarioId }) => {
     }
     setLoading(true);
     const { error } = await insertWithCompanyId('rh_beneficiarios', { ...novo, percentual: Number(novo.percentual), funcionario_id: funcionarioId });
-    if (!error) {
+    if (error) {
+      toast({ title: "Erro", description: error.message || "Não foi possível adicionar o beneficiário.", variant: "destructive" });
+    } else {
       toast({ title: "Sucesso", description: "Beneficiário adicionado" });
       setNovo({ nome: '', parentesco: '', percentual: '' });
       fetchBeneficiarios();

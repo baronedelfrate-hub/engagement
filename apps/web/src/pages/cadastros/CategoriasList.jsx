@@ -3,12 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
 import CRUDTable from '@/components/CRUDTable';
 import { Badge } from '@/components/ui/badge';
-
-const GRUPO_DRE_LABELS = {
-  custo_servico: 'Custo dos Serviços',
-  despesa_operacional: 'Despesa Operacional',
-  nao_operacional: 'Não Operacional',
-};
+import { GRUPOS_DRE_LABELS as GRUPO_DRE_LABELS } from '@/lib/planoContas';
 
 const CategoriasList = () => {
   const navigate = useNavigate();
@@ -25,8 +20,14 @@ const CategoriasList = () => {
   useEffect(() => { fetchData(); }, []);
 
   const columns = [
-    { 
-      header: 'Nome', 
+    {
+      header: 'Código',
+      accessorKey: 'codigo',
+      sortable: true,
+      cell: ({ row }) => <span className="text-foreground font-mono text-xs">{row.codigo || '—'}</span>
+    },
+    {
+      header: 'Nome',
       accessorKey: 'nome', 
       sortable: true,
       cell: ({ row }) => <span className="text-foreground font-medium">{row.nome}</span>

@@ -48,7 +48,7 @@ export default function LancamentosContabeisForm() {
       setLoading(true);
       const [empRes, contasRes, ccRes] = await Promise.all([
         supabase.from('empresas').select('id, razao_social, nome_fantasia').eq('ativo', true),
-        supabase.from('contas_contabeis').select('id, codigo, nome').eq('ativa', true).order('codigo'),
+        supabase.from('contas_contabeis').select('id, codigo, nome, empresa_id, analitica').eq('ativa', true).order('codigo'),
         supabase.from('centros_custo').select('id, codigo, nome').eq('ativo', true).order('codigo')
       ]);
       
@@ -75,6 +75,9 @@ export default function LancamentosContabeisForm() {
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  // Só contas analíticas (sintéticas apenas agrupam) e da empresa escolhida
+  const contasDaEmpresa = contas.filter(c => c.analitica !== false && (!formData.empresa_id || c.empresa_id === formData.empresa_id));
 
   const handleDocumentLinked = (doc) => {
     setFormData(prev => ({
@@ -185,20 +188,20 @@ export default function LancamentosContabeisForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted p-4 rounded-lg border border-border">
             <div className="space-y-2">
               <Label className="text-foreground font-semibold text-blue-700 dark:text-blue-400">Conta Débito (D) *</Label>
-              <Select value={formData.conta_debito_id} onValueChange={(v) => handleChange('conta_debito_id', v)}>
+              <Select value={formData.conta_debito_id} onValueChange={(v) => handleChange('conta_debito_id', v)} disabled={!formData.empresa_id}>
                 <SelectTrigger className="bg-background border-blue-200 dark:border-blue-800"><SelectValue placeholder="Selecione Conta a Debitar" /></SelectTrigger>
                 <SelectContent>
-                  {contas.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
+                  {contasDaEmpresa.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label className="text-foreground font-semibold text-emerald-700 dark:text-emerald-400">Conta Crédito (C) *</Label>
-              <Select value={formData.conta_credito_id} onValueChange={(v) => handleChange('conta_credito_id', v)}>
+              <Select value={formData.conta_credito_id} onValueChange={(v) => handleChange('conta_credito_id', v)} disabled={!formData.empresa_id}>
                 <SelectTrigger className="bg-background border-emerald-200 dark:border-emerald-800"><SelectValue placeholder="Selecione Conta a Creditar" /></SelectTrigger>
                 <SelectContent>
-                  {contas.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
+                  {contasDaEmpresa.map(c => <SelectItem key={c.id} value={c.id}>{c.codigo} - {c.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

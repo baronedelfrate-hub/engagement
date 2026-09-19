@@ -33,7 +33,7 @@ export default function VinculacaoFinanceiroContabilTab() {
               <TableRow key={v.id}>
                 <TableCell>{v.tipo_documento}</TableCell>
                 <TableCell>{v.conta_financeira}</TableCell>
-                <TableCell>{data.contas.find(c => c.id === v.conta_contabil_id)?.descricao || '-'}</TableCell>
+                <TableCell>{data.contas.find(c => c.id === v.conta_contabil_id)?.nome || '-'}</TableCell>
                 <TableCell>{data.centrosCusto.find(c => c.id === v.centro_custo_id)?.nome || '-'}</TableCell>
                 <TableCell>
                   <Badge variant={v.ativa ? 'default' : 'secondary'}>{v.ativa ? 'Ativa' : 'Inativa'}</Badge>

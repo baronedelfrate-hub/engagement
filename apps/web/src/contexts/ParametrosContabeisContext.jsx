@@ -1,8 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
+import { compararCodigos, normalizarCodigo } from '@/lib/planoContas';
+import { importarPlano, sincronizarPlanoDaEmpresa } from '@/lib/planoContasService';
 
 const ParametrosContabeisContext = createContext();
+
+// Traduz o erro do banco em uma mensagem que o usuário consegue agir sobre
+const mensagemDeErro = (error, padrao) => {
+  if (error?.code === '42501' || /row-level security/i.test(error?.message || '')) {
+    return 'Sem permissão para gravar aqui. Selecione uma empresa (configurações globais só o superadmin altera).';
+  }
+  if (error?.code === '23503') return 'Este registro está em uso e não pode ser removido. Inative-o em vez de excluir.';
+  if (error?.code === '23505') return 'Já existe um registro com este código.';
+  return error?.message || padrao;
+};
 
 export const useParametrosContabeis = () => {
   const context = useContext(ParametrosContabeisContext);
@@ -29,7 +41,11 @@ export const ParametrosContabeisProvider = ({ children }) => {
   useEffect(() => {
     const fetchEmpresas = async () => {
       const { data: emp } = await supabase.from('empresas').select('id, razao_social').eq('ativo', true);
-      if (emp) setEmpresas(emp);
+      if (emp) {
+        setEmpresas(emp);
+        // Quem enxerga uma única empresa (admin) já começa com ela selecionada: "todas" gravaria sem empresa e seria recusado
+        if (emp.length === 1) setEmpresaId(emp[0].id);
+      }
     };
     fetchEmpresas();
   }, []);
@@ -38,9 +54,13 @@ export const ParametrosContabeisProvider = ({ children }) => {
     setLoading(true);
     try {
       const filter = empresaId !== 'all' ? empresaId : null;
-      
+
+      // Plano único: contas_contabeis (as pc_* antigas ficam sem uso)
+      let consultaContas = supabase.from('contas_contabeis').select('*');
+      if (filter) consultaContas = consultaContas.eq('empresa_id', filter);
+
       const promises = [
-        supabase.from('pc_contas_contabeis').select('*').order('codigo'),
+        consultaContas,
         supabase.from('pc_vinculacoes').select('*'),
         supabase.from('centros_custo').select('*'),
         supabase.from('pc_historicos').select('*').order('codigo'),
@@ -53,7 +73,7 @@ export const ParametrosContabeisProvider = ({ children }) => {
       const results = await Promise.all(promises);
       
       setData({
-        contas: results[0].data || [],
+        contas: (results[0].data || []).slice().sort((a, b) => compararCodigos(a.codigo, b.codigo)),
         vinculacoes: results[1].data || [],
         centrosCusto: results[2].data || [],
         historicos: results[3].data || [],
@@ -88,7 +108,7 @@ export const ParametrosContabeisProvider = ({ children }) => {
       fetchData();
       return true;
     } catch (error) {
-      toast({ title: 'Erro', description: 'Falha ao salvar.', variant: 'destructive' });
+      toast({ title: 'Erro', description: mensagemDeErro(error, 'Falha ao salvar.'), variant: 'destructive' });
       return false;
     }
   };
@@ -100,13 +120,59 @@ export const ParametrosContabeisProvider = ({ children }) => {
       toast({ title: 'Sucesso', description: 'Registro removido.' });
       fetchData();
     } catch (error) {
-      toast({ title: 'Erro', description: 'Falha ao remover.', variant: 'destructive' });
+      toast({ title: 'Erro', description: mensagemDeErro(error, 'Falha ao remover.'), variant: 'destructive' });
     }
+  };
+
+  // Plano de contas: grava em contas_contabeis e reflete no Financeiro (categorias/subcategorias)
+  const saveConta = async (conta) => {
+    if (empresaId === 'all') {
+      toast({ title: 'Selecione a empresa', description: 'O plano de contas pertence a uma empresa.', variant: 'destructive' });
+      return false;
+    }
+    const codigo = normalizarCodigo(conta.codigo || '');
+    if (!codigo || !(conta.nome || '').trim()) {
+      toast({ title: 'Erro', description: 'Informe o código e a descrição da conta.', variant: 'destructive' });
+      return false;
+    }
+    try {
+      const partes = codigo.split('.');
+      const codigoPai = partes.length > 1 ? partes.slice(0, -1).join('.') : null;
+      const pai = codigoPai ? data.contas.find(c => c.codigo === codigoPai) : null;
+      const payload = {
+        empresa_id: empresaId,
+        codigo,
+        nome: conta.nome.trim(),
+        tipo: conta.tipo || null,
+        natureza: conta.natureza || null,
+        analitica: conta.analitica !== false,
+        ativa: conta.ativa !== false,
+        conta_pai_id: pai?.id || null
+      };
+      const res = conta.id
+        ? await supabase.from('contas_contabeis').update(payload).eq('id', conta.id)
+        : await supabase.from('contas_contabeis').insert([payload]);
+      if (res.error) throw res.error;
+      await sincronizarPlanoDaEmpresa(empresaId);
+      toast({ title: 'Sucesso', description: 'Conta salva.' });
+      fetchData();
+      return true;
+    } catch (error) {
+      toast({ title: 'Erro', description: mensagemDeErro(error, 'Falha ao salvar a conta.'), variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const importarPlanoExcel = async (plano) => {
+    if (empresaId === 'all') throw new Error('Selecione a empresa antes de importar.');
+    const resumo = await importarPlano(empresaId, plano);
+    fetchData();
+    return resumo;
   };
 
   return (
     <ParametrosContabeisContext.Provider value={{
-      empresaId, setEmpresaId, empresas, data, loading, fetchData, saveItem, deleteItem
+      empresaId, setEmpresaId, empresas, data, loading, fetchData, saveItem, deleteItem, saveConta, importarPlanoExcel
     }}>
       {children}
     </ParametrosContabeisContext.Provider>

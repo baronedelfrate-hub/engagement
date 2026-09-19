@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
 import CRUDForm from '@/components/CRUDForm';
 import { useToast } from '@/components/ui/use-toast';
+import { GRUPOS_DRE_LABELS } from '@/lib/planoContas';
 
 const CategoriasForm = () => {
   const { id } = useParams();
@@ -23,9 +24,11 @@ const CategoriasForm = () => {
 
   const handleSubmit = async (formData) => {
     setLoading(true);
-    const res = id 
-        ? await erpServices.categorias.update(id, formData) 
-        : await erpServices.categorias.create(formData);
+    // Código vazio vai como null: '' colidiria no índice único (empresa, código) entre categorias sem código
+    const payload = { ...formData, codigo: (formData.codigo || '').trim() || null };
+    const res = id
+        ? await erpServices.categorias.update(id, payload)
+        : await erpServices.categorias.create(payload);
 
     if (res.success) {
       toast({ title: 'Sucesso', description: 'Categoria salva.', variant: 'success' });
@@ -35,17 +38,14 @@ const CategoriasForm = () => {
   };
 
   const fields = [
+    { name: 'codigo', label: 'Código (ex.: 5.1)' },
     { name: 'nome', label: 'Nome da Categoria', required: true, fullWidth: true },
     { name: 'descricao', label: 'Descrição', type: 'textarea', fullWidth: true },
     {
       name: 'grupo_dre',
-      label: 'Grupo no DRE',
+      label: 'Linha na DRE',
       type: 'select',
-      options: [
-        { label: 'Custo dos Serviços', value: 'custo_servico' },
-        { label: 'Despesa Operacional', value: 'despesa_operacional' },
-        { label: 'Não Operacional', value: 'nao_operacional' },
-      ],
+      options: Object.entries(GRUPOS_DRE_LABELS).map(([value, label]) => ({ label, value })),
     },
     { name: 'ativo', label: 'Ativo', type: 'boolean' },
   ];

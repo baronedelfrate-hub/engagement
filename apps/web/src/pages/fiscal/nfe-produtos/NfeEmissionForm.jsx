@@ -157,7 +157,8 @@ export default function NfeEmissionForm() {
       }
     }
 
-    if (['quantidade', 'valor_unitario', 'desconto', 'impostos'].includes(field)) {
+    // produto_id também recalcula: escolher o produto preenche o valor unitário e o total da linha precisa acompanhar
+    if (['produto_id', 'quantidade', 'valor_unitario', 'desconto', 'impostos'].includes(field)) {
       const q = parseFloat(newItems[idx].quantidade) || 0;
       const vu = parseFloat(newItems[idx].valor_unitario) || 0;
       const d = parseFloat(newItems[idx].desconto) || 0;

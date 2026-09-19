@@ -19,3 +19,6 @@ npm-debug.log*
 
 # Misc
 vault/
+
+# Contexto/memória de sessões do Claude (achados internos, não deve ir pro repo público)
+_contexto-sessao-anterior/

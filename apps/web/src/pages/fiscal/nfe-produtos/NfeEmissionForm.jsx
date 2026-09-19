@@ -225,6 +225,25 @@ export default function NfeEmissionForm() {
         valor_total: totals.valor_total
       };
 
+      // FKs opcionais vazias (ou "none" do select) precisam ir como null: string vazia é rejeitada em coluna uuid
+      ['pedido_venda_id', 'condicao_pagamento_id', 'forma_pagamento_id'].forEach((campo) => {
+        if (!payload[campo] || payload[campo] === 'none') payload[campo] = null;
+      });
+
+      // "Auto se vazio": numera em sequência por empresa e série
+      if (!isEdit && !String(payload.numero || '').trim()) {
+        const { data: existentes } = await supabase
+          .from('nfe_produtos')
+          .select('numero')
+          .eq('empresa_id', payload.empresa_id)
+          .eq('serie', payload.serie || '1');
+        const maior = (existentes || []).reduce((max, n) => {
+          const v = parseInt(n.numero, 10);
+          return Number.isNaN(v) ? max : Math.max(max, v);
+        }, 0);
+        payload.numero = String(maior + 1);
+      }
+
       let idToNav;
       if (isEdit) {
         idToNav = await nfeService.updateNfe(id, payload, items, null);

@@ -24,18 +24,19 @@ const RHBeneficiosForm = () => {
   }, [id, toast]);
 
   const handleSubmit = async (formData) => {
-    if (!formData.nome_beneficio || !formData.data_inicio) {
-      toast({ title: 'Erro', description: 'Preencha Nome do Benefício e Data Início.', variant: 'destructive' });
+    // tipo e data_inicio são NOT NULL no banco; o CRUDForm não bloqueia campo obrigatório vazio
+    if (!formData.nome_beneficio || !formData.tipo || !formData.data_inicio) {
+      toast({ title: 'Erro', description: 'Preencha Nome do Benefício, Tipo e Data Início.', variant: 'destructive' });
       return;
     }
 
     setLoading(true);
     const payload = {
       nome_beneficio: formData.nome_beneficio,
-      tipo: formData.tipo || null,
-      valor: formData.valor,
+      tipo: formData.tipo,
+      valor: formData.valor === '' ? null : formData.valor,
       data_inicio: formData.data_inicio,
-      data_fim: formData.data_fim,
+      data_fim: formData.data_fim || null,
       ativo: formData.ativo,
     };
 
@@ -58,6 +59,7 @@ const RHBeneficiosForm = () => {
     {
       name: 'tipo',
       label: 'Tipo',
+      required: true,
       type: 'select',
       options: [
         { label: 'Transporte', value: 'Transporte' },

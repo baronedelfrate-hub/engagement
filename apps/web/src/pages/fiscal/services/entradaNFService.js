@@ -38,7 +38,7 @@ export const entradaNFService = {
       .from('notas_entrada')
       .select(`
         *,
-        fornecedores (nome, cnpj, inscricao_estadual, endereco),
+        fornecedores (nome, cnpj, endereco),
         empresas (razao_social),
         categorias (nome),
         subcategorias (nome),

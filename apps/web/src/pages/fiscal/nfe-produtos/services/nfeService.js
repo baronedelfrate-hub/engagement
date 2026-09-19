@@ -33,7 +33,7 @@ export const nfeService = {
       .from('nfe_produtos')
       .select(`
         *,
-        empresas (razao_social, cnpj, endereco, bairro, cidade, estado),
+        empresas (razao_social, cnpj, logradouro, numero, complemento, bairro, cidade, estado),
         clientes (nome, cnpj_cpf, endereco, bairro, cidade, estado, cep),
         pedidos_venda (numero),
         condicoes_pagamento (nome),

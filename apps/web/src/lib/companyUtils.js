@@ -82,6 +82,9 @@ const faltaColunaCompanyId = (error) => {
   return error.code === 'PGRST204' && /company_id/.test(error.message || '');
 };
 
+// Tabelas já descobertas sem coluna company_id: evita repetir a tentativa que falha (400) a cada gravação.
+const tabelasSemCompanyId = new Set();
+
 // Remove company_id mesmo quando o chamador o enviou explicitamente.
 const semCompanyId = (row) => {
   if (!row || typeof row !== 'object' || !('company_id' in row)) return row;
@@ -112,10 +115,11 @@ export const insertWithCompanyId = async (tableName, payload, { user = null, cha
     return query;
   };
 
-  let result = await runInsert(true);
+  let result = await runInsert(!tabelasSemCompanyId.has(tableName));
 
   if (faltaColunaCompanyId(result.error)) {
     console.warn(`⚠️ [${tableName}] Tabela não possui coluna 'company_id'. Tentando novamente sem ela...`);
+    tabelasSemCompanyId.add(tableName);
     result = await runInsert(false);
   }
 
@@ -146,9 +150,10 @@ export const upsertWithCompanyId = async (tableName, payload, { user = null, cha
     return query;
   };
 
-  let result = await runUpsert(true);
+  let result = await runUpsert(!tabelasSemCompanyId.has(tableName));
 
   if (faltaColunaCompanyId(result.error)) {
+    tabelasSemCompanyId.add(tableName);
     console.warn(`⚠️ [${tableName}] Tabela não possui coluna 'company_id'. Tentando novamente sem ela...`);
     result = await runUpsert(false);
   }

@@ -188,7 +188,7 @@ export default function NfseConfigPage({ empresaId }) {
         onClear={handleClear}
         onDelete={deleteConfig}
         onEdit={() => setIsEditMode(true)}
-        onTestConnection={() => toast({ title: 'Conexão Testada', description: 'Comunicação com o webservice nacional estabelecida com sucesso.' })}
+        onTestConnection={() => toast({ title: 'Teste indisponível', description: 'O teste de conexão com o webservice nacional ainda não foi implementado.', variant: 'destructive' })}
         isValid={isValid && securityChecked}
         isSaving={loading}
         hasConfig={hasConfig}

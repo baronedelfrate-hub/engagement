@@ -63,41 +63,20 @@ export const manifestacaoNFService = {
   },
 
   // Actions
-  consultarSefaz: async (ids) => {
-    // Mocking SEFAZ query
-    const { data: { user } } = await supabase.auth.getUser();
-    for (const id of ids) {
-      const novoSit = Math.random() > 0.3 ? 'XML Disponível' : 'Consultada';
-      
-      const { error } = await supabase
-        .from('notas_manifestacao')
-        .update({ situacao_consulta: novoSit, updated_at: new Date().toISOString() })
-        .eq('id', id);
-        
-      if (!error) {
-        await supabase.from('notas_manifestacao_historico').insert({
-          manifestacao_id: id,
-          acao: 'Consulta SEFAZ',
-          detalhes: `Situação atualizada para ${novoSit}`,
-          usuario_id: user?.id
-        });
-      }
-    }
+  consultarSefaz: async () => {
+    // Não há integração com a SEFAZ configurada. Antes isto sorteava uma situação ao acaso e gravava como se fosse a resposta da SEFAZ.
+    throw new Error('A consulta à SEFAZ ainda não está configurada. Nenhuma situação foi alterada.');
   },
 
   manifestar: async (id, status, justificativa = '') => {
     const { data: { user } } = await supabase.auth.getUser();
-    
-    // Auto-update to XML Disponível if Confirmação (mock behavior)
-    let extraUpdates = {};
-    if (status === 'Confirmação' || status === 'Ciência') extraUpdates.situacao_consulta = 'XML Disponível';
 
+    // Registro interno: a manifestação NÃO é transmitida à SEFAZ (sem integração). Fica claro no histórico.
     const { error } = await supabase
       .from('notas_manifestacao')
-      .update({ 
-        status_manifestacao: status, 
-        ...extraUpdates,
-        updated_at: new Date().toISOString() 
+      .update({
+        status_manifestacao: status,
+        updated_at: new Date().toISOString()
       })
       .eq('id', id);
 
@@ -105,8 +84,8 @@ export const manifestacaoNFService = {
 
     await supabase.from('notas_manifestacao_historico').insert({
       manifestacao_id: id,
-      acao: 'Manifestação do Destinatário',
-      detalhes: `Manifestação registrada: ${status}${justificativa ? ` - Justificativa: ${justificativa}` : ''}`,
+      acao: 'Manifestação do Destinatário (registro interno, não transmitida à SEFAZ)',
+      detalhes: `Manifestação registrada no sistema: ${status}${justificativa ? ` - Justificativa: ${justificativa}` : ''}`,
       usuario_id: user?.id
     });
   },

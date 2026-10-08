@@ -194,19 +194,13 @@ export function useParametrosFiscais(empresaId) {
   };
 
   const testConnection = async () => {
-    setLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        setLoading(false);
-        const success = Math.random() > 0.3;
-        if (success) {
-          toast({ title: 'Sucesso', description: 'Conexão com integrador estabelecida.' });
-        } else {
-          toast({ title: 'Erro', description: 'Falha na conexão com integrador. Verifique credenciais.', variant: 'destructive' });
-        }
-        resolve(success);
-      }, 1500);
+    // Não existe teste real de conexão com o integrador; antes o resultado (sucesso/erro) era sorteado.
+    toast({
+      title: 'Teste indisponível',
+      description: 'O teste de conexão com o integrador ainda não foi implementado. Salve as credenciais e valide com uma emissão de homologação.',
+      variant: 'destructive'
     });
+    return false;
   };
 
   return {

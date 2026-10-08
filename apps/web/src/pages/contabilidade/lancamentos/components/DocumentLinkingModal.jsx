@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/customSupabaseClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,19 +10,37 @@ export default function DocumentLinkingModal({ open, onOpenChange, onLink }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('nf');
 
-  const mockDocuments = [
-    { id: 'NF-1020', tipo: 'nf', numero: '1020', fornecedor: 'Tech Corp', valor: 1500.00, data: '2023-10-15' },
-    { id: 'NF-1021', tipo: 'nf', numero: '1021', fornecedor: 'Office Supplies', valor: 350.50, data: '2023-10-16' },
-    { id: 'PAG-550', tipo: 'pagamento', numero: '550', fornecedor: 'Tech Corp', valor: 1500.00, data: '2023-10-20' },
-    { id: 'REC-900', tipo: 'recebimento', numero: '900', cliente: 'Acme LLC', valor: 5000.00, data: '2023-10-21' },
-    { id: 'FOLHA-10', tipo: 'folha', numero: 'Out/2023', descricao: 'Folha Salarial', valor: 25000.00, data: '2023-10-31' },
-  ];
+  const [baixas, setBaixas] = useState([]);
 
-  const filteredDocs = mockDocuments.filter(d => 
-    d.tipo === activeTab && 
-    (d.numero.includes(searchTerm) || (d.fornecedor && d.fornecedor.toLowerCase().includes(searchTerm.toLowerCase())))
+  // Pagamentos e recebimentos reais: as baixas dos títulos. NFs e folha ainda não têm origem para vincular aqui.
+  useEffect(() => {
+    if (!open) return;
+    supabase
+      .from('movimentacao_baixas')
+      .select('id, valor_baixa, data_baixa, movimentacao:movimentacao_financeira(tipo, numero_titulo, cliente:clientes(nome), fornecedor:fornecedores(nome))')
+      .order('data_baixa', { ascending: false })
+      .limit(300)
+      .then(({ data }) => {
+        setBaixas((data || []).map((b) => {
+          const pagar = b.movimentacao?.tipo === 'pagar';
+          return {
+            id: b.id,
+            tipo: pagar ? 'pagamento' : 'recebimento',
+            numero: b.movimentacao?.numero_titulo || '',
+            fornecedor: pagar ? (b.movimentacao?.fornecedor?.nome || 'Sem fornecedor') : undefined,
+            cliente: pagar ? undefined : (b.movimentacao?.cliente?.nome || 'Sem cliente'),
+            valor: Number(b.valor_baixa || 0),
+            data: b.data_baixa ? b.data_baixa.split('-').reverse().join('/') : ''
+          };
+        }));
+      });
+  }, [open]);
+
+  const termo = searchTerm.toLowerCase();
+  const filteredDocs = baixas.filter((d) =>
+    d.tipo === activeTab &&
+    (d.numero.toLowerCase().includes(termo) || (d.fornecedor || d.cliente || '').toLowerCase().includes(termo))
   );
-
   const handleSelect = (doc) => {
     onLink(doc);
     onOpenChange(false);
@@ -60,7 +79,7 @@ export default function DocumentLinkingModal({ open, onOpenChange, onLink }) {
           <div className="border border-border rounded-md overflow-hidden max-h-[300px] overflow-y-auto">
             {filteredDocs.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground text-sm">
-                Nenhum documento encontrado.
+                {activeTab === 'nf' || activeTab === 'folha' ? 'Ainda não há documentos desta origem para vincular aqui.' : 'Nenhum documento encontrado.'}
               </div>
             ) : (
               <table className="w-full text-sm text-left">

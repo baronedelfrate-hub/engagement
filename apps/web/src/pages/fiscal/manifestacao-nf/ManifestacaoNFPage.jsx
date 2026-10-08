@@ -62,14 +62,12 @@ export default function ManifestacaoNFPage() {
   };
 
   const handleSyncSefaz = async () => {
-    setIsRefreshing(true);
-    // Mock SEFAZ Sync. It would fetch from an API and create new records in notas_manifestacao
-    toast({ title: 'Sincronização', description: 'Consultando novas notas na SEFAZ...' });
-    setTimeout(() => {
-      toast({ title: 'Sucesso', description: 'Sincronização concluída. 0 novas notas encontradas.' });
-      setIsRefreshing(false);
-      loadData();
-    }, 2000);
+    // Sem integração com a SEFAZ: antes mostrava "0 novas notas encontradas" como se tivesse consultado.
+    toast({
+      title: 'Integração não configurada',
+      description: 'A sincronização com a SEFAZ ainda não está disponível. Nenhuma consulta foi feita.',
+      variant: 'destructive'
+    });
   };
 
   return (

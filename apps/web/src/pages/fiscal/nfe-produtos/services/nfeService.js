@@ -160,27 +160,9 @@ export const nfeService = {
     });
   },
   
-  emitirSefaz: async (id, user) => {
-    const { data: oldNfe } = await supabase.from('nfe_produtos').select('status').eq('id', id).single();
-
-    // Mock SEFAZ emission
-    const { error } = await supabase
-      .from('nfe_produtos')
-      .update({ 
-        status: 'Emitida',
-        protocolo: `PROT${Date.now()}`,
-        autorizacao: `AUT${Date.now()}`,
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', id);
-
-    if (error) throw error;
-
-    await supabase.from('nfe_produtos_historico').insert({
-      nfe_produto_id: id,
-      status_anterior: oldNfe.status,
-      status_novo: 'Emitida',
-      usuario_id: user?.id
-    });
+  emitirSefaz: async () => {
+    // Não há integração com a SEFAZ configurada. Antes isto marcava a nota como "Emitida" com protocolo inventado,
+    // o que parecia uma emissão real. Agora a nota não muda de status.
+    throw new Error('A transmissão para a SEFAZ ainda não está configurada. Esta NF-e NÃO foi emitida.');
   }
 };

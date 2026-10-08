@@ -3,15 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Download, Printer, RefreshCw, Upload, FileSpreadsheet } from 'lucide-react';
+import { Download, Printer, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { useDREBalancete } from '@/contexts/DREBalanceteContext';
-import { useToast } from '@/components/ui/use-toast';
-import { insertSampleData } from '@/lib/dreBalanceteSeed';
 
 export default function DREBalanceteActions() {
-  const { exportToExcel, refreshData, loading, filters } = useDREBalancete();
-  const { toast } = useToast();
-  
+  const { exportToExcel, refreshData, loading } = useDREBalancete();
+
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportType, setExportType] = useState('DRE');
 
@@ -22,21 +19,6 @@ export default function DREBalanceteActions() {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handleSeedData = async () => {
-    if (!filters.empresa_id || filters.empresa_id === 'all') {
-      toast({ title: 'Aviso', description: 'Selecione uma empresa primeiro para gerar dados.', variant: 'destructive' });
-      return;
-    }
-    toast({ title: 'Gerando Dados', description: 'Inserindo dados de exemplo...' });
-    const success = await insertSampleData(filters.empresa_id, filters.competencia);
-    if (success) {
-      toast({ title: 'Sucesso', description: 'Dados de exemplo gerados!' });
-      refreshData();
-    } else {
-      toast({ title: 'Erro', description: 'Falha ao gerar dados.', variant: 'destructive' });
-    }
   };
 
   return (
@@ -51,10 +33,6 @@ export default function DREBalanceteActions() {
 
       <Button variant="outline" className="bg-background" onClick={refreshData} disabled={loading}>
         <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Atualizar Dados
-      </Button>
-
-      <Button variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50 ml-auto" onClick={handleSeedData}>
-        <Upload className="w-4 h-4 mr-2" /> Inserir Dados Exemplo
       </Button>
 
       {/* EXPORT MODAL */}

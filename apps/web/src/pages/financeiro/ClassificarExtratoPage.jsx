@@ -10,7 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Upload, Tags } from 'lucide-react';
+import { Loader2, Upload, Tags, FilePlus2 } from 'lucide-react';
+import GerarMovimentacoesDialog from './components/GerarMovimentacoesDialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
 import { carregarCatalogo, listarExtrato, classificarLinhas } from '@/services/extratoAsaasService';
@@ -37,6 +38,7 @@ const ClassificarExtratoPage = () => {
   const [dialog, setDialog] = useState(false);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [gerarOpen, setGerarOpen] = useState(false);
 
   const carregar = async () => {
     if (!company_id) { setLoading(false); return; }
@@ -144,7 +146,12 @@ const ClassificarExtratoPage = () => {
       <PageHeader
         title="Classificar Extrato"
         description="Defina categoria, subcategoria, centro de custo e cliente. Ao criar uma regra, as próximas importações já vêm classificadas."
-        actions={<Button variant="outline" onClick={() => navigate('/financeiro/importar-extrato')}><Upload className="mr-2 h-4 w-4" /> Importar extrato</Button>}
+        actions={(
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setGerarOpen(true)}><FilePlus2 className="mr-2 h-4 w-4" /> Gerar movimentações</Button>
+            <Button variant="outline" onClick={() => navigate('/financeiro/importar-extrato')}><Upload className="mr-2 h-4 w-4" /> Importar extrato</Button>
+          </div>
+        )}
       />
 
       <div className="flex flex-wrap gap-3 items-end">
@@ -221,6 +228,8 @@ const ClassificarExtratoPage = () => {
         </div>
       </div>
       {filtradas.length > LIMITE_TELA && <p className="text-xs text-muted-foreground">Mostrando {LIMITE_TELA} de {filtradas.length}. Use os filtros para ver o restante.</p>}
+
+      <GerarMovimentacoesDialog open={gerarOpen} onOpenChange={setGerarOpen} companyId={company_id} userId={user?.id} onGerado={() => navigate('/movimentacao-financeira')} />
 
       <Dialog open={dialog} onOpenChange={setDialog}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">

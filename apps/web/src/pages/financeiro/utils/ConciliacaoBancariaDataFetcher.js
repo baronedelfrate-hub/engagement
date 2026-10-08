@@ -61,6 +61,11 @@ export const fetchConciliacaoData = async (filters) => {
       queryExtrato = queryExtrato.lte('data_transacao', dataFim);
     }
 
+    // as baixas da Movimentação podem passar de mil: filtra o período no servidor
+    const inicioPeriodo = bankInfo.data_saldo_inicial || dataInicio;
+    if (inicioPeriodo) queryMov = queryMov.gte('data_baixa', inicioPeriodo);
+    if (dataFim) queryMov = queryMov.lte('data_baixa', dataFim);
+
     const [pagarRes, receberRes, extratoRes, movRes] = await Promise.all([queryPagar, queryReceber, queryExtrato, queryMov]);
 
     if (movRes.error) {

@@ -14,6 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import MovimentacaoDetailModal from './components/MovimentacaoDetailModal';
 import BaixaMovimentacaoModal from './components/BaixaMovimentacaoModal';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { buscarTudo } from '@/services/extratoAsaasService';
+
+const POR_PAGINA = 50;
 
 const saldoEmAberto = (row) => {
   const abatido = (row.baixas || []).reduce(
@@ -35,6 +38,7 @@ const MovimentacaoFinanceiraPage = () => {
   const [modalState, setModalState] = useState({ open: false, id: null, mode: 'view' });
   
   const [baixaId, setBaixaId] = useState(null);
+  const [pagina, setPagina] = useState(1);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('Todos');
@@ -63,41 +67,35 @@ const MovimentacaoFinanceiraPage = () => {
     console.log(`[MovimentacaoFinanceiraPage] Executando query para empresa: ${company_id}`);
 
     try {
-      let query = supabase
-        .from('movimentacao_financeira')
-        .select(`
-          id,
-          numero_titulo,
-          tipo,
-          valor_total,
-          data_vencimento,
-          status,
-          cliente:clientes(nome),
-          fornecedor:fornecedores(nome),
-          baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto, data_baixa)
-        `)
-        .eq('company_id', company_id)
-        .order('data_vencimento', { ascending: true });
+      // lê em páginas de 1000 (limite do Supabase por consulta) para não cortar a lista
+      const result = await buscarTudo(() => {
+        let query = supabase
+          .from('movimentacao_financeira')
+          .select(`
+            id,
+            numero_titulo,
+            tipo,
+            valor_total,
+            data_vencimento,
+            status,
+            cliente:clientes(nome),
+            fornecedor:fornecedores(nome),
+            baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto, data_baixa)
+          `)
+          .eq('company_id', company_id)
+          .order('data_vencimento', { ascending: true })
+          .order('id', { ascending: true });
 
-      if (filtroTipo !== 'Todos') {
-        query = query.eq('tipo', filtroTipo);
-      }
-      if (filtroStatus !== 'Todos') {
-        query = query.eq('status', filtroStatus);
-      }
-      if (dateStart) {
-        query = query.gte('data_vencimento', dateStart);
-      }
-      if (dateEnd) {
-        query = query.lte('data_vencimento', dateEnd);
-      }
+        if (filtroTipo !== 'Todos') query = query.eq('tipo', filtroTipo);
+        if (filtroStatus !== 'Todos') query = query.eq('status', filtroStatus);
+        if (dateStart) query = query.gte('data_vencimento', dateStart);
+        if (dateEnd) query = query.lte('data_vencimento', dateEnd);
+        return query;
+      });
 
-      const { data: result, error: fetchError } = await query;
-
-      if (fetchError) throw fetchError;
-      
-      console.log(`[MovimentacaoFinanceiraPage] Query finalizada. ${result?.length || 0} registros retornados.`);
-      setData(result || []);
+      console.log(`[MovimentacaoFinanceiraPage] Query finalizada. ${result.length} registros retornados.`);
+      setData(result);
+      setPagina(1);
     } catch (err) {
       console.error('[MovimentacaoFinanceiraPage] Erro ao carregar movimentações:', err);
       setError(err.message);
@@ -175,7 +173,7 @@ const MovimentacaoFinanceiraPage = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setPagina(1); }}
                 placeholder="Buscar por número ou entidade..."
                 className="pl-9 bg-background border-border text-foreground"
               />
@@ -266,7 +264,7 @@ const MovimentacaoFinanceiraPage = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredData.map((row) => (
+                    filteredData.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((row) => (
                       <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                         <td className="px-6 py-4 font-mono text-foreground">{row.numero_titulo}</td>
                         <td className="px-6 py-4">
@@ -336,6 +334,15 @@ const MovimentacaoFinanceiraPage = () => {
                 </tbody>
               </table>
             </div>
+            {filteredData.length > POR_PAGINA && (
+              <div className="flex items-center justify-between px-4 py-3 border-t border-border text-sm text-muted-foreground">
+                <span>{filteredData.length} títulos · página {pagina} de {Math.ceil(filteredData.length / POR_PAGINA)}</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" disabled={pagina === 1} onClick={() => setPagina((p) => p - 1)}>Anterior</Button>
+                  <Button variant="outline" size="sm" disabled={pagina >= Math.ceil(filteredData.length / POR_PAGINA)} onClick={() => setPagina((p) => p + 1)}>Próxima</Button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

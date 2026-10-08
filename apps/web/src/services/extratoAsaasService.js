@@ -134,6 +134,100 @@ export const salvarImportacao = async ({ companyId, bancoId, linhas, regrasNovas
   };
 };
 
+// ---- Gerar movimentações financeiras (títulos + baixas) a partir do extrato classificado ----
+
+const CAMPOS_EXTRATO = 'id, banco_id, data_transacao, descricao, valor, tipo_norm, numero_documento, nota_fiscal, categoria_id, subcategoria_id, centro_custo_id, cliente_nome';
+
+// Lançamentos classificados que ainda não têm baixa ligada, mais os cadastros necessários para casar nomes.
+export const carregarBaseGeracao = async (companyId) => {
+  const [extrato, ligadas, clientes, fornecedores, categorias] = await Promise.all([
+    buscarTudo(() => supabase.from('extrato_bancario').select(CAMPOS_EXTRATO).eq('company_id', companyId).not('categoria_id', 'is', null).order('data_transacao').order('id')),
+    buscarTudo(() => supabase.from('movimentacao_baixas').select('id, extrato_bancario_id').eq('company_id', companyId).not('extrato_bancario_id', 'is', null).order('id')),
+    buscarTudo(() => supabase.from('clientes').select('id, nome').eq('company_id', companyId).order('id')),
+    buscarTudo(() => supabase.from('fornecedores').select('id, nome').eq('company_id', companyId).order('id')),
+    buscarTudo(() => supabase.from('categorias').select('id, grupo_dre').eq('company_id', companyId).order('id'))
+  ]);
+  const jaLigados = new Set(ligadas.map((b) => b.extrato_bancario_id));
+  return {
+    pendentes: extrato.filter((l) => !jaLigados.has(l.id)),
+    totalClassificados: extrato.length,
+    clientes,
+    fornecedores,
+    categoriasPorId: new Map(categorias.map((c) => [c.id, c]))
+  };
+};
+
+export const gerarMovimentacoes = async ({ companyId, titulos, userId }) => {
+  const numero = (t) => `EXT-${t.linha.numero_documento}`;
+  const existentes = new Map();
+  for (const lote of lotes(titulos.map(numero), 150)) {
+    const { data, error } = await supabase.from('movimentacao_financeira').select('id, numero_titulo').eq('company_id', companyId).in('numero_titulo', lote);
+    if (error) throw error;
+    (data || []).forEach((r) => existentes.set(r.numero_titulo, r.id));
+  }
+
+  // 1) títulos (já pagos) — os que existirem de uma tentativa anterior são reaproveitados
+  const novos = titulos.filter((t) => !existentes.has(numero(t)));
+  for (const lote of lotes(novos)) {
+    const payload = lote.map((t) => ({
+      company_id: companyId,
+      tipo: t.tipo,
+      numero_titulo: numero(t),
+      cliente_id: t.cliente?.id || null,
+      fornecedor_id: t.fornecedor?.id || null,
+      valor_total: t.valor,
+      data_emissao: t.linha.data_transacao,
+      data_vencimento: t.linha.data_transacao,
+      categoria_id: t.linha.categoria_id,
+      subcategoria_id: t.linha.subcategoria_id,
+      centro_custo_id: t.linha.centro_custo_id,
+      banco_id: t.linha.banco_id,
+      status: 'pago',
+      parcela_atual: 1,
+      total_parcelas: 1,
+      observacoes: `${t.linha.descricao}${t.linha.nota_fiscal ? ` | NF ${t.linha.nota_fiscal}` : ''}`,
+      created_by: userId || null
+    }));
+    const { data, error } = await supabase.from('movimentacao_financeira').insert(payload).select('id, numero_titulo');
+    if (error) throw error;
+    (data || []).forEach((r) => existentes.set(r.numero_titulo, r.id));
+  }
+
+  // 2) baixas na data do extrato, já conciliadas com a linha do extrato
+  const hoje = new Date().toISOString().split('T')[0];
+  for (const lote of lotes(titulos)) {
+    const payload = lote.map((t) => ({
+      movimentacao_id: existentes.get(numero(t)),
+      company_id: companyId,
+      valor_baixa: t.valor,
+      valor_juros: 0,
+      valor_desconto: 0,
+      data_baixa: t.linha.data_transacao,
+      banco_id: t.linha.banco_id,
+      categoria_id: t.linha.categoria_id,
+      subcategoria_id: t.linha.subcategoria_id,
+      centro_custo_id: t.linha.centro_custo_id,
+      observacoes: 'Gerada a partir do extrato bancário',
+      status_conciliacao: 'Conciliado',
+      data_conciliacao: hoje,
+      extrato_bancario_id: t.linha.id,
+      created_by: userId || null
+    }));
+    const { error } = await supabase.from('movimentacao_baixas').insert(payload);
+    if (error) throw error;
+  }
+
+  // 3) marca as linhas do extrato como conciliadas
+  for (const tipo of ['pagar', 'receber']) {
+    const ids = titulos.filter((t) => t.tipo === tipo).map((t) => t.linha.id);
+    for (const lote of lotes(ids)) {
+      const { error } = await supabase.from('extrato_bancario').update({ status_conciliacao: 'Conciliado', tipo_conta_sistema: tipo.toUpperCase() }).in('id', lote);
+      if (error) throw error;
+    }
+  }
+  return { titulos: titulos.length, aPagar: titulos.filter((t) => t.tipo === 'pagar').length, aReceber: titulos.filter((t) => t.tipo === 'receber').length };
+};
+
 // ---- Tela "Classificar extrato" ----
 
 export const listarExtrato = async ({ companyId, bancoId, de, ate }) =>

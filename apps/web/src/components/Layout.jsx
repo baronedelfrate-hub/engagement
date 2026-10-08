@@ -142,6 +142,7 @@ const navigation = [
         children: [
           { name: 'Central de Config.', href: '/admin', icon: Server },
           { name: 'Dashboard', href: '/admin/dashboard' },
+          { name: 'Carteira de Clientes', href: '/admin/carteira' },
           { name: 'Usuários', href: '/admin/usuarios' },
           { name: 'Times', href: '/admin/times' },
           { name: 'Faturamento', href: '/admin/faturamento' },

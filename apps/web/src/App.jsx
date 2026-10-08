@@ -26,6 +26,7 @@ import '@/lib/testExtratoImport';
 import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
+import PainelCarteira from '@/pages/admin/PainelCarteira';
 import BillingList from '@/pages/admin/billing/BillingList';
 import PlanosList from '@/pages/admin/billing/PlanosList';
 import PlanosForm from '@/pages/admin/billing/PlanosForm';
@@ -463,6 +464,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin" element={<SuperAdminRoute><ProtectedLayout><PageTransition><AdminDashboard /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/dashboard" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DashboardAdmin /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           
+          <Route path="/admin/carteira" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PainelCarteira /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="list" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="create" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/:userId" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="edit" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

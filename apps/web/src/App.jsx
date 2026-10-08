@@ -193,6 +193,7 @@ import BPOClientesCadastroForm from '@/pages/bpo/BPOClientesCadastroForm';
 import DRE from '@/pages/controladoria/DRE';
 import PontoEquilibrio from '@/pages/controladoria/PontoEquilibrio';
 import DashboardGerencial from '@/pages/controladoria/DashboardGerencial';
+import RelatorioMensal from '@/pages/controladoria/RelatorioMensal';
 import FichasCustoItensList from '@/pages/custos/FichasCustoItensList';
 import FichasCustoItensForm from '@/pages/custos/FichasCustoItensForm';
 import FichaTecnicaList from '@/pages/custos/FichaTecnicaList';
@@ -452,6 +453,7 @@ const AnimatedRoutes = () => {
           <Route path="/controladoria/dre" element={<ProtectedLayout><PageTransition><DRE /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/ponto-equilibrio" element={<ProtectedLayout><PageTransition><PontoEquilibrio /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/dashboard" element={<ProtectedLayout><PageTransition><DashboardGerencial /></PageTransition></ProtectedLayout>} />
+          <Route path="/controladoria/relatorio-mensal" element={<ProtectedLayout><PageTransition><RelatorioMensal /></PageTransition></ProtectedLayout>} />
           
           <Route path="/custos/ficha-tecnica" element={<ProtectedLayout><PageTransition><FichaTecnicaList /></PageTransition></ProtectedLayout>} />
           <Route path="/custos/ficha-tecnica/novo" element={<ProtectedLayout><PageTransition><FichaTecnicaForm /></PageTransition></ProtectedLayout>} />

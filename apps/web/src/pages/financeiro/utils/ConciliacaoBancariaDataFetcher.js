@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/customSupabaseClient';
+import { buscarTudo } from '@/services/extratoAsaasService';
 
 export const fetchConciliacaoData = async (filters) => {
   try {
@@ -12,9 +13,16 @@ export const fetchConciliacaoData = async (filters) => {
         .select('saldo, data_saldo_inicial')
         .eq('id', bancoId)
         .single();
-      
+
       if (!bankError && bankData) {
         bankInfo = bankData;
+      }
+    } else {
+      // "Todos os bancos": se a empresa só tem um banco ativo, usa o saldo inicial dele
+      const { data: ativos } = await supabase.from('bancos').select('id, saldo, data_saldo_inicial').eq('ativo', true);
+      if (ativos?.length === 1) {
+        bankInfo = ativos[0];
+        bancoId = ativos[0].id;
       }
     }
 
@@ -34,40 +42,34 @@ export const fetchConciliacaoData = async (filters) => {
       tipo_pagamento:tipos_pagamento(nome)
     `).in('status', ['Recebido', 'RECEBIDO', 'recebido', 'Pago', 'PAGO', 'pago']);
 
-    // Baixas da Movimentação Financeira (título a pagar/receber baixado pelo botão "Baixar")
-    let queryMov = supabase.from('movimentacao_baixas').select(`
-      id, valor_baixa, data_baixa, banco_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
-      banco:bancos(nome),
-      movimentacao:movimentacao_financeira(tipo, numero_titulo, cliente:clientes(nome), fornecedor:fornecedores(nome))
-    `);
-
-    let queryExtrato = supabase.from('extrato_bancario').select('*');
+    // Extrato e baixas da Movimentação podem passar de mil linhas: lê em páginas, com ordem fixa, e filtra o período no servidor.
+    const inicioPeriodo = bankInfo.data_saldo_inicial || dataInicio;
+    const montarMov = () => {
+      let q = supabase.from('movimentacao_baixas').select(`
+        id, valor_baixa, data_baixa, banco_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
+        banco:bancos(nome),
+        movimentacao:movimentacao_financeira(tipo, numero_titulo, cliente:clientes(nome), fornecedor:fornecedores(nome))
+      `).order('data_baixa').order('id');
+      if (bancoId && bancoId !== 'TODOS') q = q.eq('banco_id', bancoId);
+      if (inicioPeriodo) q = q.gte('data_baixa', inicioPeriodo);
+      if (dataFim) q = q.lte('data_baixa', dataFim);
+      return q;
+    };
+    const montarExtrato = () => {
+      let q = supabase.from('extrato_bancario').select('*').order('data_transacao').order('id');
+      if (bancoId && bancoId !== 'TODOS') q = q.eq('banco_id', bancoId);
+      if (inicioPeriodo) q = q.gte('data_transacao', inicioPeriodo);
+      if (dataFim) q = q.lte('data_transacao', dataFim);
+      return q;
+    };
 
     if (bancoId && bancoId !== 'TODOS') {
       queryPagar = queryPagar.eq('banco_id', bancoId);
       queryReceber = queryReceber.eq('banco_id', bancoId);
-      queryMov = queryMov.eq('banco_id', bancoId);
-      queryExtrato = queryExtrato.eq('banco_id', bancoId);
-    }
-    
-    // Filter by data_saldo_inicial if available
-    if (bankInfo.data_saldo_inicial) {
-      queryExtrato = queryExtrato.gte('data_transacao', bankInfo.data_saldo_inicial);
-    } else if (dataInicio) {
-      queryExtrato = queryExtrato.gte('data_transacao', dataInicio);
-    }
-    
-    if (dataFim) {
-      queryExtrato = queryExtrato.lte('data_transacao', dataFim);
     }
 
-    // as baixas da Movimentação podem passar de mil: filtra o período no servidor
-    const inicioPeriodo = bankInfo.data_saldo_inicial || dataInicio;
-    if (inicioPeriodo) queryMov = queryMov.gte('data_baixa', inicioPeriodo);
-    if (dataFim) queryMov = queryMov.lte('data_baixa', dataFim);
-
-    const [pagarRes, receberRes, extratoRes, movRes] = await Promise.all([queryPagar, queryReceber, queryExtrato, queryMov]);
-
+    const settle = (p) => p.then((data) => ({ data, error: null })).catch((error) => ({ data: null, error }));
+    const [pagarRes, receberRes, extratoRes, movRes] = await Promise.all([queryPagar, queryReceber, settle(buscarTudo(montarExtrato)), settle(buscarTudo(montarMov))]);
     if (movRes.error) {
       console.error("Error fetching movimentacao_baixas:", movRes.error);
       throw movRes.error;

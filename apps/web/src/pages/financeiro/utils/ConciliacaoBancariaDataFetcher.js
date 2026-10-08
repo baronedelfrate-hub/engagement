@@ -34,11 +34,19 @@ export const fetchConciliacaoData = async (filters) => {
       tipo_pagamento:tipos_pagamento(nome)
     `).in('status', ['Recebido', 'RECEBIDO', 'recebido', 'Pago', 'PAGO', 'pago']);
 
+    // Baixas da Movimentação Financeira (título a pagar/receber baixado pelo botão "Baixar")
+    let queryMov = supabase.from('movimentacao_baixas').select(`
+      id, valor_baixa, data_baixa, banco_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
+      banco:bancos(nome),
+      movimentacao:movimentacao_financeira(tipo, numero_titulo, cliente:clientes(nome), fornecedor:fornecedores(nome))
+    `);
+
     let queryExtrato = supabase.from('extrato_bancario').select('*');
 
     if (bancoId && bancoId !== 'TODOS') {
       queryPagar = queryPagar.eq('banco_id', bancoId);
       queryReceber = queryReceber.eq('banco_id', bancoId);
+      queryMov = queryMov.eq('banco_id', bancoId);
       queryExtrato = queryExtrato.eq('banco_id', bancoId);
     }
     
@@ -53,7 +61,12 @@ export const fetchConciliacaoData = async (filters) => {
       queryExtrato = queryExtrato.lte('data_transacao', dataFim);
     }
 
-    const [pagarRes, receberRes, extratoRes] = await Promise.all([queryPagar, queryReceber, queryExtrato]);
+    const [pagarRes, receberRes, extratoRes, movRes] = await Promise.all([queryPagar, queryReceber, queryExtrato, queryMov]);
+
+    if (movRes.error) {
+      console.error("Error fetching movimentacao_baixas:", movRes.error);
+      throw movRes.error;
+    }
 
     if (pagarRes.error) {
       console.error("Error fetching contas_pagar:", pagarRes.error);
@@ -90,7 +103,24 @@ export const fetchConciliacaoData = async (filters) => {
       status_conciliacao: item.status_conciliacao || 'Não Conciliado'
     }));
 
-    let sistemaBaixas = [...normalizedPagar, ...normalizedReceber];
+    const normalizedMov = (movRes.data || []).map(item => {
+      const isPagar = item.movimentacao?.tipo?.toLowerCase() === 'pagar';
+      const valor = parseFloat(item.valor_baixa || 0);
+      return {
+        ...item,
+        origem: 'MOV',
+        tipo_geral: isPagar ? 'PAGAR' : 'RECEBER',
+        numero: item.movimentacao?.numero_titulo,
+        entidadeNome: (isPagar ? item.movimentacao?.fornecedor?.nome : item.movimentacao?.cliente?.nome) || 'Não informado',
+        valor: isPagar ? -valor : valor,
+        data_baixa: item.data_baixa || new Date().toISOString().split('T')[0],
+        bancoNome: item.banco?.nome || 'N/A',
+        tipoPagamentoNome: 'N/A',
+        status_conciliacao: item.status_conciliacao || 'Não Conciliado'
+      };
+    });
+
+    let sistemaBaixas = [...normalizedPagar, ...normalizedReceber, ...normalizedMov];
     let ofxTransacoes = extratoRes.data || [];
 
     // Apply date filtering to sistema baixas

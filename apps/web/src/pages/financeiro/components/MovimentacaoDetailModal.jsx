@@ -18,6 +18,8 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
   const [saving, setSaving] = useState(false);
   const [row, setRow] = useState(null);
   const [documentos, setDocumentos] = useState([]);
+  const [baixas, setBaixas] = useState([]);
+  const [estornando, setEstornando] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
   const [centrosCusto, setCentrosCusto] = useState([]);
@@ -33,7 +35,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
   const loadData = async () => {
     setLoading(true);
     try {
-      const [rowRes, docsRes] = await Promise.all([
+      const [rowRes, docsRes, baixasRes] = await Promise.all([
         supabase
           .from('movimentacao_financeira')
           .select(`
@@ -47,7 +49,8 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
           `)
           .eq('id', movimentacaoId)
           .single(),
-        supabase.from('movimentacao_documentos').select('*').eq('movimentacao_id', movimentacaoId)
+        supabase.from('movimentacao_documentos').select('*').eq('movimentacao_id', movimentacaoId),
+        supabase.from('movimentacao_baixas').select('*').eq('movimentacao_id', movimentacaoId).order('data_baixa')
       ]);
 
       if (rowRes.error) throw rowRes.error;
@@ -64,6 +67,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         observacoes: rowRes.data.observacoes || ''
       });
       setDocumentos(docsRes.data || []);
+      setBaixas(baixasRes.data || []);
 
       if (mode === 'edit' && company_id) {
         const [catRes, subRes, ccRes, banRes] = await Promise.all([
@@ -82,6 +86,28 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
       toast({ title: 'Erro', description: 'Não foi possível carregar a movimentação.', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEstornar = async (baixa) => {
+    if (!window.confirm('Estornar esta baixa? O título volta a ficar em aberto pelo valor correspondente.')) return;
+    setEstornando(baixa.id);
+    try {
+      const { error: delError } = await supabase.from('movimentacao_baixas').delete().eq('id', baixa.id);
+      if (delError) throw delError;
+      const restantes = baixas.filter((b) => b.id !== baixa.id);
+      const abatido = restantes.reduce((s, b) => s + (Number(b.valor_baixa) || 0) - (Number(b.valor_juros) || 0) + (Number(b.valor_desconto) || 0), 0);
+      const total = Number(row.valor_total) || 0;
+      const status = restantes.length === 0 ? 'pendente' : abatido >= total - 0.005 ? 'pago' : 'pago_parcial';
+      const { error: upError } = await supabase.from('movimentacao_financeira').update({ status, updated_at: new Date().toISOString() }).eq('id', movimentacaoId);
+      if (upError) throw upError;
+      toast({ title: 'Baixa estornada', description: 'O título foi reaberto.' });
+      if (onSaved) onSaved();
+      loadData();
+    } catch (err) {
+      toast({ title: 'Erro', description: err.message || 'Não foi possível estornar.', variant: 'destructive' });
+    } finally {
+      setEstornando(null);
     }
   };
 
@@ -157,6 +183,29 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <div><Label className="text-muted-foreground">Observações</Label><p className="text-foreground whitespace-pre-wrap">{row.observacoes}</p></div>
             )}
             <div>
+              <Label className="text-muted-foreground">Baixas</Label>
+              {baixas.length === 0 ? (
+                <p className="text-sm text-muted-foreground mt-1">Nenhuma baixa registrada.</p>
+              ) : (
+                <div className="space-y-2 mt-2">
+                  {baixas.map((b) => (
+                    <div key={b.id} className="flex items-center justify-between p-2 border border-border rounded-md text-sm">
+                      <div className="text-foreground">
+                        {b.data_baixa ? new Date(b.data_baixa + 'T12:00:00').toLocaleDateString() : '-'} · R$ {Number(b.valor_baixa || 0).toFixed(2)}
+                        {(Number(b.valor_juros) > 0 || Number(b.valor_desconto) > 0) && (
+                          <span className="text-muted-foreground"> (juros {Number(b.valor_juros || 0).toFixed(2)} · desc. {Number(b.valor_desconto || 0).toFixed(2)})</span>
+                        )}
+                        <span className="text-muted-foreground"> · {b.status_conciliacao === 'Conciliado' ? 'Conciliada' : 'Não conciliada'}</span>
+                      </div>
+                      <Button variant="ghost" size="sm" className="text-destructive" disabled={b.status_conciliacao === 'Conciliado' || estornando === b.id} onClick={() => handleEstornar(b)} title={b.status_conciliacao === 'Conciliado' ? 'Desfaça a conciliação antes de estornar' : 'Estornar baixa'}>
+                        {estornando === b.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Estornar'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
               <Label className="text-muted-foreground">Documentos Anexos</Label>
               {documentos.length === 0 ? (
                 <p className="text-sm text-muted-foreground mt-1">Nenhum documento anexado.</p>
@@ -186,10 +235,14 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="pago">Pago</SelectItem>
+                    <SelectItem value="vencido">Vencido</SelectItem>
                     <SelectItem value="cancelado">Cancelado</SelectItem>
+                    {/* pago / pago parcial só nascem de uma baixa; aparecem aqui apenas para mostrar o status atual */}
+                    <SelectItem value="pago_parcial" disabled>Pago parcial (use Baixar)</SelectItem>
+                    <SelectItem value="pago" disabled>Pago (use Baixar)</SelectItem>
                   </SelectContent>
                 </Select>
+                {baixas.length === 0 && <p className="text-xs text-muted-foreground">Para marcar como pago, use o botão Baixar na lista.</p>}
               </div>
               <div className="space-y-2">
                 <Label>Valor Total (R$)</Label>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,15 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MovimentacaoDetailModal from './components/MovimentacaoDetailModal';
+import BaixaMovimentacaoModal from './components/BaixaMovimentacaoModal';
 import { formatDateOnly } from '@/lib/dateUtils';
+
+const saldoEmAberto = (row) => {
+  const abatido = (row.baixas || []).reduce(
+    (s, b) => s + (Number(b.valor_baixa) || 0) - (Number(b.valor_juros) || 0) + (Number(b.valor_desconto) || 0), 0);
+  return row.status === 'cancelado' ? 0 : Math.max(0, (Number(row.valor_total) || 0) - abatido);
+};
+const podeBaixar = (row) => ['pendente', 'pago_parcial', 'vencido'].includes(row.status) && saldoEmAberto(row) > 0.005;
 
 const MovimentacaoFinanceiraPage = () => {
   const navigate = useNavigate();
@@ -24,6 +32,8 @@ const MovimentacaoFinanceiraPage = () => {
   const [error, setError] = useState(null);
   const [modalState, setModalState] = useState({ open: false, id: null, mode: 'view' });
   
+  const [baixaId, setBaixaId] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('Todos');
   const [filtroStatus, setFiltroStatus] = useState('Todos');
@@ -61,7 +71,8 @@ const MovimentacaoFinanceiraPage = () => {
           data_vencimento,
           status,
           cliente:clientes(nome),
-          fornecedor:fornecedores(nome)
+          fornecedor:fornecedores(nome),
+          baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)
         `)
         .eq('company_id', company_id)
         .order('data_vencimento', { ascending: true });
@@ -186,9 +197,11 @@ const MovimentacaoFinanceiraPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Todos">Todos os Status</SelectItem>
-                  <SelectItem value="Pendente">Pendente</SelectItem>
-                  <SelectItem value="Pago">Pago</SelectItem>
-                  <SelectItem value="Cancelado">Cancelado</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="pago_parcial">Pago parcial</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="vencido">Vencido</SelectItem>
+                  <SelectItem value="cancelado">Cancelado</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -230,6 +243,7 @@ const MovimentacaoFinanceiraPage = () => {
                     <th className="px-6 py-3 font-medium">Cliente/Fornecedor</th>
                     <th className="px-6 py-3 font-medium">Vencimento</th>
                     <th className="px-6 py-3 font-medium">Valor</th>
+                    <th className="px-6 py-3 font-medium">Em aberto</th>
                     <th className="px-6 py-3 font-medium">Status</th>
                     <th className="px-6 py-3 font-medium text-right">Ações</th>
                   </tr>
@@ -237,14 +251,14 @@ const MovimentacaoFinanceiraPage = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="7" className="px-6 py-12 text-center">
+                      <td colSpan="8" className="px-6 py-12 text-center">
                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
                         <p className="text-muted-foreground">Buscando movimentações...</p>
                       </td>
                     </tr>
                   ) : filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="px-6 py-12 text-center text-muted-foreground">
+                      <td colSpan="8" className="px-6 py-12 text-center text-muted-foreground">
                         Nenhuma movimentação encontrada para os filtros selecionados.
                       </td>
                     </tr>
@@ -266,12 +280,25 @@ const MovimentacaoFinanceiraPage = () => {
                         <td className="px-6 py-4 font-medium text-foreground">
                           R$ {parseFloat(row.valor_total || 0).toFixed(2)}
                         </td>
+                        <td className="px-6 py-4 text-foreground">
+                          R$ {saldoEmAberto(row).toFixed(2)}
+                        </td>
                         <td className="px-6 py-4">
                           <Badge variant="secondary" className="capitalize text-foreground">
-                            {row.status}
+                            {(row.status || '').replace('_', ' ')}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                          {podeBaixar(row) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="mr-2 h-8"
+                              onClick={() => setBaixaId(row.id)}
+                            >
+                              <CheckCircle2 className="mr-1 h-4 w-4" /> Baixar
+                            </Button>
+                          )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">
@@ -280,6 +307,11 @@ const MovimentacaoFinanceiraPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border">
+                              {podeBaixar(row) && (
+                                <DropdownMenuItem onClick={() => setBaixaId(row.id)}>
+                                  <CheckCircle2 className="mr-2 h-4 w-4" /> Baixar título
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'view' })}>
                                 <Eye className="mr-2 h-4 w-4" /> Visualizar
                               </DropdownMenuItem>
@@ -307,6 +339,13 @@ const MovimentacaoFinanceiraPage = () => {
         mode={modalState.mode}
         movimentacaoId={modalState.id}
         onOpenChange={(open) => setModalState((prev) => ({ ...prev, open }))}
+        onSaved={loadData}
+      />
+
+      <BaixaMovimentacaoModal
+        open={!!baixaId}
+        movimentacaoId={baixaId}
+        onOpenChange={(open) => { if (!open) setBaixaId(null); }}
         onSaved={loadData}
       />
     </div>

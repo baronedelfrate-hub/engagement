@@ -60,6 +60,7 @@ const navigation = [
           { name: 'Movimentação Financeira', href: '/movimentacao-financeira', icon: ArrowRightLeft },
           { name: 'Conciliação Bancária', href: '/financeiro/conciliacao-bancaria' },
           { name: 'Importar Extrato', href: '/financeiro/importar-extrato' },
+          { name: 'Classificar Extrato', href: '/financeiro/classificar-extrato' },
           { name: 'Fluxo de Caixa', href: '/financeiro/fluxo-caixa' },
           { name: 'Histórico Conciliações', href: '/financeiro/historico-conciliacoes' },
           { name: 'Relatórios', href: '/financeiro/relatorios' },

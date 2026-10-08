@@ -51,6 +51,7 @@ import ContasReceberForm from '@/pages/financeiro/ContasReceberForm';
 import MovimentacaoFinanceiraPage from '@/pages/financeiro/MovimentacaoFinanceiraPage';
 import NovaMovimentacaoPage from '@/pages/financeiro/NovaMovimentacaoPage';
 import ImportarExtratoPage from '@/pages/financeiro/ImportarExtratoPage';
+import ClassificarExtratoPage from '@/pages/financeiro/ClassificarExtratoPage';
 import ConciliacaoBancariaPage from '@/pages/financeiro/ConciliacaoBancariaPage';
 import FluxoCaixaDashboard from '@/pages/financeiro/fluxocaixa/FluxoCaixaDashboard';
 import FluxoCaixaMovimentacoesList from '@/pages/financeiro/fluxocaixa/FluxoCaixaMovimentacoesList';
@@ -374,6 +375,7 @@ const AnimatedRoutes = () => {
           <Route path="/financeiro/baixas" element={<ProtectedLayout><PageTransition><BaixasPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/conciliacao-bancaria" element={<ProtectedLayout><PageTransition><ConciliacaoBancariaPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/importar-extrato" element={<ProtectedLayout><PageTransition><ImportarExtratoPage /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/classificar-extrato" element={<ProtectedLayout><PageTransition><ClassificarExtratoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/historico-conciliacoes" element={<ProtectedLayout><PageTransition><HistoricoConciliacoes /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/relatorios" element={<ProtectedLayout><PageTransition><RelatoriosFinanceiros /></PageTransition></ProtectedLayout>} />
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Loader2, AlertCircle, Building2, FileDown } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { supabase } from '@/lib/customSupabaseClient';
 import { montarDRE, calcularPE, agregarDashboard, MESES } from '@/lib/dreGerencial';
 import { gerarRelatorioMensalPdf } from '@/lib/relatorioMensalPdf';
+import { gerarRelatorioMensalExcel } from '@/lib/relatorioMensalExcel';
 
 const fmt = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const diasNoMes = (ano, m) => new Date(ano, m + 1, 0).getDate();
@@ -23,6 +24,7 @@ function RelatorioMensal() {
   const [mes, setMes] = useState(null);
   const [empresa, setEmpresa] = useState(null);
   const [gerando, setGerando] = useState(false);
+  const [gerandoExcel, setGerandoExcel] = useState(false);
 
   useEffect(() => {
     if (!empresaId) { setEmpresa(null); return; }
@@ -63,6 +65,18 @@ function RelatorioMensal() {
     }
   };
 
+  const gerarExcel = async () => {
+    setGerandoExcel(true);
+    try {
+      const nome = await gerarRelatorioMensalExcel({ empresa, ano, mes, dre, pe, dash, naoClassificado });
+      toast({ title: 'Planilha gerada', description: `Arquivo ${nome} baixado.` });
+    } catch (e) {
+      toast({ title: 'Erro ao gerar o Excel', description: e.message || 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setGerandoExcel(false);
+    }
+  };
+
   if (authLoading) return <div className="flex h-full items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   const pronto = dre && pe && dash && mes !== null;
@@ -80,6 +94,9 @@ function RelatorioMensal() {
         </Select>
         <Button onClick={gerar} disabled={!pronto || gerando} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Gerar PDF
+        </Button>
+        <Button onClick={gerarExcel} disabled={!pronto || gerandoExcel} variant="outline" className="gap-2">
+          {gerandoExcel ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Gerar Excel
         </Button>
       </FiltrosGerenciais>
 
@@ -114,7 +131,7 @@ function RelatorioMensal() {
             <CardContent className="text-sm text-muted-foreground space-y-1">
               <p>1. Resumo do mês e acumulado do ano &nbsp;·&nbsp; 2. DRE gerencial (mês e acumulado) &nbsp;·&nbsp; 3. Ponto de equilíbrio</p>
               <p>4. Despesas por categoria ({dash.despesasPorCategoria.length} categorias) &nbsp;·&nbsp; 5. Receita por cliente ({dash.receitaPorCliente.length} clientes) &nbsp;·&nbsp; 6. Pendências</p>
-              <p className="pt-2">Clique em <strong>Gerar PDF</strong> para baixar. O envio por e-mail e WhatsApp virá numa próxima etapa.</p>
+              <p className="pt-2">Clique em <strong>Gerar PDF</strong> ou <strong>Gerar Excel</strong> para baixar. O Excel traz o ano inteiro da DRE, com as contas detalhadas. O envio por e-mail e WhatsApp virá numa próxima etapa.</p>
             </CardContent>
           </Card>
         </>

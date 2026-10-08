@@ -123,6 +123,7 @@ const navigation = [
         children: [
           { name: 'DRE', href: '/controladoria/dre' },
           { name: 'Ponto de Equilíbrio', href: '/controladoria/ponto-equilibrio' },
+          { name: 'Dashboard Gerencial', href: '/controladoria/dashboard' },
         ],
       },
       {

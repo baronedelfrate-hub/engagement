@@ -16,6 +16,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
 import { carregarCatalogo, listarExtrato, classificarLinhas } from '@/services/extratoAsaasService';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { nomeFavorecido, casarCadastro } from '@/lib/extratoTitulos';
 
 const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const LIMITE_TELA = 500;
@@ -39,6 +40,7 @@ const ClassificarExtratoPage = () => {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [gerarOpen, setGerarOpen] = useState(false);
+  const [visao, setVisao] = useState('favorecidos');
 
   const carregar = async () => {
     if (!company_id) { setLoading(false); return; }
@@ -80,6 +82,53 @@ const ClassificarExtratoPage = () => {
   }, [linhas, status, busca]);
 
   const visiveis = filtradas.slice(0, LIMITE_TELA);
+
+  // Visão por favorecido: um grupo por (tipo + descrição sem números), do maior valor para o menor
+  const classificadasPorFav = useMemo(() => {
+    const m = new Map();
+    for (const l of linhas) {
+      if (!l.categoria_id) continue;
+      const nome = nomeFavorecido(l.descricao, l.tipo_norm);
+      if (nome && !m.has(l.assinatura)) m.set(l.assinatura, { nome, linha: l });
+    }
+    return [...m.values()];
+  }, [linhas]);
+
+  const grupos = useMemo(() => {
+    const m = new Map();
+    for (const l of filtradas) {
+      const k = `${l.tipo_norm}||${l.assinatura}`;
+      if (!m.has(k)) m.set(k, { key: k, tipo: l.tipo_transacao, linhas: [] });
+      m.get(k).linhas.push(l);
+    }
+    return [...m.values()]
+      .map((g) => {
+        const nome = nomeFavorecido(g.linhas[0].descricao, g.linhas[0].tipo_norm);
+        const sug = nome && !g.linhas[0].categoria_id ? casarCadastro(nome, classificadasPorFav) : null;
+        return { ...g, nome: nome || g.linhas[0].descricao, temFavorecido: !!nome, total: g.linhas.reduce((s, l) => s + Number(l.valor), 0), sugestao: sug?.linha || null };
+      })
+      .sort((a, b) => Math.abs(b.total) - Math.abs(a.total));
+  }, [filtradas, classificadasPorFav]);
+
+  const aplicarSugestao = async (g) => {
+    setSaving(true);
+    try {
+      const { semelhantes } = await classificarLinhas({
+        companyId: company_id,
+        linhas: g.linhas,
+        classificacao: { categoria_id: g.sugestao.categoria_id, subcategoria_id: g.sugestao.subcategoria_id, centro_custo_id: g.sugestao.centro_custo_id, cliente_nome: null },
+        escopo: 'favorecido',
+        aplicarSemelhantes: true,
+        userId: user?.id
+      });
+      toast({ title: 'Sugestão aplicada', description: `${g.linhas.length} lançamento(s)${semelhantes ? ` + ${semelhantes} semelhantes` : ''}. Regra salva para as próximas importações.` });
+      carregar();
+    } catch (e) {
+      toast({ title: 'Erro', description: e.message || 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
   const selecionadas = linhas.filter((l) => sel.has(l.id));
   const mesmoTipo = selecionadas.length > 0 && selecionadas.every((l) => l.tipo_norm && l.tipo_norm === selecionadas[0].tipo_norm);
   const mesmoFavorecido = mesmoTipo && selecionadas.every((l) => l.assinatura && l.assinatura === selecionadas[0].assinatura);
@@ -88,7 +137,7 @@ const ClassificarExtratoPage = () => {
   const todasVisiveisMarcadas = visiveis.length > 0 && visiveis.every((l) => sel.has(l.id));
   const alternarTodas = () => setSel(todasVisiveisMarcadas ? new Set() : new Set(visiveis.map((l) => l.id)));
 
-  const abrirDialogo = (linhasAlvo) => {
+  const abrirDialogo = (linhasAlvo, escopoInicial = 'linhas') => {
     setSel(new Set(linhasAlvo.map((l) => l.id)));
     const u = linhasAlvo.length === 1 ? linhasAlvo[0] : null;
     setForm({
@@ -96,7 +145,7 @@ const ClassificarExtratoPage = () => {
       subcategoria_id: u?.subcategoria_id || 'none',
       centro_custo_id: u?.centro_custo_id || 'none',
       cliente_nome: u?.cliente_nome || '',
-      escopo: 'linhas',
+      escopo: escopoInicial,
       aplicarSemelhantes: true
     });
     setDialog(true);
@@ -173,7 +222,11 @@ const ClassificarExtratoPage = () => {
         </Select>
         <Input type="date" className="w-40 bg-background" value={de} onChange={(e) => setDe(e.target.value)} title="Data inicial" />
         <Input type="date" className="w-40 bg-background" value={ate} onChange={(e) => setAte(e.target.value)} title="Data final" />
-        <Button disabled={sel.size === 0} onClick={() => abrirDialogo(selecionadas)} className="bg-blue-600 hover:bg-blue-700 text-white">
+        <div className="flex rounded-md border border-border overflow-hidden">
+          <button type="button" onClick={() => setVisao('favorecidos')} className={`px-3 py-2 text-sm ${visao === 'favorecidos' ? 'bg-blue-600 text-white' : 'bg-background text-muted-foreground'}`}>Por favorecido</button>
+          <button type="button" onClick={() => setVisao('lancamentos')} className={`px-3 py-2 text-sm ${visao === 'lancamentos' ? 'bg-blue-600 text-white' : 'bg-background text-muted-foreground'}`}>Lançamentos</button>
+        </div>
+        <Button disabled={sel.size === 0 || visao !== 'lancamentos'} onClick={() => abrirDialogo(selecionadas)} className="bg-blue-600 hover:bg-blue-700 text-white">
           <Tags className="mr-2 h-4 w-4" /> Classificar selecionadas ({sel.size})
         </Button>
       </div>
@@ -182,6 +235,60 @@ const ClassificarExtratoPage = () => {
         {totais.total} lançamentos · <span className="text-amber-600 font-medium">{totais.pend} a classificar</span> · {totais.total - totais.pend} classificados
       </p>
 
+      {visao === 'favorecidos' && (
+        <div className="rounded-md border border-border bg-card overflow-hidden">
+          <div className="overflow-auto max-h-[640px]">
+            <table className="w-full text-sm">
+              <thead className="bg-muted sticky top-0 z-10 text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="p-2 text-left">Favorecido / descrição</th>
+                  <th className="p-2 text-left">Tipo</th>
+                  <th className="p-2 text-right">Qtd</th>
+                  <th className="p-2 text-right">Total</th>
+                  <th className="p-2 text-left">Classificação / sugestão</th>
+                  <th className="p-2" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {loading ? (
+                  <tr><td colSpan="6" className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></td></tr>
+                ) : grupos.length === 0 ? (
+                  <tr><td colSpan="6" className="p-10 text-center text-muted-foreground">Nada para mostrar com esses filtros.</td></tr>
+                ) : grupos.slice(0, LIMITE_TELA).map((g) => {
+                  const primeira = g.linhas[0];
+                  const cat = mapas.cat.get(primeira.categoria_id);
+                  const sub = mapas.sub.get(primeira.subcategoria_id);
+                  const sCat = g.sugestao ? mapas.cat.get(g.sugestao.categoria_id) : null;
+                  const sSub = g.sugestao ? mapas.sub.get(g.sugestao.subcategoria_id) : null;
+                  return (
+                    <tr key={g.key} className="hover:bg-muted/30">
+                      <td className="p-2"><div className="truncate max-w-[340px] font-medium" title={g.nome}>{g.nome}</div></td>
+                      <td className="p-2 text-xs text-muted-foreground">{g.tipo}</td>
+                      <td className="p-2 text-right">{g.linhas.length}</td>
+                      <td className={`p-2 text-right font-medium whitespace-nowrap ${g.total < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{brl(g.total)}</td>
+                      <td className="p-2 text-xs">
+                        {cat ? <div><div>{cat.codigo} {cat.nome}</div><div className="text-muted-foreground">{sub ? `${sub.codigo} ${sub.nome}` : 'sem subcategoria'}</div></div>
+                          : sCat ? (
+                            <div className="flex items-center gap-2">
+                              <div><div className="text-amber-700 dark:text-amber-400">Sugestão: {sCat.codigo} {sCat.nome}</div><div className="text-muted-foreground">{sSub ? `${sSub.codigo} ${sSub.nome}` : 'sem subcategoria'}</div></div>
+                              <Button size="sm" variant="outline" disabled={saving} onClick={() => aplicarSugestao(g)}>Aplicar</Button>
+                            </div>
+                          ) : <Badge variant="outline" className="border-amber-500/40 text-amber-600">a classificar</Badge>}
+                      </td>
+                      <td className="p-2 text-right whitespace-nowrap">
+                        <Button size="sm" variant="outline" onClick={() => abrirDialogo(g.linhas, g.temFavorecido ? 'favorecido' : 'linhas')}>Classificar {g.linhas.length > 1 ? `os ${g.linhas.length}` : ''}</Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      {visao === 'favorecidos' && grupos.length > LIMITE_TELA && <p className="text-xs text-muted-foreground">Mostrando {LIMITE_TELA} de {grupos.length} grupos.</p>}
+
+      {visao === 'lancamentos' && (
       <div className="rounded-md border border-border bg-card overflow-hidden">
         <div className="overflow-auto max-h-[640px]">
           <table className="w-full text-sm">
@@ -227,7 +334,8 @@ const ClassificarExtratoPage = () => {
           </table>
         </div>
       </div>
-      {filtradas.length > LIMITE_TELA && <p className="text-xs text-muted-foreground">Mostrando {LIMITE_TELA} de {filtradas.length}. Use os filtros para ver o restante.</p>}
+      )}
+      {visao === 'lancamentos' && filtradas.length > LIMITE_TELA && <p className="text-xs text-muted-foreground">Mostrando {LIMITE_TELA} de {filtradas.length}. Use os filtros para ver o restante.</p>}
 
       <GerarMovimentacoesDialog open={gerarOpen} onOpenChange={setGerarOpen} companyId={company_id} userId={user?.id} onGerado={() => navigate('/movimentacao-financeira')} />
 

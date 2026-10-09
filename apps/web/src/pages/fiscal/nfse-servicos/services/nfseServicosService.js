@@ -1,3 +1,4 @@
+import { montarTituloReceber } from '@/lib/titulosPagar';
 import { supabase } from '@/lib/customSupabaseClient';
 
 export const nfseServicosService = {
@@ -214,20 +215,17 @@ export const nfseServicosService = {
     const dtVencimento = new Date(dtEmissao.setDate(dtEmissao.getDate() + 30)).toISOString().split('T')[0];
 
     const { error: crError } = await supabase
-      .from('contas_receber')
-      .insert({
-        company_id: nfseData.empresa_id,
-        cliente_id: nfseData.cliente_id,
+      .from('movimentacao_financeira')
+      .insert(montarTituloReceber({
+        companyId: nfseData.empresa_id,
+        clienteId: nfseData.cliente_id,
         numero: `NFSE-${nfseData.numero || nfseData.id.substring(0, 6)}`,
-        data_emissao: nfseData.data_emissao,
-        data_vencimento: dtVencimento,
-        valor_original: nfseData.valor_liquido || nfseData.valor_servico,
-        status: 'Pendente',
+        valor: nfseData.valor_liquido || nfseData.valor_servico,
+        emissao: nfseData.data_emissao,
+        vencimento: dtVencimento,
         observacoes: `Gerado automaticamente da NFS-e ${nfseData.numero || 'S/N'}`,
-        created_by: user?.id,
-        condicao_pagamento_id: nfseData.condicao_pagamento_id
-      });
-
+        createdBy: user?.id
+      }));
     if (crError) throw crError;
 
     await supabase.from('nfse_servicos').update({ integrado_financeiro: true }).eq('id', nfseData.id);

@@ -1,3 +1,4 @@
+import { montarTituloPagar } from '@/lib/titulosPagar';
 import { supabase } from './customSupabaseClient';
 
 export const apuracaoImpostosService = {
@@ -115,8 +116,9 @@ export const apuracaoImpostosService = {
     // Check if already generated (simple check by description or origin)
     const descricao = `Imposto ${apuracaoData.tipo_imposto} ref. ${apuracaoData.periodo_referencia}`;
     const { data: existing } = await supabase
-      .from('contas_pagar')
+      .from('movimentacao_financeira')
       .select('id')
+      .eq('tipo', 'pagar')
       .eq('observacoes', descricao)
       .eq('company_id', apuracaoData.empresa_id);
 
@@ -124,17 +126,15 @@ export const apuracaoImpostosService = {
       throw new Error('Obrigação financeira já gerada anteriormente.');
     }
 
-    const { error } = await supabase.from('contas_pagar').insert({
-      company_id: apuracaoData.empresa_id,
+    const { error } = await supabase.from('movimentacao_financeira').insert(montarTituloPagar({
+      companyId: apuracaoData.empresa_id,
       numero: `IMP-${apuracaoData.tipo_imposto}-${apuracaoData.periodo_referencia.replace('/','')}`,
-      data_emissao: new Date().toISOString().split('T')[0],
-      data_vencimento: apuracaoData.vencimento,
-      valor_original: apuracaoData.valor_apurado,
-      status: 'Pendente',
+      valor: apuracaoData.valor_apurado,
+      emissao: new Date().toISOString().split('T')[0],
+      vencimento: apuracaoData.vencimento,
       observacoes: descricao,
-      created_by: user?.id
-    });
-
+      createdBy: user?.id
+    }));
     if (error) throw error;
     
     // Update status mapping if desired, but we keep it independent or mark a flag

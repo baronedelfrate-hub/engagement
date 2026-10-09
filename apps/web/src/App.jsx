@@ -49,23 +49,14 @@ import LimparDados from '@/pages/admin/LimparDados';
 
 import CobrancaKanbanIntegrated from '@/pages/financeiro/cobranca/CobrancaKanbanIntegrated';
 import CobrancaDashboardIntegrated from '@/pages/financeiro/cobranca/CobrancaDashboardIntegrated';
-import ContasPagarList from '@/pages/financeiro/ContasPagarList';
-import ContasPagarForm from '@/pages/financeiro/ContasPagarForm';
-import ContasReceberList from '@/pages/financeiro/ContasReceberList';
-import ContasReceberForm from '@/pages/financeiro/ContasReceberForm';
 import MovimentacaoFinanceiraPage from '@/pages/financeiro/MovimentacaoFinanceiraPage';
 import NovaMovimentacaoPage from '@/pages/financeiro/NovaMovimentacaoPage';
 import ImportarExtratoPage from '@/pages/financeiro/ImportarExtratoPage';
 import ClassificarExtratoPage from '@/pages/financeiro/ClassificarExtratoPage';
 import ConciliacaoBancariaPage from '@/pages/financeiro/ConciliacaoBancariaPage';
 import FluxoCaixaDashboard from '@/pages/financeiro/fluxocaixa/FluxoCaixaDashboard';
-import FluxoCaixaMovimentacoesList from '@/pages/financeiro/fluxocaixa/FluxoCaixaMovimentacoesList';
-import FluxoCaixaMovimentacoesForm from '@/pages/financeiro/fluxocaixa/FluxoCaixaMovimentacoesForm';
-import FluxoCaixaConfigCategoriasList from '@/pages/financeiro/fluxocaixa/FluxoCaixaConfigCategoriasList';
-import FluxoCaixaConfigCategoriasForm from '@/pages/financeiro/fluxocaixa/FluxoCaixaConfigCategoriasForm';
 import RelatoriosFluxoCaixa from '@/pages/financeiro/fluxocaixa/relatorios/RelatoriosFluxoCaixa';
 import HistoricoConciliacoes from '@/pages/financeiro/HistoricoConciliacoes';
-import BaixasPage from '@/pages/financeiro/BaixasPage';
 import RelatoriosFinanceiros from '@/pages/financeiro/relatorios/RelatoriosFinanceiros';
 
 import CRMClientes from '@/pages/crm/CRMClientes';
@@ -372,25 +363,25 @@ const AnimatedRoutes = () => {
           <Route path="/vendas/pedidos/:id/editar" element={<ProtectedLayout><PageTransition><PedidosForm /></PageTransition></ProtectedLayout>} />
           <Route path="/vendas/relatorios" element={<ProtectedLayout><PageTransition><RelatoriosVendas /></PageTransition></ProtectedLayout>} />
 
-          <Route path="/financeiro/contas-pagar" element={<ProtectedLayout><PageTransition><ContasPagarList /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/contas-pagar/novo" element={<ProtectedLayout><PageTransition><ContasPagarForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/contas-pagar/:id" element={<ProtectedLayout><PageTransition><ContasPagarForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/contas-receber" element={<ProtectedLayout><PageTransition><ContasReceberList /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/contas-receber/novo" element={<ProtectedLayout><PageTransition><ContasReceberForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/contas-receber/:id" element={<ProtectedLayout><PageTransition><ContasReceberForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/contas-pagar" element={<Navigate to="/movimentacao-financeira?tipo=pagar" replace />} />
+          <Route path="/financeiro/contas-pagar/novo" element={<Navigate to="/movimentacao-financeira/nova" replace />} />
+          <Route path="/financeiro/contas-pagar/:id" element={<Navigate to="/movimentacao-financeira?tipo=pagar" replace />} />
+          <Route path="/financeiro/contas-receber" element={<Navigate to="/movimentacao-financeira?tipo=receber" replace />} />
+          <Route path="/financeiro/contas-receber/novo" element={<Navigate to="/movimentacao-financeira/nova" replace />} />
+          <Route path="/financeiro/contas-receber/:id" element={<Navigate to="/movimentacao-financeira?tipo=receber" replace />} />
           <Route path="/financeiro/cobranca" element={<ProtectedLayout><PageTransition><CobrancaKanbanIntegrated /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/cobranca/dashboard" element={<ProtectedLayout><PageTransition><CobrancaDashboardIntegrated /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira/nova" element={<ProtectedLayout><PageTransition><NovaMovimentacaoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira" element={<ProtectedLayout><PageTransition><MovimentacaoFinanceiraPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa" element={<ProtectedLayout><PageTransition><FluxoCaixaDashboard /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/movimentacoes" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesList /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/movimentacoes/novo" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/movimentacoes/:id" element={<ProtectedLayout><PageTransition><FluxoCaixaMovimentacoesForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/config-categorias" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasList /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/config-categorias/novo" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasForm /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/fluxo-caixa/config-categorias/:id" element={<ProtectedLayout><PageTransition><FluxoCaixaConfigCategoriasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes" element={<Navigate to="/movimentacao-financeira" replace />} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes/novo" element={<Navigate to="/movimentacao-financeira" replace />} />
+          <Route path="/financeiro/fluxo-caixa/movimentacoes/:id" element={<Navigate to="/movimentacao-financeira" replace />} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias" element={<Navigate to="/financeiro/fluxo-caixa" replace />} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias/novo" element={<Navigate to="/financeiro/fluxo-caixa" replace />} />
+          <Route path="/financeiro/fluxo-caixa/config-categorias/:id" element={<Navigate to="/financeiro/fluxo-caixa" replace />} />
           <Route path="/financeiro/fluxo-caixa/relatorios" element={<ProtectedLayout><PageTransition><RelatoriosFluxoCaixa /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/baixas" element={<ProtectedLayout><PageTransition><BaixasPage /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/baixas" element={<Navigate to="/movimentacao-financeira" replace />} />
           <Route path="/financeiro/conciliacao-bancaria" element={<ProtectedLayout><PageTransition><ConciliacaoBancariaPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/importar-extrato" element={<ProtectedLayout><PageTransition><ImportarExtratoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/classificar-extrato" element={<ProtectedLayout><PageTransition><ClassificarExtratoPage /></PageTransition></ProtectedLayout>} />

@@ -26,22 +26,6 @@ export const fetchConciliacaoData = async (filters) => {
       }
     }
 
-    // Use data_vencimento for contas_pagar since data_baixa might not exist directly on the table
-    // or use it as fallback. 
-    let queryPagar = supabase.from('contas_pagar').select(`
-      id, numero, fornecedor_id, valor_pago, data_vencimento, banco_id, tipo_pagamento_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
-      fornecedor:fornecedores(nome),
-      banco:bancos(nome),
-      tipo_pagamento:tipos_pagamento(nome)
-    `).in('status', ['Pago', 'PAGO', 'pago']);
-
-    let queryReceber = supabase.from('contas_receber').select(`
-      id, numero, cliente_id, valor_recebido, data_vencimento, data_baixa, banco_id, tipo_pagamento_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
-      cliente:clientes(nome),
-      banco:bancos(nome),
-      tipo_pagamento:tipos_pagamento(nome)
-    `).in('status', ['Recebido', 'RECEBIDO', 'recebido', 'Pago', 'PAGO', 'pago']);
-
     // Extrato e baixas da Movimentação podem passar de mil linhas: lê em páginas, com ordem fixa, e filtra o período no servidor.
     const inicioPeriodo = bankInfo.data_saldo_inicial || dataInicio;
     const montarMov = () => {
@@ -63,52 +47,17 @@ export const fetchConciliacaoData = async (filters) => {
       return q;
     };
 
-    if (bancoId && bancoId !== 'TODOS') {
-      queryPagar = queryPagar.eq('banco_id', bancoId);
-      queryReceber = queryReceber.eq('banco_id', bancoId);
-    }
-
     const settle = (p) => p.then((data) => ({ data, error: null })).catch((error) => ({ data: null, error }));
-    const [pagarRes, receberRes, extratoRes, movRes] = await Promise.all([queryPagar, queryReceber, settle(buscarTudo(montarExtrato)), settle(buscarTudo(montarMov))]);
+    const [extratoRes, movRes] = await Promise.all([settle(buscarTudo(montarExtrato)), settle(buscarTudo(montarMov))]);
     if (movRes.error) {
       console.error("Error fetching movimentacao_baixas:", movRes.error);
       throw movRes.error;
     }
 
-    if (pagarRes.error) {
-      console.error("Error fetching contas_pagar:", pagarRes.error);
-      throw pagarRes.error;
-    }
-    if (receberRes.error) {
-      console.error("Error fetching contas_receber:", receberRes.error);
-      throw receberRes.error;
-    }
     if (extratoRes.error) {
       console.error("Error fetching extrato_bancario:", extratoRes.error);
       throw extratoRes.error;
     }
-
-    let normalizedPagar = (pagarRes.data || []).map(item => ({
-      ...item,
-      tipo_geral: 'PAGAR',
-      entidadeNome: item.fornecedor?.nome || 'Não informado',
-      valor: parseFloat(item.valor_pago || 0) * -1, 
-      data_baixa: item.data_vencimento || item.data_pagamento || new Date().toISOString(), // Fallback
-      bancoNome: item.banco?.nome || 'N/A',
-      tipoPagamentoNome: item.tipo_pagamento?.nome || 'N/A',
-      status_conciliacao: item.status_conciliacao || 'Não Conciliado'
-    }));
-
-    let normalizedReceber = (receberRes.data || []).map(item => ({
-      ...item,
-      tipo_geral: 'RECEBER',
-      entidadeNome: item.cliente?.nome || 'Não informado',
-      valor: parseFloat(item.valor_recebido || 0),
-      data_baixa: item.data_baixa || item.data_vencimento || new Date().toISOString(),
-      bancoNome: item.banco?.nome || 'N/A',
-      tipoPagamentoNome: item.tipo_pagamento?.nome || 'N/A',
-      status_conciliacao: item.status_conciliacao || 'Não Conciliado'
-    }));
 
     const normalizedMov = (movRes.data || []).map(item => {
       const isPagar = item.movimentacao?.tipo?.toLowerCase() === 'pagar';
@@ -127,7 +76,7 @@ export const fetchConciliacaoData = async (filters) => {
       };
     });
 
-    let sistemaBaixas = [...normalizedPagar, ...normalizedReceber, ...normalizedMov];
+    let sistemaBaixas = [...normalizedMov];
     let ofxTransacoes = extratoRes.data || [];
 
     // Apply date filtering to sistema baixas

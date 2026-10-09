@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/customSupabaseClient';
+import { montarTituloReceber } from '@/lib/titulosPagar';
 
 export const generateContasReceber = async (nfeData, user) => {
   if (nfeData.integrado_financeiro) {
@@ -9,25 +10,22 @@ export const generateContasReceber = async (nfeData, user) => {
   const dtEmissao = new Date(nfeData.data_emissao);
   const dtVencimento = new Date(dtEmissao.setDate(dtEmissao.getDate() + 30)).toISOString().split('T')[0];
 
-  const crPayload = {
-    company_id: nfeData.empresa_id,
-    cliente_id: nfeData.cliente_id,
+  const crPayload = montarTituloReceber({
+    companyId: nfeData.empresa_id,
+    clienteId: nfeData.cliente_id,
     numero: `NFE-${nfeData.numero || nfeData.id.substring(0, 6)}`,
-    data_emissao: nfeData.data_emissao,
-    data_vencimento: dtVencimento,
-    valor_original: nfeData.valor_total,
-    status: 'Pendente',
+    valor: nfeData.valor_total,
+    emissao: nfeData.data_emissao,
+    vencimento: dtVencimento,
     observacoes: `Gerado automaticamente da NF-e ${nfeData.numero || 'S/N'}`,
-    created_by: user?.id,
-    condicao_pagamento_id: nfeData.condicao_pagamento_id
-  };
+    createdBy: user?.id
+  });
 
   const { data: crRecord, error: crError } = await supabase
-    .from('contas_receber')
+    .from('movimentacao_financeira')
     .insert(crPayload)
     .select()
     .single();
-
   if (crError) throw crError;
 
   // Update NF-e flag

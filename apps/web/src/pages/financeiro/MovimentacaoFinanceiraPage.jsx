@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ const podeBaixar =(row) => ['pendente', 'pago_parcial', 'vencido'].includes(row.
 
 const MovimentacaoFinanceiraPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { company_id, loading: authLoading } = useAuthContext();
 
@@ -41,7 +42,7 @@ const MovimentacaoFinanceiraPage = () => {
   const [pagina, setPagina] = useState(1);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [filtroTipo, setFiltroTipo] = useState('Todos');
+  const [filtroTipo, setFiltroTipo] = useState(['pagar', 'receber'].includes(searchParams.get('tipo')) ? searchParams.get('tipo') : 'Todos');
   const [filtroStatus, setFiltroStatus] = useState('Todos');
   const [dateStart, setDateStart] = useState('');
   const [dateEnd, setDateEnd] = useState('');

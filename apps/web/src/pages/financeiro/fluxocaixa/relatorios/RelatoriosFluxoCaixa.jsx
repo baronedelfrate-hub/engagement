@@ -1,3 +1,4 @@
+import { carregarMovimentos } from '../fluxoCaixaUtils';
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import PageHeader from '@/components/PageHeader';
@@ -38,14 +39,9 @@ const RelatoriosFluxoCaixa = () => {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('fluxo_caixa_movimentacoes')
-        .select('*')
-        .gte('data_movimentacao', filters.dataInicio)
-        .lte('data_movimentacao', filters.dataFim)
-        .order('data_movimentacao', { ascending: false });
-      if (fetchError) throw fetchError;
-
+      // base única: títulos (previsto, pelo vencimento) e baixas (realizado, pela data do pagamento)
+      const data = (await carregarMovimentos({ inicio: filters.dataInicio, fim: filters.dataFim }))
+        .sort((a, b) => (a.data_movimentacao < b.data_movimentacao ? 1 : a.data_movimentacao > b.data_movimentacao ? -1 : 0));
       const centroIds = [...new Set((data || []).map(m => m.centro_custo_id).filter(Boolean))];
       let map = {};
       if (centroIds.length > 0) {

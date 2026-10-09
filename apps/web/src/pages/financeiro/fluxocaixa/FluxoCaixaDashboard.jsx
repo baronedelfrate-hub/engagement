@@ -5,46 +5,49 @@ import { motion } from 'framer-motion';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Plus, Settings, FileBarChart, ListTree } from 'lucide-react';
+import { Loader2, Plus, FileBarChart, ListTree } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FluxoCaixaTabela from './FluxoCaixaTabela';
-import { fetchFluxoCaixaData, formatCurrency } from './fluxoCaixaUtils';
+import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, formatCurrency } from './fluxoCaixaUtils';
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
-import EditarPrevistoModal from './components/EditarPrevistoModal';
 import { useToast } from '@/components/ui/use-toast';
 
+// Fluxo de caixa a partir da Movimentação Financeira (base única):
+// previsto = títulos pelo vencimento; realizado = baixas pela data do pagamento/recebimento.
 function FluxoCaixaDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [periodo, setPeriodo] = useState('mes');
   const [matrixData, setMatrixData] = useState(null);
   const [chartTimeline, setChartTimeline] = useState([]);
   const [movimentacoes, setMovimentacoes] = useState([]);
-  const [centrosCusto, setCentrosCusto] = useState([]);
+  const [vencidos, setVencidos] = useState(null);
 
   const [isDrilldownModalOpen, setIsDrilldownModalOpen] = useState(false);
   const [drilldownItems, setDrilldownItems] = useState([]);
   const [drilldownTitle, setDrilldownTitle] = useState('');
 
-  const [isEditarPrevistoModalOpen, setIsEditarPrevistoModalOpen] = useState(false);
-  const [editarPrevistoData, setEditarPrevistoData] = useState(null);
-
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await fetchFluxoCaixaData(60);
+      const [result, venc] = await Promise.all([
+        fetchFluxoCaixaData(intervaloDoPeriodo(periodo)),
+        fetchVencidos(),
+      ]);
       setMatrixData(result.matrix);
       setChartTimeline(result.chartTimeline);
       setMovimentacoes(result.movimentacoes);
-      setCentrosCusto(result.centrosCusto);
+      setVencidos(venc);
     } catch (error) {
       console.error('[FluxoCaixaDashboard] Erro ao carregar dados:', error);
       toast({ title: "Erro", description: "Não foi possível carregar o fluxo de caixa.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, periodo]);
 
   useEffect(() => {
     loadData();
@@ -68,13 +71,9 @@ function FluxoCaixaDashboard() {
     setIsDrilldownModalOpen(true);
   }, [movimentacoes]);
 
-  const handleOpenEditarPrevistoModal = useCallback((row, day) => {
-    setEditarPrevistoData(row && day ? { centroCustoId: row.id, dayKey: day.key } : null);
-    setIsEditarPrevistoModalOpen(true);
-  }, []);
-
-  const totalDias = chartTimeline.length;
-  const ultimoDia = totalDias > 0 ? chartTimeline[totalDias - 1] : null;
+  const ultimoDia = chartTimeline.length > 0 ? chartTimeline[chartTimeline.length - 1] : null;
+  const rotuloPeriodo = PERIODOS_FLUXO.find((p) => p.valor === periodo)?.rotulo?.toLowerCase();
+  const temVencidos = vencidos && (vencidos.aPagar.qtd > 0 || vencidos.aReceber.qtd > 0);
 
   return (
     <>
@@ -85,20 +84,23 @@ function FluxoCaixaDashboard() {
 
       <PageHeader
         title="Fluxo de Caixa"
-        description="Visualize e projete os movimentos financeiros da sua empresa (próximos 60 dias)."
+        description="Previsto (títulos pelo vencimento) x realizado (baixas pela data do pagamento), a partir da Movimentação Financeira."
         action={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/movimentacoes')} className="gap-2">
+            <Select value={periodo} onValueChange={setPeriodo}>
+              <SelectTrigger className="w-44 bg-background"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {PERIODOS_FLUXO.map((p) => <SelectItem key={p.valor} value={p.valor}>{p.rotulo}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => navigate('/movimentacao-financeira')} className="gap-2">
               <ListTree className="h-4 w-4" /> Movimentações
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/config-categorias')} className="gap-2">
-              <Settings className="h-4 w-4" /> Categorias
             </Button>
             <Button variant="outline" onClick={() => navigate('/financeiro/fluxo-caixa/relatorios')} className="gap-2">
               <FileBarChart className="h-4 w-4" /> Relatórios
             </Button>
-            <Button onClick={() => handleOpenEditarPrevistoModal(null, null)} className="gap-2">
-              <Plus className="h-4 w-4" /> Nova Entrada
+            <Button onClick={() => navigate('/movimentacao-financeira/nova')} className="gap-2">
+              <Plus className="h-4 w-4" /> Nova Movimentação
             </Button>
           </div>
         }
@@ -110,16 +112,16 @@ function FluxoCaixaDashboard() {
         transition={{ duration: 0.5 }}
         className="space-y-6 min-w-0"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Previsto (60 dias)</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Previsto ({rotuloPeriodo})</p>
               <h3 className="text-xl font-mono font-bold text-blue-600">{formatCurrency(ultimoDia?.saldoFinal?.previsto)}</h3>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Realizado (60 dias)</p>
+              <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Realizado ({rotuloPeriodo})</p>
               <h3 className="text-xl font-mono font-bold text-emerald-600">{formatCurrency(ultimoDia?.saldoFinal?.realizado)}</h3>
             </CardContent>
           </Card>
@@ -127,6 +129,17 @@ function FluxoCaixaDashboard() {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground uppercase font-bold">Diferença</p>
               <h3 className="text-xl font-mono font-bold text-foreground">{formatCurrency((ultimoDia?.saldoFinal?.realizado || 0) - (ultimoDia?.saldoFinal?.previsto || 0))}</h3>
+            </CardContent>
+          </Card>
+          <Card className={temVencidos ? 'border-red-500/50' : ''}>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground uppercase font-bold">Vencidos em aberto</p>
+              <h3 className="text-sm font-mono font-bold text-red-600">
+                {vencidos ? `A pagar: ${vencidos.aPagar.qtd} · ${formatCurrency(vencidos.aPagar.valor)}` : '—'}
+              </h3>
+              <h3 className="text-sm font-mono font-bold text-amber-600">
+                {vencidos ? `A receber: ${vencidos.aReceber.qtd} · ${formatCurrency(vencidos.aReceber.valor)}` : ''}
+              </h3>
             </CardContent>
           </Card>
         </div>
@@ -160,14 +173,6 @@ function FluxoCaixaDashboard() {
         onClose={() => setIsDrilldownModalOpen(false)}
         items={drilldownItems}
         title={drilldownTitle}
-      />
-
-      <EditarPrevistoModal
-        isOpen={isEditarPrevistoModalOpen}
-        onClose={() => setIsEditarPrevistoModalOpen(false)}
-        data={editarPrevistoData}
-        centrosCusto={centrosCusto}
-        onSave={loadData}
       />
     </>
   );

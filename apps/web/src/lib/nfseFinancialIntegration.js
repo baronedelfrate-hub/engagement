@@ -1,4 +1,5 @@
 import { supabase } from './customSupabaseClient';
+import { montarTituloReceber } from './titulosPagar';
 
 export const NfseFinancialIntegration = {
   async createReceivable(nfseData) {
@@ -14,25 +15,24 @@ export const NfseFinancialIntegration = {
 
     const valorLiquido = Number(nfseData.valor_servicos) - impostosRetidos;
 
-    const receivable = {
-        company_id: nfseData.company_id, // Ensure we carry this if multi-tenant
-        cliente_id: nfseData.cliente_id,
+    const emissao = String(nfseData.data_emissao).split('T')[0];
+    const vencimento = new Date(new Date(emissao).setDate(new Date(emissao).getDate() + 30)).toISOString().split('T')[0];
+
+    const receivable = montarTituloReceber({
+        companyId: nfseData.company_id,
+        clienteId: nfseData.cliente_id,
         numero: `NFSE-${nfseData.numero}`,
-        data_emissao: nfseData.data_emissao,
-        data_vencimento: new Date(new Date(nfseData.data_emissao).setDate(new Date(nfseData.data_emissao).getDate() + 30)).toISOString(),
-        valor_original: nfseData.valor_total, // Usually Gross
-        valor_recebido: 0,
-        status: 'aberto',
-        observacoes: `Gerado automaticamente via NFS-e ${nfseData.numero}. Impostos retidos: R$ ${impostosRetidos.toFixed(2)}`,
-        created_at: new Date().toISOString()
-    };
+        valor: nfseData.valor_total, // valor bruto
+        emissao,
+        vencimento,
+        observacoes: `Gerado automaticamente via NFS-e ${nfseData.numero}. Impostos retidos: R$ ${impostosRetidos.toFixed(2)}`
+    });
 
     const { data, error } = await supabase
-        .from('contas_receber')
+        .from('movimentacao_financeira')
         .insert([receivable])
         .select()
         .single();
-
     if (error) {
         console.error("Error creating receivable for NFSe:", error);
         throw error;

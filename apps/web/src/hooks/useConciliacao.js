@@ -9,7 +9,7 @@ export const useConciliacao = () => {
   const matchTransactions = async (systemRecord, ofxRecord) => {
     setLoading(true);
     try {
-      const table = systemRecord.origem === 'MOV' ? 'movimentacao_baixas' : (systemRecord.tipo_geral === 'PAGAR' ? 'contas_pagar' : 'contas_receber');
+      const table = 'movimentacao_baixas'; // única origem das baixas conciliáveis
       const dataConciliacao = new Date().toISOString().split('T')[0];
 
       // 1. Update system record
@@ -50,7 +50,7 @@ export const useConciliacao = () => {
   const unmatchTransactions = async (systemRecord, ofxRecord) => {
     setLoading(true);
     try {
-      const table = systemRecord.origem === 'MOV' ? 'movimentacao_baixas' : (systemRecord.tipo_geral === 'PAGAR' ? 'contas_pagar' : 'contas_receber');
+      const table = 'movimentacao_baixas'; // única origem das baixas conciliáveis
 
       const { error: sysError } = await supabase
         .from(table)

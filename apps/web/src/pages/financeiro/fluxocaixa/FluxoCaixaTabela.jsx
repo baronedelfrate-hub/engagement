@@ -123,15 +123,17 @@ const FluxoCaixaTabela = ({ data, loading, onCellClick }) => {
                         style={{ padding: '8px 12px', textAlign: 'right', whiteSpace: 'nowrap', minWidth: '110px', cursor: onCellClick ? 'pointer' : 'default' }}
                         className="text-sm text-muted-foreground border-r border-border bg-blue-50/10 dark:bg-blue-950/10 hover:bg-blue-100/40 dark:hover:bg-blue-900/30"
                       >
-                         {dayData.previsto > 0 ? formatCurrency(dayData.previsto) : '-'}
+                         {dayData.previsto !== 0 ? (
+                           <span className={dayData.previsto < 0 ? 'text-red-600 dark:text-red-400' : ''}>{formatCurrency(dayData.previsto)}</span>
+                         ) : '-'}
                       </td>
                       <td
                         onClick={() => onCellClick?.(row, day, 'realizado')}
                         style={{ padding: '8px 12px', textAlign: 'right', whiteSpace: 'nowrap', minWidth: '110px', borderRight: '1px solid hsl(var(--border))', cursor: onCellClick ? 'pointer' : 'default' }}
                         className="text-sm text-muted-foreground bg-emerald-50/10 dark:bg-emerald-950/10 hover:bg-emerald-100/40 dark:hover:bg-emerald-900/30"
                       >
-                         {dayData.realizado > 0 ? (
-                           <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                         {dayData.realizado !== 0 ? (
+                           <span className={`font-medium ${dayData.realizado < 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
                              {formatCurrency(dayData.realizado)}
                            </span>
                          ) : '-'}
@@ -144,7 +146,7 @@ const FluxoCaixaTabela = ({ data, loading, onCellClick }) => {
             {rows.length === 0 && (
               <tr>
                 <td colSpan={days.length * 2 + 1} className="text-center py-8 text-muted-foreground">
-                  Nenhuma movimentação no período. Clique em qualquer célula Previsto pra lançar uma.
+                  Nenhuma movimentação no período. Lance títulos em Movimentação Financeira e eles aparecem aqui.
                 </td>
               </tr>
             )}
@@ -152,7 +154,7 @@ const FluxoCaixaTabela = ({ data, loading, onCellClick }) => {
         </table>
       </div>
       <div className="p-2 text-xs text-center text-muted-foreground bg-muted border-t border-border">
-        Clique numa célula pra ver ou lançar movimentações • use a barra de rolagem horizontal pra ver os demais dias
+        Previsto = títulos pelo vencimento • Realizado = baixas pela data do pagamento • saídas aparecem negativas • clique numa célula para ver os lançamentos
       </div>
     </div>
   );

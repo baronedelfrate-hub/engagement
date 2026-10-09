@@ -1,3 +1,4 @@
+import { montarTituloPagar } from '@/lib/titulosPagar';
 import { supabase } from '@/lib/customSupabaseClient';
 
 export const manifestacaoNFService = {
@@ -142,20 +143,20 @@ export const manifestacaoNFService = {
     if (nota.integrado_financeiro) throw new Error('Financeiro já integrado.');
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Conta a pagar na Movimentação Financeira. Prazo padrão de 30 dias: ajuste o vencimento na própria movimentação.
+    const vencimentoPadrao = new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0];
     const { error: cpError } = await supabase
-      .from('contas_pagar')
-      .insert({
-        company_id: nota.empresa_id,
-        fornecedor_id: nota.fornecedor_id,
+      .from('movimentacao_financeira')
+      .insert(montarTituloPagar({
+        companyId: nota.empresa_id,
+        fornecedorId: nota.fornecedor_id,
         numero: `NFM-${nota.numero}`,
-        data_emissao: nota.data_emissao,
-        data_vencimento: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // Mock 30 days
-        valor_original: nota.valor_total,
-        status: 'Pendente',
+        valor: nota.valor_total,
+        emissao: nota.data_emissao,
+        vencimento: vencimentoPadrao,
         observacoes: `Gerado via Módulo de Manifestação - Chave: ${nota.chave_acesso}`,
-        created_by: user?.id
-      });
-
+        createdBy: user?.id
+      }));
     if (cpError) throw cpError;
 
     await supabase.from('notas_manifestacao').update({ integrado_financeiro: true }).eq('id', nota.id);

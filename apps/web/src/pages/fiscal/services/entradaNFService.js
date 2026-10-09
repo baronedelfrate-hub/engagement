@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { insertWithCompanyId, upsertWithCompanyId } from '@/lib/companyUtils';
+import { montarTituloPagar } from '@/lib/titulosPagar';
 
 export const entradaNFService = {
   // Fetch lists
@@ -186,29 +187,23 @@ export const entradaNFService = {
   createContasPagarFromNota: async (nota) => {
     if (nota.integrado_financeiro) throw new Error('Esta nota já está integrada ao financeiro.');
 
-    // Create entry in contas_pagar
+    // Cria a conta a pagar na Movimentação Financeira (base única do financeiro)
     const { data: cpData, error: cpError } = await supabase
-      .from('contas_pagar')
-      .insert({
-        company_id: nota.empresa_id,
-        fornecedor_id: nota.fornecedor_id,
+      .from('movimentacao_financeira')
+      .insert(montarTituloPagar({
+        companyId: nota.empresa_id,
+        fornecedorId: nota.fornecedor_id,
         numero: `NF-${nota.numero}`,
-        data_emissao: nota.data_emissao,
-        data_vencimento: nota.data_vencimento || nota.data_entrada,
-        valor_original: nota.valor_total,
-        valor_pago: 0,
-        status: 'Pendente',
-        observacoes: `Gerado automaticamente da NF de Entrada #${nota.numero}`,
-        categoria_id: nota.categoria_id,
-        subcategoria_id: nota.subcategoria_id,
-        centro_custo_id: nota.centro_custo_id,
-        condicao_pagamento_id: nota.condicao_pagamento_id,
-        tipo_pagamento_id: nota.tipo_pagamento_id,
-        nota_entrada_id: nota.id
-      })
+        valor: nota.valor_total,
+        emissao: nota.data_emissao,
+        vencimento: nota.data_vencimento || nota.data_entrada,
+        categoriaId: nota.categoria_id,
+        subcategoriaId: nota.subcategoria_id,
+        centroCustoId: nota.centro_custo_id,
+        observacoes: `Gerado automaticamente da NF de Entrada #${nota.numero}`
+      }))
       .select()
       .single();
-
     if (cpError) throw cpError;
 
     // Update nota status
@@ -236,28 +231,30 @@ export const entradaNFService = {
     const minVal = v * 0.9;
     const maxVal = v * 1.1;
 
+    // provisões = títulos a pagar pendentes que ainda não vieram de uma NF (numero_titulo "NF-...")
     const { data, error } = await supabase
-      .from('contas_pagar')
+      .from('movimentacao_financeira')
       .select('*')
+      .eq('tipo', 'pagar')
       .eq('fornecedor_id', fornecedorId)
-      .eq('status', 'Pendente')
-      .gte('valor_original', minVal)
-      .lte('valor_original', maxVal)
-      .is('nota_entrada_id', null);
+      .eq('status', 'pendente')
+      .gte('valor_total', minVal)
+      .lte('valor_total', maxVal)
+      .not('numero_titulo', 'like', 'NF-%');
 
     if (error) throw error;
-    return data;
+    return (data || []).map((p) => ({ ...p, valor_original: p.valor_total, numero: p.numero_titulo }));
   },
 
   replaceProvisao: async (provisaoId, nota) => {
     if (nota.integrado_financeiro) throw new Error('Esta nota já está integrada ao financeiro.');
 
     const { error: cpError } = await supabase
-      .from('contas_pagar')
+      .from('movimentacao_financeira')
       .update({
-        nota_entrada_id: nota.id,
-        valor_original: nota.valor_total, 
-        numero: `NF-${nota.numero}`
+        valor_total: nota.valor_total,
+        numero_titulo: `NF-${nota.numero}`,
+        updated_at: new Date().toISOString()
       })
       .eq('id', provisaoId);
 

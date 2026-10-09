@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/customSupabaseClient';
 import { insertWithCompanyId } from '@/lib/companyUtils';
+import { montarTituloPagar } from '@/lib/titulosPagar';
+import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Calendar, Plus, Trash2, Receipt, CheckCircle2, Loader2
@@ -24,6 +26,7 @@ const FORMAS_PAGAMENTO = [
 
 const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
   const { toast } = useToast();
+  const { moduloAtivo } = useAuthContext();
   const [activeTab, setActiveTab] = useState('dados');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -164,8 +167,8 @@ const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
 
       setSaving(true);
       try {
-          // --- 1. Entradas de Estoque + atualização do estoque do produto ---
-          for (const item of items) {
+          // --- 1. Entradas de Estoque + atualização do estoque do produto (só se a empresa usa o módulo Estoque) ---
+          for (const item of (moduloAtivo('estoque') ? items : [])) {
               const produtoMatch = findProdutoMatch(item);
 
               const { error: eeError } = await insertWithCompanyId('entradas_estoque', {
@@ -191,35 +194,28 @@ const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
               }
           }
 
-          // --- 2. Contas a Pagar + Parcelas ---
-          const { data: contaPagar, error: cpError } = await insertWithCompanyId('contas_pagar', {
-              numero: nota.numero_nfe,
-              fornecedor_id: nota.fornecedor_id,
-              valor_original: parseFloat(nota.valor_total),
-              data_emissao: new Date().toISOString().split('T')[0],
-              data_vencimento: pagamentos[0].dataVencimento,
-              status: 'Pendente',
-              categoria_id: mainCategory || null,
-              subcategoria_id: subcategoriaIdToSave,
-              centro_custo_id: rateios.length > 0 ? rateios[0].centro_custo_id || null : null,
-              projeto_id: rateios.length > 0 ? rateios[0].projeto_id || null : null,
-              parcelado: pagamentos.length > 1,
-              num_parcelas: pagamentos.length,
-              numero_parcelas: pagamentos.length,
-              nota_entrada_id: nota.id,
-              observacoes: 'Gerado via Recebimento NFe',
-          }, { chain: (q) => q.select().single() });
+          // --- 2. Contas a pagar na Movimentação Financeira (um título por parcela) ---
+          const hoje = new Date().toISOString().split('T')[0];
+          const nParcelas = pagamentos.length;
+          const titulos = pagamentos.map((pag, idx) => {
+              const forma = FORMAS_PAGAMENTO.find((f) => f.id === pag.tipo)?.label || pag.tipo;
+              return montarTituloPagar({
+                  fornecedorId: nota.fornecedor_id,
+                  numero: nParcelas > 1 ? `NF-${nota.numero_nfe}-${idx + 1}/${nParcelas}` : `NF-${nota.numero_nfe}`,
+                  valor: pag.valor,
+                  emissao: hoje,
+                  vencimento: pag.dataVencimento,
+                  categoriaId: mainCategory,
+                  subcategoriaId: subcategoriaIdToSave,
+                  centroCustoId: rateios.length > 0 ? rateios[0].centro_custo_id : null,
+                  projetoId: rateios.length > 0 ? rateios[0].projeto_id : null,
+                  parcela: idx + 1,
+                  totalParcelas: nParcelas,
+                  observacoes: `Recebimento NF-e ${nota.numero_nfe} · ${forma}${pag.documento ? ` · doc ${pag.documento}` : ''}${pag.obs ? ` · ${pag.obs}` : ''}`
+              });
+          });
+          const { error: cpError } = await insertWithCompanyId('movimentacao_financeira', titulos);
           if (cpError) throw cpError;
-
-          const { error: parcelasError } = await supabase.from('contas_pagar_parcelas').insert(pagamentos.map((pag, idx) => ({
-              contas_pagar_id: contaPagar.id,
-              numero_parcela: idx + 1,
-              valor: parseFloat(pag.valor),
-              data_vencimento: pag.dataVencimento,
-              status: 'Pendente',
-          })));
-          if (parcelasError) throw parcelasError;
-
           // --- 3. Rateios ---
           if (rateios.length > 0) {
               const { error: rateioError } = await insertWithCompanyId('nf_rateio', rateios.map(r => ({
@@ -254,7 +250,7 @@ const RecebimentoNFeModal = ({ isOpen, onClose, nota, onConfirm }) => {
 
           toast({
               title: "Entrada Concluída",
-              description: "Estoque atualizado e Contas a Pagar geradas com sucesso!",
+              description: moduloAtivo('estoque') ? "Estoque atualizado e contas a pagar geradas na Movimentação Financeira." : "Contas a pagar geradas na Movimentação Financeira.",
               className: "bg-green-600 text-white border-none"
           });
 

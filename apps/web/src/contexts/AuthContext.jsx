@@ -3,6 +3,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import { clearAuthStorage, recoverSession } from '@/lib/sessionCleanup';
+import { moduloLigado } from '@/lib/modulos';
 
 const AuthContext = createContext(null);
 
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [companyId, setCompanyId] = useState(null);
   const [companyIdSource, setCompanyIdSource] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [modulosAtivos, setModulosAtivos] = useState(null); // null = todos os módulos
 
   const fetchProfile = async (userId) => {
     try {
@@ -110,6 +112,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Módulos contratados pela empresa. Qualquer falha (coluna ainda inexistente, rede) libera tudo: nunca trancar o cliente.
+  const fetchModulos = async (resolvedCompanyId) => {
+    if (!resolvedCompanyId) {
+      setModulosAtivos(null);
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('empresas')
+        .select('modulos_ativos')
+        .eq('id', resolvedCompanyId)
+        .maybeSingle();
+      setModulosAtivos(error ? null : (data?.modulos_ativos ?? null));
+    } catch (e) {
+      setModulosAtivos(null);
+    }
+  };
+
   const logout = async () => {
     try {
       await supabase.auth.signOut();
@@ -123,6 +143,7 @@ export const AuthProvider = ({ children }) => {
       setCompanyId(null);
       setCompanyIdSource(null);
       setSubscriptionStatus(null);
+      setModulosAtivos(null);
       setLoading(false);
     }
   };
@@ -167,6 +188,7 @@ export const AuthProvider = ({ children }) => {
               setProfile(p);
               const resolvedId = await resolveCompanyId(session.user, p);
               await fetchSubscriptionStatus(resolvedId);
+              await fetchModulos(resolvedId);
             }
           }
         }
@@ -196,6 +218,7 @@ export const AuthProvider = ({ children }) => {
               setProfile(p);
               const resolvedId = await resolveCompanyId(session.user, p);
               await fetchSubscriptionStatus(resolvedId);
+              await fetchModulos(resolvedId);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -206,6 +229,7 @@ export const AuthProvider = ({ children }) => {
           setCompanyId(null);
           setCompanyIdSource(null);
           setSubscriptionStatus(null);
+          setModulosAtivos(null);
         } else if (event === 'USER_DELETED' || event === 'TOKEN_REFRESH_FAILED') {
           await logout();
         }
@@ -240,6 +264,9 @@ export const AuthProvider = ({ children }) => {
     getCompanyId,
     isSuperAdmin,
     subscriptionStatus,
+    modulosAtivos,
+    // Superadmin vê tudo; empresa sem restrição (nulo) vê tudo; Cadastros é sempre do núcleo.
+    moduloAtivo: (chave) => isSuperAdmin || moduloLigado(chave, modulosAtivos),
     // Superadmin nunca e bloqueado (precisa poder entrar pra corrigir qualquer assinatura, inclusive a propria).
     // Empresa sem linha em saas_assinaturas (status null) tambem nao e bloqueada -- fail-open, mesmo padrao
     // ja usado no resto do app pra nao trancar quem nunca configurou o modulo de billing.

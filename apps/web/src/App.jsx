@@ -27,6 +27,10 @@ import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
 import PainelCarteira from '@/pages/admin/PainelCarteira';
+import ModulosPorCliente from '@/pages/admin/ModulosPorCliente';
+import ModuloNaoContratado from '@/pages/ModuloNaoContratado';
+import { moduloDaRota } from '@/lib/modulos';
+import { useAuthContext } from '@/contexts/AuthContext';
 import BillingList from '@/pages/admin/billing/BillingList';
 import PlanosList from '@/pages/admin/billing/PlanosList';
 import PlanosForm from '@/pages/admin/billing/PlanosForm';
@@ -238,13 +242,24 @@ const ContabilidadeContextWrapper = ({ children }) => {
   return <ContabilidadeProvider>{children}</ContabilidadeProvider>;
 };
 
+// Bloqueia a URL direta de um módulo que a empresa não contratou (o menu já o esconde)
+const GuardaModulo = ({ children }) => {
+  const location = useLocation();
+  const { moduloAtivo, loading } = useAuthContext();
+  const chave = moduloDaRota(location.pathname);
+  if (!loading && chave && !moduloAtivo(chave)) return <ModuloNaoContratado chave={chave} />;
+  return children;
+};
+
 const ProtectedLayout = ({ children }) => {
   const location = useLocation();
   return (
     <ProtectedRoute>
       <Layout>
         <ErrorBoundary resetKey={location.pathname}>
-          {children}
+          <GuardaModulo>
+            {children}
+          </GuardaModulo>
         </ErrorBoundary>
       </Layout>
     </ProtectedRoute>
@@ -467,6 +482,7 @@ const AnimatedRoutes = () => {
           <Route path="/admin/dashboard" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DashboardAdmin /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           
           <Route path="/admin/carteira" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PainelCarteira /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/modulos" element={<SuperAdminRoute><ProtectedLayout><PageTransition><ModulosPorCliente /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="list" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="create" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/:userId" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="edit" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

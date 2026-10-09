@@ -16,6 +16,7 @@ import DynamicClientMenu from '@/components/DynamicClientMenu';
 import Header from '@/components/Header';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
+import { MODULO_DO_MENU } from '@/lib/modulos';
 
 // Define the navigation structure
 const navigation = [
@@ -144,6 +145,7 @@ const navigation = [
           { name: 'Central de Config.', href: '/admin', icon: Server },
           { name: 'Dashboard', href: '/admin/dashboard' },
           { name: 'Carteira de Clientes', href: '/admin/carteira' },
+          { name: 'Módulos por Cliente', href: '/admin/modulos' },
           { name: 'Usuários', href: '/admin/usuarios' },
           { name: 'Times', href: '/admin/times' },
           { name: 'Faturamento', href: '/admin/faturamento' },
@@ -410,11 +412,13 @@ const flatNavigation = flattenNavigation(navigation);
 
 const Layout = ({ children }) => {
   let isSuperAdmin = false;
+  let moduloAtivo = () => true;
   let profileName = null;
   let authLogout = null;
   try {
     const auth = useAuthContext();
     isSuperAdmin = auth?.isSuperAdmin ?? false;
+    moduloAtivo = auth?.moduloAtivo ?? (() => true);
     profileName = auth?.profile?.nome || auth?.user?.email || null;
     authLogout = auth?.logout;
   } catch (e) {}
@@ -525,16 +529,17 @@ const Layout = ({ children }) => {
           <nav className="flex flex-col space-y-1 px-3">
             {navigation
               .map(item => {
-                if (item.name === 'GESTÃO') {
-                  return {
-                    ...item,
-                    children: item.children?.filter(child =>
-                      child.name !== 'Administração' || isSuperAdmin
-                    )
-                  };
-                }
-                return item;
+                if (!item.children) return item;
+                // Esconde Administração de quem não é superadmin e os módulos que a empresa não contratou
+                return {
+                  ...item,
+                  children: item.children.filter(child =>
+                    (child.name !== 'Administração' || isSuperAdmin) &&
+                    (!MODULO_DO_MENU[child.name] || moduloAtivo(MODULO_DO_MENU[child.name]))
+                  )
+                };
               })
+              .filter(item => !item.children || item.children.length > 0)
               .map((item) => (
               <div key={item.name}>
                 {!item.children || item.children.length === 0 ? (

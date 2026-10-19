@@ -63,7 +63,7 @@ export const carregarMovimentos = async ({ inicio, fim }) => {
       .order('data_vencimento').order('id')),
     buscarTudo(() => supabase
       .from('movimentacao_baixas')
-      .select('id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
+      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
       .gte('data_baixa', inicio)
       .lte('data_baixa', fim)
       .order('data_baixa').order('id')),
@@ -71,6 +71,7 @@ export const carregarMovimentos = async ({ inicio, fim }) => {
 
   const previstos = titulos.map((t) => ({
     id: `t-${t.id}`,
+    titulo_id: t.id,
     data_movimentacao: t.data_vencimento,
     valor: Number(t.valor_total) || 0,
     status: 'Previsto',
@@ -82,6 +83,7 @@ export const carregarMovimentos = async ({ inicio, fim }) => {
 
   const realizados = baixas.map((b) => ({
     id: `b-${b.id}`,
+    titulo_id: b.movimentacao_id,
     data_movimentacao: b.data_baixa,
     valor: Number(b.valor_baixa) || 0,
     status: 'Realizado',

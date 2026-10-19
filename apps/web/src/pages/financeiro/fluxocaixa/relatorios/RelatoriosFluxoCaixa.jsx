@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2 } from 'lucide-react';
+import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2, FileDown, FileSpreadsheet } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import SelecionarColunasFluxo from './components/SelecionarColunasFluxo';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { gerarFluxoCaixaPdf, gerarFluxoCaixaExcel } from '@/lib/relatorioFluxoCaixaExport';
 
 const RelatoriosFluxoCaixa = () => {
   const [filters, setFilters] = useState({
@@ -26,6 +28,15 @@ const RelatoriosFluxoCaixa = () => {
   const [centrosCustoMap, setCentrosCustoMap] = useState({});
   const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'categoria', 'descricao', 'valor']);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
+
+  const { company_id } = useAuthContext();
+  const [empresa, setEmpresa] = useState(null);
+  const [exportando, setExportando] = useState(null); // 'pdf' | 'excel' | null
+
+  useEffect(() => {
+    if (!company_id) { setEmpresa(null); return; }
+    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj').eq('id', company_id).single().then(({ data: e }) => setEmpresa(e));
+  }, [company_id]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,6 +83,23 @@ const RelatoriosFluxoCaixa = () => {
     if (filters.categoria && !(item.categoria || '').toLowerCase().includes(filters.categoria.toLowerCase())) return false;
     return true;
   });
+
+  const exportar = async (formato) => {
+    if (selectedColumns.length === 0) {
+      toast({ title: 'Atenção', description: 'Selecione ao menos uma coluna em "Configurar Colunas".', variant: 'destructive' });
+      return;
+    }
+    setExportando(formato);
+    try {
+      const gerar = formato === 'pdf' ? gerarFluxoCaixaPdf : gerarFluxoCaixaExcel;
+      const nome = await gerar({ empresa, filtros: filters, linhas: data, colunas: selectedColumns, centrosMap: centrosCustoMap });
+      toast({ title: formato === 'pdf' ? 'PDF gerado' : 'Planilha gerada', description: `Arquivo ${nome} baixado.` });
+    } catch (e) {
+      toast({ title: 'Erro ao exportar', description: e.message || 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setExportando(null);
+    }
+  };
 
   const calculateTotals = () => {
       const prev = data.filter(i => i.status === 'Previsto').reduce((acc, i) => acc + parseFloat(i.valor || 0), 0);
@@ -187,9 +215,17 @@ const RelatoriosFluxoCaixa = () => {
                     <CardTitle className="text-base flex items-center gap-2">
                         <Eye className="w-4 h-4 text-muted-foreground" /> Dados
                     </CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setIsColumnModalOpen(true)}>
-                        Configurar Colunas
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setIsColumnModalOpen(true)}>
+                            Configurar Colunas
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-2" disabled={isLoading || data.length === 0 || exportando !== null} onClick={() => exportar('pdf')}>
+                            {exportando === 'pdf' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Exportar PDF
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-2" disabled={isLoading || data.length === 0 || exportando !== null} onClick={() => exportar('excel')}>
+                            {exportando === 'excel' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Exportar Excel
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border overflow-x-auto max-h-[600px]">

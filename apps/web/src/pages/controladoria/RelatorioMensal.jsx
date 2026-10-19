@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { supabase } from '@/lib/customSupabaseClient';
-import { montarDRE, calcularPE, agregarDashboard, MESES } from '@/lib/dreGerencial';
+import { montarDRE, calcularPEPeriodo, agregarDashboard, MESES } from '@/lib/dreGerencial';
 import { gerarRelatorioMensalPdf } from '@/lib/relatorioMensalPdf';
 import { gerarRelatorioMensalExcel } from '@/lib/relatorioMensalExcel';
 
@@ -24,6 +25,9 @@ function RelatorioMensal() {
   const [mes, setMes] = useState(null);
   const [empresa, setEmpresa] = useState(null);
   const [gerando, setGerando] = useState(false);
+  // mesma escolha da tela do Ponto de Equilíbrio: retiradas de sócios como custo fixo
+  const [incluirSocios, setIncluirSocios] = useState(() => { try { return localStorage.getItem('pe_incluir_socios') === '1'; } catch { return false; } });
+  const alternarSocios = (v) => { setIncluirSocios(v); try { localStorage.setItem('pe_incluir_socios', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
   const [gerandoExcel, setGerandoExcel] = useState(false);
 
   useEffect(() => {
@@ -39,7 +43,12 @@ function RelatorioMensal() {
   }, [movs]);
 
   const dre = useMemo(() => (ano ? montarDRE(movs, { ano, categorias, subcategorias }) : null), [movs, ano, categorias, subcategorias]);
-  const pe = useMemo(() => (dre ? calcularPE(dre) : null), [dre]);
+  const pe = useMemo(() => (dre ? {
+    incluirSocios,
+    meses: Array.from({ length: 12 }, (_, i) => calcularPEPeriodo(dre, i, i, { incluirSocios })),
+    total: calcularPEPeriodo(dre, 0, 11, { incluirSocios }),
+    acumulado: mes !== null ? calcularPEPeriodo(dre, 0, mes, { incluirSocios }) : null
+  } : null), [dre, mes, incluirSocios]);
   const dash = useMemo(() => {
     if (!ano || mes === null) return null;
     const mm = String(mes + 1).padStart(2, '0');
@@ -92,6 +101,10 @@ function RelatorioMensal() {
           <SelectTrigger className="w-32 bg-background"><SelectValue placeholder="Mês" /></SelectTrigger>
           <SelectContent>{MESES.map((m, i) => <SelectItem key={m} value={String(i)}>{m}</SelectItem>)}</SelectContent>
         </Select>
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none" title="Soma as retiradas de sócios aos custos fixos no ponto de equilíbrio do relatório (PDF e Excel).">
+          <Checkbox checked={incluirSocios} onCheckedChange={(v) => alternarSocios(v === true)} />
+          Incluir retiradas de sócios no ponto de equilíbrio
+        </label>
         <Button onClick={gerar} disabled={!pronto || gerando} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Gerar PDF
         </Button>
@@ -122,7 +135,7 @@ function RelatorioMensal() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-blue-600">Receita bruta — {MESES[mes]}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(p.receita_bruta.valores[mes])}</div></CardContent></Card>
             <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-green-600">Lucro líquido — {MESES[mes]}</CardTitle></CardHeader><CardContent><div className={`text-2xl font-bold ${p.lucro_liquido.valores[mes] < 0 ? 'text-red-600' : ''}`}>R$ {fmt(p.lucro_liquido.valores[mes])}</div></CardContent></Card>
-            <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-purple-600">Ponto de equilíbrio</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(pe.meses[mes].pe)}</div><div className="text-xs text-muted-foreground">{pe.meses[mes].situacao || '—'}</div></CardContent></Card>
+            <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-purple-600">Ponto de equilíbrio</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(pe.meses[mes].pe)}</div><div className="text-xs text-muted-foreground">{pe.meses[mes].temDado ? (pe.meses[mes].peImpossivel ? 'Sem ponto de equilíbrio' : `R$ ${fmt(Math.abs(pe.meses[mes].folga))} ${pe.meses[mes].acima ? 'acima' : 'abaixo'} do PE`) : '—'}</div></CardContent></Card>
             <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-red-600">Despesas pagas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(dash.despesa)}</div></CardContent></Card>
           </div>
 

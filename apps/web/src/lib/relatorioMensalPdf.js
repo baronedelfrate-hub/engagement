@@ -247,23 +247,38 @@ export const gerarRelatorioMensalPdf = async (dados) => {
 
   // 3) ponto de equilíbrio
   secao('3. Ponto de equilíbrio');
+  const peAc = pe.acumulado;
+  const situacaoPe = (x) => (!x.temDado ? '—' : x.peImpossivel ? 'Sem PE (margem negativa)' : x.acima ? 'Acima do PE' : 'Abaixo do PE');
   autoTable(doc, {
     ...estiloBase,
     startY: y,
-    head: [['', tituloMes, `Acumulado ${ano}`]],
+    head: [['', tituloMes, `Acumulado ${MESES[0]} a ${MESES[mes]}/${ano}`]],
     body: [
-      ['Receita bruta', fmt(peMes.receita), fmt(pe.total.receita)],
-      ['Custos variáveis', fmt(peMes.variaveis), fmt(pe.total.variaveis)],
-      ['Custos fixos', fmt(peMes.fixos), fmt(pe.total.fixos)],
-      ['Margem de contribuição (R$)', fmt(peMes.mc), fmt(pe.total.mc)],
-      ['Margem de contribuição (%)', pct(peMes.mcPct), pct(pe.total.mcPct)],
-      ['Ponto de equilíbrio (R$)', fmt(peMes.pe), fmt(pe.total.pe)],
-      ['Situação', peMes.situacao || '—', pe.total.situacao || '—']
+      ['Receita bruta', fmt(peMes.receita), fmt(peAc.receita)],
+      ['Custos variáveis', fmt(peMes.variaveis), fmt(peAc.variaveis)],
+      [pe.incluirSocios ? 'Custos fixos (incluem retiradas de sócios)' : 'Custos fixos', fmt(peMes.fixos), fmt(peAc.fixos)],
+      ['Margem de contribuição (R$)', fmt(peMes.mc), fmt(peAc.mc)],
+      ['Margem de contribuição (%)', pct(peMes.mcPct), pct(peAc.mcPct)],
+      ['Ponto de equilíbrio (R$)', peMes.peImpossivel ? '—' : fmt(peMes.pe), peAc.peImpossivel ? '—' : fmt(peAc.pe)],
+      ['Sobrou / faltou em relação ao PE (R$)', peMes.peImpossivel ? '—' : fmt(peMes.folga), peAc.peImpossivel ? '—' : fmt(peAc.folga)],
+      ['Cobertura do PE (receita ÷ PE)', peMes.cobertura == null ? '—' : pct(peMes.cobertura), peAc.cobertura == null ? '—' : pct(peAc.cobertura)],
+      ['Situação', situacaoPe(peMes), situacaoPe(peAc)]
     ],
     columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
     didParseCell: (d) => { if (d.section === 'body' && d.row.index === 5) { d.cell.styles.fontStyle = 'bold'; d.cell.styles.fillColor = CINZA; } }
   });
   proximoY();
+  if (pe.incluirSocios) {
+    const nota = `Os custos fixos incluem as retiradas de sócios: ${fmt(peMes.retiradasSocios)} no mês e ${fmt(peAc.retiradasSocios)} no acumulado. Sem elas, o ponto de equilíbrio seria ${fmt(peMes.peSemSocios)} no mês e ${fmt(peAc.peSemSocios)} no acumulado.`;
+    const linhasNota = doc.splitTextToSize(nota, largura - margem * 2);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text(linhasNota, margem, y - 4);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 30, 30);
+    y += linhasNota.length * 3.6;
+  }
 
   garantir(66);
   tituloGrafico(`Receita bruta x ponto de equilíbrio — ${MESES[0]} a ${MESES[mes]}/${ano}`);

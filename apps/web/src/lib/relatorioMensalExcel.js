@@ -58,19 +58,28 @@ export const gerarRelatorioMensalExcel = async (dados) => {
 
   // 3) Ponto de equilíbrio por mês
   const col = (f) => [...pe.meses.map(f), f(pe.total)];
+  const situacaoPe = (m) => (!m.temDado ? '' : m.peImpossivel ? 'Sem PE (margem negativa)' : m.acima ? 'Acima do PE' : 'Abaixo do PE');
+  const linhasPeDef = [
+    ['Receita bruta', (m) => m.receita],
+    ['Custos variáveis', (m) => m.variaveis],
+    [pe.incluirSocios ? 'Custos fixos (incluem retiradas de sócios)' : 'Custos fixos', (m) => m.fixos],
+    ...(pe.incluirSocios ? [['   retiradas de sócios incluídas', (m) => m.retiradasSocios], ['PE sem as retiradas (R$)', (m) => m.peSemSocios]] : []),
+    ['Margem de contribuição (R$)', (m) => m.mc],
+    ['Margem de contribuição (%)', (m) => m.mcPct, 'pct'],
+    ['Ponto de equilíbrio (R$)', (m) => (m.peImpossivel ? null : m.pe)],
+    ['Sobrou / faltou em relação ao PE (R$)', (m) => (m.peImpossivel ? null : m.folga)],
+    ['Cobertura do PE (receita ÷ PE)', (m) => m.cobertura, 'pct'],
+    ['Situação', situacaoPe]
+  ];
   const peLinhas = [
-    ['Conta', ...MESES, 'Total'],
-    ['Receita bruta', ...col((m) => m.receita)],
-    ['Custos variáveis', ...col((m) => m.variaveis)],
-    ['Custos fixos', ...col((m) => m.fixos)],
-    ['Margem de contribuição (R$)', ...col((m) => m.mc)],
-    ['Margem de contribuição (%)', ...col((m) => m.mcPct)],
-    ['Ponto de equilíbrio (R$)', ...col((m) => m.pe)],
-    ['Situação', ...col((m) => m.situacao)]
+    ['Conta', ...MESES, 'Total do ano'],
+    ...linhasPeDef.map(([rotulo, f]) => [rotulo, ...col(f)]),
+    [],
+    ['Retiradas de sócios como custo fixo:', pe.incluirSocios ? 'incluídas' : 'não incluídas']
   ];
   const fmtPe = {};
-  for (let c = 1; c <= 13; c++) fmtPe[`5:${c}`] = FORMATO_PCT;
-  XLSX.utils.book_append_sheet(wb, montarAba(XLSX, peLinhas, { larguras: [32, ...Array(13).fill(13)], formatos: fmtPe }), 'Ponto de equilíbrio');
+  linhasPeDef.forEach(([, , tipo], r) => { if (tipo === 'pct') for (let c = 1; c <= 13; c++) fmtPe[`${r + 1}:${c}`] = FORMATO_PCT; });
+  XLSX.utils.book_append_sheet(wb, montarAba(XLSX, peLinhas, { larguras: [44, ...Array(13).fill(13)], formatos: fmtPe }), 'Ponto de equilíbrio');
 
   // 4) Despesas por categoria (mês)
   const desp = [[`Despesas por categoria — ${tituloMes}`], ['Categoria', 'Total pago', '% das despesas']];

@@ -28,7 +28,7 @@ const RelatoriosFluxoCaixa = () => {
 
   const [rawData, setRawData] = useState([]);
   const [centrosCustoMap, setCentrosCustoMap] = useState({});
-  const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'categoria', 'descricao', 'valor']);
+  const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'categoria', 'subcategoria', 'descricao', 'valor']);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
 
   const { company_id } = useAuthContext();
@@ -82,7 +82,7 @@ const RelatoriosFluxoCaixa = () => {
   const data = rawData.filter(item => {
     if (filters.tipo !== 'TODOS' && item.tipo !== filters.tipo) return false;
     if (filters.status !== 'TODOS' && item.status !== filters.status) return false;
-    if (filters.categoria && !(item.categoria || '').toLowerCase().includes(filters.categoria.toLowerCase())) return false;
+    if (filters.categoria && !`${item.categoria || ''} ${item.subcategoria || ''}`.toLowerCase().includes(filters.categoria.toLowerCase())) return false;
     return true;
   });
 
@@ -177,9 +177,9 @@ const RelatoriosFluxoCaixa = () => {
                 <Input type="date" className="bg-background h-9" value={filters.dataFim} onChange={e => setFilters({...filters, dataFim: e.target.value})} />
             </div>
             <div className="space-y-1">
-                <label className="text-xs font-bold text-muted-foreground">Categoria (Busca)</label>
+                <label className="text-xs font-bold text-muted-foreground">Categoria / Subcategoria (Busca)</label>
                 <Input
-                    placeholder="Filtrar por categoria..."
+                    placeholder="Categoria ou subcategoria..."
                     className="bg-background h-9"
                     value={filters.categoria}
                     onChange={e => setFilters({...filters, categoria: e.target.value})}
@@ -242,6 +242,7 @@ const RelatoriosFluxoCaixa = () => {
                                     {selectedColumns.includes('tipo') && <TableHead className="w-[100px]">Tipo</TableHead>}
                                     {selectedColumns.includes('status') && <TableHead className="w-[100px]">Status</TableHead>}
                                     {selectedColumns.includes('categoria') && <TableHead>Categoria</TableHead>}
+                                    {selectedColumns.includes('subcategoria') && <TableHead>Subcategoria</TableHead>}
                                     {selectedColumns.includes('centroCusto') && <TableHead>Centro de Custo</TableHead>}
                                     {selectedColumns.includes('descricao') && <TableHead>Descrição</TableHead>}
                                     {selectedColumns.includes('valor') && <TableHead className="text-right w-[140px]">Valor</TableHead>}
@@ -276,6 +277,7 @@ const RelatoriosFluxoCaixa = () => {
                                                 </TableCell>
                                             )}
                                             {selectedColumns.includes('categoria') && <TableCell className="text-xs font-medium">{item.categoria}</TableCell>}
+                                            {selectedColumns.includes('subcategoria') && <TableCell className="text-xs text-muted-foreground">{item.subcategoria || '-'}</TableCell>}
                                             {selectedColumns.includes('centroCusto') && <TableCell className="text-xs text-muted-foreground">{centrosCustoMap[item.centro_custo_id] ? `${centrosCustoMap[item.centro_custo_id].codigo} - ${centrosCustoMap[item.centro_custo_id].nome}` : '-'}</TableCell>}
                                             {selectedColumns.includes('descricao') && <TableCell className="text-xs text-muted-foreground truncate max-w-[200px]">{item.descricao}</TableCell>}
                                             {selectedColumns.includes('valor') && <TableCell className={`text-right font-mono text-xs font-bold ${item.tipo === 'Receita' ? 'text-emerald-600' : 'text-red-600'}`}>{parseFloat(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</TableCell>}

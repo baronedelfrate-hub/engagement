@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { formatCurrency } from './fluxoCaixaUtils';
 
-const FluxoCaixaTabela = ({ data, loading, onCellClick }) => {
+const FluxoCaixaTabela = ({ data, loading, onCellClick, rotuloLinha = 'Centro de Custos' }) => {
   if (loading) {
     return <div className="p-4"><p>Carregando dados...</p></div>;
   }
@@ -46,7 +46,7 @@ const FluxoCaixaTabela = ({ data, loading, onCellClick }) => {
                 }}
                 className="font-semibold text-foreground text-sm uppercase tracking-wider shadow-[4px_0_8px_-4px_rgba(0,0,0,0.1)]"
               >
-                Centro de Custos
+                {rotuloLinha}
               </th>
               {days.map((day) => (
                 <th

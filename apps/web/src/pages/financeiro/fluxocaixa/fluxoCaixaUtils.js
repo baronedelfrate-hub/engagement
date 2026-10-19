@@ -58,7 +58,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
       // provisão pendente conta como previsto; provisão já substituída não conta (o lançamento real que a substituiu é que conta)
       let q = supabase
         .from('movimentacao_financeira')
-        .select('id, numero_titulo, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
+        .select('id, numero_titulo, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
         .not('status', 'in', '(cancelado,substituido)')
         .gte('data_vencimento', inicio)
         .lte('data_vencimento', fim)
@@ -68,7 +68,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     }),
     buscarTudo(() => supabase
       .from('movimentacao_baixas')
-      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
+      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
       .gte('data_baixa', inicio)
       .lte('data_baixa', fim)
       .order('data_baixa').order('id')),
@@ -84,6 +84,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     tipo: t.tipo === 'pagar' ? 'Despesa' : 'Receita',
     centro_custo_id: t.centro_custo_id,
     categoria: t.categoria?.nome || 'Sem categoria',
+    subcategoria: t.subcategoria?.nome || '',
     descricao: [t.numero_titulo, nomeEntidade(t)].filter(Boolean).join(' · '),
   }));
 
@@ -96,6 +97,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     tipo: b.movimentacao?.tipo === 'pagar' ? 'Despesa' : 'Receita',
     centro_custo_id: b.centro_custo_id || b.movimentacao?.centro_custo_id || null,
     categoria: b.categoria?.nome || b.movimentacao?.categoria?.nome || 'Sem categoria',
+    subcategoria: b.subcategoria?.nome || b.movimentacao?.subcategoria?.nome || '',
     descricao: [b.movimentacao?.numero_titulo, nomeEntidade(b.movimentacao)].filter(Boolean).join(' · '),
   }));
 
@@ -125,7 +127,23 @@ export const fetchVencidos = async () => {
  * - matrix: {days:[{key,label}], rows:[{id,code,name,values:{[dayKey]:{previsto,realizado}}}]} pra FluxoCaixaTabela
  * - chartTimeline: [{date, saldoFinal:{previsto,realizado}, entradas:{...}, saidas:{...}}] pra FluxoCaixaDashboardChart
  */
-export const fetchFluxoCaixaData = async ({ inicio, fim, incluirProvisoes = true }) => {
+export const AGRUPAMENTOS_FLUXO = [
+  { valor: 'centro', rotulo: 'Centro de custo', coluna: 'Centro de Custos' },
+  { valor: 'categoria', rotulo: 'Categoria', coluna: 'Categoria' },
+  { valor: 'subcategoria', rotulo: 'Subcategoria', coluna: 'Categoria › Subcategoria' },
+];
+
+// Em qual linha da tabela cai o movimento, conforme o agrupamento escolhido
+export const descreverLinha = (m, agruparPor, centrosMap = {}) => {
+  if (agruparPor === 'categoria') return { id: `cat:${m.categoria}`, code: '', name: m.categoria || 'Sem categoria' };
+  if (agruparPor === 'subcategoria') {
+    return { id: `sub:${m.categoria}|${m.subcategoria}`, code: '', name: `${m.categoria || 'Sem categoria'} › ${m.subcategoria || '(sem subcategoria)'}` };
+  }
+  const centro = centrosMap[m.centro_custo_id];
+  return { id: m.centro_custo_id || 'sem-centro', code: centro?.codigo || '-', name: centro?.nome || 'Sem Centro de Custo' };
+};
+
+export const fetchFluxoCaixaData = async ({ inicio, fim, incluirProvisoes = true, agruparPor = 'centro' }) => {
   const [movimentacoes, centrosResult] = await Promise.all([
     carregarMovimentos({ inicio, fim, incluirProvisoes }),
     supabase.from('centros_custo').select('id, codigo, nome'),
@@ -150,9 +168,8 @@ export const fetchFluxoCaixaData = async ({ inicio, fim, incluirProvisoes = true
   };
 
   movimentacoes.forEach((m) => {
-    const centro = centrosMap[m.centro_custo_id];
-    const rowId = m.centro_custo_id || 'sem-centro';
-    const row = ensureRow(rowId, centro?.codigo || '-', centro?.nome || 'Sem Centro de Custo');
+    const { id: rowId, code, name } = descreverLinha(m, agruparPor, centrosMap);
+    const row = ensureRow(rowId, code, name);
     const cell = row.values[m.data_movimentacao];
     if (!cell) return;
     // despesa entra negativa na matriz, para a soma da linha ser o saldo
@@ -163,7 +180,7 @@ export const fetchFluxoCaixaData = async ({ inicio, fim, incluirProvisoes = true
 
   const matrix = {
     days,
-    rows: Object.values(rowsMap).sort((a, b) => String(a.code).localeCompare(String(b.code))),
+    rows: Object.values(rowsMap).sort((a, b) => String(a.code).localeCompare(String(b.code)) || String(a.name).localeCompare(String(b.name), 'pt-BR')),
   };
 
   let saldoPrevistoAcumulado = 0;

@@ -20,6 +20,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                         <th className="p-3">Data</th>
                         <th className="p-3">Descrição</th>
                         <th className="p-3">Categoria</th>
+                        <th className="p-3">Subcategoria</th>
                         <th className="p-3">Origem</th>
                         <th className="p-3 text-right">Valor</th>
                     </tr>
@@ -30,6 +31,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                             <td className="p-3">{formatDateOnly(item.data)}</td>
                             <td className="p-3 font-medium">{item.descricao}</td>
                             <td className="p-3 text-muted-foreground">{item.categoria}</td>
+                            <td className="p-3 text-muted-foreground">{item.subcategoria || '-'}</td>
                             <td className="p-3 text-xs">
                                 <span className={`px-2 py-1 rounded ${item.tipo === 'PREVISTO' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400' : 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400'}`}>
                                     {item.tipo}
@@ -40,7 +42,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                             </td>
                         </tr>
                     )) : (
-                        <tr><td colSpan="5" className="p-4 text-center text-muted-foreground">Nenhum item encontrado.</td></tr>
+                        <tr><td colSpan="6" className="p-4 text-center text-muted-foreground">Nenhum item encontrado.</td></tr>
                     )}
                 </tbody>
             </table>

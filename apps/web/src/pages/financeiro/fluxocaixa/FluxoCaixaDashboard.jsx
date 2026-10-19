@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import FluxoCaixaTabela from './FluxoCaixaTabela';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, MAX_DIAS_FLUXO, diasEntre, formatarDataBR, formatCurrency } from './fluxoCaixaUtils';
+import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, MAX_DIAS_FLUXO, AGRUPAMENTOS_FLUXO, descreverLinha, diasEntre, formatarDataBR, formatCurrency } from './fluxoCaixaUtils';
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
 import { useToast } from '@/components/ui/use-toast';
@@ -24,6 +24,7 @@ function FluxoCaixaDashboard() {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('mes');
   const [incluirProvisoes, setIncluirProvisoes] = useState(true);
+  const [agruparPor, setAgruparPor] = useState('centro');
   // período personalizado: o que o usuário digita (rascunho) e o que foi aplicado de fato
   const [rascunho, setRascunho] = useState(intervaloDoPeriodo('mes'));
   const [intervaloCustom, setIntervaloCustom] = useState(intervaloDoPeriodo('mes'));
@@ -41,7 +42,7 @@ function FluxoCaixaDashboard() {
     try {
       const intervalo = periodo === 'personalizado' ? intervaloCustom : intervaloDoPeriodo(periodo);
       const [result, venc] = await Promise.all([
-        fetchFluxoCaixaData({ ...intervalo, incluirProvisoes }),
+        fetchFluxoCaixaData({ ...intervalo, incluirProvisoes, agruparPor }),
         fetchVencidos(),
       ]);
       setMatrixData(result.matrix);
@@ -54,7 +55,7 @@ function FluxoCaixaDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [toast, periodo, intervaloCustom, incluirProvisoes]);
+  }, [toast, periodo, intervaloCustom, incluirProvisoes, agruparPor]);
 
   useEffect(() => {
     loadData();
@@ -80,12 +81,12 @@ function FluxoCaixaDashboard() {
   const handleCellClick = useCallback((row, day, type) => {
     const status = type === 'previsto' ? 'Previsto' : 'Realizado';
     const items = movimentacoes.filter(m => {
-      const rowId = m.centro_custo_id || 'sem-centro';
-      return rowId === row.id && m.data_movimentacao === day.key && m.status === status;
+      return descreverLinha(m, agruparPor).id === row.id && m.data_movimentacao === day.key && m.status === status;
     }).map(m => ({
       data: m.data_movimentacao,
       descricao: m.descricao,
       categoria: m.categoria,
+      subcategoria: m.subcategoria,
       tipo: m.status?.toUpperCase(),
       valor: m.tipo === 'Despesa' ? -parseFloat(m.valor || 0) : parseFloat(m.valor || 0),
     }));
@@ -93,7 +94,7 @@ function FluxoCaixaDashboard() {
     setDrilldownItems(items);
     setDrilldownTitle(`${row.name} — ${day.label} (${status})`);
     setIsDrilldownModalOpen(true);
-  }, [movimentacoes]);
+  }, [movimentacoes, agruparPor]);
 
   const ultimoDia = chartTimeline.length > 0 ? chartTimeline[chartTimeline.length - 1] : null;
   const rotuloPeriodo = periodo === 'personalizado'
@@ -127,6 +128,12 @@ function FluxoCaixaDashboard() {
                 <Button onClick={aplicarPersonalizado} disabled={loading}>Aplicar</Button>
               </>
             )}
+            <Select value={agruparPor} onValueChange={setAgruparPor}>
+              <SelectTrigger className="w-52 bg-background" title="Como agrupar as linhas da tabela"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {AGRUPAMENTOS_FLUXO.map((a) => <SelectItem key={a.valor} value={a.valor}>Agrupar por {a.rotulo.toLowerCase()}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <label className="flex items-center gap-2 text-sm px-2 cursor-pointer select-none" title="Provisões pendentes entram no previsto">
               <Checkbox checked={incluirProvisoes} onCheckedChange={(v) => setIncluirProvisoes(v === true)} />
               Incluir provisões
@@ -196,6 +203,7 @@ function FluxoCaixaDashboard() {
             <TabsContent value="tabela" className="mt-4">
               <FluxoCaixaTabela
                 data={matrixData}
+                rotuloLinha={AGRUPAMENTOS_FLUXO.find((a) => a.valor === agruparPor)?.coluna}
                 onCellClick={handleCellClick}
               />
             </TabsContent>

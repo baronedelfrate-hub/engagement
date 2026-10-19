@@ -9,6 +9,7 @@ const AVAILABLE_COLUMNS = [
   { id: 'tipo', label: 'Tipo (Entrada/Saída)' },
   { id: 'status', label: 'Status (Previsto/Realizado)' },
   { id: 'categoria', label: 'Categoria' },
+  { id: 'subcategoria', label: 'Subcategoria' },
   { id: 'centroCusto', label: 'Centro de Custo' },
   { id: 'descricao', label: 'Descrição' },
   { id: 'valor', label: 'Valor' },

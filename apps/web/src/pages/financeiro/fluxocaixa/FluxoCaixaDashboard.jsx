@@ -9,7 +9,8 @@ import { Loader2, Plus, FileBarChart, ListTree } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FluxoCaixaTabela from './FluxoCaixaTabela';
-import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, formatCurrency } from './fluxoCaixaUtils';
+import { Input } from '@/components/ui/input';
+import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, MAX_DIAS_FLUXO, diasEntre, formatarDataBR, formatCurrency } from './fluxoCaixaUtils';
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
 import { useToast } from '@/components/ui/use-toast';
@@ -21,6 +22,9 @@ function FluxoCaixaDashboard() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('mes');
+  // período personalizado: o que o usuário digita (rascunho) e o que foi aplicado de fato
+  const [rascunho, setRascunho] = useState(intervaloDoPeriodo('mes'));
+  const [intervaloCustom, setIntervaloCustom] = useState(intervaloDoPeriodo('mes'));
   const [matrixData, setMatrixData] = useState(null);
   const [chartTimeline, setChartTimeline] = useState([]);
   const [movimentacoes, setMovimentacoes] = useState([]);
@@ -33,8 +37,9 @@ function FluxoCaixaDashboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      const intervalo = periodo === 'personalizado' ? intervaloCustom : intervaloDoPeriodo(periodo);
       const [result, venc] = await Promise.all([
-        fetchFluxoCaixaData(intervaloDoPeriodo(periodo)),
+        fetchFluxoCaixaData(intervalo),
         fetchVencidos(),
       ]);
       setMatrixData(result.matrix);
@@ -47,11 +52,28 @@ function FluxoCaixaDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [toast, periodo]);
+  }, [toast, periodo, intervaloCustom]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const aplicarPersonalizado = () => {
+    const { inicio, fim } = rascunho;
+    if (!inicio || !fim) {
+      toast({ title: 'Atenção', description: 'Informe a data inicial e a data final.', variant: 'destructive' });
+      return;
+    }
+    if (fim < inicio) {
+      toast({ title: 'Atenção', description: 'A data final não pode ser anterior à data inicial.', variant: 'destructive' });
+      return;
+    }
+    if (diasEntre(inicio, fim) > MAX_DIAS_FLUXO) {
+      toast({ title: 'Período muito longo', description: `A tabela diária comporta até ${MAX_DIAS_FLUXO} dias. Para períodos maiores, use os Relatórios.`, variant: 'destructive' });
+      return;
+    }
+    setIntervaloCustom({ inicio, fim });
+  };
 
   const handleCellClick = useCallback((row, day, type) => {
     const status = type === 'previsto' ? 'Previsto' : 'Realizado';
@@ -72,7 +94,9 @@ function FluxoCaixaDashboard() {
   }, [movimentacoes]);
 
   const ultimoDia = chartTimeline.length > 0 ? chartTimeline[chartTimeline.length - 1] : null;
-  const rotuloPeriodo = PERIODOS_FLUXO.find((p) => p.valor === periodo)?.rotulo?.toLowerCase();
+  const rotuloPeriodo = periodo === 'personalizado'
+    ? `${formatarDataBR(intervaloCustom.inicio)} a ${formatarDataBR(intervaloCustom.fim)}`
+    : PERIODOS_FLUXO.find((p) => p.valor === periodo)?.rotulo?.toLowerCase();
   const temVencidos = vencidos && (vencidos.aPagar.qtd > 0 || vencidos.aReceber.qtd > 0);
 
   return (
@@ -86,13 +110,21 @@ function FluxoCaixaDashboard() {
         title="Fluxo de Caixa"
         description="Previsto (títulos pelo vencimento) x realizado (baixas pela data do pagamento), a partir da Movimentação Financeira."
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Select value={periodo} onValueChange={setPeriodo}>
               <SelectTrigger className="w-44 bg-background"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {PERIODOS_FLUXO.map((p) => <SelectItem key={p.valor} value={p.valor}>{p.rotulo}</SelectItem>)}
               </SelectContent>
             </Select>
+            {periodo === 'personalizado' && (
+              <>
+                <Input type="date" className="w-40 bg-background" value={rascunho.inicio} onChange={(e) => setRascunho((r) => ({ ...r, inicio: e.target.value }))} title="Data inicial" />
+                <span className="text-sm text-muted-foreground">até</span>
+                <Input type="date" className="w-40 bg-background" value={rascunho.fim} onChange={(e) => setRascunho((r) => ({ ...r, fim: e.target.value }))} title="Data final" />
+                <Button onClick={aplicarPersonalizado} disabled={loading}>Aplicar</Button>
+              </>
+            )}
             <Button variant="outline" onClick={() => navigate('/movimentacao-financeira')} className="gap-2">
               <ListTree className="h-4 w-4" /> Movimentações
             </Button>

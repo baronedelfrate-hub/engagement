@@ -19,7 +19,15 @@ export const PERIODOS_FLUXO = [
   { valor: 'prox30', rotulo: 'Próximos 30 dias' },
   { valor: 'prox60', rotulo: 'Próximos 60 dias' },
   { valor: 'ult30', rotulo: 'Últimos 30 dias' },
+  { valor: 'personalizado', rotulo: 'Personalizado' },
 ];
+
+// A matriz tem uma coluna por dia; acima disso a tela fica pesada e ilegível (para mais, use o Relatório).
+export const MAX_DIAS_FLUXO = 366;
+
+export const diasEntre = (inicio, fim) => Math.round((fromKey(fim) - fromKey(inicio)) / 86400000) + 1;
+
+export const formatarDataBR = (key) => (key ? key.split('-').reverse().join('/') : '');
 
 export const intervaloDoPeriodo = (periodo) => {
   const hoje = new Date();

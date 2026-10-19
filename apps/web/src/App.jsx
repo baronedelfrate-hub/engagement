@@ -47,8 +47,8 @@ import FiscalMunicipiosMigration from '@/pages/admin/FiscalMunicipiosMigration';
 import FiscalMunicipiosSetup from '@/pages/admin/FiscalMunicipiosSetup';
 import LimparDados from '@/pages/admin/LimparDados';
 
-import CobrancaKanbanIntegrated from '@/pages/financeiro/cobranca/CobrancaKanbanIntegrated';
-import CobrancaDashboardIntegrated from '@/pages/financeiro/cobranca/CobrancaDashboardIntegrated';
+import CobrancaKanbanMov from '@/pages/financeiro/cobranca/CobrancaKanbanMov';
+import CobrancaDashboardMov from '@/pages/financeiro/cobranca/CobrancaDashboardMov';
 import MovimentacaoFinanceiraPage from '@/pages/financeiro/MovimentacaoFinanceiraPage';
 import NovaMovimentacaoPage from '@/pages/financeiro/NovaMovimentacaoPage';
 import ImportarExtratoPage from '@/pages/financeiro/ImportarExtratoPage';
@@ -369,8 +369,8 @@ const AnimatedRoutes = () => {
           <Route path="/financeiro/contas-receber" element={<Navigate to="/movimentacao-financeira?tipo=receber" replace />} />
           <Route path="/financeiro/contas-receber/novo" element={<Navigate to="/movimentacao-financeira/nova" replace />} />
           <Route path="/financeiro/contas-receber/:id" element={<Navigate to="/movimentacao-financeira?tipo=receber" replace />} />
-          <Route path="/financeiro/cobranca" element={<ProtectedLayout><PageTransition><CobrancaKanbanIntegrated /></PageTransition></ProtectedLayout>} />
-          <Route path="/financeiro/cobranca/dashboard" element={<ProtectedLayout><PageTransition><CobrancaDashboardIntegrated /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/cobranca" element={<ProtectedLayout><PageTransition><CobrancaKanbanMov /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/cobranca/dashboard" element={<ProtectedLayout><PageTransition><CobrancaDashboardMov /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira/nova" element={<ProtectedLayout><PageTransition><NovaMovimentacaoPage /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira" element={<ProtectedLayout><PageTransition><MovimentacaoFinanceiraPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa" element={<ProtectedLayout><PageTransition><FluxoCaixaDashboard /></PageTransition></ProtectedLayout>} />

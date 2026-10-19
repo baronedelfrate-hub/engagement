@@ -122,11 +122,14 @@ export const calcularPE = (dre) => {
 
 // Ponto de equilíbrio de um intervalo de meses (0 = jan ... 11 = dez), somando o período e aplicando a mesma fórmula.
 // Devolve também quanto a receita ficou acima ou abaixo do PE (folga), a cobertura (receita ÷ PE) e a margem de segurança.
-export const calcularPEPeriodo = (dre, de, ate) => {
+export const calcularPEPeriodo = (dre, de, ate, { incluirSocios = false } = {}) => {
   const soma = (k) => dre.porChave[k].valores.slice(de, ate + 1).reduce((s, x) => s + x, 0);
   const receita = soma('receita_bruta');
   const variaveis = -(soma('custo_mao_obra') + soma('custo_ferramentas') + soma('custo_midia') + soma('deducoes'));
-  const fixos = -(soma('desp_administrativas') + soma('desp_comerciais') + soma('desp_estrutura') + soma('desp_gerais') + soma('desp_financeira'));
+  const fixosBase = -(soma('desp_administrativas') + soma('desp_comerciais') + soma('desp_estrutura') + soma('desp_gerais') + soma('desp_financeira'));
+  // retiradas de sócios (grupo 9): ficam fora do PE, a menos que a empresa queira tratá-las como custo fixo
+  const retiradasSocios = -soma('socios');
+  const fixos = fixosBase + (incluirSocios ? retiradasSocios : 0);
   const mc = receita - variaveis;
   const mcPct = receita > 0 ? mc / receita : 0;
   const peImpossivel = fixos > 0 && mcPct <= 0; // margem de contribuição não cobre nem os custos variáveis
@@ -134,6 +137,9 @@ export const calcularPEPeriodo = (dre, de, ate) => {
   const folga = receita - pe;
   return {
     receita: arred(receita), variaveis: arred(variaveis), fixos: arred(fixos), mc: arred(mc), mcPct, pe: arred(pe),
+    incluiuSocios: incluirSocios,
+    retiradasSocios: arred(retiradasSocios),
+    peSemSocios: arred(mcPct > 0 ? fixosBase / mcPct : 0),
     folga: arred(folga),
     cobertura: pe > 0 ? receita / pe : null,
     margemSeguranca: receita > 0 ? folga / receita : 0,

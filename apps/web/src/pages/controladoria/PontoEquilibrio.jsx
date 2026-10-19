@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
@@ -66,6 +67,13 @@ const CartaoPE = ({ titulo, subtitulo, p }) => (
 
       <Situacao p={p} />
 
+      {p.incluiuSocios && p.temDado && (
+        <div className="rounded-md border border-border bg-muted/40 p-2 text-xs text-muted-foreground">
+          Os custos fixos incluem <strong className="text-foreground">{brl(p.retiradasSocios)}</strong> de retiradas de sócios.
+          {!p.peImpossivel && <> Sem elas, o ponto de equilíbrio seria <strong className="text-foreground">{brl(p.peSemSocios)}</strong>.</>}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm pt-1">
         <div><div className="text-xs text-muted-foreground">Custos fixos</div><div className="font-medium">{brl(p.fixos)}</div></div>
         <div><div className="text-xs text-muted-foreground">Custos variáveis</div><div className="font-medium">{brl(p.variaveis)}</div></div>
@@ -81,10 +89,13 @@ function PontoEquilibrio() {
   const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, loading, error } = dados;
   const [mes, setMes] = useState(null);
   const [sim, setSim] = useState({ receita: 0, fixos: 0, variavelPct: 0 });
+  // retiradas de sócios como custo fixo: lembra a escolha neste navegador
+  const [incluirSocios, setIncluirSocios] = useState(() => { try { return localStorage.getItem('pe_incluir_socios') === '1'; } catch { return false; } });
+  const alternarSocios = (v) => { setIncluirSocios(v); try { localStorage.setItem('pe_incluir_socios', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
 
   const dre = useMemo(() => (ano ? montarDRE(movs, { ano, categorias, subcategorias }) : null), [movs, ano, categorias, subcategorias]);
 
-  const porMes = useMemo(() => (dre ? Array.from({ length: 12 }, (_, i) => ({ i, ...calcularPEPeriodo(dre, i, i) })) : []), [dre]);
+  const porMes = useMemo(() => (dre ? Array.from({ length: 12 }, (_, i) => ({ i, ...calcularPEPeriodo(dre, i, i, { incluirSocios }) })) : []), [dre, incluirSocios]);
   const mesesComDado = porMes.filter((m) => m.temDado);
 
   // mês inicial: o último com movimento no ano
@@ -94,7 +105,7 @@ function PontoEquilibrio() {
   }, [dre]);
 
   const doMes = dre && mes !== null ? porMes[mes] : null;
-  const acumulado = useMemo(() => (dre && mes !== null ? calcularPEPeriodo(dre, 0, mes) : null), [dre, mes]);
+  const acumulado = useMemo(() => (dre && mes !== null ? calcularPEPeriodo(dre, 0, mes, { incluirSocios }) : null), [dre, mes, incluirSocios]);
 
   // simulação parte dos números do mês escolhido
   const baseSim = useMemo(() => (doMes
@@ -122,6 +133,10 @@ function PontoEquilibrio() {
           <SelectTrigger className="w-40 bg-background"><SelectValue placeholder="Mês" /></SelectTrigger>
           <SelectContent>{mesesComDado.map((m) => <SelectItem key={m.i} value={String(m.i)}>{MESES[m.i]}/{ano}</SelectItem>)}</SelectContent>
         </Select>
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none" title="Soma as retiradas de sócios (grupo 9 da DRE) aos custos fixos. Útil quando o sócio vive da retirada.">
+          <Checkbox checked={incluirSocios} onCheckedChange={(v) => alternarSocios(v === true)} />
+          Incluir retiradas de sócios como custo fixo
+        </label>
       </FiltrosGerenciais>
 
       {!empresaId ? (

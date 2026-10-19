@@ -178,7 +178,8 @@ import F5Governance from '@/pages/metodologia-f5/F5Governance';
 import RelatorioF1 from '@/pages/metodologia-f5/RelatorioF1';
 import HistoricoF1 from '@/pages/metodologia-f5/HistoricoF1';
 import BPODashboard from '@/pages/bpo/BPODashboard';
-import BPOClientesList from '@/pages/bpo/BPOClientesList';
+import ClientesEngagement from '@/pages/engagement/ClientesEngagement';
+import ClienteEngagement from '@/pages/engagement/ClienteEngagement';
 import BPOClientesForm from '@/pages/bpo/BPOClientesForm';
 import ClienteFasesPage from '@/pages/bpo/ClienteFasesPage';
 import BPOClienteDetail from '@/pages/bpo/BPOClienteDetail';
@@ -305,7 +306,7 @@ const AnimatedRoutes = () => {
           <Route path="/operacao/projeto/:id" element={<ProtectedLayout><PageTransition><ProjetosFormNew /></PageTransition></ProtectedLayout>} />
           <Route path="/operacao/projeto" element={<ProtectedLayout><PageTransition><ProjetosPage /></PageTransition></ProtectedLayout>} />
           
-          <Route path="/operacao/bpo-e5/clientes-bpo" element={<ProtectedLayout><PageTransition><BPOClientesList /></PageTransition></ProtectedLayout>} />
+          <Route path="/operacao/bpo-e5/clientes-bpo" element={<ProtectedLayout><Navigate to="/bpo/clientes" replace /></ProtectedLayout>} />
           <Route path="/operacao/bpo-e5/clientes-bpo/novo" element={<ProtectedLayout><PageTransition><BPOClientesForm /></PageTransition></ProtectedLayout>} />
           <Route path="/operacao/bpo-e5/clientes/:cliente_id/fases" element={<ProtectedLayout><PageTransition><ClienteFasesPage /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/clientes/:cliente_id/fases" element={<ProtectedLayout><PageTransition><ClienteFasesPage /></PageTransition></ProtectedLayout>} />
@@ -522,8 +523,8 @@ const AnimatedRoutes = () => {
           <Route path="/metodologia-f5/auditoria" element={<ProtectedLayout><PageTransition><F5AuditoriaLog /></PageTransition></ProtectedLayout>} />
 
           <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><BPODashboard /></PageTransition></ProtectedLayout>} />
-          <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><BPOClientesList /></PageTransition></ProtectedLayout>} />
-          <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><BPOClienteDetail /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/fase/:faseId" element={<ProtectedLayout><PageTransition><BPOFaseDetail /></PageTransition></ProtectedLayout>} />
           <Route path="/clientes-bpo" element={<ProtectedLayout><Navigate to="/clientes-bpo/cadastro-clientes" replace /></ProtectedLayout>} />
           <Route path="/clientes-bpo/cadastro-clientes" element={<ProtectedLayout><PageTransition><BPOClientesCadastroList /></PageTransition></ProtectedLayout>} />

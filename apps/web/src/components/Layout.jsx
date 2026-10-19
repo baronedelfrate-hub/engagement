@@ -203,8 +203,7 @@ const navigation = [
         icon: ClipboardList,
         isNested: true,
         children: [
-          { name: 'Dashboard', href: '/bpo/dashboard' },
-          { name: 'Clientes BPO', href: '/bpo/clientes' },
+          { name: 'Clientes Engagement', href: '/bpo/clientes' },
         ],
       },
       {

@@ -69,6 +69,7 @@ const textoFiltros = (f) => {
   const partes = [`Período: ${dataBR(f.dataInicio)} a ${dataBR(f.dataFim)}`];
   partes.push(`Tipo: ${f.tipo === 'TODOS' ? 'todos' : f.tipo === 'Receita' ? 'entradas' : 'saídas'}`);
   partes.push(`Status: ${f.status === 'TODOS' ? 'todos' : f.status}`);
+  if (f.incluirProvisoes !== undefined) partes.push(f.incluirProvisoes ? 'Provisões incluídas' : 'Sem provisões');
   if (f.categoria) partes.push(`Categoria contém "${f.categoria}"`);
   return partes.join('  ·  ');
 };

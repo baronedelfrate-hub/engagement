@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2 } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2, CalendarClock, Replace, Undo2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MovimentacaoDetailModal from './components/MovimentacaoDetailModal';
 import BaixaMovimentacaoModal from './components/BaixaMovimentacaoModal';
+import ProvisaoDialog from './components/ProvisaoDialog';
+import SubstituirProvisaoDialog from './components/SubstituirProvisaoDialog';
 import { formatDateOnly } from '@/lib/dateUtils';
 import { buscarTudo } from '@/services/extratoAsaasService';
 
@@ -25,7 +27,9 @@ const saldoEmAberto = (row) => {
 };
 // data da última baixa (data em que o dinheiro de fato saiu/entrou)
 const dataPagamento = (row) => (row.baixas || []).map((b) => b.data_baixa).filter(Boolean).sort().pop() || null;
-const podeBaixar =(row) => ['pendente', 'pago_parcial', 'vencido'].includes(row.status) && saldoEmAberto(row) > 0.005;
+// provisão não recebe baixa: ela é substituída por um lançamento real
+const podeBaixar = (row) => !row.provisao && ['pendente', 'pago_parcial', 'vencido'].includes(row.status) && saldoEmAberto(row) > 0.005;
+const podeSubstituir = (row) => row.provisao && row.status === 'pendente';
 
 const MovimentacaoFinanceiraPage = () => {
   const navigate = useNavigate();
@@ -40,6 +44,9 @@ const MovimentacaoFinanceiraPage = () => {
   
   const [baixaId, setBaixaId] = useState(null);
   const [pagina, setPagina] = useState(1);
+  const [provisaoAberta, setProvisaoAberta] = useState(false);
+  const [substituirRow, setSubstituirRow] = useState(null);
+  const [filtroNatureza, setFiltroNatureza] = useState('Todos'); // Todos | real | provisao
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState(['pagar', 'receber'].includes(searchParams.get('tipo')) ? searchParams.get('tipo') : 'Todos');
@@ -58,7 +65,7 @@ const MovimentacaoFinanceiraPage = () => {
       setLoading(false);
       setData([]);
     }
-  }, [company_id, authLoading, filtroTipo, filtroStatus, dateStart, dateEnd]);
+  }, [company_id, authLoading, filtroTipo, filtroStatus, filtroNatureza, dateStart, dateEnd]);
 
   const loadData = async () => {
     if (!company_id) return;
@@ -79,6 +86,14 @@ const MovimentacaoFinanceiraPage = () => {
             valor_total,
             data_vencimento,
             status,
+            company_id,
+            provisao,
+            provisao_id,
+            cliente_id,
+            fornecedor_id,
+            categoria_id,
+            subcategoria_id,
+            centro_custo_id,
             cliente:clientes(nome),
             fornecedor:fornecedores(nome),
             baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto, data_baixa)
@@ -89,6 +104,7 @@ const MovimentacaoFinanceiraPage = () => {
 
         if (filtroTipo !== 'Todos') query = query.eq('tipo', filtroTipo);
         if (filtroStatus !== 'Todos') query = query.eq('status', filtroStatus);
+        if (filtroNatureza !== 'Todos') query = query.eq('provisao', filtroNatureza === 'provisao');
         if (dateStart) query = query.gte('data_vencimento', dateStart);
         if (dateEnd) query = query.lte('data_vencimento', dateEnd);
         return query;
@@ -125,6 +141,20 @@ const MovimentacaoFinanceiraPage = () => {
     }
   };
 
+  const reabrirProvisao = async (row) => {
+    if (!window.confirm('Reabrir esta provisão? Os lançamentos que a substituíram continuam existindo, mas deixam de estar ligados a ela, e a provisão volta a contar no previsto.')) return;
+    try {
+      const { error: e1 } = await supabase.from('movimentacao_financeira').update({ provisao_id: null }).eq('provisao_id', row.id);
+      if (e1) throw e1;
+      const { error: e2 } = await supabase.from('movimentacao_financeira').update({ status: 'pendente', updated_at: new Date().toISOString() }).eq('id', row.id);
+      if (e2) throw e2;
+      toast({ title: 'Provisão reaberta', description: 'Ela voltou a entrar no previsto do fluxo de caixa.' });
+      loadData();
+    } catch (err) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    }
+  };
+
   const filteredData = data.filter(item => {
     const term = searchTerm.toLowerCase();
     const entidade = (item.tipo?.toLowerCase() === 'receber' ? item.cliente?.nome : item.fornecedor?.nome) || '';
@@ -149,13 +179,18 @@ const MovimentacaoFinanceiraPage = () => {
         title="Movimentação Financeira" 
         description="Gestão unificada de contas a pagar e receber."
         action={
-          <Button 
-            onClick={() => navigate('/movimentacao-financeira/nova')} 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            disabled={!company_id}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Nova Movimentação
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setProvisaoAberta(true)} disabled={!company_id}>
+              <CalendarClock className="mr-2 h-4 w-4" /> Nova Provisão
+            </Button>
+            <Button 
+              onClick={() => navigate('/movimentacao-financeira/nova')} 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              disabled={!company_id}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Nova Movimentação
+            </Button>
+          </div>
         }
       />
       
@@ -192,6 +227,17 @@ const MovimentacaoFinanceiraPage = () => {
                 </SelectContent>
               </Select>
 
+              <Select value={filtroNatureza} onValueChange={setFiltroNatureza}>
+                <SelectTrigger className="w-[150px] bg-background border-border text-foreground">
+                  <SelectValue placeholder="Natureza" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Todos">Real e provisão</SelectItem>
+                  <SelectItem value="real">Só lançamentos reais</SelectItem>
+                  <SelectItem value="provisao">Só provisões</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={filtroStatus} onValueChange={setFiltroStatus}>
                 <SelectTrigger className="w-[140px] bg-background border-border text-foreground">
                   <SelectValue placeholder="Status" />
@@ -203,6 +249,7 @@ const MovimentacaoFinanceiraPage = () => {
                   <SelectItem value="pago">Pago</SelectItem>
                   <SelectItem value="vencido">Vencido</SelectItem>
                   <SelectItem value="cancelado">Cancelado</SelectItem>
+                  <SelectItem value="substituido">Provisão substituída</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -267,7 +314,11 @@ const MovimentacaoFinanceiraPage = () => {
                   ) : (
                     filteredData.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((row) => (
                       <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                        <td className="px-6 py-4 font-mono text-foreground">{row.numero_titulo}</td>
+                        <td className="px-6 py-4 font-mono text-foreground">
+                          {row.numero_titulo}
+                          {row.provisao && <Badge variant="outline" className="ml-2 border-amber-500/40 text-amber-600 bg-amber-500/10 font-sans">Provisão</Badge>}
+                          {!row.provisao && row.provisao_id && <Badge variant="outline" className="ml-2 border-blue-500/40 text-blue-600 bg-blue-500/10 font-sans">Substitui provisão</Badge>}
+                        </td>
                         <td className="px-6 py-4">
                           <Badge variant="outline" className={row.tipo?.toUpperCase() === 'PAGAR' ? 'border-red-500/30 text-red-500 bg-red-500/10' : 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10'}>
                             {row.tipo?.toUpperCase()}
@@ -290,10 +341,15 @@ const MovimentacaoFinanceiraPage = () => {
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant="secondary" className="capitalize text-foreground">
-                            {(row.status || '').replace('_', ' ')}
+                            {row.status === 'substituido' ? 'substituída' : (row.status || '').replace('_', ' ')}
                           </Badge>
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap">
+                          {podeSubstituir(row) && (
+                            <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setSubstituirRow(row)}>
+                              <Replace className="mr-1 h-4 w-4" /> Substituir
+                            </Button>
+                          )}
                           {podeBaixar(row) && (
                             <Button
                               size="sm"
@@ -312,6 +368,16 @@ const MovimentacaoFinanceiraPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border">
+                              {podeSubstituir(row) && (
+                                <DropdownMenuItem onClick={() => setSubstituirRow(row)}>
+                                  <Replace className="mr-2 h-4 w-4" /> Substituir provisão
+                                </DropdownMenuItem>
+                              )}
+                              {row.provisao && row.status === 'substituido' && (
+                                <DropdownMenuItem onClick={() => reabrirProvisao(row)}>
+                                  <Undo2 className="mr-2 h-4 w-4" /> Reabrir provisão
+                                </DropdownMenuItem>
+                              )}
                               {podeBaixar(row) && (
                                 <DropdownMenuItem onClick={() => setBaixaId(row.id)}>
                                   <CheckCircle2 className="mr-2 h-4 w-4" /> Baixar título
@@ -354,6 +420,15 @@ const MovimentacaoFinanceiraPage = () => {
         movimentacaoId={modalState.id}
         onOpenChange={(open) => setModalState((prev) => ({ ...prev, open }))}
         onSaved={loadData}
+      />
+
+      <ProvisaoDialog open={provisaoAberta} onOpenChange={setProvisaoAberta} onSaved={loadData} />
+
+      <SubstituirProvisaoDialog
+        open={!!substituirRow}
+        provisao={substituirRow}
+        onOpenChange={(open) => { if (!open) setSubstituirRow(null); }}
+        onDone={loadData}
       />
 
       <BaixaMovimentacaoModal

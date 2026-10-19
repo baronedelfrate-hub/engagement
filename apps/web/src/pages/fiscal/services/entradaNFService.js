@@ -184,13 +184,14 @@ export const entradaNFService = {
   },
 
   // Integrations
-  createContasPagarFromNota: async (nota) => {
+  // provisaoId (opcional): provisão que este lançamento substitui; ela passa a 'substituida' e deixa de contar no previsto
+  createContasPagarFromNota: async (nota, provisaoId = null) => {
     if (nota.integrado_financeiro) throw new Error('Esta nota já está integrada ao financeiro.');
 
     // Cria a conta a pagar na Movimentação Financeira (base única do financeiro)
     const { data: cpData, error: cpError } = await supabase
       .from('movimentacao_financeira')
-      .insert(montarTituloPagar({
+      .insert({ ...montarTituloPagar({
         companyId: nota.empresa_id,
         fornecedorId: nota.fornecedor_id,
         numero: `NF-${nota.numero}`,
@@ -201,10 +202,22 @@ export const entradaNFService = {
         subcategoriaId: nota.subcategoria_id,
         centroCustoId: nota.centro_custo_id,
         observacoes: `Gerado automaticamente da NF de Entrada #${nota.numero}`
-      }))
+      }), ...(provisaoId ? { provisao_id: provisaoId } : {}) })
       .select()
       .single();
     if (cpError) throw cpError;
+
+    if (provisaoId) {
+      const { error: provError } = await supabase
+        .from('movimentacao_financeira')
+        .update({ status: 'substituido', updated_at: new Date().toISOString() })
+        .eq('id', provisaoId);
+      if (provError) {
+        // não deixa um lançamento solto se a provisão não pôde ser marcada como substituída
+        await supabase.from('movimentacao_financeira').delete().eq('id', cpData.id);
+        throw provError;
+      }
+    }
 
     // Update nota status
     await supabase
@@ -231,51 +244,26 @@ export const entradaNFService = {
     const minVal = v * 0.9;
     const maxVal = v * 1.1;
 
-    // provisões = títulos a pagar pendentes que ainda não vieram de uma NF (numero_titulo "NF-...")
+    // provisões a pagar ainda pendentes (do fornecedor da nota ou sem fornecedor definido) com valor próximo ao da nota
     const { data, error } = await supabase
       .from('movimentacao_financeira')
       .select('*')
       .eq('tipo', 'pagar')
-      .eq('fornecedor_id', fornecedorId)
+      .eq('provisao', true)
       .eq('status', 'pendente')
+      .or(`fornecedor_id.eq.${fornecedorId},fornecedor_id.is.null`)
       .gte('valor_total', minVal)
       .lte('valor_total', maxVal)
-      .not('numero_titulo', 'like', 'NF-%');
+      .order('data_vencimento');
 
     if (error) throw error;
     return (data || []).map((p) => ({ ...p, valor_original: p.valor_total, numero: p.numero_titulo }));
   },
 
+  // Cria o lançamento real da nota no lugar da provisão escolhida
   replaceProvisao: async (provisaoId, nota) => {
-    if (nota.integrado_financeiro) throw new Error('Esta nota já está integrada ao financeiro.');
-
-    const { error: cpError } = await supabase
-      .from('movimentacao_financeira')
-      .update({
-        valor_total: nota.valor_total,
-        numero_titulo: `NF-${nota.numero}`,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', provisaoId);
-
-    if (cpError) throw cpError;
-
-    await supabase
-      .from('notas_entrada')
-      .update({ 
-        integrado_financeiro: true, 
-        status: 'Integrada',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', nota.id);
-
-    await insertWithCompanyId('notas_entrada_historico', {
-      nota_entrada_id: nota.id,
-      status_anterior: nota.status,
-      status_novo: 'Integrada'
-    });
+    return await entradaNFService.createContasPagarFromNota(nota, provisaoId);
   },
-
   sendToContabilidade: async (nota) => {
     if (nota.integrado_contabil) throw new Error('Esta nota já foi enviada à contabilidade.');
 

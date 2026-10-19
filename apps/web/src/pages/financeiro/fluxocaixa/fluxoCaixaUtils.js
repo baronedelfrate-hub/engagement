@@ -52,15 +52,20 @@ const nomeEntidade = (m) => (m?.tipo === 'pagar' ? m?.fornecedor?.nome : m?.clie
  * - Realizado: baixas pelo dia do PAGAMENTO/RECEBIMENTO, pelo valor efetivamente pago/recebido.
  * Mesmo formato que a tela já usava: { id, data_movimentacao, valor, status, tipo ('Receita'|'Despesa'), centro_custo_id, categoria, descricao }.
  */
-export const carregarMovimentos = async ({ inicio, fim }) => {
+export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true }) => {
   const [titulos, baixas] = await Promise.all([
-    buscarTudo(() => supabase
-      .from('movimentacao_financeira')
-      .select('id, numero_titulo, tipo, valor_total, data_vencimento, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
-      .neq('status', 'cancelado')
-      .gte('data_vencimento', inicio)
-      .lte('data_vencimento', fim)
-      .order('data_vencimento').order('id')),
+    buscarTudo(() => {
+      // provisão pendente conta como previsto; provisão já substituída não conta (o lançamento real que a substituiu é que conta)
+      let q = supabase
+        .from('movimentacao_financeira')
+        .select('id, numero_titulo, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
+        .not('status', 'in', '(cancelado,substituido)')
+        .gte('data_vencimento', inicio)
+        .lte('data_vencimento', fim)
+        .order('data_vencimento').order('id');
+      if (!incluirProvisoes) q = q.eq('provisao', false);
+      return q;
+    }),
     buscarTudo(() => supabase
       .from('movimentacao_baixas')
       .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
@@ -72,6 +77,7 @@ export const carregarMovimentos = async ({ inicio, fim }) => {
   const previstos = titulos.map((t) => ({
     id: `t-${t.id}`,
     titulo_id: t.id,
+    provisao: !!t.provisao,
     data_movimentacao: t.data_vencimento,
     valor: Number(t.valor_total) || 0,
     status: 'Previsto',
@@ -103,6 +109,7 @@ export const fetchVencidos = async () => {
     .from('movimentacao_financeira')
     .select('id, tipo, valor_total, baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)')
     .in('status', ['pendente', 'pago_parcial', 'vencido'])
+    .eq('provisao', false) // provisão não é título vencido
     .lt('data_vencimento', hoje)
     .order('id'));
   const saldo = (t) => (Number(t.valor_total) || 0) - (t.baixas || []).reduce((s, b) => s + (Number(b.valor_baixa) || 0) - (Number(b.valor_juros) || 0) + (Number(b.valor_desconto) || 0), 0);
@@ -118,9 +125,9 @@ export const fetchVencidos = async () => {
  * - matrix: {days:[{key,label}], rows:[{id,code,name,values:{[dayKey]:{previsto,realizado}}}]} pra FluxoCaixaTabela
  * - chartTimeline: [{date, saldoFinal:{previsto,realizado}, entradas:{...}, saidas:{...}}] pra FluxoCaixaDashboardChart
  */
-export const fetchFluxoCaixaData = async ({ inicio, fim }) => {
+export const fetchFluxoCaixaData = async ({ inicio, fim, incluirProvisoes = true }) => {
   const [movimentacoes, centrosResult] = await Promise.all([
-    carregarMovimentos({ inicio, fim }),
+    carregarMovimentos({ inicio, fim, incluirProvisoes }),
     supabase.from('centros_custo').select('id, codigo, nome'),
   ]);
 

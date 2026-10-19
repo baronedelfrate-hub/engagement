@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FluxoCaixaTabela from './FluxoCaixaTabela';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO, MAX_DIAS_FLUXO, diasEntre, formatarDataBR, formatCurrency } from './fluxoCaixaUtils';
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
@@ -22,6 +23,7 @@ function FluxoCaixaDashboard() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('mes');
+  const [incluirProvisoes, setIncluirProvisoes] = useState(true);
   // período personalizado: o que o usuário digita (rascunho) e o que foi aplicado de fato
   const [rascunho, setRascunho] = useState(intervaloDoPeriodo('mes'));
   const [intervaloCustom, setIntervaloCustom] = useState(intervaloDoPeriodo('mes'));
@@ -39,7 +41,7 @@ function FluxoCaixaDashboard() {
     try {
       const intervalo = periodo === 'personalizado' ? intervaloCustom : intervaloDoPeriodo(periodo);
       const [result, venc] = await Promise.all([
-        fetchFluxoCaixaData(intervalo),
+        fetchFluxoCaixaData({ ...intervalo, incluirProvisoes }),
         fetchVencidos(),
       ]);
       setMatrixData(result.matrix);
@@ -52,7 +54,7 @@ function FluxoCaixaDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [toast, periodo, intervaloCustom]);
+  }, [toast, periodo, intervaloCustom, incluirProvisoes]);
 
   useEffect(() => {
     loadData();
@@ -125,6 +127,10 @@ function FluxoCaixaDashboard() {
                 <Button onClick={aplicarPersonalizado} disabled={loading}>Aplicar</Button>
               </>
             )}
+            <label className="flex items-center gap-2 text-sm px-2 cursor-pointer select-none" title="Provisões pendentes entram no previsto">
+              <Checkbox checked={incluirProvisoes} onCheckedChange={(v) => setIncluirProvisoes(v === true)} />
+              Incluir provisões
+            </label>
             <Button variant="outline" onClick={() => navigate('/movimentacao-financeira')} className="gap-2">
               <ListTree className="h-4 w-4" /> Movimentações
             </Button>

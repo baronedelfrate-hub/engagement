@@ -5,6 +5,7 @@ import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2, FileDown, FileSpreadsheet } from 'lucide-react';
@@ -22,6 +23,7 @@ const RelatoriosFluxoCaixa = () => {
     tipo: 'TODOS',
     status: 'TODOS',
     categoria: '',
+    incluirProvisoes: true,
   });
 
   const [rawData, setRawData] = useState([]);
@@ -43,7 +45,7 @@ const RelatoriosFluxoCaixa = () => {
 
   useEffect(() => {
     loadData();
-  }, [filters.dataInicio, filters.dataFim]);
+  }, [filters.dataInicio, filters.dataFim, filters.incluirProvisoes]);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -51,7 +53,7 @@ const RelatoriosFluxoCaixa = () => {
 
     try {
       // base única: títulos (previsto, pelo vencimento) e baixas (realizado, pela data do pagamento)
-      const data = (await carregarMovimentos({ inicio: filters.dataInicio, fim: filters.dataFim }))
+      const data = (await carregarMovimentos({ inicio: filters.dataInicio, fim: filters.dataFim, incluirProvisoes: filters.incluirProvisoes }))
         .sort((a, b) => (a.data_movimentacao < b.data_movimentacao ? 1 : a.data_movimentacao > b.data_movimentacao ? -1 : 0));
       const centroIds = [...new Set((data || []).map(m => m.centro_custo_id).filter(Boolean))];
       let map = {};
@@ -143,7 +145,7 @@ const RelatoriosFluxoCaixa = () => {
                 <Filter className="w-4 h-4" /> Filtros do Relatório
             </CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
             <div className="space-y-1">
                 <label className="text-xs font-bold text-muted-foreground">Tipo</label>
                 <Select value={filters.tipo} onValueChange={v => setFilters({...filters, tipo: v})}>
@@ -183,6 +185,10 @@ const RelatoriosFluxoCaixa = () => {
                     onChange={e => setFilters({...filters, categoria: e.target.value})}
                 />
             </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none md:col-span-5">
+                <Checkbox checked={filters.incluirProvisoes} onCheckedChange={(v) => setFilters({...filters, incluirProvisoes: v === true})} />
+                Incluir provisões (o que ainda não virou lançamento real) no previsto
+            </label>
         </CardContent>
       </Card>
 

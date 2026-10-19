@@ -120,6 +120,30 @@ export const calcularPE = (dre) => {
   return { meses: Array.from({ length: 12 }, (_, i) => calc(i)), total: calc('total') };
 };
 
+// Ponto de equilíbrio de um intervalo de meses (0 = jan ... 11 = dez), somando o período e aplicando a mesma fórmula.
+// Devolve também quanto a receita ficou acima ou abaixo do PE (folga), a cobertura (receita ÷ PE) e a margem de segurança.
+export const calcularPEPeriodo = (dre, de, ate) => {
+  const soma = (k) => dre.porChave[k].valores.slice(de, ate + 1).reduce((s, x) => s + x, 0);
+  const receita = soma('receita_bruta');
+  const variaveis = -(soma('custo_mao_obra') + soma('custo_ferramentas') + soma('custo_midia') + soma('deducoes'));
+  const fixos = -(soma('desp_administrativas') + soma('desp_comerciais') + soma('desp_estrutura') + soma('desp_gerais') + soma('desp_financeira'));
+  const mc = receita - variaveis;
+  const mcPct = receita > 0 ? mc / receita : 0;
+  const peImpossivel = fixos > 0 && mcPct <= 0; // margem de contribuição não cobre nem os custos variáveis
+  const pe = mcPct > 0 ? fixos / mcPct : 0;
+  const folga = receita - pe;
+  return {
+    receita: arred(receita), variaveis: arred(variaveis), fixos: arred(fixos), mc: arred(mc), mcPct, pe: arred(pe),
+    folga: arred(folga),
+    cobertura: pe > 0 ? receita / pe : null,
+    margemSeguranca: receita > 0 ? folga / receita : 0,
+    resultado: arred(mc - fixos),
+    acima: !peImpossivel && receita >= pe,
+    peImpossivel,
+    temDado: receita !== 0 || variaveis !== 0 || fixos !== 0
+  };
+};
+
 // Dashboard: despesas por categoria (líquido das saídas) e receita recebida por cliente.
 export const agregarDashboard = (movs, { categorias, subcategorias, de, ate }) => {
   const catPorId = new Map(categorias.map((c) => [c.id, c]));

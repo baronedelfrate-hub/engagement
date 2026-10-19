@@ -58,7 +58,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
       // provisão pendente conta como previsto; provisão já substituída não conta (o lançamento real que a substituiu é que conta)
       let q = supabase
         .from('movimentacao_financeira')
-        .select('id, numero_titulo, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
+        .select('id, numero_titulo, observacoes, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
         .not('status', 'in', '(cancelado,substituido)')
         .gte('data_vencimento', inicio)
         .lte('data_vencimento', fim)
@@ -68,7 +68,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     }),
     buscarTudo(() => supabase
       .from('movimentacao_baixas')
-      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), movimentacao:movimentacao_financeira(numero_titulo, tipo, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
+      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), movimentacao:movimentacao_financeira(numero_titulo, observacoes, tipo, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
       .gte('data_baixa', inicio)
       .lte('data_baixa', fim)
       .order('data_baixa').order('id')),
@@ -85,7 +85,9 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     centro_custo_id: t.centro_custo_id,
     categoria: t.categoria?.nome || 'Sem categoria',
     subcategoria: t.subcategoria?.nome || '',
-    descricao: [t.numero_titulo, nomeEntidade(t)].filter(Boolean).join(' · '),
+    numero_titulo: t.numero_titulo || '',
+    entidade: nomeEntidade(t),
+    descricao: t.observacoes || '',
   }));
 
   const realizados = baixas.map((b) => ({
@@ -98,7 +100,9 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     centro_custo_id: b.centro_custo_id || b.movimentacao?.centro_custo_id || null,
     categoria: b.categoria?.nome || b.movimentacao?.categoria?.nome || 'Sem categoria',
     subcategoria: b.subcategoria?.nome || b.movimentacao?.subcategoria?.nome || '',
-    descricao: [b.movimentacao?.numero_titulo, nomeEntidade(b.movimentacao)].filter(Boolean).join(' · '),
+    numero_titulo: b.movimentacao?.numero_titulo || '',
+    entidade: nomeEntidade(b.movimentacao),
+    descricao: b.movimentacao?.observacoes || '',
   }));
 
   return [...previstos, ...realizados];

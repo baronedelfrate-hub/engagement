@@ -87,6 +87,8 @@ function FluxoCaixaDashboard() {
       descricao: m.descricao,
       categoria: m.categoria,
       subcategoria: m.subcategoria,
+      documento: m.numero_titulo,
+      favorecido: m.entidade,
       tipo: m.status?.toUpperCase(),
       valor: m.tipo === 'Despesa' ? -parseFloat(m.valor || 0) : parseFloat(m.valor || 0),
     }));

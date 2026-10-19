@@ -24,11 +24,12 @@ const RelatoriosFluxoCaixa = () => {
     status: 'TODOS',
     categoria: '',
     incluirProvisoes: true,
+    busca: '',
   });
 
   const [rawData, setRawData] = useState([]);
   const [centrosCustoMap, setCentrosCustoMap] = useState({});
-  const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'categoria', 'subcategoria', 'descricao', 'valor']);
+  const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'documento', 'entidade', 'categoria', 'subcategoria', 'descricao', 'valor']);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
 
   const { company_id } = useAuthContext();
@@ -82,6 +83,7 @@ const RelatoriosFluxoCaixa = () => {
   const data = rawData.filter(item => {
     if (filters.tipo !== 'TODOS' && item.tipo !== filters.tipo) return false;
     if (filters.status !== 'TODOS' && item.status !== filters.status) return false;
+    if (filters.busca && !`${item.numero_titulo || ''} ${item.entidade || ''} ${item.descricao || ''}`.toLowerCase().includes(filters.busca.toLowerCase())) return false;
     if (filters.categoria && !`${item.categoria || ''} ${item.subcategoria || ''}`.toLowerCase().includes(filters.categoria.toLowerCase())) return false;
     return true;
   });
@@ -185,7 +187,16 @@ const RelatoriosFluxoCaixa = () => {
                     onChange={e => setFilters({...filters, categoria: e.target.value})}
                 />
             </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer select-none md:col-span-5">
+            <div className="space-y-1 md:col-span-2">
+                <label className="text-xs font-bold text-muted-foreground">Nº do título / favorecido (Busca)</label>
+                <Input
+                    placeholder="Número do título, cliente ou fornecedor..."
+                    className="bg-background h-9"
+                    value={filters.busca}
+                    onChange={e => setFilters({...filters, busca: e.target.value})}
+                />
+            </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none md:col-span-3">
                 <Checkbox checked={filters.incluirProvisoes} onCheckedChange={(v) => setFilters({...filters, incluirProvisoes: v === true})} />
                 Incluir provisões (o que ainda não virou lançamento real) no previsto
             </label>
@@ -241,6 +252,8 @@ const RelatoriosFluxoCaixa = () => {
                                     {selectedColumns.includes('data') && <TableHead className="w-[120px]">Data</TableHead>}
                                     {selectedColumns.includes('tipo') && <TableHead className="w-[100px]">Tipo</TableHead>}
                                     {selectedColumns.includes('status') && <TableHead className="w-[100px]">Status</TableHead>}
+                                    {selectedColumns.includes('documento') && <TableHead>Nº do título</TableHead>}
+                                    {selectedColumns.includes('entidade') && <TableHead>Cliente / Fornecedor</TableHead>}
                                     {selectedColumns.includes('categoria') && <TableHead>Categoria</TableHead>}
                                     {selectedColumns.includes('subcategoria') && <TableHead>Subcategoria</TableHead>}
                                     {selectedColumns.includes('centroCusto') && <TableHead>Centro de Custo</TableHead>}
@@ -276,6 +289,8 @@ const RelatoriosFluxoCaixa = () => {
                                                     </span>
                                                 </TableCell>
                                             )}
+                                            {selectedColumns.includes('documento') && <TableCell className="font-mono text-xs">{item.numero_titulo || '-'}</TableCell>}
+                                            {selectedColumns.includes('entidade') && <TableCell className="text-xs">{item.entidade || '-'}</TableCell>}
                                             {selectedColumns.includes('categoria') && <TableCell className="text-xs font-medium">{item.categoria}</TableCell>}
                                             {selectedColumns.includes('subcategoria') && <TableCell className="text-xs text-muted-foreground">{item.subcategoria || '-'}</TableCell>}
                                             {selectedColumns.includes('centroCusto') && <TableCell className="text-xs text-muted-foreground">{centrosCustoMap[item.centro_custo_id] ? `${centrosCustoMap[item.centro_custo_id].codigo} - ${centrosCustoMap[item.centro_custo_id].nome}` : '-'}</TableCell>}

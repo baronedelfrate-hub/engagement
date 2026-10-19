@@ -18,6 +18,8 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                 <thead className="bg-muted text-foreground font-medium">
                     <tr>
                         <th className="p-3">Data</th>
+                        <th className="p-3">Nº do título</th>
+                        <th className="p-3">Cliente / Fornecedor</th>
                         <th className="p-3">Descrição</th>
                         <th className="p-3">Categoria</th>
                         <th className="p-3">Subcategoria</th>
@@ -29,7 +31,9 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                     {items && items.length > 0 ? items.map((item, idx) => (
                         <tr key={idx} className="hover:bg-muted">
                             <td className="p-3">{formatDateOnly(item.data)}</td>
-                            <td className="p-3 font-medium">{item.descricao}</td>
+                            <td className="p-3 font-mono text-xs">{item.documento || '-'}</td>
+                            <td className="p-3 font-medium">{item.favorecido || '-'}</td>
+                            <td className="p-3 text-muted-foreground text-xs">{item.descricao}</td>
                             <td className="p-3 text-muted-foreground">{item.categoria}</td>
                             <td className="p-3 text-muted-foreground">{item.subcategoria || '-'}</td>
                             <td className="p-3 text-xs">
@@ -42,7 +46,7 @@ const DrilldownModal = ({ isOpen, onClose, items, title }) => {
                             </td>
                         </tr>
                     )) : (
-                        <tr><td colSpan="6" className="p-4 text-center text-muted-foreground">Nenhum item encontrado.</td></tr>
+                        <tr><td colSpan="8" className="p-4 text-center text-muted-foreground">Nenhum item encontrado.</td></tr>
                     )}
                 </tbody>
             </table>

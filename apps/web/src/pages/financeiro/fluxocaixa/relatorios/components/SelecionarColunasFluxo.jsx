@@ -8,6 +8,8 @@ const AVAILABLE_COLUMNS = [
   { id: 'data', label: 'Data' },
   { id: 'tipo', label: 'Tipo (Entrada/Saída)' },
   { id: 'status', label: 'Status (Previsto/Realizado)' },
+  { id: 'documento', label: 'Nº do título / documento' },
+  { id: 'entidade', label: 'Cliente / Fornecedor' },
   { id: 'categoria', label: 'Categoria' },
   { id: 'subcategoria', label: 'Subcategoria' },
   { id: 'centroCusto', label: 'Centro de Custo' },

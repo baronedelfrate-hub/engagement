@@ -100,6 +100,16 @@ const CobrancaKanbanMov = () => {
 
           {erro && <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{erro}</div>}
 
+          <div className="flex flex-wrap gap-2 mb-3">
+            {colunas.map((c) => (
+              <div key={c.id} className={`flex items-center gap-2 rounded-md border-l-4 ${c.cor} bg-card border border-border px-3 py-1.5 text-xs`}>
+                <span className="font-medium text-foreground">{c.titulo.replace(/ \(.*\)/, '')}</span>
+                <Badge variant="secondary" className="text-[10px]">{c.itens.length}</Badge>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400">{formatCurrency(c.itens.reduce((t, i) => t + (i.recuperado ? i.valor_recebido : i.saldo), 0))}</span>
+              </div>
+            ))}
+          </div>
+
           <p className="text-xs text-muted-foreground mb-2">
             {filtrados.length} de {itens.length} títulos · a fase vem do vencimento (D-3 a D+30); recuperados = pagos com atraso nos últimos 60 dias.
           </p>
@@ -109,7 +119,7 @@ const CobrancaKanbanMov = () => {
               {colunas.map((col) => {
                 const total = col.itens.reduce((s, i) => s + (i.recuperado ? i.valor_recebido : i.saldo), 0);
                 return (
-                  <div key={col.id} className="flex flex-col w-[300px] flex-shrink-0 bg-muted/40 rounded-lg border border-border h-full">
+                  <div key={col.id} className="flex flex-col w-[270px] flex-shrink-0 bg-muted/40 rounded-lg border border-border h-full">
                     <div className={`p-3 border-b-2 ${col.cor} bg-card rounded-t-lg`}>
                       <div className="flex justify-between items-center mb-1">
                         <h3 className="font-semibold text-foreground text-sm truncate">{col.titulo}</h3>

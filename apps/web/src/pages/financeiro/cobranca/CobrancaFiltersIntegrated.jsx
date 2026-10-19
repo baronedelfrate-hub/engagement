@@ -25,24 +25,23 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
 
   const activeFilterCount = Object.values(filters).filter(v => v && v !== 'ALL').length;
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-        onFilterChange(filters);
-    }, 500); // Debounce
-    return () => clearTimeout(handler);
-  }, [filters, onFilterChange]);
+  // Os filtros só valem depois de clicar em Aplicar (ou Enter na busca): o que está digitado é um rascunho.
+  const aplicar = () => onFilterChange(filters);
+
+  const FILTROS_VAZIOS = {
+    search: '',
+    statusPrazo: 'ALL',
+    clienteId: 'ALL',
+    fase: 'ALL',
+    minValor: '',
+    maxValor: '',
+    dataVencimentoInicio: '',
+    dataVencimentoFim: ''
+  };
 
   const handleClear = () => {
-    setFilters({
-      search: '',
-      statusPrazo: 'ALL',
-      clienteId: 'ALL',
-      fase: 'ALL',
-      minValor: '',
-      maxValor: '',
-      dataVencimentoInicio: '',
-      dataVencimentoFim: ''
-    });
+    setFilters(FILTROS_VAZIOS);
+    onFilterChange(FILTROS_VAZIOS);
   };
 
   return (
@@ -75,6 +74,7 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
               className="pl-8 h-9 bg-background border-border text-xs focus:ring-blue-500/20"
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              onKeyDown={(e) => { if (e.key === 'Enter') aplicar(); }}
             />
           </div>
         </div>
@@ -172,6 +172,13 @@ const CobrancaFiltersIntegrated = ({ onFilterChange, loading }) => {
                 />
             </div>
         </div>
+      </div>
+
+      <div className="flex justify-end gap-2 mt-4">
+        <Button variant="outline" size="sm" onClick={handleClear}>Limpar</Button>
+        <Button size="sm" onClick={aplicar} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Search className="w-3.5 h-3.5 mr-2" /> Aplicar filtros
+        </Button>
       </div>
     </div>
   );

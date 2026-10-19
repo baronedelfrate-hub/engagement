@@ -29,7 +29,7 @@ const RelatoriosFluxoCaixa = () => {
 
   const [rawData, setRawData] = useState([]);
   const [centrosCustoMap, setCentrosCustoMap] = useState({});
-  const [selectedColumns, setSelectedColumns] = useState(['data', 'tipo', 'status', 'documento', 'entidade', 'categoria', 'subcategoria', 'descricao', 'valor']);
+  const [selectedColumns, setSelectedColumns] = useState(['data', 'documento', 'tipo', 'status', 'entidade', 'categoria', 'subcategoria', 'descricao', 'valor']);
   const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
 
   const { company_id } = useAuthContext();
@@ -250,9 +250,9 @@ const RelatoriosFluxoCaixa = () => {
                             <TableHeader className="bg-muted sticky top-0 z-10 shadow-sm">
                                 <TableRow>
                                     {selectedColumns.includes('data') && <TableHead className="w-[120px]">Data</TableHead>}
+                                    {selectedColumns.includes('documento') && <TableHead>Nº do título</TableHead>}
                                     {selectedColumns.includes('tipo') && <TableHead className="w-[100px]">Tipo</TableHead>}
                                     {selectedColumns.includes('status') && <TableHead className="w-[100px]">Status</TableHead>}
-                                    {selectedColumns.includes('documento') && <TableHead>Nº do título</TableHead>}
                                     {selectedColumns.includes('entidade') && <TableHead>Cliente / Fornecedor</TableHead>}
                                     {selectedColumns.includes('categoria') && <TableHead>Categoria</TableHead>}
                                     {selectedColumns.includes('subcategoria') && <TableHead>Subcategoria</TableHead>}
@@ -275,6 +275,7 @@ const RelatoriosFluxoCaixa = () => {
                                     data.map((item) => (
                                         <TableRow key={item.id} className="hover:bg-muted">
                                             {selectedColumns.includes('data') && <TableCell className="font-mono text-xs">{formatDateOnly(item.data_movimentacao)}</TableCell>}
+                                            {selectedColumns.includes('documento') && <TableCell className="font-mono text-xs">{item.numero_titulo || '-'}</TableCell>}
                                             {selectedColumns.includes('tipo') && (
                                                 <TableCell>
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.tipo === 'Receita' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400'}`}>
@@ -289,7 +290,6 @@ const RelatoriosFluxoCaixa = () => {
                                                     </span>
                                                 </TableCell>
                                             )}
-                                            {selectedColumns.includes('documento') && <TableCell className="font-mono text-xs">{item.numero_titulo || '-'}</TableCell>}
                                             {selectedColumns.includes('entidade') && <TableCell className="text-xs">{item.entidade || '-'}</TableCell>}
                                             {selectedColumns.includes('categoria') && <TableCell className="text-xs font-medium">{item.categoria}</TableCell>}
                                             {selectedColumns.includes('subcategoria') && <TableCell className="text-xs text-muted-foreground">{item.subcategoria || '-'}</TableCell>}

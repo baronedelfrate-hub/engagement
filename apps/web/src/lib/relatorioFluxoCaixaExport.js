@@ -28,7 +28,7 @@ const ROTULOS = {
 
 // Status deixa de ser coluna: Previsto e Realizado são colunas. Elas aparecem quando "Valor" está marcado nas colunas da tela.
 const colunasDoRelatorio = (selecionadas) => {
-  const base = ['data', 'tipo', 'documento', 'entidade', 'categoria', 'subcategoria', 'centroCusto', 'descricao'].filter((c) => selecionadas.includes(c));
+  const base = ['data', 'documento', 'tipo', 'entidade', 'categoria', 'subcategoria', 'centroCusto', 'descricao'].filter((c) => selecionadas.includes(c));
   return selecionadas.includes('valor') ? [...base, 'previsto', 'realizado'] : base;
 };
 

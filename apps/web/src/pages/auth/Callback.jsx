@@ -12,9 +12,9 @@ const Callback = () => {
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
 
-        // Se a URL contiver type=invite (comum em convites), redirecione para configurar senha
+        // Convite ou recuperação de senha: leva para a tela de definir a senha
         const hash = window.location.hash;
-        if (hash && hash.includes('type=invite')) {
+        if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
           navigate('/auth/set-password', { replace: true });
         } else {
           navigate('/', { replace: true });

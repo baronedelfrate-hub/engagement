@@ -107,7 +107,7 @@ export const atualizarUsuario = async (user_id, dados) => {
       body: { 
         user_id, 
         nome: dados.nome, 
-        company_id: dados.company_id, 
+        company_id: dados.company_id || null,
         role: dados.role 
       }
     });
@@ -120,4 +120,20 @@ export const atualizarUsuario = async (user_id, dados) => {
     console.error('Erro ao atualizar usuário:', error);
     throw error;
   }
+};
+// Redefine a senha (senha nova informada) ou envia o link de recuperação por e-mail.
+export const redefinirSenha = async (user_id, password) => {
+  const { data, error } = await supabase.functions.invoke('reset-user-password', { body: { user_id, password } });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+};
+
+export const enviarLinkRecuperacao = async (user_id) => {
+  const { data, error } = await supabase.functions.invoke('reset-user-password', {
+    body: { user_id, send_recovery: true, redirect_to: `${window.location.origin}/auth/callback` }
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
 };

@@ -14,12 +14,15 @@ import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Save, AlertCircle, Mail, UserPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  criarUsuario, 
-  atualizarUsuario, 
+import {
+  criarUsuario,
+  atualizarUsuario,
   buscarTodasEmpresas,
-  listarUsuarios
+  listarUsuarios,
+  redefinirSenha,
+  enviarLinkRecuperacao
 } from '@/services/admin/usuariosService';
+import { listarClientes, vincularAcesso } from '@/lib/engService';
 
 const UsuariosForm = ({ mode, userId }) => {
   const navigate = useNavigate();
@@ -45,9 +48,22 @@ const UsuariosForm = ({ mode, userId }) => {
 
   const [errors, setErrors] = useState({});
 
+  // 'empresa' = usuário de uma empresa do ERP; 'engagement' = login de cliente da Engagement (só acompanha o projeto)
+  const [tipoUsuario, setTipoUsuario] = useState('empresa');
+  const [clientesEng, setClientesEng] = useState([]);
+  const [clienteEngId, setClienteEngId] = useState('');
+  const [novaSenha, setNovaSenha] = useState({ senha: '', confirmar: '' });
+  const [trocandoSenha, setTrocandoSenha] = useState(false);
+  const [enviandoLink, setEnviandoLink] = useState(false);
+
   useEffect(() => {
     loadDependencies();
   }, [mode, userId]);
+
+  useEffect(() => {
+    if (mode !== 'create') return;
+    listarClientes().then(setClientesEng).catch(() => setClientesEng([]));
+  }, [mode]);
 
   const loadDependencies = async () => {
     try {
@@ -70,6 +86,7 @@ const UsuariosForm = ({ mode, userId }) => {
             role: user.role || '',
             status: user.banned_until ? 'inativo' : 'ativo'
           });
+          if (!user.company_id && user.role !== 'superadmin') setTipoUsuario('engagement');
         } else {
           toast({ variant: "destructive", title: "Usuário não encontrado" });
           navigate('/admin/usuarios');
@@ -100,8 +117,12 @@ const UsuariosForm = ({ mode, userId }) => {
 
     if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório';
     if (!formData.email.trim() || !emailRegex.test(formData.email)) newErrors.email = 'E-mail inválido';
-    if (!formData.company_id) newErrors.company_id = 'Empresa é obrigatória';
-    if (!formData.role) newErrors.role = 'Perfil é obrigatório';
+    if (tipoUsuario === 'engagement') {
+      if (mode === 'create' && !clienteEngId) newErrors.cliente_eng = 'Escolha o cliente da Engagement';
+    } else {
+      if (!formData.company_id && formData.role !== 'superadmin') newErrors.company_id = 'Empresa é obrigatória';
+      if (!formData.role) newErrors.role = 'Perfil é obrigatório';
+    }
 
     if (formData.senha || formData.confirmar_senha) {
       if (!formData.senha) newErrors.senha = 'Preencha a senha';
@@ -130,14 +151,22 @@ const UsuariosForm = ({ mode, userId }) => {
     setLoading(true);
     try {
       if (mode === 'create') {
+        const engagement = tipoUsuario === 'engagement';
         await criarUsuario(
           formData.email,
           formData.senha,
           formData.nome,
-          formData.company_id,
-          formData.role
+          engagement ? undefined : formData.company_id,
+          engagement ? 'viewer' : formData.role
         );
-        
+        if (engagement) {
+          try {
+            await vincularAcesso(formData.email, clienteEngId);
+          } catch (e) {
+            toast({ variant: "destructive", title: "Usuário criado, mas o vínculo com o cliente falhou", description: `${e.message} Faça o vínculo na ficha do cliente (aba Resumo).` });
+          }
+        }
+
         toast({ 
           title: "Sucesso", 
           description: formData.senha 
@@ -210,7 +239,18 @@ const UsuariosForm = ({ mode, userId }) => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            
+            {mode === 'create' && (
+              <div className="flex flex-wrap gap-2">
+                {[['empresa', 'Usuário de uma empresa do ERP'], ['engagement', 'Cliente da Engagement (acompanha o projeto)']].map(([v, r]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setTipoUsuario(v)}
+                    className={`px-3 py-2 rounded-md border text-sm transition-colors ${tipoUsuario === v ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:bg-muted'}`}
+                  >{r}</button>
+                ))}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <div className="space-y-2">
@@ -241,6 +281,27 @@ const UsuariosForm = ({ mode, userId }) => {
                 {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
               </div>
 
+              {tipoUsuario === 'engagement' ? (
+                mode === 'create' ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="cliente_eng">Cliente da Engagement <span className="text-destructive">*</span></Label>
+                    <Select value={clienteEngId} onValueChange={(v) => { setClienteEngId(v); if (errors.cliente_eng) setErrors(prev => ({ ...prev, cliente_eng: null })); }}>
+                      <SelectTrigger className={errors.cliente_eng ? 'border-destructive' : ''}>
+                        <SelectValue placeholder={clientesEng.length ? 'Selecione o cliente' : 'Nenhum cliente cadastrado'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clientesEng.map(c => (<SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                    {errors.cliente_eng && <p className="text-xs text-destructive">{errors.cliente_eng}</p>}
+                    <p className="text-xs text-muted-foreground">Acesso somente leitura à tela "Meu projeto". O usuário não enxerga o resto do ERP.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 md:col-span-2">
+                    <p className="text-sm text-muted-foreground rounded-md border border-border p-3">Login de cliente da Engagement (somente leitura). O vínculo com o cliente é gerenciado na ficha do cliente, aba Resumo.</p>
+                  </div>
+                )
+              ) : (
               <div className="space-y-2">
                 <Label htmlFor="company_id">Empresa <span className="text-destructive">*</span></Label>
                 {companiesLoading ? (
@@ -264,7 +325,9 @@ const UsuariosForm = ({ mode, userId }) => {
                 )}
                 {errors.company_id && <p className="text-xs text-destructive">{errors.company_id}</p>}
               </div>
+              )}
 
+              {tipoUsuario !== 'engagement' && (
               <div className="space-y-2">
                 <Label htmlFor="role">Perfil / Time <span className="text-destructive">*</span></Label>
                 <Select value={formData.role} onValueChange={(v) => handleSelectChange('role', v)}>
@@ -280,6 +343,7 @@ const UsuariosForm = ({ mode, userId }) => {
                 </Select>
                 {errors.role && <p className="text-xs text-destructive">{errors.role}</p>}
               </div>
+              )}
 
               {mode === 'create' && (
                 <>
@@ -349,6 +413,69 @@ const UsuariosForm = ({ mode, userId }) => {
           </CardFooter>
         </Card>
       </form>
+
+      {mode === 'edit' && (
+        <Card className="border shadow-sm mt-6">
+          <CardHeader>
+            <CardTitle>Senha de acesso</CardTitle>
+            <CardDescription>Defina uma nova senha agora ou envie ao usuário um link para ele mesmo escolher a senha.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nova_senha">Nova senha</Label>
+                <Input id="nova_senha" type="password" autoComplete="new-password" value={novaSenha.senha} onChange={(e) => setNovaSenha(s => ({ ...s, senha: e.target.value }))} placeholder="Mínimo de 8 caracteres" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmar_nova_senha">Confirmar nova senha</Label>
+                <Input id="confirmar_nova_senha" type="password" autoComplete="new-password" value={novaSenha.confirmar} onChange={(e) => setNovaSenha(s => ({ ...s, confirmar: e.target.value }))} />
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-wrap justify-between gap-3 border-t bg-muted/20 px-6 py-4">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={enviandoLink}
+              onClick={async () => {
+                setEnviandoLink(true);
+                try {
+                  const r = await enviarLinkRecuperacao(userId);
+                  toast({ title: 'Link enviado', description: `Enviamos o link de redefinição para ${r.email}.` });
+                } catch (error) {
+                  toast({ variant: "destructive", title: "Não foi possível enviar o link", description: error.message });
+                } finally {
+                  setEnviandoLink(false);
+                }
+              }}
+            >
+              {enviandoLink ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Mail className="h-4 w-4 mr-2" />}
+              Enviar link por e-mail
+            </Button>
+            <Button
+              type="button"
+              disabled={trocandoSenha || !novaSenha.senha}
+              onClick={async () => {
+                if (novaSenha.senha.length < 8) { toast({ variant: "destructive", title: "Senha curta", description: "Use pelo menos 8 caracteres." }); return; }
+                if (novaSenha.senha !== novaSenha.confirmar) { toast({ variant: "destructive", title: "As senhas não coincidem" }); return; }
+                setTrocandoSenha(true);
+                try {
+                  await redefinirSenha(userId, novaSenha.senha);
+                  setNovaSenha({ senha: '', confirmar: '' });
+                  toast({ title: 'Senha alterada', description: 'O usuário já pode entrar com a nova senha.' });
+                } catch (error) {
+                  toast({ variant: "destructive", title: "Não foi possível alterar a senha", description: error.message });
+                } finally {
+                  setTrocandoSenha(false);
+                }
+              }}
+            >
+              {trocandoSenha && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Definir nova senha
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 };

@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { carregarCliente, atualizarCliente, iniciarOnboarding, listarTarefas, hojeISO, STATUS_CONTRATO } from '@/lib/engService';
 import DiagnosticoTab from './tabs/DiagnosticoTab';
 import ImplantacaoTab from './tabs/ImplantacaoTab';
+import ConsultoriaTab from './tabs/ConsultoriaTab';
 
 const PLANOS = ['Estruturação F5', 'Básico', 'Essencial', 'Profissional', 'Estratégico'];
 const selectCls = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
@@ -153,12 +154,14 @@ const ClienteEngagement = () => {
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
           <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>
           <TabsTrigger value="implantacao">Implantação</TabsTrigger>
+          <TabsTrigger value="consultoria">Consultoria F5</TabsTrigger>
         </TabsList>
         <TabsContent value="resumo" className="mt-4">
           <ResumoTab key={cliente.updated_at || cliente.id} cliente={cliente} onSalvar={salvar} onIniciar={iniciar} iniciando={iniciando} temOnboarding={temOnboarding} />
         </TabsContent>
         <TabsContent value="diagnostico" className="mt-4"><DiagnosticoTab cliente={cliente} /></TabsContent>
         <TabsContent value="implantacao" className="mt-4"><ImplantacaoTab cliente={cliente} /></TabsContent>
+        <TabsContent value="consultoria" className="mt-4"><ConsultoriaTab cliente={cliente} /></TabsContent>
       </Tabs>
     </>
   );

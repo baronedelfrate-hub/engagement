@@ -186,16 +186,7 @@ const navigation = [
         icon: BarChart2,
         isNested: true,
         children: [
-          { name: 'Dashboard Global', href: '/metodologia-f5/dashboard' },
-          { name: 'Diagnóstico F1', href: '/metodologia-f5/diagnostico-f1' },
-          { name: 'Histórico F1', href: '/metodologia-f5/historico' },
-          { name: 'Projetos F5', href: '/metodologia-f5/projetos' },
-          { name: 'Etapas F5', href: '/metodologia-f5/etapas' },
-          { name: 'Checklists F5', href: '/metodologia-f5/checklists' },
-          { name: 'KPIs F5', href: '/metodologia-f5/kpis' },
-          { name: 'Entregáveis F5', href: '/metodologia-f5/entregaveis' },
-          { name: 'Relatórios F5', href: '/metodologia-f5/relatorios' },
-          { name: 'Logs de Auditoria', href: '/metodologia-f5/auditoria' },
+          { name: 'Clientes e projetos', href: '/metodologia-f5/clientes' },
         ],
       },
       {

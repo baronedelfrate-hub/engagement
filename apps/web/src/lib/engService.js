@@ -91,3 +91,130 @@ export const formatarData = (iso) => {
   const [a, m, d] = String(iso).slice(0, 10).split('-');
   return `${d}/${m}/${a}`;
 };
+
+// ---------- Consultoria F5: projeto, cronograma, agenda, OS de visita e entregas ----------
+export const STATUS_VISITA = {
+  agendada: 'Agendada',
+  realizada: 'Realizada',
+  parcial: 'Realizada parcialmente',
+  remarcada: 'Remarcada',
+  cancelada: 'Cancelada'
+};
+
+export const TIPOS_COMPROMISSO = ['Visita', 'Reunião com o cliente', 'Reunião com o contador', 'Interno — Engagement', 'Outro'];
+
+export const STATUS_ENTREGA = { pendente: 'Pendente', em_andamento: 'Em andamento', concluido: 'Concluído', na: 'N/A' };
+
+export const listarProjetosF5 = async (clienteId) => ok(
+  await supabase.from('eng_projetos').select('*').eq('cliente_id', clienteId).eq('tipo', 'f5').order('created_at')
+);
+
+export const criarProjetoF5 = async (clienteId, dados) => ok(
+  await supabase.from('eng_projetos').insert({ cliente_id: clienteId, tipo: 'f5', status: 'em_andamento', ...dados }).select().single()
+);
+
+export const atualizarProjeto = async (id, dados) => ok(
+  await supabase.from('eng_projetos').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+);
+
+export const listarTarefasProjeto = async (projetoId) => ok(
+  await supabase.from('eng_tarefas').select('*').eq('projeto_id', projetoId).order('dia_plano', { nullsFirst: false }).order('data_prevista').order('created_at')
+);
+
+export const criarTarefa = async (clienteId, projetoId, dados) => ok(
+  await supabase.from('eng_tarefas').insert({ cliente_id: clienteId, projeto_id: projetoId, origem: 'f5', funcao_responsavel: 'consultor', ...dados }).select().single()
+);
+
+export const excluirTarefa = async (id) => ok(await supabase.from('eng_tarefas').delete().eq('id', id));
+
+export const listarAgenda = async (clienteId, projetoId) => {
+  let q = supabase.from('eng_agenda').select('*').eq('cliente_id', clienteId).order('data').order('hora_inicio', { nullsFirst: true });
+  if (projetoId) q = q.eq('projeto_id', projetoId);
+  return ok(await q);
+};
+
+export const criarAgenda = async (clienteId, projetoId, dados) => ok(
+  await supabase.from('eng_agenda').insert({ cliente_id: clienteId, projeto_id: projetoId, ...dados }).select().single()
+);
+
+export const atualizarAgenda = async (id, dados) => ok(
+  await supabase.from('eng_agenda').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+);
+
+export const excluirAgenda = async (id) => ok(await supabase.from('eng_agenda').delete().eq('id', id));
+
+export const listarOS = async (clienteId) => ok(
+  await supabase.from('eng_os').select('*').eq('cliente_id', clienteId).order('numero', { ascending: false })
+);
+
+export const criarOS = async (clienteId, projetoId, dados) => {
+  const ultimas = ok(await supabase.from('eng_os').select('numero').eq('cliente_id', clienteId).order('numero', { ascending: false }).limit(1));
+  const numero = (ultimas[0]?.numero || 0) + 1;
+  return ok(await supabase.from('eng_os').insert({ cliente_id: clienteId, projeto_id: projetoId, numero, ...dados }).select().single());
+};
+
+export const atualizarOS = async (id, dados) => ok(
+  await supabase.from('eng_os').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+);
+
+export const listarEntregaveis = async (projetoId) => ok(
+  await supabase.from('eng_entregaveis').select('*').eq('projeto_id', projetoId).order('ordem').order('created_at')
+);
+
+export const criarEntregavel = async (clienteId, projetoId, dados) => ok(
+  await supabase.from('eng_entregaveis').insert({ cliente_id: clienteId, projeto_id: projetoId, ...dados }).select().single()
+);
+
+export const atualizarEntregavel = async (id, dados) => ok(
+  await supabase.from('eng_entregaveis').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id).select().single()
+);
+
+export const excluirEntregavel = async (id) => ok(await supabase.from('eng_entregaveis').delete().eq('id', id));
+
+const DIAS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+export const diaDaSemana = (iso) => (iso ? DIAS[new Date(`${String(iso).slice(0, 10)}T12:00:00`).getDay()] : '');
+
+// Datas dos encontros: a partir do início, nos dias da semana escolhidos, pulando os períodos de pausa.
+export const calcularDatas = ({ inicio, diasSemana, quantidade, pausas = [] }) => {
+  const datas = [];
+  const d = new Date(`${inicio}T12:00:00`);
+  const emPausa = (iso) => pausas.some((p) => p.de && p.ate && iso >= p.de && iso <= p.ate);
+  let guarda = 0;
+  while (datas.length < quantidade && guarda < 2000) {
+    const iso = d.toISOString().slice(0, 10);
+    if (diasSemana.includes(d.getDay()) && !emPausa(iso)) datas.push(iso);
+    d.setDate(d.getDate() + 1);
+    guarda += 1;
+  }
+  return datas;
+};
+
+// Distribui as datas pelas atividades do cronograma (uma data por "dia do plano") e cria a agenda correspondente.
+export const gerarAgendaDoCronograma = async (clienteId, projetoId, tarefas, { inicio, diasSemana, horaInicio, pausas }) => {
+  const dias = [...new Set(tarefas.map((t) => t.dia_plano).filter((n) => n !== null && n !== undefined))].sort((a, b) => a - b);
+  const datas = calcularDatas({ inicio, diasSemana, quantidade: dias.length, pausas });
+  const dataDoDia = new Map(dias.map((n, i) => [n, datas[i]]));
+  for (const t of tarefas) {
+    const data = dataDoDia.get(t.dia_plano);
+    if (data) await atualizarTarefa(t.id, { data_prevista: data });
+  }
+  const jaNaAgenda = new Set((await listarAgenda(clienteId, projetoId)).map((a) => a.dia_plano).filter(Boolean));
+  let criados = 0;
+  for (const n of dias) {
+    if (jaNaAgenda.has(n) || !dataDoDia.get(n)) continue;
+    const doDia = tarefas.filter((t) => t.dia_plano === n);
+    const horas = doDia.reduce((s, t) => s + (Number(t.carga_horas) || 0), 0);
+    let horaFim = null;
+    if (horaInicio && horas) {
+      const [h, m] = horaInicio.split(':').map(Number);
+      const fim = h * 60 + m + horas * 60;
+      horaFim = `${String(Math.floor(fim / 60) % 24).padStart(2, '0')}:${String(fim % 60).padStart(2, '0')}`;
+    }
+    await criarAgenda(clienteId, projetoId, {
+      data: dataDoDia.get(n), hora_inicio: horaInicio || null, hora_fim: horaFim, tipo: 'Visita',
+      titulo: doDia.map((t) => t.atividade).join(' · ').slice(0, 140), dia_plano: n
+    });
+    criados += 1;
+  }
+  return { datas: datas.length, agenda: criados };
+};

@@ -500,6 +500,7 @@ const AnimatedRoutes = () => {
           {/* Rota Protegida de Limpar Dados */}
           <Route path="/admin/limpar-dados" element={<ProtectedLayout><PageTransition><LimparDados /></PageTransition></ProtectedLayout>} />
 
+          <Route path="/metodologia-f5/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/dashboard" element={<ProtectedLayout><PageTransition><F5Dashboard /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/diagnostico-f1" element={<ProtectedLayout><PageTransition><F1Diagnosis /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/historico" element={<ProtectedLayout><PageTransition><HistoricoF1 /></PageTransition></ProtectedLayout>} />

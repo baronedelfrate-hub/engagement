@@ -186,6 +186,7 @@ const navigation = [
         icon: BarChart2,
         isNested: true,
         children: [
+          { name: 'Painel', href: '/metodologia-f5/dashboard' },
           { name: 'Clientes e projetos', href: '/metodologia-f5/clientes' },
         ],
       },
@@ -194,6 +195,7 @@ const navigation = [
         icon: ClipboardList,
         isNested: true,
         children: [
+          { name: 'Painel', href: '/bpo/dashboard' },
           { name: 'Clientes BPO', href: '/bpo/clientes' },
         ],
       },

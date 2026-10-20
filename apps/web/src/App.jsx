@@ -181,6 +181,7 @@ import BPODashboard from '@/pages/bpo/BPODashboard';
 import ClientesEngagement from '@/pages/engagement/ClientesEngagement';
 import ClienteEngagement from '@/pages/engagement/ClienteEngagement';
 import PortalCliente from '@/pages/engagement/PortalCliente';
+import DashboardEngagement from '@/pages/engagement/DashboardEngagement';
 import BPOClientesForm from '@/pages/bpo/BPOClientesForm';
 import ClienteFasesPage from '@/pages/bpo/ClienteFasesPage';
 import BPOClienteDetail from '@/pages/bpo/BPOClienteDetail';
@@ -513,7 +514,7 @@ const AnimatedRoutes = () => {
 
           <Route path="/metodologia-f5/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement servico="consultoria" /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement servico="consultoria" /></PageTransition></ProtectedLayout>} />
-          <Route path="/metodologia-f5/dashboard" element={<ProtectedLayout><PageTransition><F5Dashboard /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/dashboard" element={<ProtectedLayout><PageTransition><DashboardEngagement servico="consultoria" /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/diagnostico-f1" element={<ProtectedLayout><PageTransition><F1Diagnosis /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/historico" element={<ProtectedLayout><PageTransition><HistoricoF1 /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/projetos" element={<ProtectedLayout><PageTransition><F5ProjetosList /></PageTransition></ProtectedLayout>} />
@@ -535,7 +536,7 @@ const AnimatedRoutes = () => {
           <Route path="/metodologia-f5/relatorios" element={<ProtectedLayout><PageTransition><F5Relatorios /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/auditoria" element={<ProtectedLayout><PageTransition><F5AuditoriaLog /></PageTransition></ProtectedLayout>} />
 
-          <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><BPODashboard /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><DashboardEngagement servico="bpo" /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement servico="bpo" /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement servico="bpo" /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/fase/:faseId" element={<ProtectedLayout><PageTransition><BPOFaseDetail /></PageTransition></ProtectedLayout>} />

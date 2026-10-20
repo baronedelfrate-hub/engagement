@@ -1,159 +1,73 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { useCRM } from '@/contexts/CRMContext';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, Plus, Settings2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Plus } from 'lucide-react';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { listarPropostas, moeda, STATUS_PROPOSTA } from '@/lib/crmService';
 
-const STATUS_OPTIONS = ['LEAD', 'PROPOSTA', 'NEGOCIACAO', 'GANHA', 'ENVIADO_FATURAMENTO'];
+const COR = { rascunho: 'outline', enviada: 'warning', aceita: 'success', recusada: 'destructive', expirada: 'secondary' };
+const fmt = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '');
+const FILTROS = [['todas', 'Todas'], ['rascunho', 'Rascunho'], ['enviada', 'Enviadas'], ['aceita', 'Aceitas'], ['recusada', 'Recusadas']];
 
 const CRMPropostas = () => {
-  const { propostas, clientes, createProposta, loading } = useCRM();
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    cliente_id: '',
-    numero: `PRP-${Date.now().toString().slice(-6)}`,
-    valor_total: '',
-    status: 'LEAD',
-    data_emissao: new Date().toISOString().split('T')[0]
-  });
+  const { company_id: companyId, loading: authLoading } = useAuthContext();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [lista, setLista] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filtro, setFiltro] = useState('todas');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.cliente_id || !formData.valor_total) return;
-    
-    const result = await createProposta(formData);
-    if (result) {
-      setIsOpen(false);
-      setFormData({
-        cliente_id: '',
-        numero: `PRP-${Date.now().toString().slice(-6)}`,
-        valor_total: '',
-        status: 'LEAD',
-        data_emissao: new Date().toISOString().split('T')[0]
-      });
-    }
-  };
+  const carregar = useCallback(async () => {
+    if (!companyId) { setLoading(false); return; }
+    setLoading(true);
+    try { setLista(await listarPropostas(companyId)); }
+    catch (e) { toast({ title: 'Erro ao carregar', description: e.message, variant: 'destructive' }); }
+    finally { setLoading(false); }
+  }, [companyId, toast]);
+  useEffect(() => { if (!authLoading) carregar(); }, [authLoading, carregar]);
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'GANHA': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400';
-      case 'LEAD': return 'bg-muted text-foreground';
-      case 'ENVIADO_FATURAMENTO': return 'bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400';
-      default: return 'bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400';
-    }
-  };
+  if (authLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (!companyId) return <p className="text-sm text-muted-foreground py-10 text-center">Entre com o usuário de uma empresa para ver o CRM dela.</p>;
+
+  const vis = lista.filter((p) => filtro === 'todas' || p.status === filtro);
+  const abertas = lista.filter((p) => p.status === 'enviada');
 
   return (
     <>
       <Helmet><title>Propostas | CRM</title></Helmet>
-      <PageHeader 
-        title="Propostas CRM" 
-        description="Gestão de propostas comerciais." 
-        icon={FileText}
-        action={
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Proposta</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar Nova Proposta</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Cliente</Label>
-                  <Select value={formData.cliente_id} onValueChange={(val) => setFormData({...formData, cliente_id: val})}>
-                    <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-                    <SelectContent>
-                      {clientes.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Valor (R$)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      value={formData.valor_total} 
-                      onChange={(e) => setFormData({...formData, valor_total: e.target.value})}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Data</Label>
-                    <Input 
-                      type="date" 
-                      value={formData.data_emissao} 
-                      onChange={(e) => setFormData({...formData, data_emissao: e.target.value})}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={formData.status} onValueChange={(val) => setFormData({...formData, status: val})}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map(s => <SelectItem key={s} value={s}>{s.replace(/_/g, ' ')}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button type="submit">Salvar Proposta</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        }
+      <PageHeader
+        title="Propostas"
+        description={`${lista.length} proposta(s) · ${abertas.length} aguardando resposta (${moeda(abertas.reduce((s, p) => s + Number(p.valor_total || 0), 0))}).`}
+        action={<div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => navigate('/crm/configuracoes')}><Settings2 className="w-4 h-4 mr-2" /> Textos da proposta</Button><Button onClick={() => navigate('/crm/propostas/nova')}><Plus className="w-4 h-4 mr-2" /> Nova proposta</Button></div>}
       />
-
-      <div className="bg-background rounded-xl shadow-sm border border-border mt-6 overflow-hidden">
-        <Table>
-          <TableHeader className="bg-muted">
-            <TableRow>
-              <TableHead>Número</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Valor</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8">Carregando...</TableCell></TableRow>
-            ) : propostas.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma proposta encontrada.</TableCell></TableRow>
-            ) : (
-              propostas.map((prop) => (
-                <TableRow key={prop.id}>
-                  <TableCell className="font-medium text-foreground">{prop.numero || '-'}</TableCell>
-                  <TableCell>{prop.cliente?.nome || 'Cliente Desconhecido'}</TableCell>
-                  <TableCell>{new Date(prop.data_emissao).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell className="font-medium">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(prop.valor_total || 0)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(prop.status)} variant="outline">
-                      {prop.status ? prop.status.replace(/_/g, ' ') : 'LEAD'}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {FILTROS.map(([id, r]) => <button key={id} type="button" onClick={() => setFiltro(id)} className={`px-3 py-1.5 rounded-md border text-sm ${filtro === id ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-border hover:bg-muted'}`}>{r}</button>)}
       </div>
+      {loading ? <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div> : vis.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-10 text-center">Nenhuma proposta {filtro === 'todas' ? 'ainda. Clique em "Nova proposta" para criar a primeira.' : 'nesta situação.'}</p>
+      ) : (
+        <div className="rounded-lg border border-border overflow-hidden bg-card">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="text-left p-3">Número</th><th className="text-left p-3">Cliente</th><th className="text-left p-3">Proposta</th><th className="text-right p-3">Valor</th><th className="text-left p-3">Emissão</th><th className="text-left p-3">Situação</th></tr></thead>
+            <tbody className="divide-y divide-border">
+              {vis.map((p) => (
+                <tr key={p.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(`/crm/propostas/${p.id}`)}>
+                  <td className="p-3 font-medium whitespace-nowrap">{p.numero}{p.versao > 1 ? ` v${p.versao}` : ''}</td>
+                  <td className="p-3">{p.conta?.nome || <span className="text-muted-foreground">—</span>}</td>
+                  <td className="p-3 max-w-[320px] truncate">{p.titulo}</td>
+                  <td className="p-3 text-right">{moeda(p.valor_total)}</td>
+                  <td className="p-3 text-xs">{fmt(p.data_emissao)}</td>
+                  <td className="p-3"><Badge variant={COR[p.status]}>{STATUS_PROPOSTA[p.status]}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </>
   );
 };

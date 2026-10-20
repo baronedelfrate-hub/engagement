@@ -165,10 +165,12 @@ const navigation = [
         icon: Handshake, 
         isNested: true,
         children: [
-          { name: 'Dashboard', href: '/crm/dashboard' },
-          { name: 'Clientes', href: '/crm/clientes' },
-          { name: 'Kanban', href: '/crm/kanban' },
+          { name: 'Painel', href: '/crm/dashboard' },
+          { name: 'Funil', href: '/crm/funil' },
+          { name: 'Contas e contatos', href: '/crm/contas' },
+          { name: 'Atividades', href: '/crm/atividades' },
           { name: 'Propostas', href: '/crm/propostas' },
+          { name: 'Catálogo', href: '/crm/catalogo' },
         ],
       },
       {

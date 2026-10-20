@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { F5Provider } from '@/contexts/F5Context'; 
-import { CRMProvider } from '@/contexts/CRMContext'; 
 import { ContabilidadeProvider } from '@/contexts/ContabilidadeContext';
 import { SessionValidator } from '@/components/SessionValidator';
 import Layout from '@/components/Layout';
@@ -59,9 +58,13 @@ import RelatoriosFluxoCaixa from '@/pages/financeiro/fluxocaixa/relatorios/Relat
 import HistoricoConciliacoes from '@/pages/financeiro/HistoricoConciliacoes';
 import RelatoriosFinanceiros from '@/pages/financeiro/relatorios/RelatoriosFinanceiros';
 
-import CRMClientes from '@/pages/crm/CRMClientes';
-import CRMKanban from '@/pages/crm/CRMKanban';
+import CRMContas from '@/pages/crm/CRMContas';
+import CRMFunil from '@/pages/crm/CRMFunil';
 import CRMPropostas from '@/pages/crm/CRMPropostas';
+import CRMPropostaEditor from '@/pages/crm/CRMPropostaEditor';
+import CRMAtividades from '@/pages/crm/CRMAtividades';
+import CRMCatalogo from '@/pages/crm/CRMCatalogo';
+import CRMConfig from '@/pages/crm/CRMConfig';
 import CRMDashboard from '@/pages/crm/CRMDashboard';
 
 import EmpresasList from '@/pages/cadastros/EmpresasList';
@@ -228,9 +231,8 @@ const PageTransition = ({ children }) => {
   );
 };
 
-const CRMContextWrapper = ({ children }) => {
-  return <CRMProvider>{children}</CRMProvider>;
-};
+// O CRM novo busca os proprios dados em cada tela; o provedor antigo nao e mais necessario.
+const CRMContextWrapper = ({ children }) => children;
 
 const ContabilidadeContextWrapper = ({ children }) => {
   return <ContabilidadeProvider>{children}</ContabilidadeProvider>;
@@ -303,9 +305,15 @@ const AnimatedRoutes = () => {
               <CRMContextWrapper>
                 <Routes>
                   <Route path="dashboard" element={<PageTransition><CRMDashboard /></PageTransition>} />
-                  <Route path="clientes" element={<PageTransition><CRMClientes /></PageTransition>} />
+                  <Route path="contas" element={<PageTransition><CRMContas /></PageTransition>} />
                   <Route path="propostas" element={<PageTransition><CRMPropostas /></PageTransition>} />
-                  <Route path="kanban" element={<PageTransition><CRMKanban /></PageTransition>} />
+                  <Route path="propostas/:id" element={<PageTransition><CRMPropostaEditor /></PageTransition>} />
+                  <Route path="atividades" element={<PageTransition><CRMAtividades /></PageTransition>} />
+                  <Route path="catalogo" element={<PageTransition><CRMCatalogo /></PageTransition>} />
+                  <Route path="configuracoes" element={<PageTransition><CRMConfig /></PageTransition>} />
+                  <Route path="funil" element={<PageTransition><CRMFunil /></PageTransition>} />
+                  <Route path="clientes" element={<Navigate to="/crm/contas" replace />} />
+                  <Route path="kanban" element={<Navigate to="/crm/funil" replace />} />
                   <Route path="" element={<Navigate to="dashboard" replace />} />
                 </Routes>
               </CRMContextWrapper>

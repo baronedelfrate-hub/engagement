@@ -10,13 +10,65 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { carregarCliente, atualizarCliente, iniciarOnboarding, listarTarefas, hojeISO, STATUS_CONTRATO } from '@/lib/engService';
+import {
+  carregarCliente, atualizarCliente, iniciarOnboarding, listarTarefas, hojeISO, STATUS_CONTRATO,
+  listarAcessos, vincularAcesso, desvincularAcesso
+} from '@/lib/engService';
 import DiagnosticoTab from './tabs/DiagnosticoTab';
 import ImplantacaoTab from './tabs/ImplantacaoTab';
 import ConsultoriaTab from './tabs/ConsultoriaTab';
 
 const PLANOS = ['Estruturação F5', 'Básico', 'Essencial', 'Profissional', 'Estratégico'];
 const selectCls = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
+
+// Login do cliente: a Estela cria o usuário (Administração > Usuários) e aqui apenas o vincula a este cliente.
+const AcessoCliente = ({ cliente }) => {
+  const { toast } = useToast();
+  const [acessos, setAcessos] = useState(null);
+  const [email, setEmail] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [indisponivel, setIndisponivel] = useState(false);
+
+  const carregar = useCallback(async () => {
+    try { setAcessos(await listarAcessos(cliente.id)); setIndisponivel(false); }
+    catch (e) { setAcessos([]); setIndisponivel(true); }
+  }, [cliente.id]);
+  useEffect(() => { carregar(); }, [carregar]);
+
+  const vincular = async () => {
+    if (!email.trim()) return;
+    setSalvando(true);
+    try { await vincularAcesso(email.trim(), cliente.id); setEmail(''); toast({ title: 'Acesso liberado' }); await carregar(); }
+    catch (e) { toast({ title: 'Não foi possível liberar o acesso', description: e.message, variant: 'destructive' }); }
+    finally { setSalvando(false); }
+  };
+  const remover = async (u) => {
+    if (!window.confirm(`Remover o acesso de ${u.email}?`)) return;
+    try { await desvincularAcesso(u.id); await carregar(); } catch (e) { toast({ title: 'Não foi possível remover', description: e.message, variant: 'destructive' }); }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Acesso do cliente</CardTitle>
+        <CardDescription>O cliente entra com e-mail e senha e vê só a tela "Meu projeto": fases, entregas, agenda e OS publicadas. Crie o usuário em Administração > Usuários (perfil comum ou somente leitura, sem empresa) e vincule o e-mail aqui.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {indisponivel && <p className="text-xs text-amber-700">Recurso ainda não disponível no banco (falta aplicar a migração de acesso do cliente).</p>}
+        {(acessos || []).map((u) => (
+          <div key={u.id} className="flex items-center justify-between text-sm border border-border rounded-md px-3 py-2">
+            <span>{u.email}{u.nome ? <span className="text-muted-foreground"> · {u.nome}</span> : null}</span>
+            <Button variant="ghost" size="sm" onClick={() => remover(u)}>Remover</Button>
+          </div>
+        ))}
+        <div className="flex gap-2">
+          <Input type="email" placeholder="e-mail do usuário do cliente" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Button onClick={vincular} disabled={salvando || !email.trim() || indisponivel}>{salvando && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Liberar acesso</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) => {
   const [f, setF] = useState(cliente);
@@ -82,6 +134,8 @@ const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) =
           )}
         </CardContent>
       </Card>
+
+      <div className="lg:col-span-2"><AcessoCliente cliente={cliente} /></div>
     </div>
   );
 };

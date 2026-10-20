@@ -218,3 +218,7 @@ export const gerarAgendaDoCronograma = async (clienteId, projetoId, tarefas, { i
   }
   return { datas: datas.length, agenda: criados };
 };
+// ---------- Acesso do cliente (login somente leitura) ----------
+export const listarAcessos = async (clienteId) => ok(await supabase.rpc('eng_usuarios_do_cliente', { p_cliente: clienteId }));
+export const vincularAcesso = async (email, clienteId) => ok(await supabase.rpc('eng_vincular_usuario_cliente', { p_email: email, p_cliente: clienteId }));
+export const desvincularAcesso = async (usuarioId) => ok(await supabase.rpc('eng_desvincular_usuario_cliente', { p_usuario: usuarioId }));

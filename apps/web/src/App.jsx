@@ -180,6 +180,7 @@ import HistoricoF1 from '@/pages/metodologia-f5/HistoricoF1';
 import BPODashboard from '@/pages/bpo/BPODashboard';
 import ClientesEngagement from '@/pages/engagement/ClientesEngagement';
 import ClienteEngagement from '@/pages/engagement/ClienteEngagement';
+import PortalCliente from '@/pages/engagement/PortalCliente';
 import BPOClientesForm from '@/pages/bpo/BPOClientesForm';
 import ClienteFasesPage from '@/pages/bpo/ClienteFasesPage';
 import BPOClienteDetail from '@/pages/bpo/BPOClienteDetail';
@@ -243,10 +244,18 @@ const GuardaModulo = ({ children }) => {
   return children;
 };
 
+// Login de cliente da Engagement: só enxerga a própria tela de acompanhamento.
+const GuardaCliente = ({ children }) => {
+  const { clienteBpoId, loading } = useAuthContext();
+  if (!loading && clienteBpoId) return <Navigate to="/meu-projeto" replace />;
+  return children;
+};
+
 const ProtectedLayout = ({ children }) => {
   const location = useLocation();
   return (
     <ProtectedRoute>
+      <GuardaCliente>
       <Layout>
         <ErrorBoundary resetKey={location.pathname}>
           <GuardaModulo>
@@ -254,6 +263,7 @@ const ProtectedLayout = ({ children }) => {
           </GuardaModulo>
         </ErrorBoundary>
       </Layout>
+      </GuardaCliente>
     </ProtectedRoute>
   );
 };
@@ -278,7 +288,7 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/auth/callback" element={<PageTransition><Callback /></PageTransition>} />
           <Route path="/auth/set-password" element={<PageTransition><SetPassword /></PageTransition>} />
-          <Route path="/assinatura-bloqueada" element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
+          <Route path="/meu-projeto" element={<ProtectedRoute><PageTransition><PortalCliente /></PageTransition></ProtectedRoute>} /> element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
 
           {/* Rotas Protegidas */}
           <Route path="/" element={<ProtectedLayout><PageTransition><Dashboard /></PageTransition></ProtectedLayout>} />

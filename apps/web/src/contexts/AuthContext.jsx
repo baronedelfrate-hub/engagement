@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, nome, role, company_id')
+        .select('id, nome, role, company_id, cliente_bpo_id')
         .eq('id', userId)
         .single();
         
@@ -259,6 +259,8 @@ export const AuthProvider = ({ children }) => {
     user,
     profile,
     role: profile?.role ?? null,
+    // login de cliente da Engagement (só acompanha o próprio projeto)
+    clienteBpoId: profile?.cliente_bpo_id ?? null,
     company_id: companyId,
     companyIdSource,
     getCompanyId,

@@ -30,11 +30,11 @@ const AcessosTab = ({ cliente }) => {
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Acessos e dados do cliente</CardTitle>
         <CardDescription>
-          Logins, links, contatos e observações recebidos na implantação. As senhas são guardadas cifradas e só a equipe Engagement as vê; cada vez que uma senha é mostrada, fica registrado. Também dá para cadastrar direto em cada item da aba Implantação.
+          Logins, links, contatos e observações recebidos na implantação. As senhas são guardadas cifradas e só a equipe Engagement as vê; cada vez que uma senha é mostrada, fica registrado. Esta aba é só de consulta: para cadastrar ou alterar um acesso, abra o item correspondente na aba Implantação.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <AcessosPanel clienteId={cliente.id} acessos={acessos} itensPorId={itensPorId} onAtualizar={setAcessos} />
+        <AcessosPanel clienteId={cliente.id} acessos={acessos} itensPorId={itensPorId} onAtualizar={setAcessos} consulta />
       </CardContent>
     </Card>
   );

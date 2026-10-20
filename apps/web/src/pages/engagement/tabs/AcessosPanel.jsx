@@ -10,7 +10,7 @@ import {
 } from '@/lib/engService';
 
 // Um acesso: sistema/plataforma, link, usuário, senha (cifrada no banco), contato e observações.
-const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir }) => {
+const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir, consulta }) => {
   const { toast } = useToast();
   const [senhaVisivel, setSenhaVisivel] = useState(null);
   const [novaSenha, setNovaSenha] = useState('');
@@ -55,16 +55,16 @@ const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir }) => {
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">
           <Label className="text-xs">Sistema / plataforma {rotuloItem ? <span className="text-muted-foreground">· {rotuloItem}</span> : null}</Label>
-          <Input defaultValue={acesso.nome} onBlur={(e) => salvarCampo('nome', e.target.value.trim() || acesso.nome)} placeholder="ex.: Internet Banking Itaú — operador" />
+          <Input readOnly={consulta} defaultValue={acesso.nome} onBlur={(e) => salvarCampo('nome', e.target.value.trim() || acesso.nome)} placeholder="ex.: Internet Banking Itaú — operador" />
         </div>
-        <button type="button" title="Excluir este acesso" className="text-muted-foreground hover:text-destructive mt-6" onClick={onExcluir}><Trash2 className="h-4 w-4" /></button>
+        {!consulta && <button type="button" title="Excluir este acesso" className="text-muted-foreground hover:text-destructive mt-6" onClick={onExcluir}><Trash2 className="h-4 w-4" /></button>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Link / endereço</Label>
           <div className="flex gap-1">
-            <Input defaultValue={acesso.url || ''} onBlur={(e) => salvarCampo('url', e.target.value.trim())} placeholder="https://..." />
+            <Input readOnly={consulta} defaultValue={acesso.url || ''} onBlur={(e) => salvarCampo('url', e.target.value.trim())} placeholder="https://..." />
             {acesso.url && /^https?:\/\//i.test(acesso.url) && (
               <a href={acesso.url} target="_blank" rel="noopener noreferrer" title="Abrir" className="inline-flex items-center justify-center w-9 shrink-0 rounded-md border border-input hover:bg-muted"><ExternalLink className="h-4 w-4" /></a>
             )}
@@ -72,18 +72,20 @@ const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir }) => {
         </div>
         <div>
           <Label className="text-xs">Usuário / login</Label>
-          <Input defaultValue={acesso.usuario || ''} onBlur={(e) => salvarCampo('usuario', e.target.value.trim())} autoComplete="off" />
+          <Input readOnly={consulta} defaultValue={acesso.usuario || ''} onBlur={(e) => salvarCampo('usuario', e.target.value.trim())} autoComplete="off" />
         </div>
       </div>
 
       <div>
         <Label className="text-xs flex items-center gap-1"><KeyRound className="h-3 w-3" /> Senha <span className="text-muted-foreground">(guardada cifrada; só a equipe Engagement vê)</span></Label>
-        {acesso.tem_senha && !editandoSenha ? (
+        {!acesso.tem_senha && consulta ? (
+          <p className="text-sm text-muted-foreground">Sem senha cadastrada.</p>
+        ) : acesso.tem_senha && !editandoSenha ? (
           <div className="flex flex-wrap items-center gap-2">
             <code className="px-3 py-1.5 rounded-md bg-muted text-sm min-w-[160px]">{senhaVisivel === null ? '••••••••••' : (senhaVisivel || '(vazia)')}</code>
             <Button type="button" variant="outline" size="sm" onClick={ver} disabled={ocupado}>{ocupado ? <Loader2 className="h-4 w-4 animate-spin" /> : senhaVisivel === null ? <Eye className="h-4 w-4 mr-1" /> : <EyeOff className="h-4 w-4 mr-1" />}{senhaVisivel === null ? 'Mostrar' : 'Ocultar'}</Button>
             <Button type="button" variant="outline" size="sm" onClick={copiar}><Copy className="h-4 w-4 mr-1" />Copiar</Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => { setEditandoSenha(true); setSenhaVisivel(null); }}>Alterar</Button>
+            {!consulta && <Button type="button" variant="ghost" size="sm" onClick={() => { setEditandoSenha(true); setSenhaVisivel(null); }}>Alterar</Button>}
             {acesso.senha_alterada_em && <span className="text-xs text-muted-foreground">definida em {formatarData(acesso.senha_alterada_em)}</span>}
           </div>
         ) : (
@@ -98,11 +100,11 @@ const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Contato (nome, telefone, e-mail)</Label>
-          <Input defaultValue={acesso.contato || ''} onBlur={(e) => salvarCampo('contato', e.target.value.trim())} />
+          <Input readOnly={consulta} defaultValue={acesso.contato || ''} onBlur={(e) => salvarCampo('contato', e.target.value.trim())} />
         </div>
         <div>
           <Label className="text-xs">Observações</Label>
-          <Textarea rows={1} defaultValue={acesso.observacao || ''} onBlur={(e) => salvarCampo('observacao', e.target.value.trim())} placeholder="perfil, token, pergunta de segurança, quem autorizou..." />
+          <Textarea rows={1} readOnly={consulta} defaultValue={acesso.observacao || ''} onBlur={(e) => salvarCampo('observacao', e.target.value.trim())} placeholder="perfil, token, pergunta de segurança, quem autorizou..." />
         </div>
       </div>
     </div>
@@ -110,7 +112,7 @@ const CartaoAcesso = ({ acesso, rotuloItem, onMudou, onExcluir }) => {
 };
 
 // Lista os acessos de um item do checklist (itemId) ou de todo o cliente (sem itemId).
-const AcessosPanel = ({ clienteId, itemId, acessos, itensPorId, onAtualizar }) => {
+const AcessosPanel = ({ clienteId, itemId, acessos, itensPorId, onAtualizar, consulta = false }) => {
   const { toast } = useToast();
   const [criando, setCriando] = useState(false);
   const lista = acessos.filter((a) => (itemId ? a.item_id === itemId : true));
@@ -124,11 +126,12 @@ const AcessosPanel = ({ clienteId, itemId, acessos, itensPorId, onAtualizar }) =
 
   return (
     <div className="space-y-3">
-      {lista.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma informação cadastrada.</p>}
+      {lista.length === 0 && <p className="text-xs text-muted-foreground">{consulta ? 'Nenhum acesso cadastrado ainda. Cadastre pelos itens da aba Implantação.' : 'Nenhuma informação cadastrada.'}</p>}
       {lista.map((a) => (
         <CartaoAcesso
           key={a.id}
           acesso={a}
+          consulta={consulta}
           rotuloItem={!itemId && a.item_id ? itensPorId?.[a.item_id] : null}
           onMudou={(nv) => onAtualizar(acessos.map((x) => (x.id === a.id ? { ...x, ...nv } : x)))}
           onExcluir={async () => {
@@ -138,7 +141,7 @@ const AcessosPanel = ({ clienteId, itemId, acessos, itensPorId, onAtualizar }) =
           }}
         />
       ))}
-      <Button type="button" variant="outline" size="sm" onClick={adicionar} disabled={criando}>{criando ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}Adicionar acesso / informação</Button>
+      {!consulta && <Button type="button" variant="outline" size="sm" onClick={adicionar} disabled={criando}>{criando ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Plus className="h-4 w-4 mr-1" />}Adicionar acesso / informação</Button>}
     </div>
   );
 };

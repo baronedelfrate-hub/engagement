@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
@@ -18,6 +19,7 @@ import DiagnosticoTab from './tabs/DiagnosticoTab';
 import ImplantacaoTab from './tabs/ImplantacaoTab';
 import ConsultoriaTab from './tabs/ConsultoriaTab';
 import AcessosTab from './tabs/AcessosTab';
+import { SERVICOS } from './ClientesEngagement';
 
 const PLANOS = ['Estruturação F5', 'Básico', 'Essencial', 'Profissional', 'Estratégico'];
 const selectCls = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
@@ -71,7 +73,7 @@ const AcessoCliente = ({ cliente }) => {
   );
 };
 
-const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) => {
+const ResumoTab = ({ cliente, servico, onSalvar, onIniciar, iniciando, temOnboarding }) => {
   const [f, setF] = useState(cliente);
   const [inicio, setInicio] = useState(hojeISO());
   const muda = (k, v) => setF((x) => ({ ...x, [k]: v }));
@@ -87,7 +89,19 @@ const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) =
           </div>
           <div><Label>E-mail</Label><Input value={f.email || ''} onChange={(e) => muda('email', e.target.value)} /></div>
           <div><Label>Segmento</Label><Input value={f.segmento || ''} onChange={(e) => muda('segmento', e.target.value)} /></div>
+          <div>
+            <Label>Serviços contratados</Label>
+            <div className="flex gap-6 mt-1">
+              {Object.values(SERVICOS).map((s) => (
+                <label key={s.chave} className="flex items-center gap-2 text-sm">
+                  <Checkbox checked={(f.servicos || []).includes(s.chave)} onCheckedChange={(v) => muda('servicos', v === true ? [...new Set([...(f.servicos || []), s.chave])] : (f.servicos || []).filter((x) => x !== s.chave))} />
+                  {s.rotulo}
+                </label>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
+            {servico === 'bpo' ? (
             <div>
               <Label>Plano contratado</Label>
               <select className={selectCls} value={f.plano || ''} onChange={(e) => muda('plano', e.target.value || null)}>
@@ -95,6 +109,7 @@ const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) =
                 {PLANOS.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
+            ) : <div />}
             <div>
               <Label>Situação</Label>
               <select className={selectCls} value={f.status_contrato} onChange={(e) => muda('status_contrato', e.target.value)}>
@@ -102,21 +117,21 @@ const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) =
               </select>
             </div>
           </div>
-          <div>
+          {servico === 'bpo' && <div>
             <Label>Base da DRE deste cliente</Label>
             <select className={selectCls} value={f.base_dre} onChange={(e) => muda('base_dre', e.target.value)}>
               <option value="extrato">Extrato bancário (regime de caixa) — recomendado para clientes pequenos</option>
               <option value="competencia">Competência (a partir dos títulos)</option>
             </select>
-          </div>
-          <Button onClick={() => onSalvar({
+          </div>}
+          <Button onClick={() => { if (!(f.servicos || []).length) { alert('Marque ao menos um serviço contratado.'); return; } onSalvar({
             nome: f.nome, cnpj_cpf: f.cnpj_cpf || null, telefone: f.telefone || null, email: f.email || null,
-            segmento: f.segmento || null, plano: f.plano || null, status_contrato: f.status_contrato, base_dre: f.base_dre
-          })}>Salvar dados</Button>
+            segmento: f.segmento || null, plano: f.plano || null, status_contrato: f.status_contrato, base_dre: f.base_dre, servicos: f.servicos
+          }); }}>Salvar dados</Button>
         </CardContent>
       </Card>
 
-      <Card>
+      {servico === 'bpo' && <Card>
         <CardHeader>
           <CardTitle className="text-base">Onboarding B1</CardTitle>
           <CardDescription>Projeto de 8 dias: diagnóstico e processo (Bloco 01) e implantação técnica (Bloco 02).</CardDescription>
@@ -134,14 +149,15 @@ const ResumoTab = ({ cliente, onSalvar, onIniciar, iniciando, temOnboarding }) =
             </>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
       <div className="lg:col-span-2"><AcessoCliente cliente={cliente} /></div>
     </div>
   );
 };
 
-const ClienteEngagement = () => {
+const ClienteEngagement = ({ servico = 'bpo' }) => {
+  const cfg = SERVICOS[servico] || SERVICOS.bpo;
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -193,32 +209,32 @@ const ClienteEngagement = () => {
 
   return (
     <>
-      <Helmet><title>{cliente.nome} | Clientes Engagement</title></Helmet>
+      <Helmet><title>{cliente.nome} | {cfg.rotulo}</title></Helmet>
       <PageHeader
         title={cliente.nome}
-        description={`${(cliente.servicos || []).map((s) => (s === 'bpo' ? 'BPO E5' : 'Consultoria F5')).join(' + ')}${cliente.plano ? ` · Plano ${cliente.plano}` : ''}`}
+        description={`${cfg.rotulo}${servico === 'bpo' && cliente.plano ? ` · Plano ${cliente.plano}` : ''}${(cliente.servicos || []).length > 1 ? ` · também contratou ${SERVICOS[(cliente.servicos || []).find((s) => s !== servico)]?.rotulo || ''}` : ''}`}
         action={
           <div className="flex items-center gap-2">
             <Badge variant="outline">{STATUS_CONTRATO[cliente.status_contrato]}</Badge>
-            <Button variant="outline" size="sm" onClick={() => navigate('/bpo/clientes')}><ArrowLeft className="w-4 h-4 mr-2" /> Clientes</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate(cfg.rotaLista)}><ArrowLeft className="w-4 h-4 mr-2" /> Clientes</Button>
           </div>
         }
       />
       <Tabs value={aba} onValueChange={setAba}>
         <TabsList>
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
-          <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>
-          <TabsTrigger value="implantacao">Implantação</TabsTrigger>
-          <TabsTrigger value="acessos">Acessos</TabsTrigger>
-          <TabsTrigger value="consultoria">Consultoria F5</TabsTrigger>
+          {servico === 'bpo' && <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>}
+          {servico === 'bpo' && <TabsTrigger value="implantacao">Implantação</TabsTrigger>}
+          {servico === 'bpo' && <TabsTrigger value="acessos">Acessos</TabsTrigger>}
+          {servico === 'consultoria' && <TabsTrigger value="consultoria">Projeto F5</TabsTrigger>}
         </TabsList>
         <TabsContent value="resumo" className="mt-4">
-          <ResumoTab key={cliente.updated_at || cliente.id} cliente={cliente} onSalvar={salvar} onIniciar={iniciar} iniciando={iniciando} temOnboarding={temOnboarding} />
+          <ResumoTab key={cliente.updated_at || cliente.id} cliente={cliente} servico={servico} onSalvar={salvar} onIniciar={iniciar} iniciando={iniciando} temOnboarding={temOnboarding} />
         </TabsContent>
-        <TabsContent value="diagnostico" className="mt-4"><DiagnosticoTab cliente={cliente} /></TabsContent>
-        <TabsContent value="implantacao" className="mt-4"><ImplantacaoTab cliente={cliente} /></TabsContent>
-        <TabsContent value="acessos" className="mt-4"><AcessosTab cliente={cliente} /></TabsContent>
-        <TabsContent value="consultoria" className="mt-4"><ConsultoriaTab cliente={cliente} /></TabsContent>
+        {servico === 'bpo' && <TabsContent value="diagnostico" className="mt-4"><DiagnosticoTab cliente={cliente} /></TabsContent>}
+        {servico === 'bpo' && <TabsContent value="implantacao" className="mt-4"><ImplantacaoTab cliente={cliente} /></TabsContent>}
+        {servico === 'bpo' && <TabsContent value="acessos" className="mt-4"><AcessosTab cliente={cliente} /></TabsContent>}
+        {servico === 'consultoria' && <TabsContent value="consultoria" className="mt-4"><ConsultoriaTab cliente={cliente} /></TabsContent>}
       </Tabs>
     </>
   );

@@ -21,10 +21,33 @@ const COR_STATUS = {
   encerrado: 'secondary'
 };
 
-const vazio = { nome: '', cnpj_cpf: '', email: '', telefone: '', segmento: '', bpo: true, f5: false };
+// BPO E5 e Consultoria F5 são serviços separados: cada menu lista só os clientes do próprio serviço.
+export const SERVICOS = {
+  bpo: {
+    chave: 'bpo',
+    rotulo: 'BPO E5',
+    titulo: 'Clientes BPO E5',
+    descricao: 'Clientes que contrataram o BPO financeiro (metodologia E5). Lista própria da Engagement, separada dos clientes de cada empresa do ERP.',
+    rotaFicha: (id) => `/bpo/cliente/${id}`,
+    rotaLista: '/bpo/clientes',
+    progresso: 'b1',
+    colunaProgresso: 'Onboarding B1'
+  },
+  consultoria: {
+    chave: 'consultoria',
+    rotulo: 'Consultoria F5',
+    titulo: 'Clientes e projetos — Consultoria F5',
+    descricao: 'Clientes que contrataram a Consultoria F5 (estruturação). Cada cliente tem seu projeto, cronograma, agenda de visitas, OS e entregas.',
+    rotaFicha: (id) => `/metodologia-f5/cliente/${id}`,
+    rotaLista: '/metodologia-f5/clientes',
+    progresso: 'f5',
+    colunaProgresso: 'Andamento do projeto'
+  }
+};
 
-// Clientes da Engagement (BPO E5 e Consultoria F5). Lista própria, separada do cadastro de clientes das empresas do ERP.
-const ClientesEngagement = () => {
+const ClientesEngagement = ({ servico = 'bpo' }) => {
+  const cfg = SERVICOS[servico] || SERVICOS.bpo;
+  const outro = servico === 'bpo' ? SERVICOS.consultoria : SERVICOS.bpo;
   const navigate = useNavigate();
   const { toast } = useToast();
   const [clientes, setClientes] = useState([]);
@@ -32,6 +55,8 @@ const ClientesEngagement = () => {
   const [busca, setBusca] = useState('');
   const [novo, setNovo] = useState(null);
   const [salvando, setSalvando] = useState(false);
+
+  const vazio = { nome: '', cnpj_cpf: '', email: '', telefone: '', segmento: '', tambemOutro: false };
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -48,8 +73,7 @@ const ClientesEngagement = () => {
 
   const salvar = async () => {
     if (!novo.nome.trim()) { toast({ title: 'Informe o nome do cliente', variant: 'destructive' }); return; }
-    const servicos = [novo.bpo && 'bpo', novo.f5 && 'consultoria'].filter(Boolean);
-    if (servicos.length === 0) { toast({ title: 'Marque ao menos um serviço', variant: 'destructive' }); return; }
+    const servicos = [cfg.chave, ...(novo.tambemOutro ? [outro.chave] : [])];
     setSalvando(true);
     try {
       const c = await criarCliente({
@@ -57,7 +81,7 @@ const ClientesEngagement = () => {
         telefone: novo.telefone || null, segmento: novo.segmento || null, servicos, status_contrato: 'proposta'
       });
       setNovo(null);
-      navigate(`/bpo/cliente/${c.id}`);
+      navigate(cfg.rotaFicha(c.id));
     } catch (e) {
       toast({ title: 'Não foi possível salvar', description: e.message, variant: 'destructive' });
     } finally {
@@ -65,14 +89,15 @@ const ClientesEngagement = () => {
     }
   };
 
-  const lista = clientes.filter((c) => !busca || `${c.nome} ${c.cnpj_cpf || ''}`.toLowerCase().includes(busca.toLowerCase()));
+  const doServico = clientes.filter((c) => (c.servicos || []).includes(cfg.chave));
+  const lista = doServico.filter((c) => !busca || `${c.nome} ${c.cnpj_cpf || ''}`.toLowerCase().includes(busca.toLowerCase()));
 
   return (
     <>
-      <Helmet><title>Clientes Engagement</title></Helmet>
+      <Helmet><title>{cfg.titulo}</title></Helmet>
       <PageHeader
-        title="Clientes Engagement"
-        description="Clientes de BPO E5 e de Consultoria F5. É uma lista própria da Engagement, separada dos clientes de cada empresa do ERP."
+        title={cfg.titulo}
+        description={cfg.descricao}
         action={<Button onClick={() => setNovo({ ...vazio })}><Plus className="w-4 h-4 mr-2" /> Novo cliente</Button>}
       />
 
@@ -84,40 +109,36 @@ const ClientesEngagement = () => {
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
       ) : lista.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-10 text-center">Nenhum cliente cadastrado ainda. Clique em "Novo cliente" para começar.</p>
+        <p className="text-sm text-muted-foreground py-10 text-center">
+          {doServico.length === 0 ? `Nenhum cliente de ${cfg.rotulo} cadastrado ainda. Clique em "Novo cliente" para começar.` : 'Nenhum cliente encontrado na busca.'}
+        </p>
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-card">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
               <tr>
                 <th className="text-left p-3">Cliente</th>
-                <th className="text-left p-3">Serviços</th>
-                <th className="text-left p-3">Plano</th>
+                {servico === 'bpo' && <th className="text-left p-3">Plano</th>}
                 <th className="text-left p-3">Situação</th>
-                <th className="text-left p-3 w-48">Onboarding B1</th>
+                <th className="text-left p-3 w-56">{cfg.colunaProgresso}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {lista.map((c) => {
-                const pct = c.b1.total ? Math.round((c.b1.feitas / c.b1.total) * 100) : 0;
+                const p = c[cfg.progresso];
+                const pct = p.total ? Math.round((p.feitas / p.total) * 100) : 0;
                 return (
-                  <tr key={c.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(`/bpo/cliente/${c.id}`)}>
+                  <tr key={c.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(cfg.rotaFicha(c.id))}>
                     <td className="p-3">
                       <div className="font-medium text-foreground">{c.nome}</div>
                       <div className="text-xs text-muted-foreground">{c.cnpj_cpf || c.email || ''}</div>
                     </td>
-                    <td className="p-3">
-                      <div className="flex gap-1 flex-wrap">
-                        {(c.servicos || []).includes('bpo') && <Badge variant="outline">BPO E5</Badge>}
-                        {(c.servicos || []).includes('consultoria') && <Badge variant="outline">Consultoria F5</Badge>}
-                      </div>
-                    </td>
-                    <td className="p-3">{c.plano || '—'}</td>
+                    {servico === 'bpo' && <td className="p-3">{c.plano || '—'}</td>}
                     <td className="p-3"><Badge variant={COR_STATUS[c.status_contrato] || 'outline'}>{STATUS_CONTRATO[c.status_contrato] || c.status_contrato}</Badge></td>
                     <td className="p-3">
-                      {c.b1.total ? (
-                        <div className="flex items-center gap-2"><Progress value={pct} className="h-2" /><span className="text-xs text-muted-foreground w-16">{c.b1.feitas}/{c.b1.total}</span></div>
-                      ) : <span className="text-xs text-muted-foreground">não iniciado</span>}
+                      {p.total ? (
+                        <div className="flex items-center gap-2"><Progress value={pct} className="h-2" /><span className="text-xs text-muted-foreground w-16">{p.feitas}/{p.total}</span></div>
+                      ) : <span className="text-xs text-muted-foreground">{servico === 'bpo' ? 'não iniciado' : 'sem projeto'}</span>}
                     </td>
                   </tr>
                 );
@@ -129,7 +150,7 @@ const ClientesEngagement = () => {
 
       <Dialog open={!!novo} onOpenChange={(o) => { if (!o) setNovo(null); }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Novo cliente Engagement</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Novo cliente — {cfg.rotulo}</DialogTitle></DialogHeader>
           {novo && (
             <div className="space-y-3">
               <div><Label>Razão social / nome *</Label><Input value={novo.nome} onChange={(e) => setNovo({ ...novo, nome: e.target.value })} /></div>
@@ -139,10 +160,10 @@ const ClientesEngagement = () => {
               </div>
               <div><Label>E-mail</Label><Input value={novo.email} onChange={(e) => setNovo({ ...novo, email: e.target.value })} /></div>
               <div><Label>Segmento (ex.: agência, clínica, consultoria)</Label><Input value={novo.segmento} onChange={(e) => setNovo({ ...novo, segmento: e.target.value })} /></div>
-              <div className="flex gap-6 pt-1">
-                <label className="flex items-center gap-2 text-sm"><Checkbox checked={novo.bpo} onCheckedChange={(v) => setNovo({ ...novo, bpo: v === true })} /> BPO E5</label>
-                <label className="flex items-center gap-2 text-sm"><Checkbox checked={novo.f5} onCheckedChange={(v) => setNovo({ ...novo, f5: v === true })} /> Consultoria F5</label>
-              </div>
+              <label className="flex items-center gap-2 text-sm pt-1">
+                <Checkbox checked={novo.tambemOutro} onCheckedChange={(v) => setNovo({ ...novo, tambemOutro: v === true })} />
+                Este cliente também contratou {outro.rotulo}
+              </label>
             </div>
           )}
           <DialogFooter>

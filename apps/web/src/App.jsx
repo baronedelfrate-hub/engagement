@@ -511,7 +511,8 @@ const AnimatedRoutes = () => {
           {/* Rota Protegida de Limpar Dados */}
           <Route path="/admin/limpar-dados" element={<ProtectedLayout><PageTransition><LimparDados /></PageTransition></ProtectedLayout>} />
 
-          <Route path="/metodologia-f5/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement servico="consultoria" /></PageTransition></ProtectedLayout>} />
+          <Route path="/metodologia-f5/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement servico="consultoria" /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/dashboard" element={<ProtectedLayout><PageTransition><F5Dashboard /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/diagnostico-f1" element={<ProtectedLayout><PageTransition><F1Diagnosis /></PageTransition></ProtectedLayout>} />
           <Route path="/metodologia-f5/historico" element={<ProtectedLayout><PageTransition><HistoricoF1 /></PageTransition></ProtectedLayout>} />
@@ -535,8 +536,8 @@ const AnimatedRoutes = () => {
           <Route path="/metodologia-f5/auditoria" element={<ProtectedLayout><PageTransition><F5AuditoriaLog /></PageTransition></ProtectedLayout>} />
 
           <Route path="/bpo/dashboard" element={<ProtectedLayout><PageTransition><BPODashboard /></PageTransition></ProtectedLayout>} />
-          <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement /></PageTransition></ProtectedLayout>} />
-          <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/clientes" element={<ProtectedLayout><PageTransition><ClientesEngagement servico="bpo" /></PageTransition></ProtectedLayout>} />
+          <Route path="/bpo/cliente/:id" element={<ProtectedLayout><PageTransition><ClienteEngagement servico="bpo" /></PageTransition></ProtectedLayout>} />
           <Route path="/bpo/fase/:faseId" element={<ProtectedLayout><PageTransition><BPOFaseDetail /></PageTransition></ProtectedLayout>} />
           <Route path="/clientes-bpo" element={<ProtectedLayout><Navigate to="/clientes-bpo/cadastro-clientes" replace /></ProtectedLayout>} />
           <Route path="/clientes-bpo/cadastro-clientes" element={<ProtectedLayout><PageTransition><BPOClientesCadastroList /></PageTransition></ProtectedLayout>} />

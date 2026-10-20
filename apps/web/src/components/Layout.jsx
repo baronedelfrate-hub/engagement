@@ -194,7 +194,7 @@ const navigation = [
         icon: ClipboardList,
         isNested: true,
         children: [
-          { name: 'Clientes Engagement', href: '/bpo/clientes' },
+          { name: 'Clientes BPO', href: '/bpo/clientes' },
         ],
       },
       {

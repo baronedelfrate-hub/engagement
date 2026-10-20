@@ -31,13 +31,14 @@ export const FUNCOES = {
 
 export const listarClientes = async () => {
   const clientes = ok(await supabase.from('clientes_bpo').select('*').order('nome'));
-  const tarefas = ok(await supabase.from('eng_tarefas').select('cliente_id, origem, status').eq('origem', 'b1'));
+  const tarefas = ok(await supabase.from('eng_tarefas').select('cliente_id, origem, status').in('origem', ['b1', 'f5']));
   const resumo = {};
   tarefas.forEach((t) => {
-    const r = (resumo[t.cliente_id] ||= { total: 0, feitas: 0 });
+    const r = ((resumo[t.cliente_id] ||= {})[t.origem] ||= { total: 0, feitas: 0 });
     if (t.status !== 'na') { r.total += 1; if (t.status === 'concluido') r.feitas += 1; }
   });
-  return clientes.map((c) => ({ ...c, b1: resumo[c.id] || { total: 0, feitas: 0 } }));
+  const vazio = { total: 0, feitas: 0 };
+  return clientes.map((c) => ({ ...c, b1: resumo[c.id]?.b1 || vazio, f5: resumo[c.id]?.f5 || vazio }));
 };
 
 export const criarCliente = async (dados) => ok(

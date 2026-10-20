@@ -288,7 +288,8 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/auth/callback" element={<PageTransition><Callback /></PageTransition>} />
           <Route path="/auth/set-password" element={<PageTransition><SetPassword /></PageTransition>} />
-          <Route path="/meu-projeto" element={<ProtectedRoute><PageTransition><PortalCliente /></PageTransition></ProtectedRoute>} /> element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
+          <Route path="/meu-projeto" element={<ProtectedRoute><PageTransition><PortalCliente /></PageTransition></ProtectedRoute>} />
+          <Route path="/assinatura-bloqueada" element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
 
           {/* Rotas Protegidas */}
           <Route path="/" element={<ProtectedLayout><PageTransition><Dashboard /></PageTransition></ProtectedLayout>} />

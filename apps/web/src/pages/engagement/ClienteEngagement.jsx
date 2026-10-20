@@ -17,6 +17,7 @@ import {
 import DiagnosticoTab from './tabs/DiagnosticoTab';
 import ImplantacaoTab from './tabs/ImplantacaoTab';
 import ConsultoriaTab from './tabs/ConsultoriaTab';
+import AcessosTab from './tabs/AcessosTab';
 
 const PLANOS = ['Estruturação F5', 'Básico', 'Essencial', 'Profissional', 'Estratégico'];
 const selectCls = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
@@ -208,6 +209,7 @@ const ClienteEngagement = () => {
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
           <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>
           <TabsTrigger value="implantacao">Implantação</TabsTrigger>
+          <TabsTrigger value="acessos">Acessos</TabsTrigger>
           <TabsTrigger value="consultoria">Consultoria F5</TabsTrigger>
         </TabsList>
         <TabsContent value="resumo" className="mt-4">
@@ -215,6 +217,7 @@ const ClienteEngagement = () => {
         </TabsContent>
         <TabsContent value="diagnostico" className="mt-4"><DiagnosticoTab cliente={cliente} /></TabsContent>
         <TabsContent value="implantacao" className="mt-4"><ImplantacaoTab cliente={cliente} /></TabsContent>
+        <TabsContent value="acessos" className="mt-4"><AcessosTab cliente={cliente} /></TabsContent>
         <TabsContent value="consultoria" className="mt-4"><ConsultoriaTab cliente={cliente} /></TabsContent>
       </Tabs>
     </>

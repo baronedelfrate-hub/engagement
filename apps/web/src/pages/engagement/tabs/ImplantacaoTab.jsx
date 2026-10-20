@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, KeyRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import AcessosPanel from './AcessosPanel';
 import {
-  listarTarefas, atualizarTarefa, listarImplantacao, atualizarItemImplantacao,
+  listarAcessosImpl, listarTarefas, atualizarTarefa, listarImplantacao, atualizarItemImplantacao,
   STATUS_TAREFA, formatarData, hojeISO
 } from '@/lib/engService';
 
@@ -16,13 +17,16 @@ const ImplantacaoTab = ({ cliente }) => {
   const { toast } = useToast();
   const [tarefas, setTarefas] = useState([]);
   const [itens, setItens] = useState([]);
+  const [acessos, setAcessos] = useState([]);
+  const [abertos, setAbertos] = useState({});
   const [loading, setLoading] = useState(true);
 
   const carregar = useCallback(async () => {
     try {
-      const [t, i] = await Promise.all([listarTarefas(cliente.id, { origem: 'b1' }), listarImplantacao(cliente.id)]);
+      const [t, i, ac] = await Promise.all([listarTarefas(cliente.id, { origem: 'b1' }), listarImplantacao(cliente.id), listarAcessosImpl(cliente.id).catch(() => [])]);
       setTarefas(t);
       setItens(i);
+      setAcessos(ac);
     } catch (e) {
       toast({ title: 'Erro ao carregar', description: e.message, variant: 'destructive' });
     } finally {
@@ -108,7 +112,8 @@ const ImplantacaoTab = ({ cliente }) => {
               <div className="text-sm font-semibold mb-1">{secao}</div>
               <div className="divide-y divide-border">
                 {lista.map((it) => (
-                  <div key={it.id} className="grid grid-cols-1 md:grid-cols-[1fr_auto_160px_140px] items-center gap-2 py-2">
+                  <div key={it.id} className="py-2">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_160px_140px] items-center gap-2">
                     <div className="text-sm">{it.item}</div>
                     <div className="flex gap-1">
                       {[['pendente', 'Pendente'], ['ok', 'OK'], ['na', 'N/A']].map(([v, r]) => (
@@ -122,6 +127,14 @@ const ImplantacaoTab = ({ cliente }) => {
                     </div>
                     <Input className="h-8 text-xs" placeholder="Responsável" defaultValue={it.responsavel || ''} onBlur={(e) => { if (e.target.value !== (it.responsavel || '')) salvarItem(it, { responsavel: e.target.value }); }} />
                     <Input type="date" className="h-8 text-xs" value={it.prazo || ''} onChange={(e) => salvarItem(it, { prazo: e.target.value || null })} />
+                  </div>
+                  <div className="mt-1.5">
+                    <button type="button" onClick={() => setAbertos((o) => ({ ...o, [it.id]: !o[it.id] }))} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                      <KeyRound className="h-3 w-3" />{acessos.filter((x) => x.item_id === it.id).length > 0 ? `Acessos e dados (${acessos.filter((x) => x.item_id === it.id).length})` : 'Cadastrar acessos e dados'}
+                      {abertos[it.id] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                    </button>
+                    {abertos[it.id] && <div className="mt-2 pl-3 border-l-2 border-border"><AcessosPanel clienteId={cliente.id} itemId={it.id} acessos={acessos} onAtualizar={setAcessos} /></div>}
+                  </div>
                   </div>
                 ))}
               </div>

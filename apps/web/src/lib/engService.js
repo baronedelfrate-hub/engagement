@@ -222,3 +222,22 @@ export const gerarAgendaDoCronograma = async (clienteId, projetoId, tarefas, { i
 export const listarAcessos = async (clienteId) => ok(await supabase.rpc('eng_usuarios_do_cliente', { p_cliente: clienteId }));
 export const vincularAcesso = async (email, clienteId) => ok(await supabase.rpc('eng_vincular_usuario_cliente', { p_email: email, p_cliente: clienteId }));
 export const desvincularAcesso = async (usuarioId) => ok(await supabase.rpc('eng_desvincular_usuario_cliente', { p_usuario: usuarioId }));
+// ---------- Acessos e informações da implantação (senha cifrada no banco) ----------
+const COLUNAS_ACESSO = 'id, cliente_id, item_id, nome, url, usuario, contato, observacao, tem_senha, senha_alterada_em, created_at, updated_at';
+
+export const listarAcessosImpl = async (clienteId) => ok(
+  await supabase.from('bpo_acessos').select(COLUNAS_ACESSO).eq('cliente_id', clienteId).order('created_at')
+);
+
+export const criarAcessoImpl = async (clienteId, itemId, dados) => ok(
+  await supabase.from('bpo_acessos').insert({ cliente_id: clienteId, item_id: itemId || null, nome: 'Novo acesso', ...dados }).select(COLUNAS_ACESSO).single()
+);
+
+export const atualizarAcessoImpl = async (id, dados) => ok(
+  await supabase.from('bpo_acessos').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id).select(COLUNAS_ACESSO).single()
+);
+
+export const excluirAcessoImpl = async (id) => ok(await supabase.from('bpo_acessos').delete().eq('id', id));
+
+export const definirSenhaAcesso = async (id, senha) => ok(await supabase.rpc('bpo_definir_senha_acesso', { p_id: id, p_senha: senha }));
+export const revelarSenhaAcesso = async (id) => ok(await supabase.rpc('bpo_revelar_senha_acesso', { p_id: id }));

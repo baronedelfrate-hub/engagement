@@ -50,6 +50,8 @@ const navigation = [
         children: [
           { name: 'Orçamentos', href: '/vendas/orcamentos' },
           { name: 'Pedidos de Venda', href: '/vendas/pedidos' },
+          { name: 'Contratos recorrentes', href: '/vendas/contratos' },
+          { name: 'Faturamento do mês', href: '/vendas/faturamento' },
           { name: 'Relatórios', href: '/vendas/relatorios' },
         ],
       },

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import {
 } from '@/lib/crmService';
 import { criarClienteDaProposta, rotaDaFicha } from '@/lib/crmCliente';
 import { gerarPedidoDaProposta } from '@/lib/crmPedido';
+import { contratoDaProposta } from '@/lib/crmContratos';
 
 const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
 const COR = { rascunho: 'outline', enviada: 'warning', aceita: 'success', recusada: 'destructive', expirada: 'secondary' };
@@ -44,6 +45,7 @@ const CRMPropostaEditor = () => {
   const [salvando, setSalvando] = useState(false);
   const [gerando, setGerando] = useState(false);
   const [gerandoPedido, setGerandoPedido] = useState(false);
+  const [contrato, setContrato] = useState(null);
   const [contas, setContas] = useState([]);
   const [ops, setOps] = useState([]);
   const [catalogo, setCatalogo] = useState([]);
@@ -79,6 +81,7 @@ const CRMPropostaEditor = () => {
         setConteudo(merge(conteudoPadrao(), x.conteudo));
         setPaginas({ ...paginasPadrao(), ...x.paginas });
         setParcelas(x.parcelas || []);
+        setContrato(await contratoDaProposta(x.id).catch(() => null));
       }
       setSujo(false);
     } catch (e) { toast({ title: 'Erro ao carregar a proposta', description: e.message, variant: 'destructive' }); }
@@ -157,9 +160,10 @@ const CRMPropostaEditor = () => {
     try {
       const x = await carregarProposta(propostaId || p.id);
       const r = await gerarPedidoDaProposta({ proposta: x, catalogo, companyId });
-      if (r.jaExistia) { toast({ title: 'Esta proposta já gerou um pedido de venda' }); }
+      if (r.jaExistia) { toast({ title: 'Esta proposta já gerou pedido e/ou contrato' }); }
       else {
-        toast({ title: 'Pedido de venda gerado', description: `Pedido ${r.pedido.numero} criado e pronto para faturamento.${r.avisos.length ? ' ' + r.avisos.join(' ') : ''}` });
+        const partes = [r.pedido ? `Pedido ${r.pedido.numero} criado, pronto para faturar.` : null, r.contrato ? `Contrato ${r.contrato.numero} criado para os itens mensais.` : null, ...r.avisos].filter(Boolean);
+        toast({ title: r.pedido && r.contrato ? 'Pedido e contrato gerados' : (r.contrato ? 'Contrato recorrente gerado' : 'Pedido de venda gerado'), description: partes.join(' ') });
       }
     } catch (e) {
       toast({ title: automatico ? 'Proposta aceita, mas o pedido não foi gerado' : 'Não foi possível gerar o pedido', description: e.message, variant: 'destructive' });
@@ -218,7 +222,8 @@ const CRMPropostaEditor = () => {
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('aceita')}><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Cliente aceitou</Button>}
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('recusada')}><XCircle className="w-4 h-4 mr-2 text-red-600" /> Cliente recusou</Button>}
           <Button variant="outline" size="sm" onClick={novaVersao}><Copy className="w-4 h-4 mr-2" /> Nova versão</Button>
-          {p.pedido_venda_id ? <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/pedidos/${p.pedido_venda_id}`)}><ShoppingCart className="w-4 h-4 mr-2" /> Abrir pedido de venda</Button> : (p.status === 'aceita' && <Button size="sm" onClick={() => gerarPedido()} disabled={gerandoPedido}>{gerandoPedido ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShoppingCart className="w-4 h-4 mr-2" />}Gerar pedido de venda</Button>)}
+          {contrato && <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/contratos/${contrato.id}`)}><Receipt className="w-4 h-4 mr-2" /> Abrir contrato {contrato.numero}</Button>}
+          {p.pedido_venda_id ? <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/pedidos/${p.pedido_venda_id}`)}><ShoppingCart className="w-4 h-4 mr-2" /> Abrir pedido de venda</Button> : (p.status === 'aceita' && !contrato && <Button size="sm" onClick={() => gerarPedido()} disabled={gerandoPedido}>{gerandoPedido ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShoppingCart className="w-4 h-4 mr-2" />}Gerar pedido de venda</Button>)}
           {ehEngagement && <Button size="sm" onClick={criarCliente}><UserPlus className="w-4 h-4 mr-2" /> Criar cliente a partir da proposta</Button>}
         </div>
       )}

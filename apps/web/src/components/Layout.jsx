@@ -21,6 +21,7 @@ import { MODULO_DO_MENU } from '@/lib/modulos';
 // Define the navigation structure
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Tarefas', href: '/tarefas', icon: ClipboardList },
   {
     name: 'GESTÃO',
     icon: FolderCog,

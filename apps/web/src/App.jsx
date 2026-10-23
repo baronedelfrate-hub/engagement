@@ -8,7 +8,7 @@ import { F5Provider } from '@/contexts/F5Context';
 import { ContabilidadeProvider } from '@/contexts/ContabilidadeContext';
 import { SessionValidator } from '@/components/SessionValidator';
 import Layout from '@/components/Layout';
-import Dashboard from '@/pages/Dashboard';
+import DashboardHome from '@/pages/DashboardHome';
 import Login from '@/pages/Login';
 import AssinaturaBloqueada from '@/pages/AssinaturaBloqueada';
 import Callback from '@/pages/auth/Callback';
@@ -300,7 +300,7 @@ const AnimatedRoutes = () => {
           <Route path="/assinatura-bloqueada" element={<ProtectedRoute><PageTransition><AssinaturaBloqueada /></PageTransition></ProtectedRoute>} />
 
           {/* Rotas Protegidas */}
-          <Route path="/" element={<ProtectedLayout><PageTransition><Dashboard /></PageTransition></ProtectedLayout>} />
+          <Route path="/" element={<ProtectedLayout><PageTransition><DashboardHome /></PageTransition></ProtectedLayout>} />
           <Route path="/importar-extrato" element={<Navigate to="/financeiro/importar-extrato" replace />} />
 
           <Route path="/cliente/:clientId/cadastro/:submenu" element={<ProtectedLayout><PageTransition><ClientePageRouter /></PageTransition></ProtectedLayout>} />

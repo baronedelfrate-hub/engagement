@@ -374,7 +374,8 @@ const AgendaBloco = () => {
   );
 };
 // ---------- registro ----------
-export const GRUPOS = { executivo: 'Painel executivo', financeiro: 'Financeiro', comercial: 'Comercial', tarefas: 'Tarefas' };
+// A tela inicial tem três blocos, nesta ordem: tarefas e agenda (em cima), financeiro e comercial.
+export const GRUPOS = { tarefas: 'Tarefas e agenda', financeiro: 'Financeiro', comercial: 'Comercial' };
 
 // Larguras na grade de 12 colunas (telas grandes). Classes escritas por extenso para o Tailwind enxergá-las.
 export const TAMANHOS = {
@@ -385,31 +386,32 @@ export const TAMANHOS = {
   g: { rotulo: 'Largura inteira', classe: 'md:col-span-6 lg:col-span-12' }
 };
 
+// A ordem desta lista é a ordem padrão dentro de cada bloco.
 export const WIDGETS = [
-  { id: 'kpi_caixa', grupo: 'executivo', titulo: 'Caixa', descricao: 'Saldo atual dos bancos', tamanho: 'p', Componente: KpiCaixa },
-  { id: 'kpi_receitas', grupo: 'executivo', titulo: 'Receitas', descricao: 'Recebido no mês', tamanho: 'p', Componente: KpiReceitas },
-  { id: 'kpi_despesas', grupo: 'executivo', titulo: 'Despesas', descricao: 'Pago no mês', tamanho: 'p', Componente: KpiDespesas },
-  { id: 'kpi_pe', grupo: 'executivo', titulo: 'Ponto de equilíbrio', descricao: 'Faturamento necessário no mês e quanto sobrou ou faltou', tamanho: 'p', Componente: KpiPE },
-  { id: 'graf_evolucao', grupo: 'executivo', titulo: 'Receitas x despesas', descricao: 'Gráfico dos últimos meses', tamanho: 'l', Componente: GrafEvolucao },
-  { id: 'agenda', grupo: 'executivo', titulo: 'Agenda', descricao: 'Compromissos e prazos das tarefas', tamanho: 'q', Componente: AgendaBloco },
-  { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'g', Componente: FinPagarReceber },
-  { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'm', Componente: FinFluxoMes },
-  { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'm', Componente: FinProximos },
-  { id: 'com_funil', grupo: 'comercial', titulo: 'Funil comercial', descricao: 'Oportunidades por etapa', tamanho: 'm', Componente: ComFunil },
-  { id: 'com_propostas', grupo: 'comercial', titulo: 'Propostas', descricao: 'Aguardando resposta e aceitas', tamanho: 'm', Componente: ComPropostas },
-  { id: 'com_recorrente', grupo: 'comercial', titulo: 'Receita recorrente', descricao: 'Contratos mensais ativos', tamanho: 'm', Componente: ComRecorrente },
-  { id: 'tar_minhas', grupo: 'tarefas', titulo: 'Minhas tarefas', descricao: 'Em aberto, atribuídas a você', tamanho: 'm', Componente: TarMinhas },
-  { id: 'tar_atrasadas', grupo: 'tarefas', titulo: 'Tarefas atrasadas', descricao: 'De toda a equipe', tamanho: 'm', Componente: TarAtrasadas }
+  { id: 'tar_minhas', grupo: 'tarefas', titulo: 'Minhas tarefas', descricao: 'Em aberto, atribuídas a você', tamanho: 'q', Componente: TarMinhas },
+  { id: 'tar_atrasadas', grupo: 'tarefas', titulo: 'Tarefas atrasadas', descricao: 'De toda a equipe', tamanho: 'q', Componente: TarAtrasadas },
+  { id: 'agenda', grupo: 'tarefas', titulo: 'Agenda', descricao: 'Compromissos e prazos das tarefas', tamanho: 'q', Componente: AgendaBloco },
+  { id: 'kpi_caixa', grupo: 'financeiro', titulo: 'Caixa', descricao: 'Saldo do último extrato importado', tamanho: 'p', Componente: KpiCaixa },
+  { id: 'kpi_receitas', grupo: 'financeiro', titulo: 'Receitas', descricao: 'Recebido no mês', tamanho: 'p', Componente: KpiReceitas },
+  { id: 'kpi_despesas', grupo: 'financeiro', titulo: 'Despesas', descricao: 'Pago no mês', tamanho: 'p', Componente: KpiDespesas },
+  { id: 'kpi_pe', grupo: 'financeiro', titulo: 'Ponto de equilíbrio', descricao: 'Faturamento necessário no mês e quanto sobrou ou faltou', tamanho: 'p', Componente: KpiPE },
+  { id: 'graf_evolucao', grupo: 'financeiro', titulo: 'Receitas x despesas', descricao: 'Gráfico dos últimos meses', tamanho: 'l', Componente: GrafEvolucao },
+  { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
+  { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
+  { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'q', Componente: FinProximos },
+  { id: 'com_funil', grupo: 'comercial', titulo: 'Funil comercial', descricao: 'Oportunidades por etapa', tamanho: 'q', Componente: ComFunil },
+  { id: 'com_propostas', grupo: 'comercial', titulo: 'Propostas', descricao: 'Aguardando resposta e aceitas', tamanho: 'q', Componente: ComPropostas },
+  { id: 'com_recorrente', grupo: 'comercial', titulo: 'Receita recorrente', descricao: 'Contratos mensais ativos', tamanho: 'q', Componente: ComRecorrente }
 ];
 
 export const WIDGET_POR_ID = Object.fromEntries(WIDGETS.map((w) => [w.id, w]));
 
-// Modelos prontos: completo (tudo) e executivo (indicadores, gráfico e agenda, como no painel da proposta).
-const EXECUTIVO = ['kpi_caixa', 'kpi_receitas', 'kpi_despesas', 'kpi_pe', 'graf_evolucao', 'agenda'];
+// Modelos prontos: completo (todos os blocos) e executivo (o essencial: agenda, minhas tarefas, indicadores, gráfico e funil).
+const EXECUTIVO = ['agenda', 'tar_minhas', 'kpi_caixa', 'kpi_receitas', 'kpi_despesas', 'kpi_pe', 'graf_evolucao', 'com_funil'];
 export const layoutModelo = (modelo) => {
   const todos = WIDGETS.map((w) => ({ id: w.id, visivel: true, tamanho: w.tamanho }));
   if (modelo !== 'executivo') return todos;
-  return [...EXECUTIVO.map((id) => todos.find((x) => x.id === id)), ...todos.filter((x) => !EXECUTIVO.includes(x.id)).map((x) => ({ ...x, visivel: false }))];
+  return todos.map((x) => ({ ...x, visivel: EXECUTIVO.includes(x.id), tamanho: x.id === 'agenda' ? 'l' : (x.id === 'tar_minhas' ? 'q' : (x.id === 'com_funil' ? 'q' : x.tamanho)) }));
 };
 export const layoutPadrao = () => layoutModelo('completo');
 

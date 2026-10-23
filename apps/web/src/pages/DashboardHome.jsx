@@ -46,7 +46,14 @@ const DashboardHome = () => {
   const visiveis = useMemo(() => layout.filter((x) => x.visivel), [layout]);
 
   const iniciarEdicao = () => { setRascunho(layout.map((x) => ({ ...x }))); setEditando(true); };
-  const mover = (idx, delta) => setRascunho((l) => { const n = [...l]; const j = idx + delta; if (j < 0 || j >= n.length) return n; [n[idx], n[j]] = [n[j], n[idx]]; return n; });
+  // a ordem vale dentro de cada seção: troca com o vizinho mais próximo da mesma seção
+  const mover = (idx, delta) => setRascunho((l) => {
+    const g = WIDGET_POR_ID[l[idx].id].grupo;
+    let j = idx + delta;
+    while (j >= 0 && j < l.length && WIDGET_POR_ID[l[j].id].grupo !== g) j += delta;
+    if (j < 0 || j >= l.length) return l;
+    const n = [...l]; [n[idx], n[j]] = [n[j], n[idx]]; return n;
+  });
   const muda = (id, campos) => setRascunho((l) => l.map((x) => (x.id === id ? { ...x, ...campos } : x)));
 
   const gravar = async (paraEmpresa) => {
@@ -125,14 +132,24 @@ const DashboardHome = () => {
       {visiveis.length === 0 ? (
         <p className="text-sm text-muted-foreground py-10 text-center">Nenhum bloco ativo. Clique em "Personalizar" e escolha o que mostrar.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
-          {visiveis.map((x) => {
-            const W = WIDGET_POR_ID[x.id];
-            return <div key={x.id} className={TAMANHOS[x.tamanho]?.classe || TAMANHOS.m.classe}><W.Componente /></div>;
+        <div className="space-y-8">
+          {Object.entries(GRUPOS).map(([g, rotulo]) => {
+            const doGrupo = visiveis.filter((x) => WIDGET_POR_ID[x.id].grupo === g);
+            if (!doGrupo.length) return null;
+            return (
+              <section key={g}>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3 pb-1 border-b border-border">{rotulo}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
+                  {doGrupo.map((x) => {
+                    const W = WIDGET_POR_ID[x.id];
+                    return <div key={x.id} className={TAMANHOS[x.tamanho]?.classe || TAMANHOS.m.classe}><W.Componente /></div>;
+                  })}
+                </div>
+              </section>
+            );
           })}
         </div>
-      )}
-    </>
+      )}    </>
   );
 };
 

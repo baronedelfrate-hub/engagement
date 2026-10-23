@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { ArrowDown, ArrowUp, Loader2, Maximize2, Minimize2, SlidersHorizontal, Check } from 'lucide-react';
+import { ArrowDown, ArrowUp, Loader2, SlidersHorizontal, Check } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
-import { WIDGETS, WIDGET_POR_ID, GRUPOS, layoutPadrao, mesclarLayout } from '@/components/dashboard/widgets';
+import { WIDGET_POR_ID, GRUPOS, TAMANHOS, layoutPadrao, layoutModelo, mesclarLayout } from '@/components/dashboard/widgets';
 import DashboardLegado from '@/pages/Dashboard';
 
 const ok = ({ data, error }) => {
@@ -88,9 +88,14 @@ const DashboardHome = () => {
         <Card className="mb-6 border-primary/40">
           <CardHeader>
             <CardTitle className="text-base">Personalizar a tela inicial</CardTitle>
-            <CardDescription>Marque os blocos que quer ver, mude a ordem com as setas e escolha se ocupam meia largura ou a largura inteira.</CardDescription>
+            <CardDescription>Marque os blocos que quer ver, mude a ordem com as setas e escolha a largura de cada um. Ou comece por um modelo pronto.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase font-semibold text-muted-foreground">Modelos</span>
+              <Button variant="outline" size="sm" onClick={() => setRascunho(layoutModelo('executivo'))}>Executivo (indicadores, gráfico e agenda)</Button>
+              <Button variant="outline" size="sm" onClick={() => setRascunho(layoutModelo('completo'))}>Completo (todos os blocos)</Button>
+            </div>
             {Object.entries(GRUPOS).map(([g, rotulo]) => (
               <div key={g}>
                 <div className="text-xs uppercase font-semibold text-muted-foreground mb-1">{rotulo}</div>
@@ -99,7 +104,7 @@ const DashboardHome = () => {
                     <div key={x.id} className="p-2.5 flex items-center gap-3 text-sm">
                       <Checkbox checked={x.visivel} onCheckedChange={(v) => muda(x.id, { visivel: v === true })} />
                       <div className="flex-1 min-w-0"><div className="font-medium">{WIDGET_POR_ID[x.id].titulo}</div><div className="text-xs text-muted-foreground">{WIDGET_POR_ID[x.id].descricao}</div></div>
-                      <button type="button" title={x.tamanho === 'g' ? 'Largura inteira' : 'Meia largura'} className="p-1.5 rounded hover:bg-muted" onClick={() => muda(x.id, { tamanho: x.tamanho === 'g' ? 'm' : 'g' })}>{x.tamanho === 'g' ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}</button>
+                      <select className="h-8 rounded-md border border-input bg-background px-2 text-xs" value={x.tamanho} onChange={(e) => muda(x.id, { tamanho: e.target.value })} title="Largura do bloco">{Object.entries(TAMANHOS).map(([v, t]) => <option key={v} value={v}>{t.rotulo}</option>)}</select>
                       <button type="button" title="Subir" className="p-1.5 rounded hover:bg-muted" onClick={() => mover(idx, -1)}><ArrowUp className="h-4 w-4" /></button>
                       <button type="button" title="Descer" className="p-1.5 rounded hover:bg-muted" onClick={() => mover(idx, 1)}><ArrowDown className="h-4 w-4" /></button>
                     </div>
@@ -120,10 +125,10 @@ const DashboardHome = () => {
       {visiveis.length === 0 ? (
         <p className="text-sm text-muted-foreground py-10 text-center">Nenhum bloco ativo. Clique em "Personalizar" e escolha o que mostrar.</p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
           {visiveis.map((x) => {
             const W = WIDGET_POR_ID[x.id];
-            return <div key={x.id} className={x.tamanho === 'g' ? 'lg:col-span-2' : ''}><W.Componente /></div>;
+            return <div key={x.id} className={TAMANHOS[x.tamanho]?.classe || TAMANHOS.m.classe}><W.Componente /></div>;
           })}
         </div>
       )}

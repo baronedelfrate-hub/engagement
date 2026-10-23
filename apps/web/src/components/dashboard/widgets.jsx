@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Plus, CalendarPlus, Trash2, CheckSquare } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { titulosAbertos, movimentoDoMes, resumoVencimentos, hojeISO } from '@/lib/dashboardData';
+import { titulosAbertos, movimentoDoMes, resumoVencimentos, hojeISO, somaDias, resumoExecutivo, listarEventos, criarEvento, atualizarEvento, excluirEvento, linkGoogleEvento, TIPOS_EVENTO } from '@/lib/dashboardData';
 import { listarOportunidades, listarPropostas, ETAPAS, moeda } from '@/lib/crmService';
 import { listarContratos, valorMensal } from '@/lib/crmContratos';
-import { tarefasAbertas, listarUsuarios, PRIORIDADES } from '@/lib/tarefasService';
+import { tarefasAbertas, listarUsuarios, PRIORIDADES, linkGoogleAgenda } from '@/lib/tarefasService';
 
 // Cada bloco busca os próprios dados. Uma busca igual feita por dois blocos na mesma tela é reaproveitada por 30 segundos.
 const cache = new Map();
@@ -216,10 +224,174 @@ atrasadasFiltro.mostraResp = true;
 const TarMinhas = () => <TarListaBase titulo="Minhas tarefas" descricao="Em aberto, atribuídas a você." filtro={minhasFiltro} vazio="Você não tem tarefas em aberto. 🎯" />;
 const TarAtrasadas = () => <TarListaBase titulo="Tarefas atrasadas" descricao="De toda a equipe." filtro={atrasadasFiltro} vazio="Nada atrasado." />;
 
+// ---------- Painel executivo: indicadores, gráfico e agenda ----------
+const Indicador = ({ rotulo, valor, sub, estado, alerta }) => (
+  <Card className="h-full bg-slate-900 text-white border-slate-800 dark:bg-slate-800">
+    <CardContent className="p-4">
+      <div className="text-xs text-slate-300">{rotulo}</div>
+      {estado.carregando ? <div className="h-8 flex items-center"><Loader2 className="h-4 w-4 animate-spin text-slate-400" /></div> : (
+        <>
+          <div className="text-2xl font-bold mt-1" style={{ color: alerta ? '#fca5a5' : '#FFB27A' }}>{estado.erro ? '—' : valor}</div>
+          <div className="mt-2 h-1.5 rounded bg-slate-700"><div className="h-1.5 rounded" style={{ width: '100%', background: '#FE6102', opacity: 0.85 }} /></div>
+          <div className="text-[11px] text-slate-400 mt-1.5 min-h-[1rem]">{sub}</div>
+        </>
+      )}
+    </CardContent>
+  </Card>
+);
+
+const useExecutivo = () => useCarga('executivo', resumoExecutivo);
+const SEM_DADOS = 'sem movimento no extrato';
+
+const KpiCaixa = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Caixa" estado={e} valor={d?.caixa === null || d?.caixa === undefined ? '—' : moeda(d.caixa)} sub={d?.caixa === null || d?.caixa === undefined ? 'sem saldo no extrato' : 'saldo do último extrato importado'} />; };
+const KpiReceitas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Receitas" estado={e} valor={d?.temDados ? moeda(d.receitas) : '—'} sub={d?.temDados ? `recebido em ${d.mesRotulo}` : SEM_DADOS} />; };
+const KpiDespesas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Despesas" estado={e} valor={d?.temDados ? moeda(d.despesas) : '—'} sub={d?.temDados ? `pago em ${d.mesRotulo}` : SEM_DADOS} />; };
+const KpiPE = () => {
+  const e = useExecutivo(); const d = e.dados; const pe = d?.pe;
+  const ok = d?.temDados && pe?.temDado && !pe.peImpossivel;
+  return <Indicador rotulo="Ponto de equilíbrio" estado={e} alerta={ok && !pe.acima} valor={ok ? moeda(pe.pe) : '—'} sub={!d?.temDados ? SEM_DADOS : (pe?.peImpossivel ? 'margem negativa neste mês' : (ok ? `${pe.acima ? 'acima' : 'abaixo'} do ponto em ${moeda(Math.abs(pe.folga))}` : ''))} />;
+};
+
+const GrafEvolucao = () => {
+  const e = useExecutivo();
+  const serie = e.dados?.serie || [];
+  return (
+    <Moldura titulo="Receitas x despesas" descricao="Últimos meses do ano (regime de caixa)." estado={e} vazio={e.dados && !e.dados.temDados ? 'Sem movimento no extrato neste ano.' : null}>
+      <div className="h-[260px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={serie} margin={{ left: 0, right: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
+            <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tick={{ fontSize: 12 }} />
+            <Tooltip formatter={(v, n) => [moeda(v), n]} />
+            <Legend />
+            <Bar dataKey="receitas" name="Receitas" fill="#FE6102" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="despesas" name="Despesas" fill="#FFB27A" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </Moldura>
+  );
+};
+
+const DIAS_CURTOS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm w-full';
+const vazioEvento = (data) => ({ titulo: '', tipo: 'compromisso', data_inicio: data, hora_inicio: '', hora_fim: '', dia_inteiro: false, local: '', descricao: '', responsavel_id: '' });
+
+const AgendaBloco = () => {
+  const { company_id: companyId, user } = useAuthContext();
+  const { toast } = useToast();
+  const [itens, setItens] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [form, setForm] = useState(null);
+  const [salvando, setSalvando] = useState(false);
+  const hoje = hojeISO();
+
+  const carregar = useCallback(async () => {
+    if (!companyId) return;
+    try {
+      const ate = somaDias(hoje, 14);
+      const [ev, tar, us] = await Promise.all([listarEventos(companyId, hoje, ate), tarefasAbertas(companyId), listarUsuarios().catch(() => [])]);
+      setUsuarios(us);
+      const lista = [
+        ...ev.map((x) => ({ chave: `e${x.id}`, tipo: 'evento', data: x.data_inicio, hora: x.dia_inteiro ? null : (x.hora_inicio ? x.hora_inicio.slice(0, 5) : null), titulo: x.titulo, sub: [TIPOS_EVENTO[x.tipo], x.local].filter(Boolean).join(' · '), original: x, link: linkGoogleEvento(x) })),
+        ...tar.filter((t) => t.prazo && t.prazo <= ate).map((t) => ({ chave: `t${t.id}`, tipo: 'tarefa', data: t.prazo < hoje ? hoje : t.prazo, atrasada: t.prazo < hoje, hora: null, titulo: t.titulo, sub: `Tarefa${t.quadro?.nome ? ` · ${t.quadro.nome}` : ''}${t.prazo < hoje ? ' · atrasada' : ''}`, link: linkGoogleAgenda(t, t.quadro?.nome), quadroId: t.quadro_id }))
+      ].sort((a, b) => a.data.localeCompare(b.data) || String(a.hora || '').localeCompare(String(b.hora || '')));
+      setItens(lista);
+    } catch (e) { setItens([]); toast({ title: 'Não foi possível carregar a agenda', description: e.message, variant: 'destructive' }); }
+  }, [companyId, hoje, toast]);
+  useEffect(() => { carregar(); }, [carregar]);
+
+  const salvar = async () => {
+    if (!form.titulo.trim()) { toast({ title: 'Dê um título ao compromisso', variant: 'destructive' }); return; }
+    setSalvando(true);
+    try {
+      const dados = { titulo: form.titulo.trim(), tipo: form.tipo, data_inicio: form.data_inicio, hora_inicio: form.dia_inteiro || !form.hora_inicio ? null : form.hora_inicio, hora_fim: form.dia_inteiro || !form.hora_fim ? null : form.hora_fim, dia_inteiro: !!form.dia_inteiro, local: form.local || null, descricao: form.descricao || null, responsavel_id: form.responsavel_id || null };
+      if (form.id) await atualizarEvento(form.id, dados); else await criarEvento(companyId, user?.id, dados);
+      setForm(null); await carregar();
+    } catch (e) { toast({ title: 'Não foi possível salvar', description: e.message, variant: 'destructive' }); }
+    finally { setSalvando(false); }
+  };
+
+  const rotuloDia = (d) => { const dt = new Date(`${d}T12:00:00`); return { dia: d.slice(8, 10), mes: d.slice(5, 7), sem: d === hoje ? 'hoje' : DIAS_CURTOS[dt.getDay()] }; };
+
+  return (
+    <Card className="h-full">
+      <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
+        <div><CardTitle className="text-base">Agenda</CardTitle><CardDescription>Compromissos e prazos dos próximos 14 dias.</CardDescription></div>
+        <Button size="sm" variant="outline" onClick={() => setForm(vazioEvento(hoje))}><Plus className="w-4 h-4 mr-1" /> Novo</Button>
+      </CardHeader>
+      <CardContent>
+        {itens === null ? <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          : itens.length === 0 ? <p className="text-sm text-muted-foreground py-6 text-center">Nada agendado. Clique em "Novo" para marcar um compromisso.</p> : (
+            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+              {itens.map((i) => {
+                const d = rotuloDia(i.data);
+                const destaque = i.data === hoje;
+                return (
+                  <div key={i.chave} className={`rounded-md px-3 py-2 flex items-center gap-3 text-sm ${destaque ? 'text-white' : 'bg-muted/50'}`} style={destaque ? { background: '#FE6102' } : undefined}>
+                    <div className="w-11 text-center shrink-0"><div className="font-bold leading-tight">{d.dia}/{d.mes}</div><div className={`text-[10px] uppercase ${destaque ? 'text-white/90' : 'text-muted-foreground'}`}>{d.sem}</div></div>
+                    <button type="button" className="flex-1 min-w-0 text-left" onClick={() => (i.tipo === 'evento' ? setForm({ ...vazioEvento(hoje), ...i.original, hora_inicio: i.original.hora_inicio?.slice(0, 5) || '', hora_fim: i.original.hora_fim?.slice(0, 5) || '', responsavel_id: i.original.responsavel_id || '', local: i.original.local || '', descricao: i.original.descricao || '' }) : window.location.assign(`/tarefas/${i.quadroId}`))}>
+                      <div className="font-medium truncate">{i.hora ? `${i.hora} · ` : ''}{i.titulo}</div>
+                      <div className={`text-[11px] truncate ${destaque ? 'text-white/85' : 'text-muted-foreground'}`}>{i.sub}</div>
+                    </button>
+                    {i.tipo === 'tarefa' && <CheckSquare className={`h-4 w-4 shrink-0 ${destaque ? 'text-white/80' : 'text-muted-foreground'}`} />}
+                    {i.link && <a href={i.link} target="_blank" rel="noopener noreferrer" title="Adicionar ao Google Agenda" className={`shrink-0 ${destaque ? 'text-white/90 hover:text-white' : 'text-muted-foreground hover:text-foreground'}`}><CalendarPlus className="h-4 w-4" /></a>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+      </CardContent>
+
+      <Dialog open={!!form} onOpenChange={(o) => { if (!o) setForm(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{form?.id ? 'Editar compromisso' : 'Novo compromisso'}</DialogTitle></DialogHeader>
+          {form && (
+            <div className="space-y-3">
+              <div><Label className="text-xs">Título *</Label><Input value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Tipo</Label><select className={sel} value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>{Object.entries(TIPOS_EVENTO).map(([v, r]) => <option key={v} value={v}>{r}</option>)}</select></div>
+                <div><Label className="text-xs">Data</Label><Input type="date" value={form.data_inicio} onChange={(e) => setForm({ ...form, data_inicio: e.target.value })} /></div>
+              </div>
+              <label className="flex items-center gap-2 text-sm"><Checkbox checked={form.dia_inteiro} onCheckedChange={(v) => setForm({ ...form, dia_inteiro: v === true })} /> Dia inteiro</label>
+              {!form.dia_inteiro && <div className="grid grid-cols-2 gap-3"><div><Label className="text-xs">Início</Label><Input type="time" value={form.hora_inicio} onChange={(e) => setForm({ ...form, hora_inicio: e.target.value })} /></div><div><Label className="text-xs">Término</Label><Input type="time" value={form.hora_fim} onChange={(e) => setForm({ ...form, hora_fim: e.target.value })} /></div></div>}
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Local</Label><Input value={form.local} onChange={(e) => setForm({ ...form, local: e.target.value })} /></div>
+                <div><Label className="text-xs">Responsável</Label><select className={sel} value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}><option value="">—</option>{usuarios.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}</select></div>
+              </div>
+              <div><Label className="text-xs">Descrição</Label><Textarea rows={2} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} /></div>
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            {form?.id && <Button variant="ghost" className="text-destructive mr-auto" onClick={async () => { if (window.confirm('Excluir este compromisso?')) { try { await excluirEvento(form.id); setForm(null); await carregar(); } catch (e) { toast({ title: 'Não foi possível excluir', description: e.message, variant: 'destructive' }); } } }}><Trash2 className="w-4 h-4 mr-1" /> Excluir</Button>}
+            <Button variant="outline" onClick={() => setForm(null)}>Cancelar</Button>
+            <Button onClick={salvar} disabled={salvando}>{salvando && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+};
 // ---------- registro ----------
-export const GRUPOS = { financeiro: 'Financeiro', comercial: 'Comercial', tarefas: 'Tarefas' };
+export const GRUPOS = { executivo: 'Painel executivo', financeiro: 'Financeiro', comercial: 'Comercial', tarefas: 'Tarefas' };
+
+// Larguras na grade de 12 colunas (telas grandes). Classes escritas por extenso para o Tailwind enxergá-las.
+export const TAMANHOS = {
+  p: { rotulo: 'Pequeno (1/4)', classe: 'md:col-span-3 lg:col-span-3' },
+  q: { rotulo: 'Médio (1/3)', classe: 'md:col-span-6 lg:col-span-4' },
+  m: { rotulo: 'Meia largura', classe: 'md:col-span-6 lg:col-span-6' },
+  l: { rotulo: 'Grande (2/3)', classe: 'md:col-span-6 lg:col-span-8' },
+  g: { rotulo: 'Largura inteira', classe: 'md:col-span-6 lg:col-span-12' }
+};
 
 export const WIDGETS = [
+  { id: 'kpi_caixa', grupo: 'executivo', titulo: 'Caixa', descricao: 'Saldo atual dos bancos', tamanho: 'p', Componente: KpiCaixa },
+  { id: 'kpi_receitas', grupo: 'executivo', titulo: 'Receitas', descricao: 'Recebido no mês', tamanho: 'p', Componente: KpiReceitas },
+  { id: 'kpi_despesas', grupo: 'executivo', titulo: 'Despesas', descricao: 'Pago no mês', tamanho: 'p', Componente: KpiDespesas },
+  { id: 'kpi_pe', grupo: 'executivo', titulo: 'Ponto de equilíbrio', descricao: 'Faturamento necessário no mês e quanto sobrou ou faltou', tamanho: 'p', Componente: KpiPE },
+  { id: 'graf_evolucao', grupo: 'executivo', titulo: 'Receitas x despesas', descricao: 'Gráfico dos últimos meses', tamanho: 'l', Componente: GrafEvolucao },
+  { id: 'agenda', grupo: 'executivo', titulo: 'Agenda', descricao: 'Compromissos e prazos das tarefas', tamanho: 'q', Componente: AgendaBloco },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'g', Componente: FinPagarReceber },
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'm', Componente: FinFluxoMes },
   { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'm', Componente: FinProximos },
@@ -232,13 +404,20 @@ export const WIDGETS = [
 
 export const WIDGET_POR_ID = Object.fromEntries(WIDGETS.map((w) => [w.id, w]));
 
-export const layoutPadrao = () => WIDGETS.map((w) => ({ id: w.id, visivel: true, tamanho: w.tamanho }));
+// Modelos prontos: completo (tudo) e executivo (indicadores, gráfico e agenda, como no painel da proposta).
+const EXECUTIVO = ['kpi_caixa', 'kpi_receitas', 'kpi_despesas', 'kpi_pe', 'graf_evolucao', 'agenda'];
+export const layoutModelo = (modelo) => {
+  const todos = WIDGETS.map((w) => ({ id: w.id, visivel: true, tamanho: w.tamanho }));
+  if (modelo !== 'executivo') return todos;
+  return [...EXECUTIVO.map((id) => todos.find((x) => x.id === id)), ...todos.filter((x) => !EXECUTIVO.includes(x.id)).map((x) => ({ ...x, visivel: false }))];
+};
+export const layoutPadrao = () => layoutModelo('completo');
 
 // Junta o layout salvo com o catálogo: respeita ordem, visibilidade e tamanho salvos; blocos novos entram no fim, escondidos.
 export const mesclarLayout = (salvo) => {
   if (!Array.isArray(salvo) || !salvo.length) return layoutPadrao();
   const vistos = new Set();
-  const base = salvo.filter((x) => WIDGET_POR_ID[x.id] && !vistos.has(x.id) && vistos.add(x.id)).map((x) => ({ id: x.id, visivel: x.visivel !== false, tamanho: x.tamanho === 'g' ? 'g' : 'm' }));
+  const base = salvo.filter((x) => WIDGET_POR_ID[x.id] && !vistos.has(x.id) && vistos.add(x.id)).map((x) => ({ id: x.id, visivel: x.visivel !== false, tamanho: TAMANHOS[x.tamanho] ? x.tamanho : (WIDGET_POR_ID[x.id].tamanho || 'm') }));
   WIDGETS.forEach((w) => { if (!vistos.has(w.id)) base.push({ id: w.id, visivel: false, tamanho: w.tamanho }); });
   return base;
 };

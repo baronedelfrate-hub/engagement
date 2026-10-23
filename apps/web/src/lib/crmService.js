@@ -161,6 +161,27 @@ export const conteudoPadrao = () => ({
   proximos_passos: { titulo: 'Vamos começar juntos?', passos: [{ titulo: 'Aceite da proposta', texto: 'e pagamento da primeira parcela' }, { titulo: 'Início imediato', texto: '' }, { titulo: 'Operação rodando', texto: '' }] }
 });
 
+// ---------- indicadores de vendas (usados pelo painel do CRM e pela tela inicial) ----------
+const mesAnterior = (hoje) => { const [a, m] = [Number(hoje.slice(0, 4)), Number(hoje.slice(5, 7))]; return m === 1 ? `${a - 1}-12` : `${a}-${String(m - 1).padStart(2, '0')}`; };
+
+// Vendas fechadas (oportunidades ganhas), conversão (ganhas ÷ ganhas+perdidas decididas no período) e ticket médio (valor ganho ÷ nº de vendas).
+export const indicadoresVendas = (oportunidades, hoje = hojeISO()) => {
+  const periodo = (prefixo) => {
+    const g = oportunidades.filter((o) => o.etapa === 'ganho' && o.ganho_em && o.ganho_em.startsWith(prefixo));
+    const p = oportunidades.filter((o) => o.etapa === 'perdido' && o.perdido_em && o.perdido_em.startsWith(prefixo));
+    const valor = g.reduce((s, o) => s + Number(o.valor || 0), 0);
+    return {
+      ganhas: g.length, perdidas: p.length, valor,
+      conversao: g.length + p.length ? Math.round((g.length / (g.length + p.length)) * 100) : null,
+      ticket: g.length ? Math.round((valor / g.length) * 100) / 100 : null
+    };
+  };
+  return { mes: periodo(hoje.slice(0, 7)), anterior: periodo(mesAnterior(hoje)), ano: periodo(hoje.slice(0, 4)) };
+};
+
+// Variação percentual entre dois valores (null quando não há base de comparação).
+export const variacaoPct = (atual, anterior) => (anterior ? Math.round(((atual - anterior) / anterior) * 100) : null);
+
 // ---------- painel ----------
 export const montarPainelCrm = ({ oportunidades, atividades, propostas }, hoje) => {
   const abertas = oportunidades.filter((o) => !['ganho', 'perdido'].includes(o.etapa));
@@ -182,6 +203,6 @@ export const montarPainelCrm = ({ oportunidades, atividades, propostas }, hoje) 
   return {
     abertas: abertas.length, valorAberto: soma(abertas), ponderado, ganhas: ganhas.length, valorGanho: soma(ganhas),
     conversao: decididas ? Math.round((ganhas.length / decididas) * 100) : null,
-    porEtapa, atrasadas, atividadesHoje: hojeL, paradas, propostasAbertas
+    porEtapa, atrasadas, atividadesHoje: hojeL, paradas, propostasAbertas, vendas: indicadoresVendas(oportunidades, hoje)
   };
 };

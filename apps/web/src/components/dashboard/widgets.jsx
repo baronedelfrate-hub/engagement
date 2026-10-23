@@ -12,8 +12,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { titulosAbertos, movimentoDoMes, resumoVencimentos, hojeISO, somaDias, resumoExecutivo, listarEventos, criarEvento, atualizarEvento, excluirEvento, linkGoogleEvento, TIPOS_EVENTO } from '@/lib/dashboardData';
-import { listarOportunidades, listarPropostas, ETAPAS, moeda } from '@/lib/crmService';
+import { titulosAbertos, movimentoDoMes, resumoVencimentos, hojeISO, somaDias, resumoExecutivo, faturamentoDoMes, listarEventos, criarEvento, atualizarEvento, excluirEvento, linkGoogleEvento, TIPOS_EVENTO } from '@/lib/dashboardData';
+import { listarOportunidades, listarPropostas, ETAPAS, moeda, indicadoresVendas, variacaoPct } from '@/lib/crmService';
 import { listarContratos, valorMensal } from '@/lib/crmContratos';
 import { tarefasAbertas, listarUsuarios, PRIORIDADES, linkGoogleAgenda } from '@/lib/tarefasService';
 
@@ -183,6 +183,29 @@ const ComRecorrente = () => {
       </div>
     </Moldura>
   );
+};
+
+// Indicadores de vendas: faturamento (pedidos), vendas fechadas, taxa de conversão e ticket médio (CRM).
+const txtVar = (atual, anterior) => { const v = variacaoPct(atual, anterior); return v === null ? '' : ` · ${v >= 0 ? '▲' : '▼'} ${Math.abs(v)}% vs mês anterior`; };
+
+const ComFaturamento = () => {
+  const e = useCarga('faturamento', faturamentoDoMes); const d = e.dados;
+  return <Indicador rotulo="Faturamento do mês" estado={e} valor={d ? moeda(d.mes) : '—'} sub={d ? (d.qtd ? `${d.qtd} pedido(s)${txtVar(d.mes, d.anterior)}` : 'nenhum pedido confirmado no mês') : ''} />;
+};
+const useVendas = () => { const e = useCarga('oportunidades', listarOportunidades); return { e, v: e.dados ? indicadoresVendas(e.dados) : null }; };
+const ComVendas = () => {
+  const { e, v } = useVendas();
+  return <Indicador rotulo="Vendas fechadas" estado={e} valor={v ? moeda(v.mes.valor) : '—'} sub={v ? `${v.mes.ganhas} venda(s) no mês${txtVar(v.mes.valor, v.anterior.valor)}` : ''} />;
+};
+const ComConversao = () => {
+  const { e, v } = useVendas();
+  const m = v?.mes; const ano = v?.ano;
+  return <Indicador rotulo="Taxa de conversão" estado={e} valor={m?.conversao === null || !m ? '—' : `${m.conversao}%`} sub={!v ? '' : (m.conversao !== null ? `${m.ganhas} de ${m.ganhas + m.perdidas} negócios decididos no mês` : (ano.conversao !== null ? `no ano: ${ano.conversao}% (${ano.ganhas} de ${ano.ganhas + ano.perdidas})` : 'nenhum negócio decidido ainda'))} />;
+};
+const ComTicket = () => {
+  const { e, v } = useVendas();
+  const m = v?.mes; const ano = v?.ano;
+  return <Indicador rotulo="Ticket médio" estado={e} valor={m?.ticket === null || !m ? '—' : moeda(m.ticket)} sub={!v ? '' : (ano.ticket !== null ? `no ano: ${moeda(ano.ticket)} (${ano.ganhas} vendas)` : 'valor das vendas ÷ nº de vendas')} />;
 };
 
 // ---------- Tarefas ----------
@@ -399,6 +422,10 @@ export const WIDGETS = [
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
   { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'q', Componente: FinProximos },
+  { id: 'com_faturamento', grupo: 'comercial', titulo: 'Faturamento do mês', descricao: 'Pedidos de venda confirmados no mês e variação', tamanho: 'p', Componente: ComFaturamento },
+  { id: 'com_vendas', grupo: 'comercial', titulo: 'Vendas fechadas', descricao: 'Oportunidades ganhas no mês (CRM)', tamanho: 'p', Componente: ComVendas },
+  { id: 'com_conversao', grupo: 'comercial', titulo: 'Taxa de conversão', descricao: 'Ganhas ÷ decididas no mês (CRM)', tamanho: 'p', Componente: ComConversao },
+  { id: 'com_ticket', grupo: 'comercial', titulo: 'Ticket médio', descricao: 'Valor das vendas ÷ número de vendas', tamanho: 'p', Componente: ComTicket },
   { id: 'com_funil', grupo: 'comercial', titulo: 'Funil comercial', descricao: 'Oportunidades por etapa', tamanho: 'q', Componente: ComFunil },
   { id: 'com_propostas', grupo: 'comercial', titulo: 'Propostas', descricao: 'Aguardando resposta e aceitas', tamanho: 'q', Componente: ComPropostas },
   { id: 'com_recorrente', grupo: 'comercial', titulo: 'Receita recorrente', descricao: 'Contratos mensais ativos', tamanho: 'q', Componente: ComRecorrente }
@@ -407,7 +434,7 @@ export const WIDGETS = [
 export const WIDGET_POR_ID = Object.fromEntries(WIDGETS.map((w) => [w.id, w]));
 
 // Modelos prontos: completo (todos os blocos) e executivo (o essencial: agenda, minhas tarefas, indicadores, gráfico e funil).
-const EXECUTIVO = ['agenda', 'tar_minhas', 'kpi_caixa', 'kpi_receitas', 'kpi_despesas', 'kpi_pe', 'graf_evolucao', 'com_funil'];
+const EXECUTIVO = ['agenda', 'tar_minhas', 'kpi_caixa', 'kpi_receitas', 'kpi_despesas', 'kpi_pe', 'graf_evolucao', 'com_faturamento', 'com_vendas', 'com_conversao', 'com_ticket', 'com_funil'];
 export const layoutModelo = (modelo) => {
   const todos = WIDGETS.map((w) => ({ id: w.id, visivel: true, tamanho: w.tamanho }));
   if (modelo !== 'executivo') return todos;

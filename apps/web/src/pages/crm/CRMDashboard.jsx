@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, RefreshCw, Target, TrendingUp, Trophy, Percent } from 'lucide-react';
+import { Loader2, RefreshCw, Target, TrendingUp, Trophy, Percent, Receipt } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { hojeISO, moeda, montarPainelCrm, listarOportunidades, listarAtividades, listarPropostas, STATUS_PROPOSTA } from '@/lib/crmService';
+import { hojeISO, moeda, variacaoPct, montarPainelCrm, listarOportunidades, listarAtividades, listarPropostas, STATUS_PROPOSTA } from '@/lib/crmService';
 
 const Indicador = ({ titulo, valor, detalhe, icone: Icone, cor }) => (
   <Card><CardContent className="p-5 flex justify-between"><div><p className="text-sm text-muted-foreground">{titulo}</p><h3 className={`text-2xl font-bold ${cor}`}>{valor}</h3>{detalhe && <p className="text-xs text-muted-foreground mt-1">{detalhe}</p>}</div><Icone className={`h-6 w-6 ${cor}`} /></CardContent></Card>
@@ -46,12 +46,12 @@ const CRMDashboard = () => {
       <Helmet><title>Painel | CRM</title></Helmet>
       <PageHeader title="Painel comercial" description="Funil, previsão de vendas, atividades e propostas em andamento." action={<Button variant="outline" size="sm" onClick={carregar} disabled={loading}><RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Atualizar</Button>} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
         <Indicador titulo="No funil" valor={moeda(p.valorAberto)} detalhe={`${p.abertas} oportunidade(s) em aberto`} icone={Target} cor="text-foreground" />
         <Indicador titulo="Previsão ponderada" valor={moeda(p.ponderado)} detalhe="valor × probabilidade da etapa" icone={TrendingUp} cor="text-blue-600" />
-        <Indicador titulo="Ganho" valor={moeda(p.valorGanho)} detalhe={`${p.ganhas} oportunidade(s) ganha(s)`} icone={Trophy} cor="text-emerald-600" />
-        <Indicador titulo="Conversão" valor={p.conversao === null ? '—' : `${p.conversao}%`} detalhe="ganhas ÷ (ganhas + perdidas)" icone={Percent} cor="text-orange-600" />
-      </div>
+        <Indicador titulo="Vendas do mês" valor={moeda(p.vendas.mes.valor)} detalhe={`${p.vendas.mes.ganhas} venda(s)${variacaoPct(p.vendas.mes.valor, p.vendas.anterior.valor) === null ? '' : ` · ${variacaoPct(p.vendas.mes.valor, p.vendas.anterior.valor) >= 0 ? '▲' : '▼'} ${Math.abs(variacaoPct(p.vendas.mes.valor, p.vendas.anterior.valor))}% vs mês anterior`}`} icone={Trophy} cor="text-emerald-600" />
+        <Indicador titulo="Ticket médio" valor={p.vendas.mes.ticket === null ? '—' : moeda(p.vendas.mes.ticket)} detalhe={p.vendas.ano.ticket === null ? 'valor ÷ nº de vendas' : `no ano: ${moeda(p.vendas.ano.ticket)} (${p.vendas.ano.ganhas} vendas)`} icone={Receipt} cor="text-blue-600" />
+        <Indicador titulo="Taxa de conversão" valor={p.vendas.mes.conversao === null ? '—' : `${p.vendas.mes.conversao}%`} detalhe={p.vendas.ano.conversao === null ? 'ganhas ÷ (ganhas + perdidas)' : `no ano: ${p.vendas.ano.conversao}% (${p.vendas.ano.ganhas} de ${p.vendas.ano.ganhas + p.vendas.ano.perdidas})`} icone={Percent} cor="text-orange-600" />      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         <Card className="xl:col-span-2">

@@ -79,6 +79,17 @@ export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
   return { temDados, caixa, mesRotulo: `${MESES[mes]}/${ano}`, receitas: receita(mes), despesas: despesa(mes), pe: calcularPEPeriodo(dre, mes, mes), serie, naoClassificado };
 };
 
+// Faturamento do mês: soma dos pedidos de venda confirmados ou faturados (rascunhos e cancelados ficam de fora), pela data do pedido.
+export const faturamentoDoMes = async (companyId, hoje = hojeISO()) => {
+  const [a, m] = [Number(hoje.slice(0, 4)), Number(hoje.slice(5, 7))];
+  const ant = m === 1 ? `${a - 1}-12` : `${a}-${String(m - 1).padStart(2, '0')}`;
+  const atual = hoje.slice(0, 7);
+  const linhas = ok(await supabase.from('pedidos_venda').select('valor_total, data_pedido, data_emissao, status_pedido').eq('company_id', companyId).in('status_pedido', ['confirmed', 'invoiced']).gte('data_pedido', `${ant}-01`).limit(5000));
+  const dataDe = (x) => String(x.data_pedido || x.data_emissao || '').slice(0, 7);
+  const soma = (pref) => linhas.filter((x) => dataDe(x) === pref).reduce((s, x) => s + Number(x.valor_total || 0), 0);
+  return { mes: soma(atual), anterior: soma(ant), qtd: linhas.filter((x) => dataDe(x) === atual).length };
+};
+
 // ---------- agenda ----------
 export const listarEventos = async (companyId, de, ate) => ok(
   await supabase.from('agenda_eventos').select('*').eq('company_id', companyId).gte('data_inicio', de).lte('data_inicio', ate).order('data_inicio').order('hora_inicio', { nullsFirst: true })

@@ -21,7 +21,14 @@ import { MODULO_DO_MENU } from '@/lib/modulos';
 // Define the navigation structure
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Tarefas', href: '/tarefas', icon: ClipboardList },
+  {
+    name: 'Tarefas',
+    icon: ClipboardList,
+    children: [
+      { name: 'Tarefas', href: '/tarefas', icon: ClipboardList },
+      { name: 'Calendário', href: '/tarefas/calendario', icon: CalendarCheck },
+    ],
+  },
   {
     name: 'GESTÃO',
     icon: FolderCog,
@@ -258,6 +265,7 @@ const MenuItem = ({ item, isSidebarOpen, openMenus, toggleMenu, level = 0 }) => 
     return (
       <NavLink
         to={item.href}
+        end={item.href === '/tarefas'}
         className={({ isActive }) =>
           cn(
             'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',

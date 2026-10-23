@@ -187,6 +187,7 @@ import PortalCliente from '@/pages/engagement/PortalCliente';
 import DashboardEngagement from '@/pages/engagement/DashboardEngagement';
 import TarefasQuadros from '@/pages/tarefas/TarefasQuadros';
 import TarefasQuadro from '@/pages/tarefas/TarefasQuadro';
+import TarefasCalendario from '@/pages/tarefas/TarefasCalendario';
 import ContratosList from '@/pages/vendas/contratos/ContratosList';
 import ContratoForm from '@/pages/vendas/contratos/ContratoForm';
 import FaturamentoMes from '@/pages/vendas/contratos/FaturamentoMes';
@@ -384,7 +385,8 @@ const AnimatedRoutes = () => {
           <Route path="/vendas/orcamentos/:id" element={<ProtectedLayout><PageTransition><OrcamentosForm /></PageTransition></ProtectedLayout>} />
           <Route path="/vendas/orcamentos/:id/editar" element={<ProtectedLayout><PageTransition><OrcamentosForm /></PageTransition></ProtectedLayout>} />
           <Route path="/tarefas" element={<ProtectedLayout><PageTransition><TarefasQuadros /></PageTransition></ProtectedLayout>} />
-          <Route path="/tarefas/:id" element={<ProtectedLayout><PageTransition><TarefasQuadro /></PageTransition></ProtectedLayout>} />
+          <Route path="/tarefas/calendario" element={<ProtectedLayout><PageTransition><TarefasCalendario /></PageTransition></ProtectedLayout>} />
+          <Route path="/tarefas/:id"element={<ProtectedLayout><PageTransition><TarefasQuadro /></PageTransition></ProtectedLayout>} />
           <Route path="/vendas/contratos" element={<ProtectedLayout><PageTransition><ContratosList /></PageTransition></ProtectedLayout>} />
           <Route path="/vendas/contratos/novo" element={<ProtectedLayout><PageTransition><ContratoForm /></PageTransition></ProtectedLayout>} />
           <Route path="/vendas/contratos/:id" element={<ProtectedLayout><PageTransition><ContratoForm /></PageTransition></ProtectedLayout>} />

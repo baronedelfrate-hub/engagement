@@ -16,12 +16,15 @@ const chamar = async (body) => {
 export const enviarWhatsApp = (payload) => chamar(payload);
 
 // { conectado: boolean, estado: 'open' | 'close' | 'connecting' ... }
-export const statusWhatsApp = () => chamar({ acao: 'status' });
+// Uma instância por empresa. empresaId só vale para o superadmin (os demais usam a empresa do próprio usuário).
+// { estado: 'open' | 'close' | 'connecting' | 'sem_instancia' | 'inexistente', conectado, instancia }
+export const statusWhatsApp = (empresaId) => chamar({ acao: 'status', empresa_id: empresaId });
 
-// Gestão da conexão (só superadmin): QR code { qr: 'data:image/png;base64,...', codigoPareamento }, criar a instância e desconectar.
-export const qrCodeWhatsApp = () => chamar({ acao: 'qrcode' });
-export const criarInstanciaWhatsApp = () => chamar({ acao: 'criar' });
-export const desconectarWhatsApp = () => chamar({ acao: 'desconectar' });
+// Gestão da conexão (administrador da empresa ou superadmin): QR code { qr: 'data:image/png;base64,...', codigoPareamento }, criar, desconectar e remover a instância.
+export const qrCodeWhatsApp = (empresaId) => chamar({ acao: 'qrcode', empresa_id: empresaId });
+export const criarInstanciaWhatsApp = (empresaId) => chamar({ acao: 'criar', empresa_id: empresaId });
+export const desconectarWhatsApp = (empresaId) => chamar({ acao: 'desconectar', empresa_id: empresaId });
+export const removerInstanciaWhatsApp = (empresaId) => chamar({ acao: 'remover', empresa_id: empresaId });
 
 export const listarEnviosWhatsApp = async (refTipo, refId, limite = 10) => {
   const { data, error } = await supabase.from('whatsapp_envios').select('id, tipo, destinatario, mensagem, anexo, status, erro, created_at')

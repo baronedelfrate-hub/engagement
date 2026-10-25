@@ -49,6 +49,7 @@ const navigation = [
           { name: 'Serviços', href: '/cadastros/servicos' },
           { name: 'Subcategorias', href: '/cadastros/subcategorias' },
           { name: 'Tipo de Produto', href: '/cadastros/tipo-produto' },
+          { name: 'WhatsApp (conexão)', href: '/configuracoes/whatsapp' },
         ],
       },
       {
@@ -160,7 +161,6 @@ const navigation = [
           { name: 'Times', href: '/admin/times' },
           { name: 'Faturamento', href: '/admin/faturamento' },
           { name: 'Planos', href: '/admin/planos' },
-          { name: 'WhatsApp (conexão)', href: '/admin/whatsapp' },
           { name: 'Logs de Auditoria', href: '/admin/logs' },
           { name: 'Temas', href: '/configuracoes/temas' },
         ],

@@ -74,7 +74,7 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
               ))}
             </div>
           )}
-          <p className="text-xs text-muted-foreground">Sai pelo número de WhatsApp conectado à plataforma. Use *negrito* e _itálico_ do próprio WhatsApp se quiser.</p>
+          <p className="text-xs text-muted-foreground">Sai pelo número de WhatsApp da sua empresa (Cadastros → WhatsApp (conexão)). Use *negrito* e _itálico_ do próprio WhatsApp se quiser.</p>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={enviando}>Cancelar</Button>

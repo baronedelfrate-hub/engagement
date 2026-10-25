@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://ckupnneaeswdnrckulck.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrdXBubmVhZXN3ZG5yY2t1bGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMDM0NDEsImV4cCI6MjA3OTY3OTQ0MX0.h_gmMVy9EerqFKYznznqnqEhssLCqt4oTVwRjGkE89E';
+// Banco no Brasil (sa-east-1), por LGPD. O projeto antigo (ckupnneaeswdnrckulck, us-east-2) fica de reserva.
+const supabaseUrl = 'https://plqjffuhlkvbwdipapxq.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscWpmZnVobGt2YndkaXBhcHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5MjU1MDYsImV4cCI6MjEwODUwMTUwNn0.Jk_HGBOfV2jgcWY8f1nkZbYk-e8oPzoCtN0fVgDN7pc';
 
 const customSupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 

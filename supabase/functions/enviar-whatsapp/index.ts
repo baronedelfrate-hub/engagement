@@ -50,6 +50,31 @@ Deno.serve(async (req) => {
       return json({ success: true, estado, conectado: estado === 'open' });
     }
 
+    // Gestão da conexão (QR code, criar instância, desconectar): só o superadmin, porque a instância é compartilhada por todas as empresas.
+    if (['qrcode', 'criar', 'desconectar'].includes(b.acao)) {
+      if (perfil.role !== 'superadmin') return json({ error: 'Somente o superadmin gerencia a conexão do WhatsApp.' }, 403);
+      const nome = encodeURIComponent(instancia);
+      // deno-lint-ignore no-explicit-any
+      const erroDa = (t: Record<string, any>, r: Response) => t?.response?.message?.[0] ?? t?.message ?? t?.error ?? `A Evolution API respondeu ${r.status}`;
+      if (b.acao === 'desconectar') {
+        const r = await fetch(`${base}/instance/logout/${nome}`, { method: 'DELETE', headers: cab });
+        const t = await r.json().catch(() => ({}));
+        if (!r.ok) return json({ error: String(erroDa(t, r)) }, 502);
+        return json({ success: true });
+      }
+      const r = b.acao === 'criar'
+        ? await fetch(`${base}/instance/create`, { method: 'POST', headers: cab, body: JSON.stringify({ instanceName: instancia, integration: 'WHATSAPP-BAILEYS', qrcode: true }) })
+        : await fetch(`${base}/instance/connect/${nome}`, { headers: cab });
+      const t = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const msg = String(erroDa(t, r));
+        if (b.acao === 'qrcode' && r.status === 404) return json({ error: `A instância "${instancia}" não existe na Evolution API. Use "Criar instância".` }, 404);
+        return json({ error: msg }, 502);
+      }
+      const qr = t?.base64 ?? t?.qrcode?.base64 ?? null;
+      return json({ success: true, qr, codigoPareamento: t?.pairingCode ?? t?.qrcode?.pairingCode ?? null, tentativas: t?.count ?? null });
+    }
+
     const tipo = TIPOS.includes(b.tipo) ? b.tipo : 'outro';
     const numero = normalizarNumero(b.para);
     if (!numero) return json({ error: 'Telefone inválido. Use DDD + número, por exemplo (19) 99999-9999.' }, 400);

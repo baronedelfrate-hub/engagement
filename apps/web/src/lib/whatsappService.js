@@ -18,6 +18,11 @@ export const enviarWhatsApp = (payload) => chamar(payload);
 // { conectado: boolean, estado: 'open' | 'close' | 'connecting' ... }
 export const statusWhatsApp = () => chamar({ acao: 'status' });
 
+// Gestão da conexão (só superadmin): QR code { qr: 'data:image/png;base64,...', codigoPareamento }, criar a instância e desconectar.
+export const qrCodeWhatsApp = () => chamar({ acao: 'qrcode' });
+export const criarInstanciaWhatsApp = () => chamar({ acao: 'criar' });
+export const desconectarWhatsApp = () => chamar({ acao: 'desconectar' });
+
 export const listarEnviosWhatsApp = async (refTipo, refId, limite = 10) => {
   const { data, error } = await supabase.from('whatsapp_envios').select('id, tipo, destinatario, mensagem, anexo, status, erro, created_at')
     .eq('ref_tipo', refTipo).eq('ref_id', refId).order('created_at', { ascending: false }).limit(limite);

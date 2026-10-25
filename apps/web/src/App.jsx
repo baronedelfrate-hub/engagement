@@ -25,6 +25,7 @@ import '@/lib/testExtratoImport';
 import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
+import WhatsAppConexao from '@/pages/admin/WhatsAppConexao';
 import PainelCarteira from '@/pages/admin/PainelCarteira';
 import ModulosPorCliente from '@/pages/admin/ModulosPorCliente';
 import ModuloNaoContratado from '@/pages/ModuloNaoContratado';
@@ -508,6 +509,7 @@ const AnimatedRoutes = () => {
           
           <Route path="/admin/carteira" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PainelCarteira /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/modulos" element={<SuperAdminRoute><ProtectedLayout><PageTransition><ModulosPorCliente /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/whatsapp" element={<SuperAdminRoute><ProtectedLayout><PageTransition><WhatsAppConexao /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="list" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/novo" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="create" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/usuarios/:userId" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="edit" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

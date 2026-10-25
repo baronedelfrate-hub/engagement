@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: email,
       password: password || undefined,
+      email_confirm: true, // usuário criado pelo administrador já entra confirmado, independente da configuração do projeto
       user_metadata: {
         nome: nome,
         company_id: company_id,

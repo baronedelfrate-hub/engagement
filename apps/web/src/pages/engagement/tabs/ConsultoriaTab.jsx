@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Trash2, CalendarPlus, FileDown, FilePlus2, Eye, EyeOff, Mail } from 'lucide-react';
+import { Loader2, Plus, Trash2, CalendarPlus, FileDown, FilePlus2, Eye, EyeOff, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import HistoricoEmails from '@/components/HistoricoEmails';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -273,6 +274,7 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
   };
 
   const [emailAberto, setEmailAberto] = useState(false);
+  const [zapAberto, setZapAberto] = useState(false);
 
   const pdf = async () => {
     setGerando(true);
@@ -295,6 +297,7 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
               <Button variant="outline" size="sm" onClick={() => setOsAberta(null)}>Voltar à lista</Button>
               <Button variant="outline" size="sm" onClick={pdf} disabled={gerando || !o.numero}>{gerando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}PDF</Button>
               <Button variant="outline" size="sm" onClick={() => setEmailAberto(true)} disabled={!o.numero} title={o.numero ? '' : 'Salve a OS antes de enviar'}><Mail className="w-4 h-4 mr-2" />Enviar por e-mail</Button>
+              <Button variant="outline" size="sm" onClick={() => setZapAberto(true)} disabled={!o.numero} title={o.numero ? '' : 'Salve a OS antes de enviar'}><MessageCircle className="w-4 h-4 mr-2 text-emerald-600" />WhatsApp</Button>
               <Button variant="outline" size="sm" onClick={() => salvar()} disabled={salvando}>Salvar</Button>
               <Button size="sm" onClick={() => salvar(!o.publicada)} disabled={salvando}>{o.publicada ? 'Despublicar' : 'Salvar e publicar ao cliente'}</Button>
             </div>
@@ -312,7 +315,16 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
           <div className="max-w-[220px]"><Label>Próxima visita prevista</Label><Input type="date" value={o.proxima_visita || ''} onChange={(e) => muda('proxima_visita', e.target.value)} /></div>
           {o.publicada && <Badge variant="success">Publicada — o cliente vê esta OS</Badge>}
         </CardContent>
-        {o.id && <div className="px-6 pb-4"><HistoricoEmails refTipo="eng_os" refId={o.id} recarregar={emailAberto} /></div>}
+        {o.id && <div className="px-6 pb-4"><HistoricoEmails refTipo="eng_os" refId={o.id} recarregar={`${emailAberto}${zapAberto}`} /></div>}
+        {o.id && (
+          <EnviarWhatsAppDialog
+            open={zapAberto} onOpenChange={setZapAberto}
+            titulo="Enviar a OS pelo WhatsApp" descricao={`OS Nº ${o.numero} · ${cliente.nome}`}
+            tipo="portal" refTipo="eng_os" refId={o.id}
+            paraInicial={cliente.telefone || ''}
+            mensagemInicial={`Olá! Tudo bem?\n\nSegue a ordem de serviço *Nº ${o.numero}* da nossa visita de ${formatarData(o.data)}${o.objetivo ? ` (${o.objetivo})` : ''}, com o que foi feito, as pendências e os próximos passos.${o.proxima_visita ? `\n\nPróxima visita prevista: *${formatarData(o.proxima_visita)}*.` : ''}${o.publicada ? '\n\nVocê também acompanha tudo no portal "Meu projeto": https://erp.engagementsolucoes.com.br/meu-projeto' : ''}\n\n${consultorNome || ''}`}
+            anexos={[{ rotulo: 'OS em PDF', gerar: async () => { const { gerarOsPdf } = await import('@/lib/engOsPdf'); return gerarOsPdf({ cliente, projeto, os: o, consultorNome }, { base64: true }); } }]}          />
+        )}
         {o.id && (
           <EnviarEmailDialog
             open={emailAberto} onOpenChange={setEmailAberto}

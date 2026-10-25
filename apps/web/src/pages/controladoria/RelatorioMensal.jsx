@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet, Mail } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet, Mail, MessageCircle } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -31,10 +32,11 @@ function RelatorioMensal() {
   const alternarSocios = (v) => { setIncluirSocios(v); try { localStorage.setItem('pe_incluir_socios', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
   const [gerandoExcel, setGerandoExcel] = useState(false);
   const [emailAberto, setEmailAberto] = useState(false);
+  const [zapAberto, setZapAberto] = useState(false);
 
   useEffect(() => {
     if (!empresaId) { setEmpresa(null); return; }
-    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, email').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
+    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, email, telefone').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
   }, [empresaId]);
 
   // mês inicial: o mês do último lançamento do ano
@@ -114,7 +116,19 @@ function RelatorioMensal() {
           {gerandoExcel ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Gerar Excel
         </Button>
         <Button onClick={() => setEmailAberto(true)} disabled={!pronto} variant="outline" className="gap-2"><Mail className="h-4 w-4" /> Enviar por e-mail</Button>
+        <Button onClick={() => setZapAberto(true)} disabled={!pronto} variant="outline" className="gap-2"><MessageCircle className="h-4 w-4 text-emerald-600" /> WhatsApp</Button>
       </FiltrosGerenciais>
+
+      {pronto && (
+        <EnviarWhatsAppDialog
+          open={zapAberto} onOpenChange={setZapAberto}
+          titulo="Enviar o relatório mensal por WhatsApp" descricao={`${empresa?.nome_fantasia || empresa?.razao_social || ''} · ${MESES[mes]}/${ano}`}
+          tipo="relatorio_mensal" refTipo="relatorio_mensal" refId={empresaId}
+          paraInicial={empresa?.telefone || ''}
+          mensagemInicial={`Olá! Tudo bem?\n\nSegue o relatório gerencial de *${MESES[mes]}/${ano}* da ${empresa?.nome_fantasia || empresa?.razao_social || 'sua empresa'}.\n\nReceita bruta: *R$ ${fmt(p.receita_bruta.valores[mes])}*\nLucro líquido: *R$ ${fmt(p.lucro_liquido.valores[mes])}*\nPonto de equilíbrio: *R$ ${fmt(pe.meses[mes].pe)}*\n\nNo PDF você vê a DRE, as despesas por categoria e a receita por cliente. Podemos marcar uma conversa para comentar os números?`}
+          anexos={[{ rotulo: 'Relatório mensal em PDF', gerar: () => gerarRelatorioMensalPdf({ empresa, ano, mes, dre, pe, dash, naoClassificado }, { base64: true }) }]}
+        />
+      )}
 
       {pronto && (
         <EnviarEmailDialog

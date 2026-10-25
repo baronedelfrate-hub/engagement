@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { Phone, Mail, MessageCircle, Copy, Wallet, PauseCircle, PlayCircle, Loader2, CalendarCheck, Send } from 'lucide-react';
 import { enviarEmail } from '@/lib/emailService';
+import { enviarWhatsApp } from '@/lib/whatsappService';
 import { PHASES, formatCurrency } from '@/lib/cobrancaService';
 import { registrarAcao, mensagemSugerida, linkWhatsApp, linkEmail, tituloDaMensagem } from '@/lib/cobrancaMovService';
 import { formatDateOnly } from '@/lib/dateUtils';
@@ -105,6 +106,22 @@ const CobrancaCardModalMov = ({ isOpen, onClose, card, empresaNome, onChanged, o
     } finally { setSaving(false); }
   };
 
+  // Envio direto pela Evolution API (número de WhatsApp conectado à plataforma) com registro automático no histórico.
+  const enviarWhatsAppAgora = async () => {
+    const destino = card.cliente?.telefone;
+    if (!destino) return;
+    if (!window.confirm(`Enviar esta mensagem de cobrança por WhatsApp para ${destino}?`)) return;
+    setSaving(true);
+    try {
+      await enviarWhatsApp({ tipo: 'cobranca', para: destino, mensagem, ref_tipo: 'movimentacao', ref_id: card.id });
+      await registrarAcao({ companyId: card.company_id, movimentacaoId: card.id, tipo: 'contato', canal: 'whatsapp', descricao: `WhatsApp enviado para ${destino} (${PHASES[card.fase]?.label || card.fase})` });
+      toast({ title: 'WhatsApp de cobrança enviado', description: `Para ${destino}. Registrado no histórico.` });
+      if (onChanged) await onChanged();
+    } catch (e) {
+      toast({ title: 'Não foi possível enviar o WhatsApp', description: e.message, variant: 'destructive' });
+    } finally { setSaving(false); }
+  };
+
   const suspenderOuRetomar = async () => {
     await gravar({ tipo: card.suspensa ? 'retomada' : 'suspensao', descricao: form.descricao || null }, card.suspensa ? 'Cobrança retomada' : 'Cobrança suspensa');
   };
@@ -173,8 +190,11 @@ const CobrancaCardModalMov = ({ isOpen, onClose, card, empresaNome, onChanged, o
               <Textarea rows={5} value={mensagem} onChange={(e) => setMensagem(e.target.value)} className="text-sm" />
               <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" onClick={copiar}><Copy className="mr-2 h-3.5 w-3.5" /> Copiar</Button>
+                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!temTelefone || saving} onClick={enviarWhatsAppAgora} title={temTelefone ? '' : 'Cliente sem telefone no cadastro'}>
+                  <MessageCircle className="mr-2 h-3.5 w-3.5" /> Enviar WhatsApp agora
+                </Button>
                 <Button size="sm" variant="outline" disabled={!temTelefone || saving} onClick={() => enviarPor('whatsapp')} title={temTelefone ? '' : 'Cliente sem telefone no cadastro'}>
-                  <MessageCircle className="mr-2 h-3.5 w-3.5" /> Abrir no WhatsApp
+                  <MessageCircle className="mr-2 h-3.5 w-3.5" /> Abrir no meu WhatsApp
                 </Button>
                 <Button size="sm" disabled={!temEmail || saving} onClick={enviarEmailAgora} title={temEmail ? '' : 'Cliente sem e-mail no cadastro'}>
                   <Send className="mr-2 h-3.5 w-3.5" /> Enviar e-mail agora
@@ -183,7 +203,7 @@ const CobrancaCardModalMov = ({ isOpen, onClose, card, empresaNome, onChanged, o
                   <Mail className="mr-2 h-3.5 w-3.5" /> Abrir no meu e-mail
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">"Enviar e-mail agora" manda a mensagem acima direto ao cliente, pela plataforma, e registra no histórico. WhatsApp e "meu e-mail" abrem o aplicativo com o texto pronto.</p>
+              <p className="text-xs text-muted-foreground">"Enviar e-mail agora" e "Enviar WhatsApp agora" mandam a mensagem acima direto ao cliente, pela plataforma, e registram no histórico. "Abrir no meu..." abre o seu aplicativo com o texto pronto.</p>
             </div>
 
             <Separator />

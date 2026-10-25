@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt, Mail } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import HistoricoEmails from '@/components/HistoricoEmails';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -44,6 +45,7 @@ const CRMPropostaEditor = () => {
   const navigate = useNavigate();
 
   const [emailAberto, setEmailAberto] = useState(false);
+  const [zapAberto, setZapAberto] = useState(false);
   const [contatos, setContatos] = useState([]);
   const [recarregarEmails, setRecarregarEmails] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -147,11 +149,14 @@ const CRMPropostaEditor = () => {
     finally { setGerando(false); }
   };
 
-  const abrirEmail = async () => {
+  const abrirEnvio = async (canal) => {
     if (sujo) { toast({ title: 'Salve as alterações antes de enviar a proposta', variant: 'destructive' }); return; }
     try { setContatos(p.conta_id ? await listarContatos(companyId, p.conta_id) : []); } catch { setContatos([]); }
-    setEmailAberto(true);
+    if (canal === 'whatsapp') setZapAberto(true); else setEmailAberto(true);
   };
+  const abrirEmail = () => abrirEnvio('email');
+  const contatoPrincipal = contatos.find((c) => c.decisor) || contatos[0];
+  const primeiroNome = contatoPrincipal?.nome ? contatoPrincipal.nome.split(' ')[0] : '';
 
   const depoisDoEnvio = async () => {
     setRecarregarEmails((n) => n + 1);
@@ -237,6 +242,7 @@ const CRMPropostaEditor = () => {
       {!nova && (
         <div className="flex flex-wrap gap-2 mb-4">
           <Button size="sm" onClick={abrirEmail}><Mail className="w-4 h-4 mr-2" /> Enviar por e-mail</Button>
+          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => abrirEnvio('whatsapp')}><MessageCircle className="w-4 h-4 mr-2" /> Enviar por WhatsApp</Button>
           {p.status === 'rascunho' && <Button variant="outline" size="sm" onClick={() => mudarStatus('enviada')}><Send className="w-4 h-4 mr-2" /> Marcar como enviada</Button>}
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('aceita')}><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Cliente aceitou</Button>}
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('recusada')}><XCircle className="w-4 h-4 mr-2 text-red-600" /> Cliente recusou</Button>}
@@ -257,6 +263,18 @@ const CRMPropostaEditor = () => {
           assuntoInicial={`Proposta ${p.numero} — ${p.titulo || conta?.nome || ''}`}
           mensagemInicial={`Olá${(contatos.find((c) => c.decisor) || contatos[0])?.nome ? `, ${(contatos.find((c) => c.decisor) || contatos[0]).nome.split(' ')[0]}` : ''}!\n\nSegue em anexo a proposta ${p.numero}${p.titulo ? ` — ${p.titulo}` : ''}, conforme conversamos.\n\nEla tem validade de ${p.validade_dias || 30} dias a partir de ${(p.data_emissao || '').split('-').reverse().join('/')}. Qualquer dúvida ou ajuste, é só responder este e-mail.\n\nUm abraço,\n${profile?.nome || ''}`}
           destaques={[{ rotulo: 'Proposta', valor: `${p.numero}${p.versao > 1 ? ` v${p.versao}` : ''}` }, { rotulo: 'Investimento total', valor: moeda(total) }, { rotulo: 'Validade', valor: `${p.validade_dias || 30} dias` }]}
+          anexos={[{ rotulo: 'Proposta em PDF', gerar: async () => { const { gerarPropostaPdf } = await import('@/lib/crmPropostaPdf'); return gerarPropostaPdf(dadosPdf(), { base64: true }); } }]}
+          onEnviado={depoisDoEnvio}
+        />
+      )}
+      {!nova && (
+        <EnviarWhatsAppDialog
+          open={zapAberto} onOpenChange={setZapAberto}
+          titulo="Enviar proposta por WhatsApp" descricao={`${p.numero}${p.versao > 1 ? ` v${p.versao}` : ''} · ${conta?.nome || ''}`}
+          tipo="proposta" refTipo="proposta" refId={p.id}
+          paraInicial={(contatoPrincipal?.whatsapp || contatoPrincipal?.telefone || '')}
+          sugestoes={contatos.map((c) => ({ nome: c.nome, telefone: c.whatsapp || c.telefone }))}
+          mensagemInicial={`Olá${primeiroNome ? `, ${primeiroNome}` : ''}! Tudo bem?\n\nSegue a proposta *${p.numero}*${p.titulo ? ` — ${p.titulo}` : ''}, conforme conversamos.\n\nInvestimento: *${moeda(total)}*\nValidade: ${p.validade_dias || 30} dias\n\nQualquer dúvida ou ajuste, é só me chamar por aqui.\n${profile?.nome || ''}`}
           anexos={[{ rotulo: 'Proposta em PDF', gerar: async () => { const { gerarPropostaPdf } = await import('@/lib/crmPropostaPdf'); return gerarPropostaPdf(dadosPdf(), { base64: true }); } }]}
           onEnviado={depoisDoEnvio}
         />

@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, ArrowLeft, Receipt, RefreshCw, Mail } from 'lucide-react';
+import { Loader2, ArrowLeft, Receipt, RefreshCw, Mail, MessageCircle } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,6 +28,7 @@ const FaturamentoMes = () => {
   const [pedidos, setPedidos] = useState({});
   const [emailsClientes, setEmailsClientes] = useState({});
   const [avisar, setAvisar] = useState(null);
+  const [avisarZap, setAvisarZap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [gerando, setGerando] = useState(false);
   const [sel, setSel] = useState({});
@@ -45,7 +47,7 @@ const FaturamentoMes = () => {
       }
       const cids = [...new Set(lista.map((c) => c.cliente_id).filter(Boolean))];
       if (cids.length) {
-        const { data } = await supabase.from('clientes').select('id, nome, email').in('id', cids);
+        const { data } = await supabase.from('clientes').select('id, nome, email, telefone').in('id', cids);
         setEmailsClientes(Object.fromEntries((data || []).map((x) => [x.id, x])));
       }
     } catch (e) { toast({ title: 'Erro ao carregar', description: e.message, variant: 'destructive' }); }
@@ -140,7 +142,8 @@ const FaturamentoMes = () => {
                   <span><span className="font-medium">{pedidos[f.pedido_venda_id]?.numero || 'pedido'}</span> <span className="text-muted-foreground">· {c.cliente?.nome} · competência {String(f.competencia).slice(5, 7)}/{String(f.competencia).slice(0, 4)}</span></span>
                   <span className="flex items-center gap-3">
                     <span className="font-medium">{moeda(f.valor)}</span>
-                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAvisar({ c, f }); }}><Mail className="w-3.5 h-3.5 mr-1.5" /> Avisar cliente</Button>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAvisar({ c, f }); }}><Mail className="w-3.5 h-3.5 mr-1.5" /> E-mail</Button>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAvisarZap({ c, f }); }}><MessageCircle className="w-3.5 h-3.5 mr-1.5 text-emerald-600" /> WhatsApp</Button>
                   </span>
                 </div>
               ))}
@@ -148,6 +151,16 @@ const FaturamentoMes = () => {
           )}
         </CardContent>
       </Card>
+
+      {avisarZap && (
+        <EnviarWhatsAppDialog
+          open={!!avisarZap} onOpenChange={(o) => { if (!o) setAvisarZap(null); }}
+          titulo="Avisar o cliente pelo WhatsApp" descricao={`${avisarZap.c.numero} · ${avisarZap.c.cliente?.nome || ''}`}
+          tipo="aviso_faturamento" refTipo="pedido_venda" refId={avisarZap.f.pedido_venda_id}
+          paraInicial={emailsClientes[avisarZap.c.cliente_id]?.telefone || ''}
+          mensagemInicial={`Olá! Tudo bem?\n\nInformamos a cobrança de *${String(avisarZap.f.competencia).slice(5, 7)}/${String(avisarZap.f.competencia).slice(0, 4)}* do contrato "${avisarZap.c.titulo}":\n\nValor: *${moeda(avisarZap.f.valor)}*${pedidos[avisarZap.f.pedido_venda_id]?.data_vencimento ? `\nVencimento: *${fmt(pedidos[avisarZap.f.pedido_venda_id].data_vencimento)}*` : ''}\n\nA nota fiscal será enviada em seguida. Qualquer dúvida, é só responder por aqui. Obrigado!`}
+        />
+      )}
 
       {avisar && (
         <EnviarEmailDialog

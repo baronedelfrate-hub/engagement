@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, Download, Table as TableIcon, Filter, Mail } from 'lucide-react';
+import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -62,6 +63,7 @@ const RelatoriosFinanceiros = () => {
 
   // State Management
   const [emailAberto, setEmailAberto] = useState(false);
+  const [zapAberto, setZapAberto] = useState(false);
   const [source, setSource] = useState('CONTAS_PAGAR');
   const [filters, setFilters] = useState(() => {
     const saved = localStorage.getItem('relatoriosFinFiltros');
@@ -297,6 +299,15 @@ const RelatoriosFinanceiros = () => {
                   <Mail className="h-4 w-4 mr-2 text-blue-500" />
                   Enviar por e-mail
                 </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setZapAberto(true)}
+                  disabled={loadingData || filteredData.length === 0}
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2 text-emerald-500" />
+                  WhatsApp
+                </Button>
               </div>
             </div>
 
@@ -304,6 +315,14 @@ const RelatoriosFinanceiros = () => {
               <RelatoriosFinanceirosSummaries data={filteredData} source={source} />
             )}
 
+            <EnviarWhatsAppDialog
+              open={zapAberto} onOpenChange={setZapAberto}
+              titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'} por WhatsApp`}
+              descricao={getFilterDescription()}
+              tipo="relatorio_pagar" refTipo="relatorio_financeiro" refId={null}
+              mensagemInicial={`Olá! Tudo bem?\n\nSegue o relatório de *${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}*${dateRangeStr ? ` (${dateRangeStr})` : ''}.\n\nRegistros: *${filteredData.length}*\nValor total: *${filteredData.reduce((s, r) => s + Number(r.valor_original || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*\n\nO PDF traz o detalhamento e os resumos por dia, ${source === 'CONTAS_PAGAR' ? 'fornecedor' : 'cliente'}, categoria e centro de custo.`}
+              anexos={[{ rotulo: 'Relatório em PDF', gerar: () => exportToPDF(filteredData, SOURCE_COLUMNS[source], `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`, getFilterDescription(), source, { base64: true }) }]}
+            />
             <EnviarEmailDialog
               open={emailAberto} onOpenChange={setEmailAberto}
               titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}`}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BarChart2, RefreshCw, Filter, X, Pencil, Trash2, Mail } from 'lucide-react';
+import { Plus, BarChart2, RefreshCw, Filter, X, Pencil, Trash2, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
@@ -30,6 +31,7 @@ function PedidosCompraList() {
   const { toast } = useToast();
   const { profile } = useAuthContext();
   const [envio, setEnvio] = useState(null);
+  const [canalEnvio, setCanalEnvio] = useState('email');
   const [pedidos, setPedidos] = useState([]);
   const [filteredPedidos, setFilteredPedidos] = useState([]);
 
@@ -97,8 +99,9 @@ function PedidosCompraList() {
   };
 
   // Envia o pedido ao fornecedor com o PDF anexo. Carrega itens e dados do comprador na hora de abrir.
-  const abrirEnvio = async (pedido) => {
+  const abrirEnvio = async (pedido, canal = 'email') => {
     try {
+      setCanalEnvio(canal);
       const fornecedor = fornecedores.find((f) => f.id === pedido.fornecedor_id) || {};
       const [{ data: itens, error: eItens }, empresaRes] = await Promise.all([
         supabase.from('pedidos_compra_itens').select('quantidade, preco_unitario, desconto, valor_total, produto:produtos(nome, sku, unidade_medida)').eq('pedido_id', pedido.id),
@@ -168,8 +171,11 @@ function PedidosCompraList() {
       header: 'Ações',
       render: (item) => (
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => abrirEnvio(item)} title="Enviar ao fornecedor por e-mail">
-            <Mail className="h-4 w-4 text-emerald-600" />
+          <Button variant="ghost" size="icon" onClick={() => abrirEnvio(item, 'email')} title="Enviar ao fornecedor por e-mail">
+            <Mail className="h-4 w-4 text-blue-600" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => abrirEnvio(item, 'whatsapp')} title="Enviar ao fornecedor por WhatsApp">
+            <MessageCircle className="h-4 w-4 text-emerald-600" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => handleEdit(item.id)} title="Editar">
             <Pencil className="h-4 w-4 text-blue-500" />
@@ -246,7 +252,17 @@ function PedidosCompraList() {
         emptyMessage="Nenhum pedido de compra encontrado"
       />
 
-      {envio && (
+      {envio && canalEnvio === 'whatsapp' && (
+        <EnviarWhatsAppDialog
+          open onOpenChange={(o) => { if (!o) setEnvio(null); }}
+          titulo="Enviar pedido ao fornecedor por WhatsApp" descricao={`Pedido ${envio.pedido.numero || ''} · ${envio.fornecedor.nome || ''}`}
+          tipo="pedido_compra" refTipo="pedido_compra" refId={envio.pedido.id}
+          paraInicial={envio.fornecedor.telefone || ''}
+          mensagemInicial={`Olá${envio.fornecedor.nome ? `, ${envio.fornecedor.nome}` : ''}! Tudo bem?\n\nSegue o pedido de compra *${envio.pedido.numero || ''}* da ${envio.empresa.nome}${envio.pedido.data_entrega ? `, com entrega prevista para ${formatDateOnly(envio.pedido.data_entrega)}` : ''}.\n\nValor total: *${Number(envio.pedido.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*\n\nPode confirmar o recebimento, o prazo de entrega e as condições de pagamento? Obrigado!\n${profile?.nome || ''}`}
+          anexos={[{ rotulo: 'Pedido de compra em PDF', gerar: async () => { const { gerarPedidoCompraPdf } = await import('@/lib/pedidoCompraPdf'); return gerarPedidoCompraPdf({ pedido: envio.pedido, fornecedor: envio.fornecedor, itens: envio.itens, empresa: envio.empresa }, { base64: true }); } }]}
+        />
+      )}
+      {envio && canalEnvio === 'email' && (
         <EnviarEmailDialog
           open={!!envio} onOpenChange={(o) => { if (!o) setEnvio(null); }}
           titulo="Enviar pedido ao fornecedor" descricao={`Pedido ${envio.pedido.numero || ''} · ${envio.fornecedor.nome || ''}`}

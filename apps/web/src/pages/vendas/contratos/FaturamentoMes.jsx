@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, ArrowLeft, Receipt, RefreshCw } from 'lucide-react';
+import { Loader2, ArrowLeft, Receipt, RefreshCw, Mail } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -24,6 +25,8 @@ const FaturamentoMes = () => {
   const navigate = useNavigate();
   const [contratos, setContratos] = useState([]);
   const [pedidos, setPedidos] = useState({});
+  const [emailsClientes, setEmailsClientes] = useState({});
+  const [avisar, setAvisar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [gerando, setGerando] = useState(false);
   const [sel, setSel] = useState({});
@@ -37,8 +40,13 @@ const FaturamentoMes = () => {
       setContratos(lista);
       const ids = lista.flatMap((c) => c.faturamentos.map((f) => f.pedido_venda_id)).filter(Boolean);
       if (ids.length) {
-        const { data } = await supabase.from('pedidos_venda').select('id, numero, valor_total').in('id', ids);
+        const { data } = await supabase.from('pedidos_venda').select('id, numero, valor_total, data_vencimento').in('id', ids);
         setPedidos(Object.fromEntries((data || []).map((p) => [p.id, p])));
+      }
+      const cids = [...new Set(lista.map((c) => c.cliente_id).filter(Boolean))];
+      if (cids.length) {
+        const { data } = await supabase.from('clientes').select('id, nome, email').in('id', cids);
+        setEmailsClientes(Object.fromEntries((data || []).map((x) => [x.id, x])));
       }
     } catch (e) { toast({ title: 'Erro ao carregar', description: e.message, variant: 'destructive' }); }
     finally { setLoading(false); }
@@ -130,13 +138,33 @@ const FaturamentoMes = () => {
               {recentes.map(({ c, f }) => (
                 <div key={f.contrato_id + f.competencia} className="py-2 flex items-center justify-between text-sm cursor-pointer hover:bg-muted/30" onClick={() => navigate(`/vendas/pedidos/${f.pedido_venda_id}`)}>
                   <span><span className="font-medium">{pedidos[f.pedido_venda_id]?.numero || 'pedido'}</span> <span className="text-muted-foreground">· {c.cliente?.nome} · competência {String(f.competencia).slice(5, 7)}/{String(f.competencia).slice(0, 4)}</span></span>
-                  <span className="font-medium">{moeda(f.valor)}</span>
+                  <span className="flex items-center gap-3">
+                    <span className="font-medium">{moeda(f.valor)}</span>
+                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAvisar({ c, f }); }}><Mail className="w-3.5 h-3.5 mr-1.5" /> Avisar cliente</Button>
+                  </span>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {avisar && (
+        <EnviarEmailDialog
+          open={!!avisar} onOpenChange={(o) => { if (!o) setAvisar(null); }}
+          titulo="Avisar o cliente da cobrança do mês" descricao={`${avisar.c.numero} · ${avisar.c.cliente?.nome || ''}`}
+          tipo="aviso_faturamento" refTipo="pedido_venda" refId={avisar.f.pedido_venda_id}
+          paraInicial={emailsClientes[avisar.c.cliente_id]?.email || ''}
+          assuntoInicial={`Cobrança de ${String(avisar.f.competencia).slice(5, 7)}/${String(avisar.f.competencia).slice(0, 4)} — ${avisar.c.titulo}`}
+          mensagemInicial={`Olá!\n\nInformamos o valor referente a ${String(avisar.f.competencia).slice(5, 7)}/${String(avisar.f.competencia).slice(0, 4)} do contrato "${avisar.c.titulo}"${pedidos[avisar.f.pedido_venda_id]?.data_vencimento ? `, com vencimento em ${fmt(pedidos[avisar.f.pedido_venda_id].data_vencimento)}` : ''}.\n\nA nota fiscal será enviada em seguida. Qualquer dúvida, é só responder este e-mail.\n\nObrigado!`}
+          destaques={[
+            { rotulo: 'Contrato', valor: avisar.c.numero },
+            { rotulo: 'Competência', valor: `${String(avisar.f.competencia).slice(5, 7)}/${String(avisar.f.competencia).slice(0, 4)}` },
+            { rotulo: 'Valor', valor: moeda(avisar.f.valor) },
+            ...(pedidos[avisar.f.pedido_venda_id]?.data_vencimento ? [{ rotulo: 'Vencimento', valor: fmt(pedidos[avisar.f.pedido_venda_id].data_vencimento) }] : [])
+          ]}
+        />
+      )}
     </>
   );
 };

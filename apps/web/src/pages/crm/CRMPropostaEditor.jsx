@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt, Mail } from 'lucide-react';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import HistoricoEmails from '@/components/HistoricoEmails';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +19,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import {
   listarContas, listarOportunidades, listarCatalogo, carregarConfig, carregarProposta, criarProposta, atualizarProposta, salvarItens,
   gerarNumeroProposta, moverEtapa, totalItem, totalProposta, dividirParcelas, conteudoPadrao, paginasPadrao, PAGINAS,
-  STATUS_PROPOSTA, moeda, hojeISO
+  STATUS_PROPOSTA, moeda, hojeISO, listarContatos
 } from '@/lib/crmService';
 import { criarClienteDaProposta, rotaDaFicha } from '@/lib/crmCliente';
 import { gerarPedidoDaProposta } from '@/lib/crmPedido';
@@ -37,10 +39,13 @@ const CRMPropostaEditor = () => {
   const { id } = useParams();
   const [params] = useSearchParams();
   const nova = id === 'nova';
-  const { company_id: companyId, loading: authLoading } = useAuthContext();
+  const { company_id: companyId, profile, loading: authLoading } = useAuthContext();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const [emailAberto, setEmailAberto] = useState(false);
+  const [contatos, setContatos] = useState([]);
+  const [recarregarEmails, setRecarregarEmails] = useState(0);
   const [loading, setLoading] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [gerando, setGerando] = useState(false);
@@ -128,16 +133,29 @@ const CRMPropostaEditor = () => {
     finally { setSalvando(false); }
   };
 
+  const dadosPdf = () => ({
+    proposta: { ...p, valor_total: total, parcelas, paginas, conteudo, numero: p.numero || 'RASCUNHO' },
+    conta, itens: itens.map((i) => ({ ...i, quantidade: Number(i.quantidade) || 0, preco_unitario: Number(i.preco_unitario) || 0, desconto: Number(i.desconto) || 0 })), institucional: inst
+  });
+
   const gerarPdf = async () => {
     setGerando(true);
     try {
       const { gerarPropostaPdf } = await import('@/lib/crmPropostaPdf');
-      await gerarPropostaPdf({
-        proposta: { ...p, valor_total: total, parcelas, paginas, conteudo, numero: p.numero || 'RASCUNHO' },
-        conta, itens: itens.map((i) => ({ ...i, quantidade: Number(i.quantidade) || 0, preco_unitario: Number(i.preco_unitario) || 0, desconto: Number(i.desconto) || 0 })), institucional: inst
-      });
+      await gerarPropostaPdf(dadosPdf());
     } catch (e) { toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' }); }
     finally { setGerando(false); }
+  };
+
+  const abrirEmail = async () => {
+    if (sujo) { toast({ title: 'Salve as alterações antes de enviar a proposta', variant: 'destructive' }); return; }
+    try { setContatos(p.conta_id ? await listarContatos(companyId, p.conta_id) : []); } catch { setContatos([]); }
+    setEmailAberto(true);
+  };
+
+  const depoisDoEnvio = async () => {
+    setRecarregarEmails((n) => n + 1);
+    if (p.status === 'rascunho') await mudarStatus('enviada');
   };
 
   const mudarStatus = async (status) => {
@@ -218,6 +236,7 @@ const CRMPropostaEditor = () => {
 
       {!nova && (
         <div className="flex flex-wrap gap-2 mb-4">
+          <Button size="sm" onClick={abrirEmail}><Mail className="w-4 h-4 mr-2" /> Enviar por e-mail</Button>
           {p.status === 'rascunho' && <Button variant="outline" size="sm" onClick={() => mudarStatus('enviada')}><Send className="w-4 h-4 mr-2" /> Marcar como enviada</Button>}
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('aceita')}><CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Cliente aceitou</Button>}
           {['rascunho', 'enviada'].includes(p.status) && <Button variant="outline" size="sm" onClick={() => mudarStatus('recusada')}><XCircle className="w-4 h-4 mr-2 text-red-600" /> Cliente recusou</Button>}
@@ -226,6 +245,21 @@ const CRMPropostaEditor = () => {
           {p.pedido_venda_id ? <Button variant="outline" size="sm" onClick={() => navigate(`/vendas/pedidos/${p.pedido_venda_id}`)}><ShoppingCart className="w-4 h-4 mr-2" /> Abrir pedido de venda</Button> : (p.status === 'aceita' && !contrato && <Button size="sm" onClick={() => gerarPedido()} disabled={gerandoPedido}>{gerandoPedido ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShoppingCart className="w-4 h-4 mr-2" />}Gerar pedido de venda</Button>)}
           {ehEngagement && <Button size="sm" onClick={criarCliente}><UserPlus className="w-4 h-4 mr-2" /> Criar cliente a partir da proposta</Button>}
         </div>
+      )}
+      {!nova && <HistoricoEmails refTipo="proposta" refId={p.id} recarregar={recarregarEmails} />}
+      {!nova && (
+        <EnviarEmailDialog
+          open={emailAberto} onOpenChange={setEmailAberto}
+          titulo="Enviar proposta por e-mail" descricao={`${p.numero}${p.versao > 1 ? ` v${p.versao}` : ''} · ${conta?.nome || ''}`}
+          tipo="proposta" refTipo="proposta" refId={p.id}
+          sugestoes={contatos.map((c) => ({ nome: c.nome, email: c.email }))}
+          paraInicial={(contatos.find((c) => c.decisor && c.email) || contatos.find((c) => c.email))?.email || ''}
+          assuntoInicial={`Proposta ${p.numero} — ${p.titulo || conta?.nome || ''}`}
+          mensagemInicial={`Olá${(contatos.find((c) => c.decisor) || contatos[0])?.nome ? `, ${(contatos.find((c) => c.decisor) || contatos[0]).nome.split(' ')[0]}` : ''}!\n\nSegue em anexo a proposta ${p.numero}${p.titulo ? ` — ${p.titulo}` : ''}, conforme conversamos.\n\nEla tem validade de ${p.validade_dias || 30} dias a partir de ${(p.data_emissao || '').split('-').reverse().join('/')}. Qualquer dúvida ou ajuste, é só responder este e-mail.\n\nUm abraço,\n${profile?.nome || ''}`}
+          destaques={[{ rotulo: 'Proposta', valor: `${p.numero}${p.versao > 1 ? ` v${p.versao}` : ''}` }, { rotulo: 'Investimento total', valor: moeda(total) }, { rotulo: 'Validade', valor: `${p.validade_dias || 30} dias` }]}
+          anexos={[{ rotulo: 'Proposta em PDF', gerar: async () => { const { gerarPropostaPdf } = await import('@/lib/crmPropostaPdf'); return gerarPropostaPdf(dadosPdf(), { base64: true }); } }]}
+          onEnviado={depoisDoEnvio}
+        />
       )}
 
       <Tabs defaultValue="geral">

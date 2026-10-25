@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Trash2, CalendarPlus, FileDown, FilePlus2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Plus, Trash2, CalendarPlus, FileDown, FilePlus2, Eye, EyeOff, Mail } from 'lucide-react';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import HistoricoEmails from '@/components/HistoricoEmails';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -270,6 +272,8 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
     finally { setSalvando(false); }
   };
 
+  const [emailAberto, setEmailAberto] = useState(false);
+
   const pdf = async () => {
     setGerando(true);
     try {
@@ -290,6 +294,7 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
             <div className="flex gap-2 flex-wrap">
               <Button variant="outline" size="sm" onClick={() => setOsAberta(null)}>Voltar à lista</Button>
               <Button variant="outline" size="sm" onClick={pdf} disabled={gerando || !o.numero}>{gerando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileDown className="w-4 h-4 mr-2" />}PDF</Button>
+              <Button variant="outline" size="sm" onClick={() => setEmailAberto(true)} disabled={!o.numero} title={o.numero ? '' : 'Salve a OS antes de enviar'}><Mail className="w-4 h-4 mr-2" />Enviar por e-mail</Button>
               <Button variant="outline" size="sm" onClick={() => salvar()} disabled={salvando}>Salvar</Button>
               <Button size="sm" onClick={() => salvar(!o.publicada)} disabled={salvando}>{o.publicada ? 'Despublicar' : 'Salvar e publicar ao cliente'}</Button>
             </div>
@@ -307,6 +312,20 @@ const OrdensServico = ({ cliente, projeto, ordens, recarregar, osAberta, setOsAb
           <div className="max-w-[220px]"><Label>Próxima visita prevista</Label><Input type="date" value={o.proxima_visita || ''} onChange={(e) => muda('proxima_visita', e.target.value)} /></div>
           {o.publicada && <Badge variant="success">Publicada — o cliente vê esta OS</Badge>}
         </CardContent>
+        {o.id && <div className="px-6 pb-4"><HistoricoEmails refTipo="eng_os" refId={o.id} recarregar={emailAberto} /></div>}
+        {o.id && (
+          <EnviarEmailDialog
+            open={emailAberto} onOpenChange={setEmailAberto}
+            titulo="Enviar a OS ao cliente" descricao={`OS Nº ${o.numero} · ${cliente.nome}`}
+            tipo="portal" refTipo="eng_os" refId={o.id}
+            paraInicial={cliente.email || ''}
+            assuntoInicial={`Ordem de serviço Nº ${o.numero} — ${cliente.nome}`}
+            mensagemInicial={`Olá!\n\nSegue a ordem de serviço da nossa visita de ${formatarData(o.data)}${o.objetivo ? ` (${o.objetivo})` : ''}, com o que foi feito, as pendências e os próximos passos.${o.proxima_visita ? `\n\nNossa próxima visita está prevista para ${formatarData(o.proxima_visita)}.` : ''}\n\nVocê também acompanha tudo no portal "Meu projeto". Qualquer dúvida, é só responder este e-mail.\n\n${consultorNome || ''}`}
+            destaques={[{ rotulo: 'Ordem de serviço', valor: `Nº ${o.numero}` }, { rotulo: 'Data da visita', valor: formatarData(o.data) }, ...(o.proxima_visita ? [{ rotulo: 'Próxima visita', valor: formatarData(o.proxima_visita) }] : [])]}
+            botao={o.publicada ? { texto: 'Abrir Meu projeto', url: 'https://erp.engagementsolucoes.com.br/meu-projeto' } : undefined}
+            anexos={[{ rotulo: 'OS em PDF', gerar: async () => { const { gerarOsPdf } = await import('@/lib/engOsPdf'); return gerarOsPdf({ cliente, projeto, os: o, consultorNome }, { base64: true }); } }]}
+          />
+        )}
       </Card>
     );
   }

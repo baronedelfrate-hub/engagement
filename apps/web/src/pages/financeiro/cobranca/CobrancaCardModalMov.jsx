@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { Phone, Mail, MessageCircle, Copy, Wallet, PauseCircle, PlayCircle, Loader2, CalendarCheck } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Copy, Wallet, PauseCircle, PlayCircle, Loader2, CalendarCheck, Send } from 'lucide-react';
+import { enviarEmail } from '@/lib/emailService';
 import { PHASES, formatCurrency } from '@/lib/cobrancaService';
 import { registrarAcao, mensagemSugerida, linkWhatsApp, linkEmail, tituloDaMensagem } from '@/lib/cobrancaMovService';
 import { formatDateOnly } from '@/lib/dateUtils';
@@ -77,6 +78,31 @@ const CobrancaCardModalMov = ({ isOpen, onClose, card, empresaNome, onChanged, o
     if (canal === 'whatsapp') window.open(linkWhatsApp(card.cliente?.telefone, mensagem), '_blank', 'noopener');
     else window.location.href = linkEmail(card.cliente?.email, tituloDaMensagem(card), mensagem);
     await gravar({ tipo: 'contato', canal, descricao: `Mensagem preparada para envio (${PHASES[card.fase]?.label || card.fase})` }, 'Contato registrado no histórico');
+  };
+
+  // Envio direto pelo Resend (sai em nome da empresa, resposta volta para quem enviou) e registro automático no histórico.
+  const enviarEmailAgora = async () => {
+    const destino = card.cliente?.email;
+    if (!destino) return;
+    if (!window.confirm(`Enviar este e-mail de cobrança para ${destino}?`)) return;
+    setSaving(true);
+    try {
+      await enviarEmail({
+        tipo: 'cobranca', para: [destino], assunto: tituloDaMensagem(card), mensagem,
+        destaques: [
+          { rotulo: 'Título', valor: card.numero_titulo },
+          { rotulo: 'Valor em aberto', valor: formatCurrency(card.saldo) },
+          { rotulo: 'Vencimento', valor: formatDateOnly(card.data_vencimento) },
+          ...(dias < 0 ? [{ rotulo: 'Dias de atraso', valor: String(card.dias_atraso) }] : [])
+        ],
+        ref_tipo: 'movimentacao', ref_id: card.id
+      });
+      await registrarAcao({ companyId: card.company_id, movimentacaoId: card.id, tipo: 'contato', canal: 'email', descricao: `E-mail enviado para ${destino} (${PHASES[card.fase]?.label || card.fase})` });
+      toast({ title: 'E-mail de cobrança enviado', description: `Para ${destino}. Registrado no histórico.` });
+      if (onChanged) await onChanged();
+    } catch (e) {
+      toast({ title: 'Não foi possível enviar o e-mail', description: e.message, variant: 'destructive' });
+    } finally { setSaving(false); }
   };
 
   const suspenderOuRetomar = async () => {
@@ -150,11 +176,14 @@ const CobrancaCardModalMov = ({ isOpen, onClose, card, empresaNome, onChanged, o
                 <Button size="sm" variant="outline" disabled={!temTelefone || saving} onClick={() => enviarPor('whatsapp')} title={temTelefone ? '' : 'Cliente sem telefone no cadastro'}>
                   <MessageCircle className="mr-2 h-3.5 w-3.5" /> Abrir no WhatsApp
                 </Button>
+                <Button size="sm" disabled={!temEmail || saving} onClick={enviarEmailAgora} title={temEmail ? '' : 'Cliente sem e-mail no cadastro'}>
+                  <Send className="mr-2 h-3.5 w-3.5" /> Enviar e-mail agora
+                </Button>
                 <Button size="sm" variant="outline" disabled={!temEmail || saving} onClick={() => enviarPor('email')} title={temEmail ? '' : 'Cliente sem e-mail no cadastro'}>
-                  <Mail className="mr-2 h-3.5 w-3.5" /> Abrir no e-mail
+                  <Mail className="mr-2 h-3.5 w-3.5" /> Abrir no meu e-mail
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">Abre o seu WhatsApp ou e-mail com o texto pronto; o contato já fica registrado no histórico. O envio automático virá numa próxima etapa.</p>
+              <p className="text-xs text-muted-foreground">"Enviar e-mail agora" manda a mensagem acima direto ao cliente, pela plataforma, e registra no histórico. WhatsApp e "meu e-mail" abrem o aplicativo com o texto pronto.</p>
             </div>
 
             <Separator />

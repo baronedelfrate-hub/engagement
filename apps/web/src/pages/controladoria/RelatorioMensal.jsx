@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet, Mail } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,10 +30,11 @@ function RelatorioMensal() {
   const [incluirSocios, setIncluirSocios] = useState(() => { try { return localStorage.getItem('pe_incluir_socios') === '1'; } catch { return false; } });
   const alternarSocios = (v) => { setIncluirSocios(v); try { localStorage.setItem('pe_incluir_socios', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
   const [gerandoExcel, setGerandoExcel] = useState(false);
+  const [emailAberto, setEmailAberto] = useState(false);
 
   useEffect(() => {
     if (!empresaId) { setEmpresa(null); return; }
-    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
+    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, email').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
   }, [empresaId]);
 
   // mês inicial: o mês do último lançamento do ano
@@ -111,7 +113,25 @@ function RelatorioMensal() {
         <Button onClick={gerarExcel} disabled={!pronto || gerandoExcel} variant="outline" className="gap-2">
           {gerandoExcel ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Gerar Excel
         </Button>
+        <Button onClick={() => setEmailAberto(true)} disabled={!pronto} variant="outline" className="gap-2"><Mail className="h-4 w-4" /> Enviar por e-mail</Button>
       </FiltrosGerenciais>
+
+      {pronto && (
+        <EnviarEmailDialog
+          open={emailAberto} onOpenChange={setEmailAberto}
+          titulo="Enviar o relatório mensal" descricao={`${empresa?.nome_fantasia || empresa?.razao_social || ''} · ${MESES[mes]}/${ano}`}
+          tipo="relatorio_mensal" refTipo="relatorio_mensal" refId={empresaId}
+          paraInicial={empresa?.email || ''}
+          assuntoInicial={`Relatório gerencial de ${MESES[mes]}/${ano} — ${empresa?.nome_fantasia || empresa?.razao_social || ''}`}
+          mensagemInicial={`Olá!\n\nSegue em anexo o relatório gerencial de ${MESES[mes]}/${ano}, com o resumo do mês, a DRE, o ponto de equilíbrio, as despesas por categoria e a receita por cliente.\n\n${naoClassificado.qtd > 0 ? `Atenção: há ${naoClassificado.qtd} lançamento(s) ainda sem classificação, então o resultado pode mudar depois de classificados.\n\n` : ''}Fico à disposição para conversarmos sobre os números.\n\nUm abraço.`}
+          destaques={[
+            { rotulo: 'Receita bruta', valor: `R$ ${fmt(p.receita_bruta.valores[mes])}` },
+            { rotulo: 'Lucro líquido', valor: `R$ ${fmt(p.lucro_liquido.valores[mes])}` },
+            { rotulo: 'Ponto de equilíbrio', valor: `R$ ${fmt(pe.meses[mes].pe)}` }
+          ]}
+          anexos={[{ rotulo: 'Relatório mensal em PDF', gerar: () => gerarRelatorioMensalPdf({ empresa, ano, mes, dre, pe, dash, naoClassificado }, { base64: true }) }]}
+        />
+      )}
 
       {!empresaId ? (
         <Card className="flex flex-col items-center py-16 text-center"><Building2 className="h-14 w-14 text-muted-foreground mb-4 opacity-20" /><CardTitle className="text-xl text-muted-foreground">Nenhuma empresa selecionada</CardTitle><CardDescription className="mt-2">{isSuperAdmin ? 'Selecione uma empresa no filtro acima.' : 'Seu usuário não está ligado a uma empresa.'}</CardDescription></Card>

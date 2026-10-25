@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BarChart2, RefreshCw, Filter, X, Pencil, Trash2 } from 'lucide-react';
+import { Plus, BarChart2, RefreshCw, Filter, X, Pencil, Trash2, Mail } from 'lucide-react';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
+import { useAuthContext } from '@/contexts/AuthContext';
 import PageHeader from '@/components/PageHeader';
 import SearchBar from '@/components/SearchBar';
 import DataTable from '@/components/DataTable';
@@ -26,6 +28,8 @@ import {
 function PedidosCompraList() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { profile } = useAuthContext();
+  const [envio, setEnvio] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [filteredPedidos, setFilteredPedidos] = useState([]);
 
@@ -65,7 +69,7 @@ function PedidosCompraList() {
     try {
       const [{ data: pedidosData, error: pedidosError }, { data: fornecedoresData }] = await Promise.all([
         supabase.from('pedidos_compra').select('*').order('created_at', { ascending: false }),
-        supabase.from('fornecedores').select('id, nome'),
+        supabase.from('fornecedores').select('id, nome, email, telefone, cnpj'),
       ]);
       if (pedidosError) throw pedidosError;
 
@@ -90,6 +94,22 @@ function PedidosCompraList() {
 
   const handleEdit = (id) => {
     navigate(`/compras/pedidos/${id}`);
+  };
+
+  // Envia o pedido ao fornecedor com o PDF anexo. Carrega itens e dados do comprador na hora de abrir.
+  const abrirEnvio = async (pedido) => {
+    try {
+      const fornecedor = fornecedores.find((f) => f.id === pedido.fornecedor_id) || {};
+      const [{ data: itens, error: eItens }, empresaRes] = await Promise.all([
+        supabase.from('pedidos_compra_itens').select('quantidade, preco_unitario, desconto, valor_total, produto:produtos(nome, sku, unidade_medida)').eq('pedido_id', pedido.id),
+        pedido.company_id ? supabase.from('empresas').select('nome_fantasia, razao_social, email, telefone').eq('id', pedido.company_id).maybeSingle() : Promise.resolve({ data: null })
+      ]);
+      if (eItens) throw eItens;
+      const e = empresaRes.data;
+      setEnvio({ pedido, fornecedor, itens: itens || [], empresa: { nome: e?.nome_fantasia || e?.razao_social || 'Engagement Soluções', email: e?.email, telefone: e?.telefone } });
+    } catch (err) {
+      toast({ title: 'Não foi possível preparar o envio', description: err.message, variant: 'destructive' });
+    }
   };
 
   const handleDelete = async (id) => {
@@ -148,6 +168,9 @@ function PedidosCompraList() {
       header: 'Ações',
       render: (item) => (
         <div className="flex gap-1">
+          <Button variant="ghost" size="icon" onClick={() => abrirEnvio(item)} title="Enviar ao fornecedor por e-mail">
+            <Mail className="h-4 w-4 text-emerald-600" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => handleEdit(item.id)} title="Editar">
             <Pencil className="h-4 w-4 text-blue-500" />
           </Button>
@@ -222,6 +245,24 @@ function PedidosCompraList() {
         loading={isLoading}
         emptyMessage="Nenhum pedido de compra encontrado"
       />
+
+      {envio && (
+        <EnviarEmailDialog
+          open={!!envio} onOpenChange={(o) => { if (!o) setEnvio(null); }}
+          titulo="Enviar pedido ao fornecedor" descricao={`Pedido ${envio.pedido.numero || ''} · ${envio.fornecedor.nome || ''}`}
+          tipo="pedido_compra" refTipo="pedido_compra" refId={envio.pedido.id}
+          paraInicial={envio.fornecedor.email || ''}
+          assuntoInicial={`Pedido de compra ${envio.pedido.numero || ''} — ${envio.empresa.nome}`}
+          mensagemInicial={`Olá${envio.fornecedor.nome ? `, ${envio.fornecedor.nome}` : ''}!\n\nSegue em anexo o nosso pedido de compra ${envio.pedido.numero || ''}${envio.pedido.data_entrega ? `, com entrega prevista para ${formatDateOnly(envio.pedido.data_entrega)}` : ''}.\n\nPor favor, confirme o recebimento deste pedido, o prazo de entrega e as condições de pagamento respondendo este e-mail.\n\nObrigado!\n${profile?.nome || ''}\n${envio.empresa.nome}`}
+          destaques={[
+            { rotulo: 'Pedido', valor: String(envio.pedido.numero || '') },
+            { rotulo: 'Itens', valor: String(envio.itens.length) },
+            { rotulo: 'Valor total', valor: Number(envio.pedido.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
+            ...(envio.pedido.data_entrega ? [{ rotulo: 'Entrega prevista', valor: formatDateOnly(envio.pedido.data_entrega) }] : [])
+          ]}
+          anexos={[{ rotulo: 'Pedido de compra em PDF', gerar: async () => { const { gerarPedidoCompraPdf } = await import('@/lib/pedidoCompraPdf'); return gerarPedidoCompraPdf({ pedido: envio.pedido, fornecedor: envio.fornecedor, itens: envio.itens, empresa: envio.empresa }, { base64: true }); } }]}
+        />
+      )}
 
       <Dialog open={isReportsOpen} onOpenChange={setIsReportsOpen}>
         <DialogContent className="max-w-lg bg-card text-card-foreground">

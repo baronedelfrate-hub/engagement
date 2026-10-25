@@ -1,6 +1,7 @@
 // Proposta comercial em PDF no formato de apresentação (16:9), na identidade da Engagement.
 import logoUrl from '@/assets/engagement-logo.png';
 import capaUrl from '@/assets/proposta-capa.png';
+import { finalizarPdf } from '@/lib/pdfSaida';
 
 const W = 297;
 const H = 167;
@@ -37,7 +38,7 @@ const carregarImagem = async (url) => {
 };
 
 // dados: { proposta, conta, itens, institucional }
-export const gerarPropostaPdf = async ({ proposta, conta, itens = [], institucional = {} }) => {
+export const gerarPropostaPdf = async ({ proposta, conta, itens = [], institucional = {} }, opcoes = {}) => {
   const jspdfMod = await import('jspdf');
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [W, H] });
@@ -324,6 +325,5 @@ export const gerarPropostaPdf = async ({ proposta, conta, itens = [], institucio
 
   const slug = (conta?.nome || 'cliente').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_');
   const nome = `Proposta_${proposta.numero}${proposta.versao > 1 ? `_v${proposta.versao}` : ''}_${slug}.pdf`;
-  doc.save(nome);
-  return nome;
+  return finalizarPdf(doc, nome, opcoes);
 };

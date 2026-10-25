@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { finalizarPdf } from '@/lib/pdfSaida';
 
 const LOGO_URL = "https://horizons-cdn.hostinger.com/43ae158d-775e-48c7-b200-7254194a0f9e/af31af53b69a979ae681cddadfef2c25.png";
 
@@ -132,7 +133,7 @@ export const exportToExcel = async (data, columns, reportTitle, filtersDescripti
   saveAs(new Blob([buffer]), `Relatorio_${isPagar ? 'ContasPagar' : 'ContasReceber'}_${dateStr}.xlsx`);
 };
 
-export const exportToPDF = async (data, columns, reportTitle, filtersDescription, source) => {
+export const exportToPDF = async (data, columns, reportTitle, filtersDescription, source, opcoes = {}) => {
   const doc = new jsPDF('landscape');
   const isPagar = source === 'CONTAS_PAGAR';
 
@@ -214,5 +215,5 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
   }
 
   const dateStr = new Date().toISOString().split('T')[0];
-  doc.save(`Relatorio_${isPagar ? 'ContasPagar' : 'ContasReceber'}_${dateStr}.pdf`);
+  return finalizarPdf(doc, `Relatorio_${isPagar ? 'ContasPagar' : 'ContasReceber'}_${dateStr}.pdf`, opcoes);
 };

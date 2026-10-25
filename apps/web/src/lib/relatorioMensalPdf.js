@@ -1,5 +1,6 @@
 // Relatório gerencial mensal em PDF (A4). jsPDF e autotable são carregados só quando o PDF é gerado.
 import { MESES } from '@/lib/dreGerencial';
+import { finalizarPdf } from '@/lib/pdfSaida';
 
 const num = (v) => Number(v) || 0;
 const fmt = (v) => {
@@ -118,7 +119,7 @@ const topComDemais = (lista, n) => {
 };
 
 // dados: { empresa:{razao_social,nome_fantasia,cnpj}, ano, mes (0-11), dre, pe, dash, naoClassificado:{qtd,valor} }
-export const gerarRelatorioMensalPdf = async (dados) => {
+export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
   const jspdfMod = await import('jspdf');
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
   const autoTableMod = await import('jspdf-autotable');
@@ -350,6 +351,5 @@ export const gerarRelatorioMensalPdf = async (dados) => {
   }
 
   const nomeArquivo = `relatorio-gerencial_${(empresa?.nome_fantasia || empresa?.razao_social || 'empresa').replace(/[^\w]+/g, '-').toLowerCase()}_${ano}-${String(mes + 1).padStart(2, '0')}.pdf`;
-  doc.save(nomeArquivo);
-  return nomeArquivo;
+  return finalizarPdf(doc, nomeArquivo, opcoes);
 };

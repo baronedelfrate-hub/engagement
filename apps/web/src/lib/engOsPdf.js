@@ -1,4 +1,5 @@
 // Ordem de Serviço da visita (PDF, A4) — documento entregue ao cliente.
+import { finalizarPdf } from '@/lib/pdfSaida';
 const AZUL = [30, 58, 138];
 const CINZA = [241, 245, 249];
 
@@ -23,7 +24,7 @@ const BLOCOS = [
 ];
 
 // cliente: { nome }  projeto: { nome }  os: registro de eng_os  consultorNome: string
-export const gerarOsPdf = async ({ cliente, projeto, os, consultorNome }) => {
+export const gerarOsPdf = async ({ cliente, projeto, os, consultorNome }, opcoes = {}) => {
   const jspdfMod = await import('jspdf');
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -121,6 +122,5 @@ export const gerarOsPdf = async ({ cliente, projeto, os, consultorNome }) => {
 
   const slug = (cliente.nome || 'cliente').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_');
   const nome = `OS_${String(os.numero).padStart(2, '0')}_${slug}.pdf`;
-  doc.save(nome);
-  return nome;
+  return finalizarPdf(doc, nome, opcoes);
 };

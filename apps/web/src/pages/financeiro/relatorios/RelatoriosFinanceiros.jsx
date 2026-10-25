@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, Download, Table as TableIcon, Filter } from 'lucide-react';
+import { Loader2, Download, Table as TableIcon, Filter, Mail } from 'lucide-react';
+import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -60,6 +61,7 @@ const RelatoriosFinanceiros = () => {
   const dropdowns = useFinanceiroDropdowns();
 
   // State Management
+  const [emailAberto, setEmailAberto] = useState(false);
   const [source, setSource] = useState('CONTAS_PAGAR');
   const [filters, setFilters] = useState(() => {
     const saved = localStorage.getItem('relatoriosFinFiltros');
@@ -283,8 +285,17 @@ const RelatoriosFinanceiros = () => {
                   disabled={exportingExcel || loadingData || filteredData.length === 0} 
                   className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
                 >
-                  {exportingExcel ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <TableIcon className="h-4 w-4 mr-2 text-emerald-500" />} 
+                  {exportingExcel ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <TableIcon className="h-4 w-4 mr-2 text-emerald-500" />}
                   Exportar Excel
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEmailAberto(true)}
+                  disabled={loadingData || filteredData.length === 0}
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
+                >
+                  <Mail className="h-4 w-4 mr-2 text-blue-500" />
+                  Enviar por e-mail
                 </Button>
               </div>
             </div>
@@ -292,6 +303,21 @@ const RelatoriosFinanceiros = () => {
             {!loadingData && filteredData.length > 0 && (
               <RelatoriosFinanceirosSummaries data={filteredData} source={source} />
             )}
+
+            <EnviarEmailDialog
+              open={emailAberto} onOpenChange={setEmailAberto}
+              titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}`}
+              descricao={getFilterDescription()}
+              tipo="relatorio_pagar" refTipo="relatorio_financeiro" refId={null}
+              assuntoInicial={`Relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}${dateRangeStr ? ` — ${dateRangeStr}` : ''}`}
+              mensagemInicial={`Olá!\n\nSegue em anexo o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}${dateRangeStr ? ` (${dateRangeStr})` : ''}, com o detalhamento dos títulos e os resumos por dia, ${source === 'CONTAS_PAGAR' ? 'fornecedor' : 'cliente'}, categoria e centro de custo.\n\nQualquer dúvida, é só responder este e-mail.\n\nUm abraço.`}
+              destaques={[
+                { rotulo: 'Registros', valor: String(filteredData.length) },
+                { rotulo: 'Valor total', valor: filteredData.reduce((s, r) => s + Number(r.valor_original || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) },
+                { rotulo: 'Filtros', valor: getFilterDescription() }
+              ]}
+              anexos={[{ rotulo: 'Relatório em PDF', gerar: () => exportToPDF(filteredData, SOURCE_COLUMNS[source], `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`, getFilterDescription(), source, { base64: true }) }]}
+            />
 
             {!loadingData && filteredData.length === 0 && (
               <div className="bg-background border border-border rounded-xl p-16 text-center shadow-lg flex flex-col items-center justify-center">

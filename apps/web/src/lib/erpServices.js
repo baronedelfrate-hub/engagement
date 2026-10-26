@@ -111,7 +111,8 @@ const genericService = (tableName) => ({
           updated_at: new Date().toISOString(),
           // created_by: user?.id || null, // Optional: if column exists
         };
-        if (includeCompanyId && companyId && p.company_id === undefined) {
+        // empresas é a própria tabela das empresas: não tem company_id (e uma empresa nova não pertence à empresa de quem a cadastra)
+        if (includeCompanyId && tableName !== 'empresas' && companyId && p.company_id === undefined) {
           p.company_id = companyId;
         }
         // Remove undefined keys to prevent sending "undefined" to DB
@@ -129,8 +130,10 @@ const genericService = (tableName) => ({
         .select()
         .single();
 
-      // Se a tabela não tiver a coluna company_id, tenta novamente sem ela
-      if (error && error.code === '42703' && payload.company_id !== undefined) {
+      // Se a tabela não tiver a coluna company_id, tenta novamente sem ela.
+      // O Postgres devolve 42703, mas o PostgREST responde PGRST204 ("Could not find the 'company_id' column ... in the schema cache").
+      const faltaColuna = error && (error.code === '42703' || (error.code === 'PGRST204' && /company_id/.test(error.message || '')));
+      if (faltaColuna && payload.company_id !== undefined) {
         console.warn(`⚠️ [${tableName}] Tabela não possui coluna 'company_id'. Tentando novamente sem ela...`);
         payload = buildPayload(false);
         ({ data: created, error } = await supabase

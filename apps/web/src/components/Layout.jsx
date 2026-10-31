@@ -46,6 +46,7 @@ const navigation = [
           { name: 'Empresas', href: '/cadastros/empresas' },
           { name: 'Fornecedores', href: '/cadastros/fornecedores' },
           { name: 'Produtos', href: '/cadastros/produtos' },
+          { name: 'Projetos', href: '/cadastros/projetos' },
           { name: 'Serviços', href: '/cadastros/servicos' },
           { name: 'Subcategorias', href: '/cadastros/subcategorias' },
           { name: 'Tipo de Produto', href: '/cadastros/tipo-produto' },

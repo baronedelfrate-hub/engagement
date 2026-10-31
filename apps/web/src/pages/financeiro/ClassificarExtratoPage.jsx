@@ -27,7 +27,7 @@ const ClassificarExtratoPage = () => {
   const { company_id, user } = useAuthContext();
   const dropdowns = useFinanceiroDropdowns();
 
-  const [catalogo, setCatalogo] = useState({ categorias: [], subcategorias: [], centros: [], regras: [], clientes: [] });
+  const [catalogo, setCatalogo] = useState({ categorias: [], subcategorias: [], centros: [], regras: [], clientes: [], projetos: [] });
   const [linhas, setLinhas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bancoId, setBancoId] = useState('TODOS');
@@ -62,7 +62,8 @@ const ClassificarExtratoPage = () => {
   const mapas = useMemo(() => ({
     cat: new Map(catalogo.categorias.map((c) => [c.id, c])),
     sub: new Map(catalogo.subcategorias.map((s) => [s.id, s])),
-    cc: new Map(catalogo.centros.map((c) => [c.id, c]))
+    cc: new Map(catalogo.centros.map((c) => [c.id, c])),
+    proj: new Map(catalogo.projetos.map((p) => [p.id, p]))
   }), [catalogo]);
 
   const classificada = (l) => !!l.categoria_id;
@@ -116,7 +117,7 @@ const ClassificarExtratoPage = () => {
       const { semelhantes } = await classificarLinhas({
         companyId: company_id,
         linhas: g.linhas,
-        classificacao: { categoria_id: g.sugestao.categoria_id, subcategoria_id: g.sugestao.subcategoria_id, centro_custo_id: g.sugestao.centro_custo_id, cliente_nome: null },
+        classificacao: { categoria_id: g.sugestao.categoria_id, subcategoria_id: g.sugestao.subcategoria_id, centro_custo_id: g.sugestao.centro_custo_id, projeto_id: g.sugestao.projeto_id, cliente_nome: null },
         escopo: 'favorecido',
         aplicarSemelhantes: true,
         userId: user?.id
@@ -144,6 +145,7 @@ const ClassificarExtratoPage = () => {
       categoria_id: u?.categoria_id || 'none',
       subcategoria_id: u?.subcategoria_id || 'none',
       centro_custo_id: u?.centro_custo_id || 'none',
+      projeto_id: u?.projeto_id || 'none',
       cliente_nome: u?.cliente_nome || '',
       escopo: escopoInicial,
       aplicarSemelhantes: true
@@ -166,6 +168,7 @@ const ClassificarExtratoPage = () => {
           categoria_id: orNull(form.categoria_id),
           subcategoria_id: orNull(form.subcategoria_id),
           centro_custo_id: orNull(form.centro_custo_id),
+          projeto_id: orNull(form.projeto_id),
           cliente_nome: form.cliente_nome
         },
         escopo: form.escopo,
@@ -298,6 +301,7 @@ const ClassificarExtratoPage = () => {
                 <th className="p-2 text-left">Data</th>
                 <th className="p-2 text-left">Descrição</th>
                 <th className="p-2 text-left">Classificação</th>
+                <th className="p-2 text-left">Projeto</th>
                 <th className="p-2 text-left">Cliente</th>
                 <th className="p-2 text-right">Valor</th>
                 <th className="p-2" />
@@ -305,9 +309,9 @@ const ClassificarExtratoPage = () => {
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
-                <tr><td colSpan="7" className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></td></tr>
+                <tr><td colSpan="8" className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" /></td></tr>
               ) : visiveis.length === 0 ? (
-                <tr><td colSpan="7" className="p-10 text-center text-muted-foreground">Nada para mostrar com esses filtros.</td></tr>
+                <tr><td colSpan="8" className="p-10 text-center text-muted-foreground">Nada para mostrar com esses filtros.</td></tr>
               ) : visiveis.map((l) => {
                 const cat = mapas.cat.get(l.categoria_id);
                 const sub = mapas.sub.get(l.subcategoria_id);
@@ -324,6 +328,7 @@ const ClassificarExtratoPage = () => {
                         </div>
                       ) : <Badge variant="outline" className="border-amber-500/40 text-amber-600">a classificar</Badge>}
                     </td>
+                    <td className="p-2 text-xs">{mapas.proj.get(l.projeto_id)?.nome || '—'}</td>
                     <td className="p-2 text-xs">{l.cliente_nome || '—'}</td>
                     <td className={`p-2 text-right font-medium whitespace-nowrap ${l.valor < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{brl(l.valor)}</td>
                     <td className="p-2 text-right"><Button size="sm" variant="outline" onClick={() => abrirDialogo([l])}>Classificar</Button></td>
@@ -374,6 +379,16 @@ const ClassificarExtratoPage = () => {
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
                   {catalogo.centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 col-span-2">
+              <Label>Projeto</Label>
+              <Select value={form.projeto_id} onValueChange={(v) => setForm((f) => ({ ...f, projeto_id: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Não se aplica</SelectItem>
+                  {catalogo.projetos.filter((p) => !['concluido', 'concluído', 'cancelado', 'encerrado'].includes(String(p.status || '').toLowerCase()) || p.id === form.projeto_id).map((p) => <SelectItem key={p.id} value={p.id}>{p.codigo ? `${p.codigo} - ` : ''}{p.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

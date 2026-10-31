@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, FileText, Download } from 'lucide-react';
+import SeletorProjeto from '@/components/SeletorProjeto';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
   const { toast } = useToast();
@@ -45,6 +46,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
             categoria:categorias(nome),
             subcategoria:subcategorias(nome),
             centro_custo:centros_custo(nome),
+            projeto:projetos(nome, codigo),
             banco:bancos(nome)
           `)
           .eq('id', movimentacaoId)
@@ -63,6 +65,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         categoria_id: rowRes.data.categoria_id || 'none',
         subcategoria_id: rowRes.data.subcategoria_id || 'none',
         centro_custo_id: rowRes.data.centro_custo_id || 'none',
+        projeto_id: rowRes.data.projeto_id || 'none',
         banco_id: rowRes.data.banco_id || 'none',
         observacoes: rowRes.data.observacoes || ''
       });
@@ -131,6 +134,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         categoria_id: form.categoria_id === 'none' ? null : form.categoria_id,
         subcategoria_id: form.subcategoria_id === 'none' ? null : form.subcategoria_id,
         centro_custo_id: form.centro_custo_id === 'none' ? null : form.centro_custo_id,
+        projeto_id: form.projeto_id === 'none' ? null : form.projeto_id,
         banco_id: form.banco_id === 'none' ? null : form.banco_id,
         observacoes: form.observacoes,
         updated_at: new Date().toISOString()
@@ -177,6 +181,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <div><Label className="text-muted-foreground">Categoria</Label><p className="text-foreground">{row.categoria?.nome || '-'}</p></div>
               <div><Label className="text-muted-foreground">Subcategoria</Label><p className="text-foreground">{row.subcategoria?.nome || '-'}</p></div>
               <div><Label className="text-muted-foreground">Centro de Custo</Label><p className="text-foreground">{row.centro_custo?.nome || '-'}</p></div>
+              <div><Label className="text-muted-foreground">Projeto</Label><p className="text-foreground">{row.projeto ? `${row.projeto.codigo ? row.projeto.codigo + ' - ' : ''}${row.projeto.nome}` : 'Não se aplica'}</p></div>
               <div><Label className="text-muted-foreground">Banco</Label><p className="text-foreground">{row.banco?.nome || '-'}</p></div>
             </div>
             {row.observacoes && (
@@ -285,6 +290,10 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                     {centrosCusto.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Projeto</Label>
+                <SeletorProjeto value={form.projeto_id} onChange={(v) => setForm(f => ({ ...f, projeto_id: v }))} empresaId={row?.company_id} />
               </div>
               <div className="space-y-2">
                 <Label>Banco</Label>

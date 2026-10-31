@@ -12,6 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Loader2, Upload, X, File as FileIcon } from 'lucide-react';
+import SeletorProjeto, { projetoOuNulo } from '@/components/SeletorProjeto';
+
+const semNone = (v) => (!v || v === 'none' ? null : v);
 
 const NovaMovimentacaoPage = () => {
   const navigate = useNavigate();
@@ -32,6 +35,7 @@ const NovaMovimentacaoPage = () => {
   const [categoriaId, setCategoriaId] = useState('');
   const [subcategoriaId, setSubcategoriaId] = useState('');
   const [centroCustoId, setCentroCustoId] = useState('');
+  const [projetoId, setProjetoId] = useState('none');
   const [bancoId, setBancoId] = useState('');
 
   const [gerarParcelamento, setGerarParcelamento] = useState(false);
@@ -136,15 +140,16 @@ const NovaMovimentacaoPage = () => {
           company_id,
           tipo,
           numero_titulo: parcelsCount > 1 ? `${numeroTitulo}-${i}/${parcelsCount}` : numeroTitulo,
-          cliente_id: tipo === 'receber' ? entidadeId : null,
-          fornecedor_id: tipo === 'pagar' ? entidadeId : null,
+          cliente_id: tipo === 'receber' ? semNone(entidadeId) : null,
+          fornecedor_id: tipo === 'pagar' ? semNone(entidadeId) : null,
           valor_total: baseValue,
           data_emissao: dataEmissao,
           data_vencimento: parcelDate,
-          categoria_id: categoriaId || null,
-          subcategoria_id: subcategoriaId || null,
-          centro_custo_id: centroCustoId || null,
-          banco_id: bancoId || null,
+          categoria_id: semNone(categoriaId),
+          subcategoria_id: semNone(subcategoriaId),
+          centro_custo_id: semNone(centroCustoId),
+          projeto_id: projetoOuNulo(projetoId),
+          banco_id: semNone(bancoId),
           status: 'pendente',
           observacoes,
           parcela_atual: i,
@@ -360,6 +365,11 @@ const NovaMovimentacaoPage = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Projeto</Label>
+                <SeletorProjeto value={projetoId} onChange={setProjetoId} />
               </div>
 
               <div className="space-y-2">

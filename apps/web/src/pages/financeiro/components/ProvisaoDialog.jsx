@@ -11,11 +11,12 @@ import { useFinanceiroDropdowns } from '@/hooks/useFinanceiroDropdowns';
 import { insertWithCompanyId } from '@/lib/companyUtils';
 import { montarProvisoes, somarMeses } from '@/lib/provisoes';
 import { Loader2, CalendarClock } from 'lucide-react';
+import SeletorProjeto from '@/components/SeletorProjeto';
 
 const hoje = () => new Date().toISOString().split('T')[0];
 const formaVazia = () => ({
   tipo: 'pagar', descricao: '', entidadeId: 'none', valor: '', dataPrevista: hoje(), repetirMeses: 1,
-  categoriaId: 'none', subcategoriaId: 'none', centroCustoId: 'none', observacoes: ''
+  categoriaId: 'none', subcategoriaId: 'none', centroCustoId: 'none', projetoId: 'none', observacoes: ''
 });
 const nulo = (v) => (v === 'none' ? null : v);
 
@@ -53,6 +54,7 @@ const ProvisaoDialog = ({ open, onOpenChange, onSaved }) => {
         categoriaId: nulo(form.categoriaId),
         subcategoriaId: nulo(form.subcategoriaId),
         centroCustoId: nulo(form.centroCustoId),
+        projetoId: nulo(form.projetoId),
         observacoes: form.observacoes,
         createdBy: user?.id
       });
@@ -135,7 +137,7 @@ const ProvisaoDialog = ({ open, onOpenChange, onSaved }) => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2 col-span-2">
+            <div className="space-y-2">
               <Label>Centro de custo</Label>
               <Select value={form.centroCustoId} onValueChange={set('centroCustoId')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -144,6 +146,10 @@ const ProvisaoDialog = ({ open, onOpenChange, onSaved }) => {
                   {dropdowns.centrosCusto.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Projeto</Label>
+              <SeletorProjeto value={form.projetoId} onChange={set('projetoId')} />
             </div>
           </div>
 

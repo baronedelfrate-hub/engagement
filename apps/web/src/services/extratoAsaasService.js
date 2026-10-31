@@ -49,19 +49,21 @@ export const lerArquivoExtrato = async (arquivo) => {
 const normalizarNome = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim();
 
 export const carregarCatalogo = async (companyId) => {
-  const [cat, sub, cc, regras, clientes] = await Promise.all([
+  const [cat, sub, cc, regras, clientes, proj] = await Promise.all([
     supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId).order('codigo'),
     supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId).order('codigo'),
     supabase.from('centros_custo').select('id, codigo, nome').eq('company_id', companyId).order('nome'),
     supabase.from('extrato_regras').select('*').eq('company_id', companyId),
-    supabase.from('clientes').select('nome').eq('company_id', companyId).order('nome')
+    supabase.from('clientes').select('nome').eq('company_id', companyId).order('nome'),
+    supabase.from('projetos').select('id, codigo, nome, status').eq('company_id', companyId).order('nome')
   ]);
-  for (const r of [cat, sub, cc, regras]) if (r.error) throw r.error;
+  for (const r of [cat, sub, cc, regras, proj]) if (r.error) throw r.error;
   return {
     categorias: cat.data || [],
     subcategorias: sub.data || [],
     centros: cc.data || [],
     regras: regras.data || [],
+    projetos: proj.data || [],
     clientes: (clientes.data || []).map((c) => c.nome).filter(Boolean)
   };
 };
@@ -117,6 +119,7 @@ export const salvarImportacao = async ({ companyId, bancoId, linhas, regrasNovas
       categoria_id: l.classificacao?.categoria_id || null,
       subcategoria_id: l.classificacao?.subcategoria_id || null,
       centro_custo_id: l.classificacao?.centro_custo_id || null,
+      projeto_id: l.classificacao?.projeto_id || null,
       cliente_nome: l.classificacao?.cliente_nome || null,
       classificacao_origem: l.classificacao?.categoria_id ? l.origem : null,
       regra_id: l.regra ? l.regra.id || idRegra.get(`${l.regra.tipo_norm}||${l.regra.assinatura || ''}`) || null : null
@@ -136,7 +139,7 @@ export const salvarImportacao = async ({ companyId, bancoId, linhas, regrasNovas
 
 // ---- Gerar movimentações financeiras (títulos + baixas) a partir do extrato classificado ----
 
-const CAMPOS_EXTRATO = 'id, banco_id, data_transacao, descricao, valor, tipo_norm, numero_documento, nota_fiscal, categoria_id, subcategoria_id, centro_custo_id, cliente_nome';
+const CAMPOS_EXTRATO = 'id, banco_id, data_transacao, descricao, valor, tipo_norm, numero_documento, nota_fiscal, categoria_id, subcategoria_id, centro_custo_id, projeto_id, cliente_nome';
 
 // Lançamentos classificados que ainda não têm baixa ligada, mais os cadastros necessários para casar nomes.
 export const carregarBaseGeracao = async (companyId) => {
@@ -181,6 +184,7 @@ export const gerarMovimentacoes = async ({ companyId, titulos, userId }) => {
       categoria_id: t.linha.categoria_id,
       subcategoria_id: t.linha.subcategoria_id,
       centro_custo_id: t.linha.centro_custo_id,
+      projeto_id: t.linha.projeto_id || null,
       banco_id: t.linha.banco_id,
       status: 'pago',
       parcela_atual: 1,
@@ -207,6 +211,7 @@ export const gerarMovimentacoes = async ({ companyId, titulos, userId }) => {
       categoria_id: t.linha.categoria_id,
       subcategoria_id: t.linha.subcategoria_id,
       centro_custo_id: t.linha.centro_custo_id,
+      projeto_id: t.linha.projeto_id || null,
       observacoes: 'Gerada a partir do extrato bancário',
       status_conciliacao: 'Conciliado',
       data_conciliacao: hoje,
@@ -234,7 +239,7 @@ export const listarExtrato = async ({ companyId, bancoId, de, ate }) =>
   buscarTudo(() => {
     let q = supabase
       .from('extrato_bancario')
-      .select('id, data_transacao, descricao, valor, tipo_transacao, tipo_norm, assinatura, categoria_id, subcategoria_id, centro_custo_id, cliente_nome, classificacao_origem, nota_fiscal, estornada, status_conciliacao')
+      .select('id, data_transacao, descricao, valor, tipo_transacao, tipo_norm, assinatura, categoria_id, subcategoria_id, centro_custo_id, projeto_id, cliente_nome, classificacao_origem, nota_fiscal, estornada, status_conciliacao')
       .eq('company_id', companyId)
       .order('data_transacao', { ascending: true })
       .order('id', { ascending: true });
@@ -250,6 +255,7 @@ export const classificarLinhas = async ({ companyId, linhas, classificacao, esco
     categoria_id: classificacao.categoria_id || null,
     subcategoria_id: classificacao.subcategoria_id || null,
     centro_custo_id: classificacao.centro_custo_id || null,
+    projeto_id: classificacao.projeto_id || null,
     cliente_nome: classificacao.cliente_nome?.trim() || null
   };
 

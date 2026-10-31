@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2 } from 'lucide-react';
 
 const FiltrosGerenciais = ({ dados, children }) => {
-  const { isSuperAdmin, empresas, selectedEmpresa, setSelectedEmpresa, anos, ano, setAno, bancoId, setBancoId, bancos } = dados;
+  const { isSuperAdmin, empresas, selectedEmpresa, setSelectedEmpresa, anos, ano, setAno, bancoId, setBancoId, bancos, projetoId, setProjetoId, projetos = [] } = dados;
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
       {isSuperAdmin && (
@@ -26,6 +26,16 @@ const FiltrosGerenciais = ({ dados, children }) => {
           {bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
         </SelectContent>
       </Select>
+      {projetos.length > 0 && (
+        <Select value={projetoId} onValueChange={setProjetoId}>
+          <SelectTrigger className="w-56 bg-background"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="TODOS">Todos os projetos</SelectItem>
+            <SelectItem value="SEM">Sem projeto (não se aplica)</SelectItem>
+            {projetos.map((p) => <SelectItem key={p.id} value={p.id}>{p.codigo ? `${p.codigo} - ` : ''}{p.nome}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
       {children}
     </div>
   );

@@ -15,6 +15,7 @@ import { insertWithCompanyId } from '@/lib/companyUtils';
 import { somarMeses } from '@/lib/provisoes';
 import { formatDateOnly } from '@/lib/dateUtils';
 import { Loader2, Replace } from 'lucide-react';
+import SeletorProjeto from '@/components/SeletorProjeto';
 
 const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const hoje = () => new Date().toISOString().split('T')[0];
@@ -48,6 +49,7 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
       categoriaId: ou(provisao.categoria_id),
       subcategoriaId: ou(provisao.subcategoria_id),
       centroCustoId: ou(provisao.centro_custo_id),
+      projetoId: ou(provisao.projeto_id),
       observacoes: ''
     });
 
@@ -95,6 +97,7 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
         categoria_id: nulo(form.categoriaId),
         subcategoria_id: nulo(form.subcategoriaId),
         centro_custo_id: nulo(form.centroCustoId),
+        projeto_id: nulo(form.projetoId),
         status: 'pendente',
         provisao: false,
         provisao_id: provisao.id,
@@ -205,7 +208,7 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2 col-span-2">
+              <div className="space-y-2">
                 <Label>Centro de custo</Label>
                 <Select value={form.centroCustoId || 'none'} onValueChange={set('centroCustoId')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -214,6 +217,10 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
                     {dropdowns.centrosCusto.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Projeto</Label>
+                <SeletorProjeto value={form.projetoId || 'none'} onChange={set('projetoId')} empresaId={provisao.company_id} />
               </div>
             </div>
             <div className="space-y-2">

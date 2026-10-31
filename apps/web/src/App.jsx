@@ -82,6 +82,8 @@ import BancosList from '@/pages/cadastros/BancosList';
 import BancosForm from '@/pages/cadastros/BancosForm';
 import CentroCustosList from '@/pages/cadastros/CentroCustosList';
 import CentroCustosForm from '@/pages/cadastros/CentroCustosForm';
+import ProjetosCadastroList from '@/pages/cadastros/ProjetosCadastroList';
+import ProjetosCadastroForm from '@/pages/cadastros/ProjetosCadastroForm';
 import CategoriasList from '@/pages/cadastros/CategoriasList';
 import CategoriasForm from '@/pages/cadastros/CategoriasForm';
 import SubcategoriasList from '@/pages/cadastros/SubcategoriasList';
@@ -344,6 +346,9 @@ const AnimatedRoutes = () => {
           <Route path="/cadastros/categorias" element={<ProtectedLayout><PageTransition><CategoriasList /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/categorias/novo" element={<ProtectedLayout><PageTransition><CategoriasForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/categorias/:id" element={<ProtectedLayout><PageTransition><CategoriasForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/cadastros/projetos" element={<ProtectedLayout><PageTransition><ProjetosCadastroList /></PageTransition></ProtectedLayout>} />
+          <Route path="/cadastros/projetos/novo" element={<ProtectedLayout><PageTransition><ProjetosCadastroForm /></PageTransition></ProtectedLayout>} />
+          <Route path="/cadastros/projetos/:id" element={<ProtectedLayout><PageTransition><ProjetosCadastroForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/centro-custos" element={<ProtectedLayout><PageTransition><CentroCustosList /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/centro-custos/novo" element={<ProtectedLayout><PageTransition><CentroCustosForm /></PageTransition></ProtectedLayout>} />
           <Route path="/cadastros/centro-custos/:id" element={<ProtectedLayout><PageTransition><CentroCustosForm /></PageTransition></ProtectedLayout>} />

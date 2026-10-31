@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, CheckCircle2 } from 'lucide-react';
+import SeletorProjeto from '@/components/SeletorProjeto';
 
 const hoje = () => new Date().toISOString().split('T')[0];
 const num = (v) => Number(v) || 0;
@@ -54,6 +55,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
         categoria_id: data.categoria_id || 'none',
         subcategoria_id: data.subcategoria_id || 'none',
         centro_custo_id: data.centro_custo_id || 'none',
+        projeto_id: data.projeto_id || 'none',
         observacoes: ''
       });
       setLoading(false);
@@ -92,6 +94,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
           categoria_id: orNull(form.categoria_id),
           subcategoria_id: orNull(form.subcategoria_id),
           centro_custo_id: orNull(form.centro_custo_id),
+          projeto_id: orNull(form.projeto_id),
           observacoes: form.observacoes || null,
           created_by: user?.id || null
         })
@@ -109,6 +112,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
           categoria_id: orNull(form.categoria_id),
           subcategoria_id: orNull(form.subcategoria_id),
           centro_custo_id: orNull(form.centro_custo_id),
+          projeto_id: orNull(form.projeto_id),
           updated_at: new Date().toISOString()
         })
         .eq('id', titulo.id);
@@ -206,6 +210,10 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
                     {subcategoriasDaCategoria.map((s) => <SelectItem key={s.id} value={s.id}>{s.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Projeto</Label>
+                <SeletorProjeto value={form.projeto_id} onChange={set('projeto_id')} empresaId={titulo.company_id} className="" />
               </div>
             </div>
 

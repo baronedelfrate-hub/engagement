@@ -13,7 +13,7 @@ export const somarMeses = (key, n) => {
 // Gera as linhas de provisão (uma por mês quando repete)
 export const montarProvisoes = ({
   tipo, descricao, entidadeId, valor, dataPrevista, repetirMeses = 1,
-  categoriaId, subcategoriaId, centroCustoId, observacoes, createdBy
+  categoriaId, subcategoriaId, centroCustoId, projetoId, observacoes, createdBy
 }) => {
   const n = Math.max(1, Math.min(60, Number(repetirMeses) || 1));
   const hoje = new Date();
@@ -28,6 +28,7 @@ export const montarProvisoes = ({
     categoria_id: categoriaId || null,
     subcategoria_id: subcategoriaId || null,
     centro_custo_id: centroCustoId || null,
+    projeto_id: projetoId || null,
     status: 'pendente',
     provisao: true,
     parcela_atual: k + 1,

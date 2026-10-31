@@ -12,6 +12,8 @@ export const useDadosGerenciais = () => {
   const [ano, setAno] = useState(null);
   const [bancoId, setBancoId] = useState('TODOS');
   const [bancos, setBancos] = useState([]);
+  const [projetoId, setProjetoId] = useState('TODOS'); // 'TODOS' | 'SEM' (não se aplica) | id do projeto
+  const [projetos, setProjetos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
   const [movs, setMovs] = useState([]);
@@ -31,15 +33,18 @@ export const useDadosGerenciais = () => {
     let ativo = true;
     (async () => {
       try {
-        const [cat, sub, ban, primeiro, ultimo] = await Promise.all([
+        const [cat, sub, ban, primeiro, ultimo, proj] = await Promise.all([
           supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', empresaId),
           supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', empresaId),
           supabase.from('bancos').select('id, nome').eq('company_id', empresaId).order('nome'),
           supabase.from('extrato_bancario').select('data_transacao').eq('company_id', empresaId).order('data_transacao', { ascending: true }).limit(1),
-          supabase.from('extrato_bancario').select('data_transacao').eq('company_id', empresaId).order('data_transacao', { ascending: false }).limit(1)
+          supabase.from('extrato_bancario').select('data_transacao').eq('company_id', empresaId).order('data_transacao', { ascending: false }).limit(1),
+          supabase.from('projetos').select('id, codigo, nome').eq('company_id', empresaId).order('nome')
         ]);
-        for (const r of [cat, sub, ban, primeiro, ultimo]) if (r.error) throw r.error;
+        for (const r of [cat, sub, ban, primeiro, ultimo, proj]) if (r.error) throw r.error;
         if (!ativo) return;
+        setProjetos(proj.data || []);
+        setProjetoId('TODOS');
         setCategorias(cat.data || []);
         setSubcategorias(sub.data || []);
         setBancos(ban.data || []);
@@ -72,16 +77,18 @@ export const useDadosGerenciais = () => {
         .order('data_transacao', { ascending: true })
         .order('id', { ascending: true });
       if (bancoId !== 'TODOS') q = q.eq('banco_id', bancoId);
+      if (projetoId === 'SEM') q = q.is('projeto_id', null);
+      else if (projetoId !== 'TODOS') q = q.eq('projeto_id', projetoId);
       return q;
     })
       .then((dados) => { if (ativo) setMovs(dados); })
       .catch((e) => { if (ativo) setError(e.message || 'Falha ao carregar o extrato.'); })
       .finally(() => { if (ativo) setLoading(false); });
     return () => { ativo = false; };
-  }, [authLoading, empresaId, ano, bancoId]);
+  }, [authLoading, empresaId, ano, bancoId, projetoId]);
 
   return {
     authLoading, isSuperAdmin, empresaId, empresas, selectedEmpresa, setSelectedEmpresa,
-    anos, ano, setAno, bancoId, setBancoId, bancos, categorias, subcategorias, movs, loading, error
+    anos, ano, setAno, bancoId, setBancoId, bancos, projetoId, setProjetoId, projetos, categorias, subcategorias, movs, loading, error
   };
 };

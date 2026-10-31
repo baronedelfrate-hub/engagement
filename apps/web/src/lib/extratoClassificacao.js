@@ -194,7 +194,7 @@ export const aprenderRegras = (linhas, regrasExistentes = []) => {
 export const classificarPorRegras = (linha, regras) => {
   const idx = new Map(regras.map((r) => [chaveRegra(r.tipo_norm, r.assinatura), r]));
   const r = idx.get(chaveRegra(linha.tipo_norm, linha.assinatura)) || idx.get(chaveRegra(linha.tipo_norm, null));
-  return r ? { regra: r, classificacao: { categoria_id: r.categoria_id, subcategoria_id: r.subcategoria_id, centro_custo_id: r.centro_custo_id, cliente_nome: r.cliente_nome || null } } : null;
+  return r ? { regra: r, classificacao: { categoria_id: r.categoria_id, subcategoria_id: r.subcategoria_id, centro_custo_id: r.centro_custo_id, projeto_id: r.projeto_id || null, cliente_nome: r.cliente_nome || null } } : null;
 };
 
 // Aplica arquivo -> regras (existentes + aprendidas do arquivo) a cada linha.

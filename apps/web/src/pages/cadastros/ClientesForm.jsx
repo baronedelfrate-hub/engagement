@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Save, Building2 } from 'lucide-react';
-import CnpjLookup from '@/components/CnpjLookup';
+import CnpjInput from '@/components/CnpjInput';
 import { formatCnpj, unformatCnpj } from '@/lib/cnpjUtils';
 import { validateNumericField, validateCNPJ, validateRequiredFields, validateEmail } from '@/lib/validationUtils';
 
@@ -200,10 +200,6 @@ const ClientesForm = () => {
         </div>
       </div>
 
-      {(!id || id === 'novo') && (
-        <CnpjLookup onDataFound={handleCnpjDataFound} />
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -241,13 +237,15 @@ const ClientesForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="cnpj_cpf">CPF / CNPJ *</Label>
-                <Input
+                <CnpjInput
                   id="cnpj_cpf"
                   name="cnpj_cpf"
                   value={formData.cnpj_cpf}
                   onChange={handleChange}
+                  onDataFound={handleCnpjDataFound}
+                  auto={!id || id === 'novo'}
                   required
-                  placeholder="Apenas números ou formatado"
+                  placeholder="CNPJ ou CPF (só números)"
                 />
               </div>
               <div className="space-y-2">

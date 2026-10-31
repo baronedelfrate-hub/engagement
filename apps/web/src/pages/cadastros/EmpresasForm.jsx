@@ -12,6 +12,8 @@ import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import FileUploader from '@/components/FileUploader';
+import CnpjInput, { formatarDocumento } from '@/components/CnpjInput';
+import { unformatCnpj } from '@/lib/cnpjUtils';
 
 const EmpresasForm = () => {
   const { id } = useParams();
@@ -51,7 +53,7 @@ const EmpresasForm = () => {
       try {
           const { success, data, error } = await erpServices.empresas.read(id);
           if (success) {
-              setFormData(data);
+              setFormData({ ...data, cnpj: formatarDocumento(data.cnpj) });
           } else {
               toast({ title: 'Erro', description: error || 'Empresa não encontrada', variant: 'destructive' });
               navigate('/cadastros/empresas');
@@ -66,6 +68,24 @@ const EmpresasForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Preenche tudo o que a Receita informa; o que ela não traz (inscrição estadual, site, logo) fica como estava.
+  const handleCnpjDataFound = (d) => {
+    setFormData(prev => ({
+      ...prev,
+      razao_social: d.razao_social || prev.razao_social,
+      nome_fantasia: d.nome_fantasia || prev.nome_fantasia,
+      email: d.email ? String(d.email).toLowerCase() : prev.email,
+      telefone: d.telefone || prev.telefone,
+      cep: d.cep || prev.cep,
+      logradouro: d.logradouro || prev.logradouro,
+      numero: d.numero || prev.numero,
+      complemento: d.complemento || prev.complemento,
+      bairro: d.bairro || prev.bairro,
+      cidade: d.municipio || prev.cidade,
+      estado: d.uf || prev.estado
+    }));
   };
 
   const handleCheckbox = (checked) => {
@@ -87,10 +107,11 @@ const EmpresasForm = () => {
     setLoading(true);
     try {
       let result;
+      const dados = { ...formData, cnpj: unformatCnpj(formData.cnpj) }; // as outras empresas guardam o CNPJ só com números
       if (isEditing) {
-        result = await erpServices.empresas.update(id, formData);
+        result = await erpServices.empresas.update(id, dados);
       } else {
-        result = await erpServices.empresas.create(formData);
+        result = await erpServices.empresas.create(dados);
       }
 
       if (result.success) {
@@ -153,7 +174,7 @@ const EmpresasForm = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="cnpj">CNPJ *</Label>
-                  <Input id="cnpj" name="cnpj" value={formData.cnpj} onChange={handleChange} placeholder="00.000.000/0000-00" required />
+                  <CnpjInput id="cnpj" name="cnpj" value={formData.cnpj} onChange={handleChange} onDataFound={handleCnpjDataFound} auto={!isEditing} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="inscricao_estadual">Inscrição Estadual</Label>

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Save, Truck } from 'lucide-react';
-import CnpjLookup from '@/components/CnpjLookup';
+import CnpjInput from '@/components/CnpjInput';
 import { formatCnpj, unformatCnpj } from '@/lib/cnpjUtils';
 import { validateNumericField, validateCNPJ } from '@/lib/validationUtils';
 
@@ -158,10 +158,6 @@ const FornecedoresForm = () => {
         </div>
       </div>
 
-      {(!id || id === 'novo') && formData.tipo_fornecedor === 'PJ' && (
-        <CnpjLookup onDataFound={handleCnpjDataFound} />
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -199,11 +195,13 @@ const FornecedoresForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="cnpj">CPF / CNPJ *</Label>
-                <Input
+                <CnpjInput
                   id="cnpj"
                   name="cnpj"
                   value={formData.cnpj}
                   onChange={handleChange}
+                  onDataFound={handleCnpjDataFound}
+                  auto={!id || id === 'novo'}
                   required
                   placeholder={formData.tipo_fornecedor === 'PJ' ? "00.000.000/0000-00" : "000.000.000-00"}
                 />

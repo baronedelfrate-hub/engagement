@@ -127,6 +127,7 @@ export const exportToExcel = async (data, columns, reportTitle, filtersDescripti
   addSummarySheet(isPagar ? 'Resumo por Fornecedor' : 'Resumo por Cliente', byEntidade);
   addSummarySheet('Resumo por Categoria', byCategoria);
   addSummarySheet('Resumo por Centro de Custo', byCentro);
+  addSummarySheet('Resumo por Projeto', groupData(data, i => i.projeto_id, i => i.projeto_nome));
 
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split('T')[0];
@@ -204,6 +205,7 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
   addPdfSummary(isPagar ? 'Resumo por Fornecedor' : 'Resumo por Cliente', byEntidade);
   addPdfSummary('Resumo por Categoria', byCategoria);
   addPdfSummary('Resumo por Centro de Custo', byCentro);
+  addPdfSummary('Resumo por Projeto', groupData(data, i => i.projeto_id, i => i.projeto_nome));
 
   // Footer
   const pageCount = doc.internal.getNumberOfPages();

@@ -148,7 +148,8 @@ const RelatoriosFinanceirosFilters = ({ filters, setFilters, onApply, onClear, d
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="TODOS">Todos</SelectItem>
-                        {dropdowns.projetos.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
+                        <SelectItem value="SEM">Não se aplica</SelectItem>
+                                {dropdowns.projetos.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>

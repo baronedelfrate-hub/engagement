@@ -13,6 +13,7 @@ const AVAILABLE_COLUMNS = [
   { id: 'categoria', label: 'Categoria' },
   { id: 'subcategoria', label: 'Subcategoria' },
   { id: 'centroCusto', label: 'Centro de Custo' },
+  { id: 'projeto', label: 'Projeto' },
   { id: 'descricao', label: 'Descrição' },
   { id: 'valor', label: 'Valor' },
 ];

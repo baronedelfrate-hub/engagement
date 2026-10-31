@@ -22,6 +22,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
         const byEntidade = {};
         const byCategoria = {};
         const byCentro = {};
+        const byProjeto = {};
 
         data.forEach(item => {
             const val = parseFloat(item.valor_original || 0);
@@ -47,6 +48,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
             
             addGroup(byCategoria, item.categoria_id, item.categoria_nome);
             addGroup(byCentro, item.centro_custo_id, item.centro_custo_nome);
+            addGroup(byProjeto, item.projeto_id, item.projeto_nome);
         });
 
         const sortGroups = (obj) => Object.values(obj).sort((a, b) => b.total - a.total);
@@ -56,7 +58,8 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
             byDia: sortGroups(byDia),
             byEntidade: sortGroups(byEntidade),
             byCategoria: sortGroups(byCategoria),
-            byCentro: sortGroups(byCentro)
+            byCentro: sortGroups(byCentro),
+            byProjeto: sortGroups(byProjeto)
         };
     }, [data, source]);
 
@@ -198,6 +201,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                 </Card>
 
                 <TableSummary title="Resumo por Centro de Custo" icon={MapPin} dataList={summary.byCentro} />
+                <TableSummary title="Resumo por Projeto / Obra" icon={Layers} dataList={summary.byProjeto} />
             </div>
         </div>
     );

@@ -24,6 +24,7 @@ const SOURCE_COLUMNS = {
     { id: 'data_vencimento', label: 'Vencimento', type: 'date' },
     { id: 'categoria_nome', label: 'Categoria', type: 'string' },
     { id: 'centro_custo_nome', label: 'C. Custo', type: 'string' },
+    { id: 'projeto_nome', label: 'Projeto', type: 'string' },
     { id: 'valor_original', label: 'Valor', type: 'currency' },
     { id: 'status', label: 'Status', type: 'status' }
   ],
@@ -34,6 +35,7 @@ const SOURCE_COLUMNS = {
     { id: 'data_vencimento', label: 'Vencimento', type: 'date' },
     { id: 'categoria_nome', label: 'Categoria', type: 'string' },
     { id: 'centro_custo_nome', label: 'C. Custo', type: 'string' },
+    { id: 'projeto_nome', label: 'Projeto', type: 'string' },
     { id: 'valor_original', label: 'Valor', type: 'currency' },
     { id: 'status', label: 'Status', type: 'status' }
   ]
@@ -91,47 +93,42 @@ const RelatoriosFinanceiros = () => {
     setLoadingData(true);
     try {
       const isPagar = source === 'CONTAS_PAGAR';
-      const table = source.toLowerCase();
 
-      // Build select query joining relations to get names for summaries
-      let selectQuery = `*, 
-         categoria:categorias(nome), 
+      // Lê os títulos reais (movimentacao_financeira), sem provisões, cancelados e substituídos
+      let selectQuery = `*,
+         categoria:categorias(nome),
          centro_custo:centros_custo(nome),
          subcategoria:subcategorias(nome),
-         projeto:projetos(nome),
-         banco:bancos(nome),
-         tipo_pagamento:tipos_pagamento(nome),
-         condicao_pagamento:condicoes_pagamento(nome),
-         tipo_documento:tipos_documento(nome),
-         origem:origens(nome)`;
-         
+         projeto:projetos(nome, codigo),
+         banco:bancos(nome)`;
+
       if (isPagar) {
         selectQuery += ', fornecedor:fornecedores(nome)';
       } else {
         selectQuery += ', cliente:clientes(nome)';
       }
 
-      let query = supabase.from(table).select(selectQuery);
+      let query = supabase.from('movimentacao_financeira').select(selectQuery)
+        .eq('tipo', isPagar ? 'pagar' : 'receber')
+        .eq('provisao', false)
+        .not('status', 'in', '(cancelado,substituido)');
 
       // Apply Filters
       if (filters.dataInicio) query = query.gte('data_vencimento', filters.dataInicio);
       if (filters.dataFim) query = query.lte('data_vencimento', filters.dataFim);
-      
+
       if (filters.status !== 'TODOS') {
-        if (filters.status === 'PAGO') query = query.in('status', ['Pago', 'Recebido']);
-        else query = query.not('status', 'in', '("Pago", "Recebido")');
+        if (filters.status === 'PAGO') query = query.eq('status', 'pago');
+        else query = query.neq('status', 'pago');
       }
-      
+
       if (filters.entidadeId !== 'TODOS') query = query.eq(isPagar ? 'fornecedor_id' : 'cliente_id', filters.entidadeId);
       if (filters.categoriaId !== 'TODOS') query = query.eq('categoria_id', filters.categoriaId);
       if (filters.subcategoriaId !== 'TODOS') query = query.eq('subcategoria_id', filters.subcategoriaId);
       if (filters.centroCustosId !== 'TODOS') query = query.eq('centro_custo_id', filters.centroCustosId);
-      if (filters.projetoId !== 'TODOS') query = query.eq('projeto_id', filters.projetoId);
+      if (filters.projetoId === 'SEM') query = query.is('projeto_id', null);
+      else if (filters.projetoId !== 'TODOS') query = query.eq('projeto_id', filters.projetoId);
       if (filters.bancoId !== 'TODOS') query = query.eq('banco_id', filters.bancoId);
-      if (filters.tipoPagamentoId !== 'TODOS') query = query.eq('tipo_pagamento_id', filters.tipoPagamentoId);
-      if (filters.condicaoPagamentoId !== 'TODOS') query = query.eq('condicao_pagamento_id', filters.condicaoPagamentoId);
-      if (filters.tipoDocumentoId !== 'TODOS') query = query.eq('tipo_documento_id', filters.tipoDocumentoId);
-      if (filters.origemId !== 'TODOS') query = query.eq('origem_id', filters.origemId);
 
       // Ordering
       query = query.order('data_vencimento', { ascending: true });
@@ -140,19 +137,19 @@ const RelatoriosFinanceiros = () => {
       if (error) throw error;
 
       // Flatten relations for easier table/export use
+      const rotuloStatus = (s) => (s === 'pago' ? (isPagar ? 'Pago' : 'Recebido') : s === 'pago_parcial' ? 'Parcial' : s === 'vencido' ? 'Vencido' : 'Pendente');
       const flat = (data || []).map(item => ({
         ...item,
+        numero: item.numero_titulo,
+        valor_original: item.valor_total,
+        status: rotuloStatus(item.status),
         fornecedor_nome: item.fornecedor?.nome || undefined,
         cliente_nome: item.cliente?.nome || undefined,
         categoria_nome: item.categoria?.nome || undefined,
         centro_custo_nome: item.centro_custo?.nome || undefined,
         subcategoria_nome: item.subcategoria?.nome || undefined,
-        projeto_nome: item.projeto?.nome || undefined,
-        banco_nome: item.banco?.nome || undefined,
-        tipo_pagamento_nome: item.tipo_pagamento?.nome || undefined,
-        condicao_pagamento_nome: item.condicao_pagamento?.nome || undefined,
-        tipo_documento_nome: item.tipo_documento?.nome || undefined,
-        origem_nome: item.origem?.nome || undefined
+        projeto_nome: item.projeto ? `${item.projeto.codigo ? item.projeto.codigo + ' - ' : ''}${item.projeto.nome}` : 'Não se aplica',
+        banco_nome: item.banco?.nome || undefined
       }));
 
       setFilteredData(flat);

@@ -21,6 +21,7 @@ const ROTULOS = {
   categoria: 'Categoria',
   subcategoria: 'Subcategoria',
   centroCusto: 'Centro de Custo',
+  projeto: 'Projeto',
   descricao: 'Descrição',
   previsto: 'Previsto',
   realizado: 'Realizado'
@@ -28,7 +29,7 @@ const ROTULOS = {
 
 // Status deixa de ser coluna: Previsto e Realizado são colunas. Elas aparecem quando "Valor" está marcado nas colunas da tela.
 const colunasDoRelatorio = (selecionadas) => {
-  const base = ['data', 'documento', 'tipo', 'entidade', 'categoria', 'subcategoria', 'centroCusto', 'descricao'].filter((c) => selecionadas.includes(c));
+  const base = ['data', 'documento', 'tipo', 'entidade', 'categoria', 'subcategoria', 'centroCusto', 'projeto', 'descricao'].filter((c) => selecionadas.includes(c));
   return selecionadas.includes('valor') ? [...base, 'previsto', 'realizado'] : base;
 };
 
@@ -42,7 +43,7 @@ const agrupar = (linhas) => {
     const chave = m.titulo_id ? `${m.titulo_id}|${m.data_movimentacao}` : `avulso|${m.id}`;
     if (!mapa.has(chave)) {
       mapa.set(chave, {
-        data_movimentacao: m.data_movimentacao, tipo: m.tipo, categoria: m.categoria, subcategoria: m.subcategoria, centro_custo_id: m.centro_custo_id,
+        data_movimentacao: m.data_movimentacao, tipo: m.tipo, categoria: m.categoria, subcategoria: m.subcategoria, centro_custo_id: m.centro_custo_id, projeto: m.projeto,
         numero_titulo: m.numero_titulo, entidade: m.entidade,
         descricao: m.descricao, previsto: null, realizado: null
       });
@@ -74,6 +75,7 @@ const textoFiltros = (f) => {
   partes.push(`Tipo: ${f.tipo === 'TODOS' ? 'todos' : f.tipo === 'Receita' ? 'entradas' : 'saídas'}`);
   partes.push(`Status: ${f.status === 'TODOS' ? 'todos' : f.status}`);
   if (f.incluirProvisoes !== undefined) partes.push(f.incluirProvisoes ? 'Provisões incluídas' : 'Sem provisões');
+  if (f.projeto && f.projeto !== 'TODOS') partes.push(`Projeto: ${f.projeto === 'SEM' ? 'não se aplica' : (f.projetoNome || 'selecionado')}`);
   if (f.busca) partes.push(`Busca: "${f.busca}"`);
   if (f.categoria) partes.push(`Categoria/subcategoria contém "${f.categoria}"`);
   return partes.join('  ·  ');
@@ -88,6 +90,7 @@ const textoCelula = (coluna, l, centrosMap) => {
     case 'categoria': return l.categoria || '';
     case 'subcategoria': return l.subcategoria || '';
     case 'centroCusto': { const c = centrosMap[l.centro_custo_id]; return c ? `${c.codigo} - ${c.nome}` : '-'; }
+    case 'projeto': return l.projeto || 'Não se aplica';
     case 'descricao': return l.descricao || '';
     case 'previsto': return l.previsto === null ? '' : fmt(l.previsto);
     case 'realizado': return l.realizado === null ? '' : fmt(l.realizado);
@@ -256,7 +259,7 @@ export const gerarFluxoCaixaExcel = async (dados) => {
     wsMov[`A${linhaTotal}`] = { t: 's', v: 'TOTAL' };
     wsMov['!ref'] = `A1:${XLSX.utils.encode_col(Math.max(cols.length - 1, 0))}${linhaTotal}`;
   }
-  const larguras = { data: 12, tipo: 10, documento: 20, entidade: 30, categoria: 28, subcategoria: 28, centroCusto: 28, descricao: 50, previsto: 16, realizado: 16 };
+  const larguras = { data: 12, tipo: 10, documento: 20, entidade: 30, categoria: 28, subcategoria: 28, centroCusto: 28, projeto: 28, descricao: 50, previsto: 16, realizado: 16 };
   wsMov['!cols'] = cols.map((c) => ({ wch: larguras[c] }));
   if (linhas.length) wsMov['!autofilter'] = { ref: `A1:${XLSX.utils.encode_col(Math.max(cols.length - 1, 0))}${ultima}` };
   XLSX.utils.book_append_sheet(wb, wsMov, 'Movimentos');

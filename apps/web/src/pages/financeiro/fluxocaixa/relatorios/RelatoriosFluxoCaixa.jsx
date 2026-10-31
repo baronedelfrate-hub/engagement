@@ -25,6 +25,7 @@ const RelatoriosFluxoCaixa = () => {
     categoria: '',
     incluirProvisoes: true,
     busca: '',
+    projeto: 'TODOS', // 'TODOS' | 'SEM' | id do projeto
   });
 
   const [rawData, setRawData] = useState([]);
@@ -80,9 +81,14 @@ const RelatoriosFluxoCaixa = () => {
     }
   };
 
+  const projetosDoPeriodo = [...new Map(rawData.filter(i => i.projeto_id).map(i => [i.projeto_id, i.projeto])).entries()]
+    .sort((a, b) => String(a[1]).localeCompare(String(b[1]), 'pt-BR'));
+
   const data = rawData.filter(item => {
     if (filters.tipo !== 'TODOS' && item.tipo !== filters.tipo) return false;
     if (filters.status !== 'TODOS' && item.status !== filters.status) return false;
+    if (filters.projeto === 'SEM' && item.projeto_id) return false;
+    if (filters.projeto !== 'TODOS' && filters.projeto !== 'SEM' && item.projeto_id !== filters.projeto) return false;
     if (filters.busca && !`${item.numero_titulo || ''} ${item.entidade || ''} ${item.descricao || ''}`.toLowerCase().includes(filters.busca.toLowerCase())) return false;
     if (filters.categoria && !`${item.categoria || ''} ${item.subcategoria || ''}`.toLowerCase().includes(filters.categoria.toLowerCase())) return false;
     return true;
@@ -96,7 +102,7 @@ const RelatoriosFluxoCaixa = () => {
     setExportando(formato);
     try {
       const gerar = formato === 'pdf' ? gerarFluxoCaixaPdf : gerarFluxoCaixaExcel;
-      const nome = await gerar({ empresa, filtros: filters, linhas: data, colunas: selectedColumns, centrosMap: centrosCustoMap });
+      const nome = await gerar({ empresa, filtros: { ...filters, projetoNome: projetosDoPeriodo.find(([id]) => id === filters.projeto)?.[1] }, linhas: data, colunas: selectedColumns, centrosMap: centrosCustoMap });
       toast({ title: formato === 'pdf' ? 'PDF gerado' : 'Planilha gerada', description: `Arquivo ${nome} baixado.` });
     } catch (e) {
       toast({ title: 'Erro ao exportar', description: e.message || 'Tente novamente.', variant: 'destructive' });
@@ -187,6 +193,17 @@ const RelatoriosFluxoCaixa = () => {
                     onChange={e => setFilters({...filters, categoria: e.target.value})}
                 />
             </div>
+            <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground">Projeto / obra</label>
+                <Select value={filters.projeto} onValueChange={v => setFilters({...filters, projeto: v})}>
+                    <SelectTrigger className="bg-background h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="TODOS">Todos</SelectItem>
+                        <SelectItem value="SEM">Não se aplica</SelectItem>
+                        {projetosDoPeriodo.map(([id, nome]) => <SelectItem key={id} value={id}>{nome}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
             <div className="space-y-1 md:col-span-2">
                 <label className="text-xs font-bold text-muted-foreground">Nº do título / favorecido (Busca)</label>
                 <Input
@@ -257,6 +274,7 @@ const RelatoriosFluxoCaixa = () => {
                                     {selectedColumns.includes('categoria') && <TableHead>Categoria</TableHead>}
                                     {selectedColumns.includes('subcategoria') && <TableHead>Subcategoria</TableHead>}
                                     {selectedColumns.includes('centroCusto') && <TableHead>Centro de Custo</TableHead>}
+                                    {selectedColumns.includes('projeto') && <TableHead>Projeto</TableHead>}
                                     {selectedColumns.includes('descricao') && <TableHead>Descrição</TableHead>}
                                     {selectedColumns.includes('valor') && <TableHead className="text-right w-[140px]">Valor</TableHead>}
                                 </TableRow>
@@ -294,6 +312,7 @@ const RelatoriosFluxoCaixa = () => {
                                             {selectedColumns.includes('categoria') && <TableCell className="text-xs font-medium">{item.categoria}</TableCell>}
                                             {selectedColumns.includes('subcategoria') && <TableCell className="text-xs text-muted-foreground">{item.subcategoria || '-'}</TableCell>}
                                             {selectedColumns.includes('centroCusto') && <TableCell className="text-xs text-muted-foreground">{centrosCustoMap[item.centro_custo_id] ? `${centrosCustoMap[item.centro_custo_id].codigo} - ${centrosCustoMap[item.centro_custo_id].nome}` : '-'}</TableCell>}
+                                            {selectedColumns.includes('projeto') && <TableCell className="text-xs text-muted-foreground">{item.projeto || 'Não se aplica'}</TableCell>}
                                             {selectedColumns.includes('descricao') && <TableCell className="text-xs text-muted-foreground truncate max-w-[200px]">{item.descricao}</TableCell>}
                                             {selectedColumns.includes('valor') && <TableCell className={`text-right font-mono text-xs font-bold ${item.tipo === 'Receita' ? 'text-emerald-600' : 'text-red-600'}`}>{parseFloat(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</TableCell>}
                                         </TableRow>

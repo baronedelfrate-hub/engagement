@@ -70,7 +70,7 @@ export const useDadosGerenciais = () => {
     buscarTudo(() => {
       let q = supabase
         .from('extrato_bancario')
-        .select('id, data_transacao, valor, categoria_id, subcategoria_id, cliente_nome, banco_id')
+        .select('id, data_transacao, valor, categoria_id, subcategoria_id, cliente_nome, banco_id, projeto_id')
         .eq('company_id', empresaId)
         .gte('data_transacao', `${ano}-01-01`)
         .lte('data_transacao', `${ano}-12-31`)

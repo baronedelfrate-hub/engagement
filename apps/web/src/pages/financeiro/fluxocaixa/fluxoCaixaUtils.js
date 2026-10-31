@@ -52,13 +52,15 @@ const nomeEntidade = (m) => (m?.tipo === 'pagar' ? m?.fornecedor?.nome : m?.clie
  * - Realizado: baixas pelo dia do PAGAMENTO/RECEBIMENTO, pelo valor efetivamente pago/recebido.
  * Mesmo formato que a tela já usava: { id, data_movimentacao, valor, status, tipo ('Receita'|'Despesa'), centro_custo_id, categoria, descricao }.
  */
+const nomeProjeto = (p) => (p ? `${p.codigo ? p.codigo + ' - ' : ''}${p.nome}` : '');
+
 export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true }) => {
   const [titulos, baixas] = await Promise.all([
     buscarTudo(() => {
       // provisão pendente conta como previsto; provisão já substituída não conta (o lançamento real que a substituiu é que conta)
       let q = supabase
         .from('movimentacao_financeira')
-        .select('id, numero_titulo, observacoes, tipo, valor_total, data_vencimento, provisao, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
+        .select('id, numero_titulo, observacoes, tipo, valor_total, data_vencimento, provisao, centro_custo_id, projeto_id, projeto:projetos(nome, codigo), categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome)')
         .not('status', 'in', '(cancelado,substituido)')
         .gte('data_vencimento', inicio)
         .lte('data_vencimento', fim)
@@ -68,7 +70,7 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     }),
     buscarTudo(() => supabase
       .from('movimentacao_baixas')
-      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), movimentacao:movimentacao_financeira(numero_titulo, observacoes, tipo, centro_custo_id, categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
+      .select('id, movimentacao_id, valor_baixa, data_baixa, centro_custo_id, projeto_id, projeto:projetos(nome, codigo), categoria:categorias(nome), subcategoria:subcategorias(nome), movimentacao:movimentacao_financeira(numero_titulo, observacoes, tipo, centro_custo_id, projeto_id, projeto:projetos(nome, codigo), categoria:categorias(nome), subcategoria:subcategorias(nome), cliente:clientes(nome), fornecedor:fornecedores(nome))')
       .gte('data_baixa', inicio)
       .lte('data_baixa', fim)
       .order('data_baixa').order('id')),
@@ -83,6 +85,8 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     status: 'Previsto',
     tipo: t.tipo === 'pagar' ? 'Despesa' : 'Receita',
     centro_custo_id: t.centro_custo_id,
+    projeto_id: t.projeto_id || null,
+    projeto: nomeProjeto(t.projeto),
     categoria: t.categoria?.nome || 'Sem categoria',
     subcategoria: t.subcategoria?.nome || '',
     numero_titulo: t.numero_titulo || '',
@@ -98,6 +102,8 @@ export const carregarMovimentos = async ({ inicio, fim, incluirProvisoes = true 
     status: 'Realizado',
     tipo: b.movimentacao?.tipo === 'pagar' ? 'Despesa' : 'Receita',
     centro_custo_id: b.centro_custo_id || b.movimentacao?.centro_custo_id || null,
+    projeto_id: b.projeto_id || b.movimentacao?.projeto_id || null,
+    projeto: nomeProjeto(b.projeto || b.movimentacao?.projeto),
     categoria: b.categoria?.nome || b.movimentacao?.categoria?.nome || 'Sem categoria',
     subcategoria: b.subcategoria?.nome || b.movimentacao?.subcategoria?.nome || '',
     numero_titulo: b.movimentacao?.numero_titulo || '',

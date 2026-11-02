@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
 import FileUploader from '@/components/FileUploader';
 import CnpjInput, { formatarDocumento } from '@/components/CnpjInput';
 import { unformatCnpj } from '@/lib/cnpjUtils';
+import VinculosSocios from '@/components/cadastros/VinculosSocios';
 
 const EmpresasForm = () => {
   const { id } = useParams();
@@ -23,6 +24,7 @@ const EmpresasForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    tipo_pessoa: 'PJ',
     razao_social: '',
     nome_fantasia: '',
     cnpj: '',
@@ -99,8 +101,9 @@ const EmpresasForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.razao_social || !formData.cnpj) {
-      toast({ title: 'Erro', description: 'Campos obrigatórios faltando (Razão Social, CNPJ).', variant: 'destructive' });
+    const ehPF = formData.tipo_pessoa === 'PF';
+    if (!formData.razao_social || (!ehPF && !formData.cnpj)) {
+      toast({ title: 'Erro', description: ehPF ? 'Informe o nome completo.' : 'Campos obrigatórios faltando (Razão Social, CNPJ).', variant: 'destructive' });
       return;
     }
 
@@ -162,26 +165,46 @@ const EmpresasForm = () => {
 
           <TabsContent value="geral">
             <Card>
-              <CardHeader><CardTitle>Informações Legais</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{formData.tipo_pessoa === 'PF' ? 'Dados da pessoa física' : 'Informações Legais'}</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {!isEditing && (
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Tipo de cadastro</Label>
+                    <div className="inline-flex rounded-md border border-border overflow-hidden">
+                      {[['PJ', 'Pessoa jurídica (empresa)'], ['PF', 'Pessoa física (sócio)']].map(([v, r]) => (
+                        <button key={v} type="button" onClick={() => setFormData((f) => ({ ...f, tipo_pessoa: v }))} className={`px-3 py-2 text-sm ${formData.tipo_pessoa === v ? 'bg-blue-600 text-white' : 'bg-background text-muted-foreground'}`}>{r}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
-                  <Label htmlFor="razao_social">Razão Social *</Label>
+                  <Label htmlFor="razao_social">{formData.tipo_pessoa === 'PF' ? 'Nome completo *' : 'Razão Social *'}</Label>
                   <Input id="razao_social" name="razao_social" value={formData.razao_social} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="nome_fantasia">Nome Fantasia</Label>
                   <Input id="nome_fantasia" name="nome_fantasia" value={formData.nome_fantasia} onChange={handleChange} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cnpj">CNPJ *</Label>
-                  <CnpjInput id="cnpj" name="cnpj" value={formData.cnpj} onChange={handleChange} onDataFound={handleCnpjDataFound} auto={!isEditing} required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="inscricao_estadual">Inscrição Estadual</Label>
-                  <Input id="inscricao_estadual" name="inscricao_estadual" value={formData.inscricao_estadual} onChange={handleChange} />
-                </div>
+                {formData.tipo_pessoa === 'PF' ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="cnpj">CPF</Label>
+                    <Input id="cnpj" name="cnpj" value={formData.cnpj || ''} onChange={handleChange} placeholder="Só números ou com pontuação" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="cnpj">CNPJ *</Label>
+                      <CnpjInput id="cnpj" name="cnpj" value={formData.cnpj} onChange={handleChange} onDataFound={handleCnpjDataFound} auto={!isEditing} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="inscricao_estadual">Inscrição Estadual</Label>
+                      <Input id="inscricao_estadual" name="inscricao_estadual" value={formData.inscricao_estadual} onChange={handleChange} />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
+            {isEditing && id && <VinculosSocios empresaId={id} tipoPessoa={formData.tipo_pessoa} />}
           </TabsContent>
 
           <TabsContent value="endereco">

@@ -11,7 +11,9 @@ export const ESTRUTURA_DRE = [
   { chave: 'custo_mao_obra', codigo: '3.1', tipo: 'grupo' },
   { chave: 'custo_ferramentas', codigo: '3.2', tipo: 'grupo' },
   { chave: 'custo_midia', codigo: '3.3', tipo: 'grupo' },
-  { chave: 'lucro_bruto', rotulo: 'LUCRO BRUTO', tipo: 'subtotal', soma: ['receita_liquida', 'custo_mao_obra', 'custo_ferramentas', 'custo_midia'] },
+  { chave: 'custo_deslocamento', codigo: '3.4', tipo: 'grupo' },
+  { chave: 'custo_comissoes', codigo: '3.5', tipo: 'grupo' },
+  { chave: 'lucro_bruto', rotulo: 'LUCRO BRUTO', tipo: 'subtotal', soma: ['receita_liquida', 'custo_mao_obra', 'custo_ferramentas', 'custo_midia', 'custo_deslocamento', 'custo_comissoes'] },
   { chave: 'desp_administrativas', codigo: '5.1', tipo: 'grupo' },
   { chave: 'desp_comerciais', codigo: '5.2', tipo: 'grupo' },
   { chave: 'desp_estrutura', codigo: '5.3', tipo: 'grupo' },
@@ -32,6 +34,8 @@ export const ROTULOS_GRUPO = {
   custo_mao_obra: 'Mão de Obra Direta',
   custo_ferramentas: 'Ferramentas Operacionais',
   custo_midia: 'Mídia e Produção',
+  custo_deslocamento: 'Deslocamento',
+  custo_comissoes: 'Comissões',
   desp_administrativas: 'Despesas Administrativas',
   desp_comerciais: 'Despesas Comerciais',
   desp_estrutura: 'Estrutura / Infraestrutura',
@@ -42,6 +46,9 @@ export const ROTULOS_GRUPO = {
   investimentos: 'Investimentos / Ativos',
   emprestimos: 'Empréstimos e Financiamentos'
 };
+
+// Custos cujo significado muda de uma empresa para outra: a linha da DRE usa o nome da categoria cadastrada na empresa.
+const GRUPOS_COM_NOME_DA_EMPRESA = new Set(['custo_ferramentas', 'custo_midia', 'custo_deslocamento', 'custo_comissoes']);
 
 const GRUPOS_CONHECIDOS = new Set(ESTRUTURA_DRE.filter((l) => l.tipo !== 'subtotal' && l.chave !== 'nao_classificado').map((l) => l.chave));
 const zeros = () => Array(12).fill(0);
@@ -88,7 +95,10 @@ export const montarDRE = (movs, { ano, categorias, subcategorias }) => {
         .map((d) => ({ ...d, total: arred(soma(d.valores)) }))
         .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR', { numeric: true }));
     }
-    const rotulo = def.rotulo || `${def.codigo}${def.tipo === 'fora' && def.codigo.length <= 2 ? '.' : ''} ${ROTULOS_GRUPO[def.chave]}`;
+    const nomeDaEmpresa = GRUPOS_COM_NOME_DA_EMPRESA.has(def.chave)
+      ? categorias.find((c) => c.grupo_dre === def.chave && c.nome)?.nome
+      : null;
+    const rotulo = def.rotulo || `${def.codigo}${def.tipo === 'fora' && def.codigo.length <= 2 ? '.' : ''} ${nomeDaEmpresa || ROTULOS_GRUPO[def.chave]}`;
     const linha = { chave: def.chave, tipo: def.tipo, rotulo, valores: valores.map(arred), total: arred(soma(valores)), detalhes };
     porChave[def.chave] = linha;
     return linha;
@@ -106,7 +116,7 @@ export const calcularPE = (dre) => {
   const v = (k, i) => (i === 'total' ? dre.porChave[k].total : dre.porChave[k].valores[i]);
   const calc = (i) => {
     const receita = v('receita_bruta', i);
-    const variaveis = -(v('custo_mao_obra', i) + v('custo_ferramentas', i) + v('custo_midia', i) + v('deducoes', i));
+    const variaveis = -(v('custo_mao_obra', i) + v('custo_ferramentas', i) + v('custo_midia', i) + v('custo_deslocamento', i) + v('custo_comissoes', i) + v('deducoes', i));
     const fixos = -(v('desp_administrativas', i) + v('desp_comerciais', i) + v('desp_estrutura', i) + v('desp_gerais', i) + v('desp_financeira', i));
     const mc = receita - variaveis;
     const mcPct = receita > 0 ? mc / receita : 0;
@@ -125,7 +135,7 @@ export const calcularPE = (dre) => {
 export const calcularPEPeriodo = (dre, de, ate, { incluirSocios = false } = {}) => {
   const soma = (k) => dre.porChave[k].valores.slice(de, ate + 1).reduce((s, x) => s + x, 0);
   const receita = soma('receita_bruta');
-  const variaveis = -(soma('custo_mao_obra') + soma('custo_ferramentas') + soma('custo_midia') + soma('deducoes'));
+  const variaveis = -(soma('custo_mao_obra') + soma('custo_ferramentas') + soma('custo_midia') + soma('custo_deslocamento') + soma('custo_comissoes') + soma('deducoes'));
   const fixosBase = -(soma('desp_administrativas') + soma('desp_comerciais') + soma('desp_estrutura') + soma('desp_gerais') + soma('desp_financeira'));
   // retiradas de sócios (grupo 9): ficam fora do PE, a menos que a empresa queira tratá-las como custo fixo
   const retiradasSocios = -soma('socios');

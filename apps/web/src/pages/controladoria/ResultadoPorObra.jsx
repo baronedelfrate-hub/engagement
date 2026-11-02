@@ -20,6 +20,8 @@ const COLUNAS = [
   ['custo_mao_obra', 'Mão de obra'],
   ['custo_ferramentas', 'Ferramentas'],
   ['custo_midia', 'Mídia'],
+  ['custo_deslocamento', 'Deslocamento'],
+  ['custo_comissoes', 'Comissões'],
   ['lucro_bruto', 'Lucro bruto'],
   ['desp_administrativas', 'Desp. administrativas'],
   ['desp_comerciais', 'Desp. comerciais'],

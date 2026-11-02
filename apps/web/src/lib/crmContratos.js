@@ -35,21 +35,27 @@ export const fatorDaCompetencia = (contrato, competencia) => {
   return { dias, diasMes: total, fator: dias / total, proporcional: true };
 };
 
+// Dia 31 (ou maior que o mês) vale como "último dia do mês".
+const diaNoMes = (a, m, dia) => Math.min(Number(dia) || 1, new Date(a, m, 0).getDate());
+
 // Competência C é cobrada no mês seguinte (dia de faturamento); o vencimento fica no mesmo mês ou no seguinte, se o dia for anterior.
+// Com "faturar no próprio mês" (faturar_no_mes), a cobrança sai no mês da própria competência.
 export const dataFaturamento = (contrato, competencia) => {
-  const [a, m] = partes(somaMeses(competencia, 1));
-  return iso(a, m, contrato.dia_faturamento);
+  const [a, m] = partes(somaMeses(competencia, contrato.faturar_no_mes ? 0 : 1));
+  return iso(a, m, diaNoMes(a, m, contrato.dia_faturamento));
 };
 export const dataVencimento = (contrato, competencia) => {
-  const base = contrato.dia_vencimento >= contrato.dia_faturamento ? 1 : 2;
+  const base = (contrato.faturar_no_mes ? 0 : 1) + (Number(contrato.dia_vencimento) >= Number(contrato.dia_faturamento) ? 0 : 1);
   const [a, m] = partes(somaMeses(competencia, base));
-  return iso(a, m, contrato.dia_vencimento);
+  return iso(a, m, diaNoMes(a, m, contrato.dia_vencimento));
 };
 
 // Competências já encerradas (mês anterior ao de hoje, ou antes) que ainda não geraram pedido.
 export const competenciasDevidas = (contrato, itens, faturadas, hoje = hojeISO()) => {
   if (contrato.status !== 'ativo' || !itens.length) return [];
-  const ultima = somaMeses(primeiroDia(hoje), -1);
+  // normal: só competências já encerradas; faturando no próprio mês, o mês atual entra assim que chega o dia do faturamento
+  let ultima = somaMeses(primeiroDia(hoje), -1);
+  if (contrato.faturar_no_mes && dataFaturamento(contrato, primeiroDia(hoje)) <= hoje) ultima = primeiroDia(hoje);
   const limite = contrato.data_fim && primeiroDia(contrato.data_fim) < ultima ? primeiroDia(contrato.data_fim) : ultima;
   const cheio = valorMensal(itens);
   const lista = [];

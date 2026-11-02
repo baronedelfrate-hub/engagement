@@ -49,7 +49,7 @@ const ContratoForm = () => {
       ]);
       setClientes(cl.data || []); setServicos(sv.data || []);
       if (novo) {
-        setC({ cliente_id: '', numero: '', titulo: '', status: 'ativo', data_inicio: hojeISO(), data_fim: '', vigencia_meses: '', dia_faturamento: 15, dia_vencimento: 15, proporcional: true, reajuste_mes: '', reajuste_indice: '', observacoes: '' });
+        setC({ cliente_id: '', numero: '', titulo: '', status: 'ativo', data_inicio: hojeISO(), data_fim: '', vigencia_meses: '', dia_faturamento: 15, dia_vencimento: 15, faturar_no_mes: false, proporcional: true, reajuste_mes: '', reajuste_indice: '', observacoes: '' });
         setItens([]);
       } else {
         const x = await carregarContrato(id);
@@ -81,7 +81,7 @@ const ContratoForm = () => {
     try {
       const dados = {
         cliente_id: c.cliente_id, titulo: c.titulo.trim(), status: c.status, data_inicio: c.data_inicio, data_fim: c.data_fim || null,
-        vigencia_meses: c.vigencia_meses === '' ? null : Number(c.vigencia_meses), dia_faturamento: Number(c.dia_faturamento) || 15, dia_vencimento: Number(c.dia_vencimento) || 15,
+        vigencia_meses: c.vigencia_meses === '' ? null : Number(c.vigencia_meses), faturar_no_mes: !!c.faturar_no_mes, dia_faturamento: Number(c.dia_faturamento) || 15, dia_vencimento: Number(c.dia_vencimento) || 15,
         proporcional: !!c.proporcional, reajuste_mes: c.reajuste_mes === '' ? null : Number(c.reajuste_mes), reajuste_indice: c.reajuste_indice || null, observacoes: c.observacoes || null
       };
       if (novo) {
@@ -134,11 +134,12 @@ const ContratoForm = () => {
             <C rotulo="Situação"><select className={sel} value={c.status} onChange={(e) => muda('status', e.target.value)}><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="encerrado">Encerrado</option></select></C>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <C rotulo="Dia do faturamento (mês seguinte)"><Input type="number" min="1" max="28" value={c.dia_faturamento} onChange={(e) => muda('dia_faturamento', e.target.value)} /></C>
-            <C rotulo="Dia do vencimento"><Input type="number" min="1" max="28" value={c.dia_vencimento} onChange={(e) => muda('dia_vencimento', e.target.value)} /></C>
+            <C rotulo={c.faturar_no_mes ? 'Dia do faturamento (31 = último dia)' : 'Dia do faturamento (mês seguinte)'}><Input type="number" min="1" max="31" value={c.dia_faturamento} onChange={(e) => muda('dia_faturamento', e.target.value)} /></C>
+            <C rotulo="Dia do vencimento"><Input type="number" min="1" max="31" value={c.dia_vencimento} onChange={(e) => muda('dia_vencimento', e.target.value)} /></C>
             <C rotulo="Mês do reajuste anual"><select className={sel} value={c.reajuste_mes} onChange={(e) => muda('reajuste_mes', e.target.value)}><option value="">sem reajuste</option>{MESES.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}</select></C>
             <C rotulo="Índice do reajuste"><Input value={c.reajuste_indice} onChange={(e) => muda('reajuste_indice', e.target.value)} placeholder="IPCA, IGP-M, % fixo…" /></C>
           </div>
+          <label className="flex items-center gap-2 text-sm"><Checkbox checked={!!c.faturar_no_mes} onCheckedChange={(v) => muda('faturar_no_mes', v === true)} /> Faturar no próprio mês de referência (em vez de no mês seguinte)</label>
           <label className="flex items-center gap-2 text-sm"><Checkbox checked={!!c.proporcional} onCheckedChange={(v) => muda('proporcional', v === true)} /> Cobrar proporcional aos dias no primeiro e no último mês</label>
           <C rotulo="Observações"><Textarea rows={2} value={c.observacoes} onChange={(e) => muda('observacoes', e.target.value)} /></C>
         </CardContent></Card>

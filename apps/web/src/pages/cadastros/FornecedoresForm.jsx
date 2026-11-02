@@ -34,6 +34,7 @@ const FornecedoresForm = () => {
     cep: '',
     endereco: '',
     numero: '',
+    complemento: '',
     bairro: '',
     cidade: '',
     estado: '',
@@ -53,6 +54,7 @@ const FornecedoresForm = () => {
             // Ensure fields exist to avoid uncontrolled inputs
             fantasia: res.data.fantasia || '',
             numero: res.data.numero !== null && res.data.numero !== undefined ? res.data.numero.toString() : '',
+            complemento: res.data.complemento || '',
             bairro: res.data.bairro || '',
             cnae_principal: res.data.cnae_principal || '',
             situacao_cadastral: res.data.situacao_cadastral !== null && res.data.situacao_cadastral !== undefined ? res.data.situacao_cadastral.toString() : '',
@@ -87,6 +89,7 @@ const FornecedoresForm = () => {
       cep: data.cep || '',
       endereco: data.logradouro || '',
       numero: data.numero || '',
+      complemento: data.complemento || '',
       bairro: data.bairro || '',
       cidade: data.municipio || '',
       estado: data.uf || '',
@@ -122,6 +125,7 @@ const FornecedoresForm = () => {
         cep: formData.cep,
         endereco: formData.endereco,
         numero: validateNumericField(formData.numero),
+        complemento: formData.complemento,
         bairro: formData.bairro,
         cidade: formData.cidade,
         estado: formData.estado,
@@ -277,6 +281,17 @@ const FornecedoresForm = () => {
                             value={formData.numero}
                             onChange={handleChange}
                             placeholder="Ex: 123"
+                        />
+                    </div>
+
+                    <div className="col-span-1 md:col-span-4 space-y-2">
+                        <Label htmlFor="complemento">Complemento</Label>
+                        <Input
+                            id="complemento"
+                            name="complemento"
+                            value={formData.complemento}
+                            onChange={handleChange}
+                            placeholder="Ex: Sala 12, Bloco B"
                         />
                     </div>
 

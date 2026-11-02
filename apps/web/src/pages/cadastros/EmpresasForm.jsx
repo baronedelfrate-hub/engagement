@@ -215,6 +215,10 @@ const EmpresasForm = () => {
                       <Input id="numero" name="numero" value={formData.numero} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
+                      <Label htmlFor="complemento">Complemento</Label>
+                      <Input id="complemento" name="complemento" value={formData.complemento} onChange={handleChange} placeholder="Ex: Sala 12, Bloco B" />
+                    </div>
+                    <div className="space-y-2">
                       <Label htmlFor="bairro">Bairro</Label>
                       <Input id="bairro" name="bairro" value={formData.bairro} onChange={handleChange} />
                     </div>

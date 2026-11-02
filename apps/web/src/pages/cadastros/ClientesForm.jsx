@@ -36,6 +36,7 @@ const ClientesForm = () => {
     cep: '',
     endereco: '',
     numero: '',
+    complemento: '',
     bairro: '',
     cidade: '',
     estado: '',
@@ -64,6 +65,7 @@ const ClientesForm = () => {
             ...data,
             fantasia: data.fantasia || '',
             numero: data.numero !== null && data.numero !== undefined ? data.numero.toString() : '',
+            complemento: data.complemento || '',
             bairro: data.bairro || '',
             cnae_principal: data.cnae_principal || '',
             situacao_cadastral: data.situacao_cadastral !== null && data.situacao_cadastral !== undefined ? data.situacao_cadastral.toString() : ''
@@ -101,6 +103,7 @@ const ClientesForm = () => {
       cep: data.cep || '',
       endereco: data.logradouro || '',
       numero: data.numero || '',
+      complemento: data.complemento || '',
       bairro: data.bairro || '',
       cidade: data.municipio || '',
       estado: data.uf || '',
@@ -138,6 +141,7 @@ const ClientesForm = () => {
         cep: formData.cep,
         endereco: formData.endereco,
         numero: validateNumericField(formData.numero),
+        complemento: formData.complemento,
         bairro: formData.bairro,
         cidade: formData.cidade,
         estado: formData.estado,
@@ -319,6 +323,17 @@ const ClientesForm = () => {
                             value={formData.numero}
                             onChange={handleChange}
                             placeholder="Ex: 123"
+                        />
+                    </div>
+
+                    <div className="col-span-1 md:col-span-4 space-y-2">
+                        <Label htmlFor="complemento">Complemento</Label>
+                        <Input
+                            id="complemento"
+                            name="complemento"
+                            value={formData.complemento}
+                            onChange={handleChange}
+                            placeholder="Ex: Sala 12, Bloco B"
                         />
                     </div>
 

@@ -8,7 +8,7 @@
 export const SECOES_CALCULADAS = ['2', '4', '6', '8'];
 
 // Seções em que a categoria é o nível 1 (as contas são o nível 2).
-const SECOES_CATEGORIA_NIVEL_1 = ['9', '10', '11'];
+const SECOES_CATEGORIA_NIVEL_1 = ['9', '10', '11', '12', '13'];
 
 // Código da categoria -> linha da DRE gerencial.
 export const GRUPOS_DRE = {
@@ -27,7 +27,9 @@ export const GRUPOS_DRE = {
   '7.2': 'desp_financeira',
   '9': 'socios',
   '10': 'investimentos',
-  '11': 'emprestimos'
+  '11': 'emprestimos',
+  '12': 'repasse_clientes',
+  '13': 'transferencias'
 };
 
 export const GRUPOS_DRE_LABELS = {
@@ -47,6 +49,8 @@ export const GRUPOS_DRE_LABELS = {
   socios: 'Movimentações de Sócios',
   investimentos: 'Investimentos / Ativos',
   emprestimos: 'Empréstimos e Financiamentos',
+  repasse_clientes: 'Recursos de clientes (repasse)',
+  transferencias: 'Transferências entre contas',
   // valores antigos, ainda aceitos
   custo_servico: 'Custo dos Serviços',
   despesa_operacional: 'Despesa Operacional',

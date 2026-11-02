@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { montarDRE, MESES } from '@/lib/dreGerencial';
@@ -17,10 +18,13 @@ function DRE() {
   const dados = useDadosGerenciais();
   const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, loading, error } = dados;
   const [abertas, setAbertas] = useState(new Set());
+  // retiradas de sócios (9.2) como remuneração dentro das despesas: lembra a escolha neste navegador
+  const [retiradasComoDespesa, setRetiradasComoDespesa] = useState(() => { try { return localStorage.getItem('dre_retiradas_despesa') === '1'; } catch { return false; } });
+  const alternarRetiradas = (v) => { setRetiradasComoDespesa(v); try { localStorage.setItem('dre_retiradas_despesa', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
 
   const dre = useMemo(
-    () => (ano ? montarDRE(movs, { ano, categorias, subcategorias }) : null),
-    [movs, ano, categorias, subcategorias]
+    () => (ano ? montarDRE(movs, { ano, categorias, subcategorias, retiradasComoDespesa }) : null),
+    [movs, ano, categorias, subcategorias, retiradasComoDespesa]
   );
 
   const alternar = (chave) => setAbertas((s) => { const n = new Set(s); n.has(chave) ? n.delete(chave) : n.add(chave); return n; });
@@ -32,7 +36,10 @@ function DRE() {
       linhas.push([l.rotulo, ...l.valores.map((v) => v.toFixed(2)), l.total.toFixed(2)]);
       for (const d of l.detalhes) linhas.push([`   ${d.rotulo}`, ...d.valores.map((v) => v.toFixed(2)), d.total.toFixed(2)]);
     }
-    linhas.push(['Total movimentação líquida (conferência)', ...dre.conferencia.valores.map((v) => v.toFixed(2)), dre.conferencia.total.toFixed(2)]);
+    linhas.push([]);
+    linhas.push(['RESULTADO DE CAIXA']);
+    for (const l of dre.caixa.linhas) linhas.push([l.rotulo, ...l.valores.map((v) => v.toFixed(2)), l.total.toFixed(2)]);
+    linhas.push(['= GERAÇÃO DE CAIXA DO MÊS', ...dre.caixa.geracao.valores.map((v) => v.toFixed(2)), dre.caixa.geracao.total.toFixed(2)]);
     const csv = '﻿' + linhas.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n');
     const link = document.createElement('a');
     link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -57,7 +64,12 @@ function DRE() {
         action={<Button onClick={exportCSV} disabled={!dre || loading || semMovimento} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>}
       />
 
-      <FiltrosGerenciais dados={dados} />
+      <FiltrosGerenciais dados={dados}>
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none" title="Quando o sócio retira dinheiro no lugar do pró-labore, a retirada (9.2) passa a ser despesa e reduz o lucro.">
+          <Checkbox checked={retiradasComoDespesa} onCheckedChange={(v) => alternarRetiradas(v === true)} />
+          Retiradas de sócios como despesa
+        </label>
+      </FiltrosGerenciais>
 
       {!empresaId ? (
         <Card className="flex flex-col items-center justify-center py-16 text-center">
@@ -136,7 +148,8 @@ function DRE() {
                       const fundo = subtotal ? 'bg-muted font-bold' : pendente ? 'bg-amber-500/10' : '';
                       return (
                         <React.Fragment key={l.chave}>
-                          {l.chave === 'socios' && <tr><td colSpan={14} className="px-3 py-2 text-left text-xs uppercase tracking-wide text-muted-foreground bg-background">Fora da DRE</td></tr>}
+                          {l.chave === 'socios' && <tr><td colSpan={14} className="px-3 py-2 text-left text-xs uppercase tracking-wide text-muted-foreground bg-background">Fora da DRE (entram no caixa)</td></tr>}
+                          {l.chave === 'repasse_clientes' && <tr><td colSpan={14} className="px-3 py-2 text-left text-xs uppercase tracking-wide text-muted-foreground bg-background">Fora da DRE e do caixa (dinheiro que só passa pela empresa)</td></tr>}
                           <tr className={`border-b border-border ${fundo} ${expansivel ? 'cursor-pointer hover:bg-muted/50' : ''}`} onClick={() => expansivel && alternar(l.chave)}>
                             <td className={`px-3 py-2 text-left sticky left-0 ${subtotal ? 'bg-muted' : pendente ? 'bg-amber-50 dark:bg-amber-950/30' : 'bg-background'}`}>
                               <span className="inline-flex items-center gap-1">
@@ -157,15 +170,45 @@ function DRE() {
                         </React.Fragment>
                       );
                     })}
-                    <tr className="border-t-2 border-border bg-muted/60 font-semibold">
-                      <td className="px-3 py-2 text-left sticky left-0 bg-muted">Total movimentação líquida (conferência)</td>
-                      {dre.conferencia.valores.map((v, i) => <td key={i} className={`px-3 py-2 ${cor(v)}`}>{fmt(v)}</td>)}
-                      <td className={`px-3 py-2 ${cor(dre.conferencia.total)}`}>{fmt(dre.conferencia.total)}</td>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">Clique numa linha para ver as contas. Repasses de clientes e transferências entre contas não entram no resultado nem no caixa da empresa.</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Resultado de caixa {ano}</CardTitle>
+              <CardDescription>Do lucro líquido à geração de caixa: mostra se o lucro paga os empréstimos, os investimentos e as retiradas dos sócios.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-right min-w-[1100px]">
+                  <thead>
+                    <tr className="bg-muted border-b border-border">
+                      <th className="px-3 py-2 text-left sticky left-0 bg-muted min-w-[300px]">Linha</th>
+                      {MESES.map((m) => <th key={m} className="px-3 py-2">{m}/{String(ano).slice(2)}</th>)}
+                      <th className="px-3 py-2 font-bold">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dre.caixa.linhas.map((l) => (
+                      <tr key={l.chave} className={`border-b border-border ${l.chave === 'nao_classificado' ? 'bg-amber-500/10' : ''}`}>
+                        <td className="px-3 py-2 text-left sticky left-0 bg-background">{l.rotulo}</td>
+                        {l.valores.map((v, i) => <td key={i} className={`px-3 py-2 ${cor(v)}`}>{fmt(v)}</td>)}
+                        <td className={`px-3 py-2 font-bold ${cor(l.total)}`}>{fmt(l.total)}</td>
+                      </tr>
+                    ))}
+                    <tr className="border-t-2 border-border bg-muted font-bold">
+                      <td className="px-3 py-2 text-left sticky left-0 bg-muted">= Geração de caixa do mês</td>
+                      {dre.caixa.geracao.valores.map((v, i) => <td key={i} className={`px-3 py-2 ${cor(v)}`}>{fmt(v)}</td>)}
+                      <td className={`px-3 py-2 ${cor(dre.caixa.geracao.total)}`}>{fmt(dre.caixa.geracao.total)}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Clique numa linha para ver as contas. A conferência é o resultado do caixa no período: lucro líquido + movimentos fora da DRE + não classificado.</p>
+              <p className="text-xs text-muted-foreground mt-3">Os juros de empréstimos já estão no lucro (7.2.05). Se a parcela inteira for lançada como amortização (11.2), os juros somem do resultado: lance os juros em 7.2.05.</p>
             </CardContent>
           </Card>
         </>

@@ -12,7 +12,7 @@ const CategoriasList = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await erpServices.categorias.list({});
+    const res = await erpServices.categorias.list({ limit: 500, sortBy: 'ordem', sortOrder: 'asc' });
     if (res.success) setData(res.data);
     setLoading(false);
   };

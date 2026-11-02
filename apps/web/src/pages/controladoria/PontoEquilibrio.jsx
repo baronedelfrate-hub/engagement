@@ -162,6 +162,26 @@ function PontoEquilibrio() {
             <CartaoPE titulo="Acumulado do ano" subtitulo={`${MESES[0]} a ${MESES[mes]}/${ano}`} p={acumulado} />
           </div>
 
+          {/* PE financeiro: soma as parcelas de empréstimos (amortização, grupo 11) aos custos fixos */}
+          {(doMes.parcelasEmprestimos > 0 || acumulado.parcelasEmprestimos > 0) && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold">Ponto de equilíbrio financeiro</h3>
+                <p className="text-xs text-muted-foreground mb-3">Quanto precisa faturar para pagar tudo: custos fixos + parcelas de empréstimos pagas (amortização do principal; os juros já estão nas despesas financeiras).</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {[['No mês', `${MESES[mes]}/${ano}`, doMes], ['Acumulado do ano', `${MESES[0]} a ${MESES[mes]}/${ano}`, acumulado]].map(([t, sub, x]) => (
+                    <div key={t} className="rounded-md bg-muted p-3 space-y-1">
+                      <div className="font-medium">{t} <span className="text-xs text-muted-foreground">{sub}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Parcelas de empréstimos</span><span>{brl(x.parcelasEmprestimos)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">PE financeiro</span><span className="font-bold text-blue-700 dark:text-blue-400">{x.peImpossivel ? '—' : brl(x.peFinanceiro)}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">{x.acimaFinanceiro ? 'Acima do PE financeiro' : 'Abaixo do PE financeiro'}</span><span className={`font-bold ${x.acimaFinanceiro ? 'text-emerald-600' : 'text-red-600'}`}>{x.peImpossivel ? '—' : brl(Math.abs(x.folgaFinanceira))}</span></div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* 2) simulação de cenário, compacta */}
           <Card>
             <CardContent className="p-4">

@@ -18,13 +18,18 @@ export const ESTRUTURA_DRE = [
   { chave: 'desp_comerciais', codigo: '5.2', tipo: 'grupo' },
   { chave: 'desp_estrutura', codigo: '5.3', tipo: 'grupo' },
   { chave: 'desp_gerais', codigo: '5.4', tipo: 'grupo' },
-  { chave: 'resultado_operacional', rotulo: 'RESULTADO OPERACIONAL', tipo: 'subtotal', soma: ['lucro_bruto', 'desp_administrativas', 'desp_comerciais', 'desp_estrutura', 'desp_gerais'] },
+  // opcional: só aparece quando a empresa escolhe tratar as retiradas dos sócios (9.2) como despesa
+  { chave: 'remuneracao_socios', codigo: '9.2', tipo: 'grupo', opcional: true },
+  { chave: 'resultado_operacional', rotulo: 'RESULTADO OPERACIONAL', tipo: 'subtotal', soma: ['lucro_bruto', 'desp_administrativas', 'desp_comerciais', 'desp_estrutura', 'desp_gerais', 'remuneracao_socios'] },
   { chave: 'receita_financeira', codigo: '7.1', tipo: 'grupo' },
   { chave: 'desp_financeira', codigo: '7.2', tipo: 'grupo' },
   { chave: 'lucro_liquido', rotulo: 'LUCRO LÍQUIDO', tipo: 'subtotal', soma: ['resultado_operacional', 'receita_financeira', 'desp_financeira'] },
   { chave: 'socios', codigo: '9', tipo: 'fora' },
   { chave: 'investimentos', codigo: '10', tipo: 'fora' },
   { chave: 'emprestimos', codigo: '11', tipo: 'fora' },
+  // neutros: dinheiro que só passa pela empresa (repasse de clientes, transferências entre contas); fora do resultado e do caixa
+  { chave: 'repasse_clientes', codigo: '12', tipo: 'neutro' },
+  { chave: 'transferencias', codigo: '13', tipo: 'neutro' },
   { chave: 'nao_classificado', rotulo: 'Ainda não classificado (pendente de revisão)', tipo: 'fora' }
 ];
 
@@ -40,11 +45,14 @@ export const ROTULOS_GRUPO = {
   desp_comerciais: 'Despesas Comerciais',
   desp_estrutura: 'Estrutura / Infraestrutura',
   desp_gerais: 'Despesas Gerais',
+  remuneracao_socios: 'Remuneração dos sócios (retiradas)',
   receita_financeira: 'Receitas Financeiras',
   desp_financeira: 'Despesas Financeiras',
   socios: 'Movimentações de Sócios',
   investimentos: 'Investimentos / Ativos',
-  emprestimos: 'Empréstimos e Financiamentos'
+  emprestimos: 'Empréstimos e Financiamentos',
+  repasse_clientes: 'Recursos de clientes para obras (repasse)',
+  transferencias: 'Transferências'
 };
 
 // Custos cujo significado muda de uma empresa para outra: a linha da DRE usa o nome da categoria cadastrada na empresa.
@@ -62,20 +70,23 @@ export const grupoDoLancamento = (mov, categoriasPorId) => {
 };
 
 // movs: [{ data_transacao 'yyyy-mm-dd', valor, categoria_id, subcategoria_id }]
-export const montarDRE = (movs, { ano, categorias, subcategorias }) => {
+export const montarDRE = (movs, { ano, categorias, subcategorias, retiradasComoDespesa = false }) => {
   const catPorId = new Map(categorias.map((c) => [c.id, c]));
   const subPorId = new Map(subcategorias.map((s) => [s.id, s]));
   const grupos = {};
-  for (const l of ESTRUTURA_DRE) if (l.tipo !== 'subtotal') grupos[l.chave] = { valores: zeros(), detalhes: new Map() };
+  for (const l of ESTRUTURA_DRE) if (l.tipo !== 'subtotal') grupos[l.chave] = { valores: zeros(), ent: zeros(), sai: zeros(), detalhes: new Map() };
 
   for (const m of movs) {
     if (!m.data_transacao || Number(m.data_transacao.slice(0, 4)) !== ano) continue;
     const mes = Number(m.data_transacao.slice(5, 7)) - 1;
-    const g = grupoDoLancamento(m, catPorId);
+    let g = grupoDoLancamento(m, catPorId);
     const valor = Number(m.valor) || 0;
-    grupos[g].valores[mes] += valor;
-
     const sub = subPorId.get(m.subcategoria_id);
+    // retiradas/adiantamentos a sócio (9.2) viram remuneração dos sócios, dentro do resultado operacional
+    if (retiradasComoDespesa && g === 'socios' && sub?.codigo && String(sub.codigo).startsWith('9.2')) g = 'remuneracao_socios';
+    grupos[g].valores[mes] += valor;
+    if (valor >= 0) grupos[g].ent[mes] += valor; else grupos[g].sai[mes] += valor;
+
     const cat = catPorId.get(m.categoria_id);
     const chaveDet = sub ? sub.id : cat ? `cat:${cat.id}` : 'sem';
     const rotuloDet = sub ? `${sub.codigo || ''} ${sub.nome}`.trim() : cat ? `${cat.codigo || ''} ${cat.nome} — sem subcategoria`.trim() : 'Sem categoria';
@@ -98,17 +109,37 @@ export const montarDRE = (movs, { ano, categorias, subcategorias }) => {
     const nomeDaEmpresa = GRUPOS_COM_NOME_DA_EMPRESA.has(def.chave)
       ? categorias.find((c) => c.grupo_dre === def.chave && c.nome)?.nome
       : null;
-    const rotulo = def.rotulo || `${def.codigo}${def.tipo === 'fora' && def.codigo.length <= 2 ? '.' : ''} ${nomeDaEmpresa || ROTULOS_GRUPO[def.chave]}`;
+    const foraDaDRE = def.tipo === 'fora' || def.tipo === 'neutro';
+    const rotulo = def.rotulo || `${def.codigo}${foraDaDRE && def.codigo.length <= 2 ? '.' : ''} ${nomeDaEmpresa || ROTULOS_GRUPO[def.chave]}`;
     const linha = { chave: def.chave, tipo: def.tipo, rotulo, valores: valores.map(arred), total: arred(soma(valores)), detalhes };
+    if (def.tipo !== 'subtotal') {
+      linha.entradas = grupos[def.chave].ent.map(arred);
+      linha.saidas = grupos[def.chave].sai.map(arred);
+    }
     porChave[def.chave] = linha;
     return linha;
-  });
+  }).filter((l) => !(ESTRUTURA_DRE.find((d) => d.chave === l.chave)?.opcional && !retiradasComoDespesa));
 
   // movimentação líquida do caixa = lucro líquido + tudo que fica fora da DRE (sócios, investimentos, empréstimos, não classificado)
   const compoeCaixa = linhas.filter((l) => l.chave === 'lucro_liquido' || l.tipo === 'fora');
   const movimentacao = zeros().map((_, i) => arred(compoeCaixa.reduce((s, l) => s + l.valores[i], 0)));
   const conferencia = { valores: movimentacao, total: arred(soma(movimentacao)) };
-  return { ano, linhas, porChave, conferencia };
+
+  // Resultado de caixa: do lucro líquido à geração de caixa do mês (repasses e transferências ficam de fora)
+  const itensCaixa = [
+    ['lucro_liquido', 'Lucro líquido', porChave.lucro_liquido.valores],
+    ['amortizacao', '(−) Amortização de empréstimos', porChave.emprestimos.saidas],
+    ['captacao', '(+) Captação de empréstimos', porChave.emprestimos.entradas],
+    ['investimentos', '(±) Investimentos e aplicações (líquido)', porChave.investimentos.valores],
+    ['retiradas', '(−) Distribuição e retiradas dos sócios', porChave.socios.saidas],
+    ['aportes', '(+) Aportes dos sócios', porChave.socios.entradas]
+  ];
+  if (porChave.nao_classificado.total !== 0) itensCaixa.push(['nao_classificado', 'Ainda não classificado (pendente de revisão)', porChave.nao_classificado.valores]);
+  const caixaLinhas = itensCaixa.map(([chave, rotulo, v]) => ({ chave, rotulo, valores: v.map(arred), total: arred(soma(v)) }));
+  const geracaoValores = zeros().map((_, i) => arred(caixaLinhas.reduce((t, l) => t + l.valores[i], 0)));
+  const caixa = { linhas: caixaLinhas, geracao: { valores: geracaoValores, total: arred(soma(geracaoValores)) } };
+
+  return { ano, linhas, porChave, conferencia, caixa };
 };
 
 // Ponto de Equilíbrio, com as fórmulas da planilha. Total usa os totais do período (não a soma dos meses).
@@ -151,6 +182,17 @@ export const calcularPEPeriodo = (dre, de, ate, { incluirSocios = false } = {}) 
     retiradasSocios: arred(retiradasSocios),
     peSemSocios: arred(mcPct > 0 ? fixosBase / mcPct : 0),
     folga: arred(folga),
+    // ponto de equilíbrio financeiro: soma as parcelas pagas de empréstimos (amortização, grupo 11) aos custos fixos
+    ...(() => {
+      const parcelas = -dre.porChave.emprestimos.saidas.slice(de, ate + 1).reduce((s, x) => s + x, 0);
+      const peFin = mcPct > 0 ? (fixos + parcelas) / mcPct : 0;
+      return {
+        parcelasEmprestimos: arred(parcelas),
+        peFinanceiro: arred(peFin),
+        folgaFinanceira: arred(receita - peFin),
+        acimaFinanceiro: !(fixos + parcelas > 0 && mcPct <= 0) && receita >= peFin
+      };
+    })(),
     cobertura: pe > 0 ? receita / pe : null,
     margemSeguranca: receita > 0 ? folga / receita : 0,
     resultado: arred(mc - fixos),

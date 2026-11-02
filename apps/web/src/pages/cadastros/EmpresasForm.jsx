@@ -15,6 +15,7 @@ import FileUploader from '@/components/FileUploader';
 import CnpjInput, { formatarDocumento } from '@/components/CnpjInput';
 import { unformatCnpj } from '@/lib/cnpjUtils';
 import VinculosSocios from '@/components/cadastros/VinculosSocios';
+import AcessosCadastro from '@/components/cadastros/AcessosCadastro';
 
 const EmpresasForm = () => {
   const { id } = useParams();
@@ -205,6 +206,7 @@ const EmpresasForm = () => {
               </CardContent>
             </Card>
             {isEditing && id && <VinculosSocios empresaId={id} tipoPessoa={formData.tipo_pessoa} />}
+            {isEditing && id && <AcessosCadastro empresaId={id} tipoPessoa={formData.tipo_pessoa} />}
           </TabsContent>
 
           <TabsContent value="endereco">

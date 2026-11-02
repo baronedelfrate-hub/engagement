@@ -10,14 +10,7 @@ export const resolveCompanyId = async (user) => {
     return localCompanyId;
   }
 
-  // 2. Tentar obter do usuário autenticado (metadados)
-  if (user?.user_metadata?.company_id) {
-    console.log("✅ [resolveCompanyId] Encontrado no user_metadata:", user.user_metadata.company_id);
-    localStorage.setItem('company_id', user.user_metadata.company_id);
-    return user.user_metadata.company_id;
-  }
-
-  // 3. Buscar diretamente na tabela profiles (fonte usada pelas políticas de RLS)
+  // 2. Buscar diretamente na tabela profiles (fonte usada pelas políticas de RLS)
   try {
     const currentUser = user || (await supabase.auth.getUser()).data?.user;
     if (currentUser?.id) {
@@ -40,6 +33,13 @@ export const resolveCompanyId = async (user) => {
     }
   } catch (err) {
     console.error("❌ [resolveCompanyId] Falha ao consultar profiles:", err);
+  }
+
+  // 3. Metadados do usuário autenticado (só se a tabela profiles não tiver empresa; quem troca de cadastro muda o profiles)
+  if (user?.user_metadata?.company_id) {
+    console.log("✅ [resolveCompanyId] Encontrado no user_metadata:", user.user_metadata.company_id);
+    localStorage.setItem('company_id', user.user_metadata.company_id);
+    return user.user_metadata.company_id;
   }
 
   // 4. Último recurso: Buscar a primeira empresa disponível na tabela empresas

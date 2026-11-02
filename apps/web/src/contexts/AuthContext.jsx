@@ -40,16 +40,16 @@ export const AuthProvider = ({ children }) => {
     let source = 'nenhuma';
 
     try {
-      // 1. Prioridade: user_metadata
-      if (currentUser?.user_metadata?.company_id) {
-        resolvedId = currentUser.user_metadata.company_id;
-        source = 'user_metadata';
-      }
-
-      // 2. Prioridade: profiles (tabela - via pre-fetch)
-      if (!resolvedId && currentProfile?.company_id) {
+      // 1. Prioridade: profiles (é o que as regras de acesso do banco usam; muda quando a pessoa troca de cadastro)
+      if (currentProfile?.company_id) {
         resolvedId = currentProfile.company_id;
         source = 'profiles (pre-fetched)';
+      }
+
+      // 2. Prioridade: user_metadata
+      if (!resolvedId && currentUser?.user_metadata?.company_id) {
+        resolvedId = currentUser.user_metadata.company_id;
+        source = 'user_metadata';
       }
 
       // 3. Fallback robusto: Forçar query direta na tabela profiles

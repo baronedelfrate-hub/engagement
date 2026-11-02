@@ -2,6 +2,7 @@ import React from 'react';
 import { Bell, User, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
+import SeletorCadastro from '@/components/SeletorCadastro';
 import { useTheme } from '@/contexts/ThemeContext';
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ function Header({ children, onLogout, userName }) {
       </div>
       
       <div className="flex items-center gap-2">
+        <SeletorCadastro />
         <ThemeSwitcher />
         
         <Button variant="ghost" size="icon" className="relative">

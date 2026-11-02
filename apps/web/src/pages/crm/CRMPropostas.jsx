@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { listarPropostas, moeda, STATUS_PROPOSTA } from '@/lib/crmService';
+import { listarPropostas, abrirPdfProposta, moeda, STATUS_PROPOSTA } from '@/lib/crmService';
 
 const COR = { rascunho: 'outline', enviada: 'warning', aceita: 'success', recusada: 'destructive', expirada: 'secondary' };
 const fmt = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : '');
@@ -52,7 +52,7 @@ const CRMPropostas = () => {
       ) : (
         <div className="rounded-lg border border-border overflow-hidden bg-card">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="text-left p-3">Número</th><th className="text-left p-3">Cliente</th><th className="text-left p-3">Proposta</th><th className="text-right p-3">Valor</th><th className="text-left p-3">Emissão</th><th className="text-left p-3">Situação</th></tr></thead>
+            <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="text-left p-3">Número</th><th className="text-left p-3">Cliente</th><th className="text-left p-3">Proposta</th><th className="text-right p-3">Valor</th><th className="text-left p-3">Emissão</th><th className="text-left p-3">Situação</th><th className="text-left p-3">Arquivo</th></tr></thead>
             <tbody className="divide-y divide-border">
               {vis.map((p) => (
                 <tr key={p.id} className="hover:bg-muted/30 cursor-pointer" onClick={() => navigate(`/crm/propostas/${p.id}`)}>
@@ -62,6 +62,7 @@ const CRMPropostas = () => {
                   <td className="p-3 text-right">{moeda(p.valor_total)}</td>
                   <td className="p-3 text-xs">{fmt(p.data_emissao)}</td>
                   <td className="p-3"><Badge variant={COR[p.status]}>{STATUS_PROPOSTA[p.status]}</Badge></td>
+                  <td className="p-3 text-xs">{p.pdf_path ? <button type="button" className="text-blue-600 hover:underline" onClick={(e) => { e.stopPropagation(); abrirPdfProposta(p.pdf_path).catch((err) => toast({ title: 'Não foi possível abrir o PDF', description: err.message, variant: 'destructive' })); }}>PDF</button> : ''}</td>
                 </tr>
               ))}
             </tbody>

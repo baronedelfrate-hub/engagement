@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import PdfAnexado from '@/components/crm/PdfAnexado';
 import { ArrowLeft, Loader2, Plus, Trash2, FileDown, Save, Copy, UserPlus, Send, CheckCircle2, XCircle, ShoppingCart, Receipt, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
@@ -301,6 +302,7 @@ const CRMPropostaEditor = () => {
               {!nova && <Campo rotulo="Número"><Input value={p.numero} readOnly /></Campo>}
             </div>
           </CardContent></Card>
+          {!nova && p.id && <PdfAnexado companyId={companyId} proposta={p} onChange={(x) => setP((prev) => ({ ...prev, ...x }))} />}
         </TabsContent>
 
         <TabsContent value="valores" className="mt-4 space-y-4">

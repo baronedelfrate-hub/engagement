@@ -17,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Save, Building2 } from 'lucide-react';
 import CnpjInput from '@/components/CnpjInput';
+import PropostasDoCliente from '@/components/crm/PropostasDoCliente';
 import { formatCnpj, unformatCnpj } from '@/lib/cnpjUtils';
 import { validateNumericField, validateCNPJ, validateRequiredFields, validateEmail } from '@/lib/validationUtils';
 
@@ -25,6 +26,8 @@ const ClientesForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [companyIdProp, setCompanyIdProp] = useState(null);
+  useEffect(() => { resolveCompanyId(null).then(setCompanyIdProp).catch(() => setCompanyIdProp(null)); }, []);
   const [fetching, setFetching] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -428,6 +431,7 @@ const ClientesForm = () => {
           </form>
         </CardContent>
       </Card>
+      {id && id !== 'novo' && companyIdProp && <PropostasDoCliente companyId={companyIdProp} documento={formData.cnpj_cpf} />}
     </div>
   );
 };

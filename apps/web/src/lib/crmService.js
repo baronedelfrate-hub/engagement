@@ -206,3 +206,42 @@ export const montarPainelCrm = ({ oportunidades, atividades, propostas }, hoje) 
     porEtapa, atrasadas, atividadesHoje: hojeL, paradas, propostasAbertas, vendas: indicadoresVendas(oportunidades, hoje)
   };
 };
+
+
+// ---------- PDF da proposta (arquivo externo anexado) ----------
+const BUCKET_PROPOSTAS = 'propostas';
+const nomeSeguro = (n) => String(n || 'proposta.pdf').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9._-]+/g, '_');
+
+/** Guarda um PDF na proposta (substitui o anterior). O arquivo fica numa pasta da empresa, em bucket privado. */
+export const anexarPdfProposta = async (companyId, proposta, arquivo) => {
+  if (!arquivo) throw new Error('Escolha um arquivo.');
+  if (arquivo.type !== 'application/pdf' && !/\.pdf$/i.test(arquivo.name || '')) throw new Error('Envie um arquivo PDF.');
+  if (arquivo.size > 20 * 1024 * 1024) throw new Error('O PDF passa de 20 MB.');
+  const path = `${companyId}/${proposta.id}/${Date.now()}-${nomeSeguro(arquivo.name)}`;
+  const up = await supabase.storage.from(BUCKET_PROPOSTAS).upload(path, arquivo, { contentType: 'application/pdf', upsert: false });
+  if (up.error) throw new Error(up.error.message);
+  const salvo = ok(await supabase.from('crm_propostas').update({ pdf_path: path, pdf_nome: arquivo.name, updated_at: new Date().toISOString() }).eq('id', proposta.id).select('id, pdf_path, pdf_nome').single());
+  if (proposta.pdf_path) await supabase.storage.from(BUCKET_PROPOSTAS).remove([proposta.pdf_path]);
+  return salvo;
+};
+
+export const removerPdfProposta = async (proposta) => {
+  ok(await supabase.from('crm_propostas').update({ pdf_path: null, pdf_nome: null, updated_at: new Date().toISOString() }).eq('id', proposta.id));
+  if (proposta.pdf_path) await supabase.storage.from(BUCKET_PROPOSTAS).remove([proposta.pdf_path]);
+};
+
+/** Abre o PDF anexado (link temporário de 5 minutos). */
+export const abrirPdfProposta = async (path) => {
+  const { data, error } = await supabase.storage.from(BUCKET_PROPOSTAS).createSignedUrl(path, 300);
+  if (error) throw new Error(error.message);
+  window.open(data.signedUrl, '_blank', 'noopener');
+};
+
+/** Propostas de um cliente: acha a conta do CRM pelo mesmo CPF/CNPJ do cadastro. */
+export const listarPropostasPorDocumento = async (companyId, documento) => {
+  const digitos = String(documento || '').replace(/\D/g, '');
+  if (!digitos) return [];
+  const contas = ok(await supabase.from('crm_contas').select('id, cnpj_cpf').eq('company_id', companyId)).filter((c) => String(c.cnpj_cpf || '').replace(/\D/g, '') === digitos);
+  if (!contas.length) return [];
+  return ok(await supabase.from('crm_propostas').select('id, numero, versao, titulo, status, valor_total, data_emissao, pdf_path, pdf_nome').eq('company_id', companyId).in('conta_id', contas.map((c) => c.id)).order('data_emissao', { ascending: false }));
+};

@@ -107,7 +107,7 @@ function FluxoCaixaDashboard() {
   return (
     <>
       <Helmet>
-        <title>Fluxo de Caixa - ERP Platform</title>
+        <title>Fluxo de Caixa - Engagement ERP</title>
         <meta name="description" content="Acompanhe o fluxo de caixa da sua empresa." />
       </Helmet>
 

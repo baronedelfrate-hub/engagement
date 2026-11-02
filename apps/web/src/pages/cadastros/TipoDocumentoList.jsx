@@ -86,7 +86,7 @@ function TipoDocumentoList() {
   return (
     <div className="p-8 min-h-screen bg-muted">
       <Helmet>
-        <title>Tipo de Documento - ERP Platform</title>
+        <title>Tipo de Documento - Engagement ERP</title>
         <meta name="description" content="Manage and view all document types in your ERP system" />
       </Helmet>
 

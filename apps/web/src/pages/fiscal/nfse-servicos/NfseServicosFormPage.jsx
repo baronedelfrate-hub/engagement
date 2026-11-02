@@ -225,7 +225,7 @@ export default function NfseServicosFormPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <Helmet><title>{isEdit ? 'Editar NFS-e' : 'Nova NFS-e'} | ERP Platform</title></Helmet>
+      <Helmet><title>{isEdit ? 'Editar NFS-e' : 'Nova NFS-e'} | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

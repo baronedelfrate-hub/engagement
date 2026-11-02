@@ -107,7 +107,7 @@ export default function EntradaNFList() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
-      <Helmet><title>Entrada de NF | ERP Platform</title></Helmet>
+      <Helmet><title>Entrada de NF | Engagement ERP</title></Helmet>
 
       <div className="flex justify-between items-center">
         <PageHeader

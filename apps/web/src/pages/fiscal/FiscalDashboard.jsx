@@ -18,7 +18,7 @@ const FiscalDashboard = () => {
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
       <Helmet>
-        <title>Dashboard Fiscal | ERP Platform</title>
+        <title>Dashboard Fiscal | Engagement ERP</title>
       </Helmet>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

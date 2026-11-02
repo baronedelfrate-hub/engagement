@@ -65,7 +65,7 @@ function ReservasList() {
 
   return (
     <>
-      <Helmet><title>Reservas - ERP Platform</title></Helmet>
+      <Helmet><title>Reservas - Engagement ERP</title></Helmet>
       <PageHeader
         title="Reservas de Estoque"
         description="Itens comprometidos em pedidos de venda"

@@ -144,7 +144,7 @@ function SubcategoriasForm() {
   return (
     <>
       <Helmet>
-        <title>{id ? 'Editar' : 'Nova'} Subcategoria - ERP Platform</title>
+        <title>{id ? 'Editar' : 'Nova'} Subcategoria - Engagement ERP</title>
         <meta name="description" content={`${id ? 'Edit existing' : 'Create new'} subcategory in your ERP classification system`} />
       </Helmet>
 

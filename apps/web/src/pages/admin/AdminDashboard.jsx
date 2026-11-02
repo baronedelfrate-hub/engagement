@@ -100,7 +100,7 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <Helmet>
-        <title>Central de Configurações | ERP Platform</title>
+        <title>Central de Configurações | Engagement ERP</title>
       </Helmet>
 
       <PageHeader

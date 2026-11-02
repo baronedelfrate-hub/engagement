@@ -78,7 +78,7 @@ export default function ConciliacoesContabeisForm() {
 
   return (
     <div className="p-6 max-w-[700px] mx-auto space-y-6 pb-24">
-      <Helmet><title>{isEditing ? 'Editar' : 'Nova'} Conciliação | ERP Platform</title></Helmet>
+      <Helmet><title>{isEditing ? 'Editar' : 'Nova'} Conciliação | Engagement ERP</title></Helmet>
 
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate('/contabilidade/conciliacoes')}>

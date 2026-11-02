@@ -607,7 +607,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <F5Provider> 
-          <Helmet><title>ERP Platform</title></Helmet>
+          <Helmet><title>Engagement ERP</title></Helmet>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AnimatedRoutes />
             <Toaster />

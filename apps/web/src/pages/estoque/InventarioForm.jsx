@@ -106,7 +106,7 @@ function InventarioForm() {
 
   return (
     <>
-      <Helmet><title>{id ? 'Editar' : 'Novo'} Inventário - ERP Platform</title></Helmet>
+      <Helmet><title>{id ? 'Editar' : 'Novo'} Inventário - Engagement ERP</title></Helmet>
       <PageHeader title={id ? 'Editar Inventário' : 'Novo Inventário'} showBack />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <form onSubmit={handleSubmit}>

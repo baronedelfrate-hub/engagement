@@ -128,7 +128,7 @@ export default function ApuracaoImpostosFormPage() {
 
   return (
     <div className="p-6 max-w-[1000px] mx-auto space-y-6">
-      <Helmet><title>{isEdit ? 'Editar Apuração' : 'Nova Apuração'} | ERP Platform</title></Helmet>
+      <Helmet><title>{isEdit ? 'Editar Apuração' : 'Nova Apuração'} | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

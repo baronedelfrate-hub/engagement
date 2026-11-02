@@ -125,7 +125,7 @@ function SubcategoriasList() {
   return (
     <div className="min-h-screen bg-muted p-8">
       <Helmet>
-        <title>Subcategorias - ERP Platform</title>
+        <title>Subcategorias - Engagement ERP</title>
         <meta name="description" content="Manage and view all subcategories" />
       </Helmet>
 

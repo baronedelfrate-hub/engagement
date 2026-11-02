@@ -191,7 +191,7 @@ function PedidosCompraList() {
   return (
     <div className="w-full space-y-6 animate-in fade-in duration-500">
       <Helmet>
-        <title>Pedidos de Compra - ERP Platform</title>
+        <title>Pedidos de Compra - Engagement ERP</title>
         <meta name="description" content="Manage purchase orders in your ERP system" />
       </Helmet>
 

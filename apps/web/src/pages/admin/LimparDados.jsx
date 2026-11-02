@@ -263,7 +263,7 @@ export default function LimparDados() {
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <Helmet>
-        <title>Limpar Dados | ERP Platform</title>
+        <title>Limpar Dados | Engagement ERP</title>
       </Helmet>
 
       <PageHeader

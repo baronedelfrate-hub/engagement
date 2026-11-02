@@ -92,7 +92,7 @@ export default function NfseServicosPage() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
-      <Helmet><title>NFS-e (Serviços) | ERP Platform</title></Helmet>
+      <Helmet><title>NFS-e (Serviços) | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

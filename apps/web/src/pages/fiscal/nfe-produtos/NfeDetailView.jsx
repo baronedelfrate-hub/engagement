@@ -111,7 +111,7 @@ export default function NfeDetailView() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <Helmet><title>Detalhes NF-e | ERP Platform</title></Helmet>
+      <Helmet><title>Detalhes NF-e | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

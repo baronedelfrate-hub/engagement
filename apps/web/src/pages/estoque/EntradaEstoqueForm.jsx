@@ -104,7 +104,7 @@ function EntradaEstoqueForm() {
   return (
     <>
       <Helmet>
-        <title>{id ? 'Editar' : 'Nova'} Entrada - ERP Platform</title>
+        <title>{id ? 'Editar' : 'Nova'} Entrada - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

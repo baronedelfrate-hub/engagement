@@ -13,7 +13,7 @@ const AssinaturaBloqueada = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
-      <Helmet><title>Acesso Suspenso | ERP Platform</title></Helmet>
+      <Helmet><title>Acesso Suspenso | Engagement ERP</title></Helmet>
       <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
       <h2 className="text-2xl font-bold text-foreground mb-2">Acesso Suspenso</h2>
       <p className="text-muted-foreground max-w-md mb-6">

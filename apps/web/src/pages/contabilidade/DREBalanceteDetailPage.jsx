@@ -14,7 +14,7 @@ export default function DREBalanceteDetailPage() {
   return (
     <DREBalanceteProvider>
       <div className="p-6 max-w-[1600px] mx-auto space-y-6 pb-24">
-        <Helmet><title>DRE & Balancete | ERP Platform</title></Helmet>
+        <Helmet><title>DRE & Balancete | Engagement ERP</title></Helmet>
 
         <PageHeader 
           title="DRE e Balancete de Verificação" 

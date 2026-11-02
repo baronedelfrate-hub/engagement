@@ -160,7 +160,7 @@ export default function EntradaNFForm() {
 
   return (
     <div className="p-6 max-w-[1000px] mx-auto space-y-6">
-      <Helmet><title>{isEdit ? 'Editar' : 'Nova'} Entrada de NF | ERP Platform</title></Helmet>
+      <Helmet><title>{isEdit ? 'Editar' : 'Nova'} Entrada de NF | Engagement ERP</title></Helmet>
 
       <PageHeader
         title={isEdit ? 'Editar Entrada de NF' : 'Nova Entrada de NF'}

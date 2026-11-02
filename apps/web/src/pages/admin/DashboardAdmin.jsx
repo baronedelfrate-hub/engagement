@@ -44,7 +44,7 @@ function DashboardAdmin() {
   return (
     <>
       <Helmet>
-        <title>Dashboard Admin - ERP Platform</title>
+        <title>Dashboard Admin - Engagement ERP</title>
       </Helmet>
 
       <PageHeader title="Administração" description="Visão geral de segurança e usuários" />

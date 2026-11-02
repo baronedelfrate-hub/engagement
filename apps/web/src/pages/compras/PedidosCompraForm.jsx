@@ -172,7 +172,7 @@ function PedidosCompraForm() {
   return (
     <div className="w-full space-y-6 animate-in fade-in duration-500 pb-10">
       <Helmet>
-        <title>{id ? 'Editar' : 'Novo'} Pedido de Compra - ERP Platform</title>
+        <title>{id ? 'Editar' : 'Novo'} Pedido de Compra - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

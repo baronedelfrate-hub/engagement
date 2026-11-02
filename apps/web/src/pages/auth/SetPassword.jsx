@@ -68,7 +68,7 @@ const SetPassword = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted p-4">
       <Helmet>
-        <title>Configurar Senha | ERP Platform</title>
+        <title>Configurar Senha | Engagement ERP</title>
       </Helmet>
 
       <div className="w-full max-w-md">

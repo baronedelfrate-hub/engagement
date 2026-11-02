@@ -73,7 +73,7 @@ export default function FechamentoMensalDetail() {
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6 pb-24">
-      <Helmet><title>Detalhes do Fechamento | ERP Platform</title></Helmet>
+      <Helmet><title>Detalhes do Fechamento | Engagement ERP</title></Helmet>
 
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

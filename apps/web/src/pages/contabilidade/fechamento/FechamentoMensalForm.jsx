@@ -82,7 +82,7 @@ export default function FechamentoMensalForm() {
 
   return (
     <div className="p-6 max-w-[800px] mx-auto space-y-6 pb-24">
-      <Helmet><title>{isEditing ? 'Editar Fechamento' : 'Novo Fechamento'} | ERP Platform</title></Helmet>
+      <Helmet><title>{isEditing ? 'Editar Fechamento' : 'Novo Fechamento'} | Engagement ERP</title></Helmet>
       
       <div className="flex items-center gap-4 mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate('/contabilidade/fechamento')}>

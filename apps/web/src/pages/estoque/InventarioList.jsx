@@ -76,7 +76,7 @@ function InventarioList() {
 
   return (
     <>
-      <Helmet><title>Inventário - ERP Platform</title></Helmet>
+      <Helmet><title>Inventário - Engagement ERP</title></Helmet>
       <PageHeader
         title="Inventário"
         description="Contagem e conferência de estoque"

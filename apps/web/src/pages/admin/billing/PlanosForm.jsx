@@ -54,7 +54,7 @@ const PlanosForm = () => {
 
   return (
     <>
-      <Helmet><title>{isEditing ? 'Editar' : 'Novo'} Plano | ERP Platform</title></Helmet>
+      <Helmet><title>{isEditing ? 'Editar' : 'Novo'} Plano | Engagement ERP</title></Helmet>
       <PageHeader
         title={isEditing ? 'Editar Plano' : 'Novo Plano'}
         showBack

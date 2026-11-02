@@ -33,7 +33,7 @@ function DashboardGerencial() {
 
   return (
     <>
-      <Helmet><title>Dashboard Gerencial - ERP Platform</title></Helmet>
+      <Helmet><title>Dashboard Gerencial - Engagement ERP</title></Helmet>
       <PageHeader title="Dashboard Gerencial" description="Para onde foi o dinheiro e de quem ele veio, no regime de caixa (extrato classificado)." />
       <FiltrosGerenciais dados={dados}>
         <Select value={mes} onValueChange={setMes}>

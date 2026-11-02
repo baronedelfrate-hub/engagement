@@ -103,7 +103,7 @@ export default function PedidosVendaFiscalPage() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
-      <Helmet><title>Pedidos de Venda Fiscais | ERP Platform</title></Helmet>
+      <Helmet><title>Pedidos de Venda Fiscais | Engagement ERP</title></Helmet>
       
       <PageHeader 
         title="Pedidos de Venda (Fiscal)" 

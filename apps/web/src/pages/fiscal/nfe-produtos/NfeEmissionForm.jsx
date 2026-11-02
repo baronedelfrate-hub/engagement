@@ -266,7 +266,7 @@ export default function NfeEmissionForm() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <Helmet><title>{isEdit ? 'Editar NF-e' : 'Nova NF-e'} | ERP Platform</title></Helmet>
+      <Helmet><title>{isEdit ? 'Editar NF-e' : 'Nova NF-e'} | Engagement ERP</title></Helmet>
       
       <div className="flex justify-between items-center">
         <PageHeader 

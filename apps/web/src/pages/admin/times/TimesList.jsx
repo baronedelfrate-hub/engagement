@@ -85,7 +85,7 @@ function TimesList() {
   return (
     <>
       <Helmet>
-        <title>Times e Grupos - ERP Platform</title>
+        <title>Times e Grupos - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

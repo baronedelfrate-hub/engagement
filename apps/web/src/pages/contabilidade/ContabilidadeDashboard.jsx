@@ -33,7 +33,7 @@ export default function ContabilidadeDashboard() {
 
   return (
     <div className="relative min-h-screen bg-muted/50 pb-24">
-      <Helmet><title>Dashboard Contábil | ERP Platform</title></Helmet>
+      <Helmet><title>Dashboard Contábil | Engagement ERP</title></Helmet>
       
       {/* STICKY FILTER BAR */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border shadow-sm px-6 py-4 mb-6">

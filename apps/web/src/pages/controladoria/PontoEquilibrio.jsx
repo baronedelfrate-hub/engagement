@@ -125,7 +125,7 @@ function PontoEquilibrio() {
 
   return (
     <>
-      <Helmet><title>Ponto de Equilíbrio - ERP Platform</title></Helmet>
+      <Helmet><title>Ponto de Equilíbrio - Engagement ERP</title></Helmet>
       <PageHeader title="Ponto de Equilíbrio" description="Quanto a empresa precisa faturar para cobrir os custos, e quanto sobrou ou faltou, mês a mês e no acumulado do ano." />
 
       <FiltrosGerenciais dados={dados}>

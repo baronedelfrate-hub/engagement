@@ -74,7 +74,7 @@ function SettingsTema() {
   return (
     <>
       <Helmet>
-        <title>Personalizar Tema - ERP Platform</title>
+        <title>Personalizar Tema - Engagement ERP</title>
       </Helmet>
 
       <PageHeader 

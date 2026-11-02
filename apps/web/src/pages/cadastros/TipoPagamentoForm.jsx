@@ -97,7 +97,7 @@ function TipoPagamentoForm() {
   return (
     <>
       <Helmet>
-        <title>{id ? 'Editar' : 'Novo'} Tipo de Pagamento - ERP Platform</title>
+        <title>{id ? 'Editar' : 'Novo'} Tipo de Pagamento - Engagement ERP</title>
         <meta name="description" content={`${id ? 'Edit existing' : 'Create new'} payment type in your ERP financial system`} />
       </Helmet>
 

@@ -106,7 +106,7 @@ export default function EntradaNFDetail() {
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
-      <Helmet><title>Detalhes Entrada NF | ERP Platform</title></Helmet>
+      <Helmet><title>Detalhes Entrada NF | Engagement ERP</title></Helmet>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader

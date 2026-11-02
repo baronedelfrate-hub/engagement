@@ -119,7 +119,7 @@ function ResultadoPorObra() {
 
   return (
     <>
-      <Helmet><title>Resultado por Obra - ERP Platform</title></Helmet>
+      <Helmet><title>Resultado por Obra - Engagement ERP</title></Helmet>
       <PageHeader
         title="Resultado por Obra"
         description="DRE resumida de cada obra/projeto no regime de caixa, a partir do extrato bancário classificado."

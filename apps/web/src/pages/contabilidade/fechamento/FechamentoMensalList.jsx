@@ -59,7 +59,7 @@ export default function FechamentoMensalList() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6 pb-24">
-      <Helmet><title>Fechamento Mensal | ERP Platform</title></Helmet>
+      <Helmet><title>Fechamento Mensal | Engagement ERP</title></Helmet>
 
       <PageHeader 
         title="Fechamento Mensal" 

@@ -39,7 +39,7 @@ export default function ConciliacoesContabeisList() {
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto space-y-6">
-      <Helmet><title>Conciliações Contábeis | ERP Platform</title></Helmet>
+      <Helmet><title>Conciliações Contábeis | Engagement ERP</title></Helmet>
 
       <PageHeader
         title="Conciliações Contábeis"

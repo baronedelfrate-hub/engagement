@@ -63,7 +63,7 @@ const ModulosPorCliente = () => {
 
   return (
     <>
-      <Helmet><title>Módulos por Cliente - ERP Platform</title></Helmet>
+      <Helmet><title>Módulos por Cliente - Engagement ERP</title></Helmet>
       <PageHeader title="Módulos por Cliente" description="Escolha quais módulos cada empresa usa. Os módulos desligados somem do menu e as telas ficam bloqueadas." />
 
       {error ? (

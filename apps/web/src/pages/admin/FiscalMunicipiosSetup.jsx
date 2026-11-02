@@ -82,7 +82,7 @@ export default function FiscalMunicipiosSetup() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <Helmet><title>Setup Municípios Fiscais | ERP Platform</title></Helmet>
+      <Helmet><title>Setup Municípios Fiscais | Engagement ERP</title></Helmet>
       
       <PageHeader 
         title="Setup e Validação: Municípios Fiscais"

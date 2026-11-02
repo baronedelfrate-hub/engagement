@@ -79,7 +79,7 @@ const BillingList = () => {
 
   return (
     <>
-      <Helmet><title>Faturamento | ERP Platform</title></Helmet>
+      <Helmet><title>Faturamento | Engagement ERP</title></Helmet>
       <PageHeader
         title="Faturamento"
         description="Status de assinatura e faturas de cada empresa cliente da plataforma."

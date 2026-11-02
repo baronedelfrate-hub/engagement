@@ -97,7 +97,7 @@ function RelatorioMensal() {
 
   return (
     <>
-      <Helmet><title>Relatório Mensal - ERP Platform</title></Helmet>
+      <Helmet><title>Relatório Mensal - Engagement ERP</title></Helmet>
       <PageHeader title="Relatório Mensal" description="Relatório gerencial do mês em PDF: resumo, DRE, ponto de equilíbrio, despesas por categoria e receita por cliente." />
 
       <FiltrosGerenciais dados={dados}>

@@ -48,7 +48,7 @@ const PainelCarteira = () => {
 
   return (
     <>
-      <Helmet><title>Carteira de Clientes - ERP Platform</title></Helmet>
+      <Helmet><title>Carteira de Clientes - Engagement ERP</title></Helmet>
       <PageHeader
         title="Carteira de Clientes"
         description="Visão de todos os clientes do BPO: extrato, pendências de classificação, títulos vencidos e resultado do último mês."

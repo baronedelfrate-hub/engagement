@@ -61,7 +61,7 @@ export default function ApuracaoImpostosDetailPage() {
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto space-y-6">
-      <Helmet><title>Detalhes Apuração | ERP Platform</title></Helmet>
+      <Helmet><title>Detalhes Apuração | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

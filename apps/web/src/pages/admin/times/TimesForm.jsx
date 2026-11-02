@@ -119,7 +119,7 @@ const TimesForm = () => {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <Helmet>
-        <title>{id ? 'Editar Time' : 'Novo Time'} - ERP Platform</title>
+        <title>{id ? 'Editar Time' : 'Novo Time'} - Engagement ERP</title>
       </Helmet>
 
       <div className="mb-6">

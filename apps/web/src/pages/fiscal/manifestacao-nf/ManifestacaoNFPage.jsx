@@ -72,7 +72,7 @@ export default function ManifestacaoNFPage() {
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto space-y-6">
-      <Helmet><title>Manifestação de NF-e | ERP Platform</title></Helmet>
+      <Helmet><title>Manifestação de NF-e | Engagement ERP</title></Helmet>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <PageHeader 

@@ -33,7 +33,7 @@ const PlanosList = () => {
 
   return (
     <>
-      <Helmet><title>Planos | ERP Platform</title></Helmet>
+      <Helmet><title>Planos | Engagement ERP</title></Helmet>
       <PageHeader
         title="Planos"
         description="Planos de assinatura oferecidos às empresas clientes da plataforma."

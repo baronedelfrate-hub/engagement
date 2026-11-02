@@ -105,7 +105,7 @@ function EntradaNotasFiscaisPage() {
   return (
     <div className="h-full flex flex-col space-y-4">
       <Helmet>
-        <title>Entrada de Notas Fiscais - ERP Platform</title>
+        <title>Entrada de Notas Fiscais - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

@@ -85,7 +85,7 @@ function TipoPagamentoList() {
   return (
     <div className="p-8 min-h-screen bg-muted">
       <Helmet>
-        <title>Tipo de Pagamento - ERP Platform</title>
+        <title>Tipo de Pagamento - Engagement ERP</title>
         <meta name="description" content="Manage and view all payment types in your ERP financial system" />
       </Helmet>
 

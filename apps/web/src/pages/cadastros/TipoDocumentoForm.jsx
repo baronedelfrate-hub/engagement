@@ -96,7 +96,7 @@ function TipoDocumentoForm() {
   return (
     <>
       <Helmet>
-        <title>{id ? 'Editar' : 'Novo'} Tipo de Documento - ERP Platform</title>
+        <title>{id ? 'Editar' : 'Novo'} Tipo de Documento - Engagement ERP</title>
         <meta name="description" content={`${id ? 'Edit existing' : 'Create new'} document type in your ERP system`} />
       </Helmet>
 

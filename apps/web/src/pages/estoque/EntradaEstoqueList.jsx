@@ -92,7 +92,7 @@ function EntradaEstoqueList() {
   return (
     <>
       <Helmet>
-        <title>Entrada de Estoque - ERP Platform</title>
+        <title>Entrada de Estoque - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

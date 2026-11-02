@@ -50,7 +50,7 @@ function DRE() {
 
   return (
     <>
-      <Helmet><title>DRE Gerencial - ERP Platform</title></Helmet>
+      <Helmet><title>DRE Gerencial - Engagement ERP</title></Helmet>
       <PageHeader
         title="DRE Gerencial"
         description="Demonstração do resultado no regime de caixa, a partir do extrato bancário classificado."

@@ -94,7 +94,7 @@ const BPOClientesList = () => {
   return (
     <>
       <Helmet>
-        <title>Clientes BPO - ERP Platform</title>
+        <title>Clientes BPO - Engagement ERP</title>
       </Helmet>
 
       <PageHeader

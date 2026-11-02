@@ -136,6 +136,7 @@ const navigation = [
         children: [
           { name: 'DRE', href: '/controladoria/dre' },
           { name: 'Resultado por Obra', href: '/controladoria/resultado-por-obra' },
+          { name: 'Resultado por Centro de Custo', href: '/controladoria/resultado-por-centro-custo' },
           { name: 'Ponto de Equilíbrio', href: '/controladoria/ponto-equilibrio' },
           { name: 'Dashboard Gerencial', href: '/controladoria/dashboard' },
           { name: 'Relatório Mensal', href: '/controladoria/relatorio-mensal' },

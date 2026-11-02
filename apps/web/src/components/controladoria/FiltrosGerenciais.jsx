@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Building2 } from 'lucide-react';
 
 const FiltrosGerenciais = ({ dados, children }) => {
-  const { isSuperAdmin, empresas, selectedEmpresa, setSelectedEmpresa, anos, ano, setAno, bancoId, setBancoId, bancos, projetoId, setProjetoId, projetos = [] } = dados;
+  const { isSuperAdmin, empresas, selectedEmpresa, setSelectedEmpresa, anos, ano, setAno, bancoId, setBancoId, bancos, projetoId, setProjetoId, projetos = [], centroCustoId, setCentroCustoId, centros = [] } = dados;
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
       {isSuperAdmin && (
@@ -33,6 +33,16 @@ const FiltrosGerenciais = ({ dados, children }) => {
             <SelectItem value="TODOS">Todos os projetos</SelectItem>
             <SelectItem value="SEM">Sem projeto (não se aplica)</SelectItem>
             {projetos.map((p) => <SelectItem key={p.id} value={p.id}>{p.codigo ? `${p.codigo} - ` : ''}{p.nome}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      )}
+      {centros.length > 0 && setCentroCustoId && (
+        <Select value={centroCustoId} onValueChange={setCentroCustoId}>
+          <SelectTrigger className="w-56 bg-background"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="TODOS">Todos os centros de custo</SelectItem>
+            <SelectItem value="SEM">Sem centro de custo</SelectItem>
+            {centros.map((c) => <SelectItem key={c.id} value={c.id}>{c.codigo ? `${c.codigo} - ` : ''}{c.nome}</SelectItem>)}
           </SelectContent>
         </Select>
       )}

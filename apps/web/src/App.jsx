@@ -202,6 +202,7 @@ import BPOClientesCadastroList from '@/pages/bpo/BPOClientesCadastroList';
 import BPOClientesCadastroForm from '@/pages/bpo/BPOClientesCadastroForm';
 import DRE from '@/pages/controladoria/DRE';
 import ResultadoPorObra from '@/pages/controladoria/ResultadoPorObra';
+import ResultadoPorCentroCusto from '@/pages/controladoria/ResultadoPorCentroCusto';
 import PontoEquilibrio from '@/pages/controladoria/PontoEquilibrio';
 import DashboardGerencial from '@/pages/controladoria/DashboardGerencial';
 import RelatorioMensal from '@/pages/controladoria/RelatorioMensal';
@@ -499,6 +500,7 @@ const AnimatedRoutes = () => {
 
           <Route path="/controladoria/dre" element={<ProtectedLayout><PageTransition><DRE /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/resultado-por-obra" element={<ProtectedLayout><PageTransition><ResultadoPorObra /></PageTransition></ProtectedLayout>} />
+          <Route path="/controladoria/resultado-por-centro-custo" element={<ProtectedLayout><PageTransition><ResultadoPorCentroCusto /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/ponto-equilibrio" element={<ProtectedLayout><PageTransition><PontoEquilibrio /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/dashboard" element={<ProtectedLayout><PageTransition><DashboardGerencial /></PageTransition></ProtectedLayout>} />
           <Route path="/controladoria/relatorio-mensal" element={<ProtectedLayout><PageTransition><RelatorioMensal /></PageTransition></ProtectedLayout>} />

@@ -56,7 +56,7 @@ export const ROTULOS_GRUPO = {
 };
 
 // Custos cujo significado muda de uma empresa para outra: a linha da DRE usa o nome da categoria cadastrada na empresa.
-const GRUPOS_COM_NOME_DA_EMPRESA = new Set(['custo_ferramentas', 'custo_midia', 'custo_deslocamento', 'custo_comissoes']);
+const GRUPOS_COM_NOME_DA_EMPRESA = new Set(['custo_mao_obra', 'custo_ferramentas', 'custo_midia', 'custo_deslocamento', 'custo_comissoes']);
 
 const GRUPOS_CONHECIDOS = new Set(ESTRUTURA_DRE.filter((l) => l.tipo !== 'subtotal' && l.chave !== 'nao_classificado').map((l) => l.chave));
 const zeros = () => Array(12).fill(0);
@@ -106,11 +106,12 @@ export const montarDRE = (movs, { ano, categorias, subcategorias, retiradasComoD
         .map((d) => ({ ...d, total: arred(soma(d.valores)) }))
         .sort((a, b) => a.rotulo.localeCompare(b.rotulo, 'pt-BR', { numeric: true }));
     }
-    const nomeDaEmpresa = GRUPOS_COM_NOME_DA_EMPRESA.has(def.chave)
-      ? categorias.find((c) => c.grupo_dre === def.chave && c.nome)?.nome
+    const catDaEmpresa = GRUPOS_COM_NOME_DA_EMPRESA.has(def.chave)
+      ? categorias.find((c) => c.grupo_dre === def.chave && c.nome)
       : null;
     const foraDaDRE = def.tipo === 'fora' || def.tipo === 'neutro';
-    const rotulo = def.rotulo || `${def.codigo}${foraDaDRE && def.codigo.length <= 2 ? '.' : ''} ${nomeDaEmpresa || ROTULOS_GRUPO[def.chave]}`;
+    const rotulo = def.rotulo
+      || (catDaEmpresa ? `${catDaEmpresa.codigo || def.codigo} ${catDaEmpresa.nome}` : `${def.codigo}${foraDaDRE && def.codigo.length <= 2 ? '.' : ''} ${ROTULOS_GRUPO[def.chave]}`);
     const linha = { chave: def.chave, tipo: def.tipo, rotulo, valores: valores.map(arred), total: arred(soma(valores)), detalhes };
     if (def.tipo !== 'subtotal') {
       linha.entradas = grupos[def.chave].ent.map(arred);

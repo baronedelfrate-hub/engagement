@@ -71,6 +71,7 @@ const navigation = [
         isNested: true,
         children: [
           { name: 'Movimentação Financeira', href: '/movimentacao-financeira', icon: ArrowRightLeft },
+          { name: 'Cartões de Crédito', href: '/financeiro/cartoes' },
           { name: 'Conciliação Bancária', href: '/financeiro/conciliacao-bancaria' },
           { name: 'Importar Extrato', href: '/financeiro/importar-extrato' },
           { name: 'Classificar Extrato', href: '/financeiro/classificar-extrato' },

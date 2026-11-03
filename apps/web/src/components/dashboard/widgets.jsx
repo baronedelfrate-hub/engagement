@@ -1,3 +1,4 @@
+import { resumoDosCartoes } from '@/lib/cartaoService';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Plus, CalendarPlus, Trash2, CheckSquare } from 'lucide-react';
@@ -97,6 +98,40 @@ const FinPagarReceber = () => {
           {r.provisoes.qtd > 0 && <p className="text-[11px] text-muted-foreground">Inclui {r.provisoes.qtd} provisão(ões) em aberto ({moeda(r.provisoes.valor)} no total, de todas as datas).</p>}
         </div>
       )}
+    </Moldura>
+  );
+};
+
+const FinCartoes = () => {
+  const navigate = useNavigate();
+  const e = useCarga('cartoes', resumoDosCartoes);
+  const lista = e.dados || [];
+  const Linha = ({ rotulo, valor, cor = '' }) => <div className="flex items-baseline justify-between gap-3 text-sm"><span className="text-muted-foreground text-xs">{rotulo}</span><span className={`font-medium whitespace-nowrap ${cor}`}>{valor}</span></div>;
+  return (
+    <Moldura titulo="Cartões de crédito" descricao="Gasto no mês, fatura a pagar e limite disponível." estado={e} vazio={e.dados && !e.dados.length ? 'Nenhum cartão cadastrado. Cadastre em Financeiro > Cartões de Crédito.' : null}>
+      <div className="space-y-4">
+        {lista.map((r) => (
+          <div key={r.cartao.id} className="space-y-1.5 cursor-pointer rounded-md hover:bg-muted/30 -mx-1 px-1 py-1" onClick={() => navigate(`/financeiro/cartoes/${r.cartao.id}`)}>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="font-semibold text-sm truncate">{r.cartao.nome}{r.cartao.final ? ` · final ${r.cartao.final}` : ''}</span>
+              <span className="text-[11px] text-muted-foreground whitespace-nowrap">fecha {fmt(r.faturaAberta.fechamento)}</span>
+            </div>
+            <Linha rotulo="Gasto no mês" valor={moeda(r.gastoMes)} />
+            <Linha rotulo={`Fatura aberta (fecha ${fmt(r.faturaAberta.fechamento)})`} valor={moeda(r.faturaAberta.valor)} />
+            <Linha rotulo={r.aPagar ? `A pagar (vence ${fmt(r.aPagar.vencimento)})` : 'A pagar'} valor={r.aPagar ? moeda(r.aPagar.valor) : '—'} cor={r.aPagar ? 'text-red-600' : ''} />
+            <Linha rotulo="Limite disponível" valor={moeda(r.disponivel)} cor="text-emerald-600" />
+            {r.limite > 0 && (
+              <div className="h-1.5 rounded bg-muted"><div className={`h-1.5 rounded ${r.percentual >= 90 ? 'bg-red-500' : r.percentual >= 70 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, r.percentual || 0)}%` }} /></div>
+            )}
+          </div>
+        ))}
+        {lista.length > 1 && (
+          <div className="border-t border-border pt-2 space-y-1">
+            <Linha rotulo="Gasto no mês (todos os cartões)" valor={moeda(lista.reduce((s, r) => s + r.gastoMes, 0))} />
+            <Linha rotulo="A pagar (todos os cartões)" valor={moeda(lista.reduce((s, r) => s + (r.aPagar ? r.aPagar.valor : 0), 0))} cor="text-red-600" />
+          </div>
+        )}
+      </div>
     </Moldura>
   );
 };
@@ -433,6 +468,7 @@ export const WIDGETS = [
   { id: 'graf_evolucao', grupo: 'financeiro', titulo: 'Receitas x despesas', descricao: 'Gráfico dos últimos meses', tamanho: 'l', Componente: GrafEvolucao },
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
+  { id: 'fin_cartoes', grupo: 'financeiro', titulo: 'Cartões de crédito', descricao: 'Gasto no mês, fatura a pagar e limite disponível', tamanho: 'q', Componente: FinCartoes },
   { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'q', Componente: FinProximos },
   { id: 'com_faturamento', grupo: 'comercial', titulo: 'Faturamento do mês', descricao: 'Pedidos de venda confirmados no mês e variação', tamanho: 'p', Componente: ComFaturamento },
   { id: 'com_vendas', grupo: 'comercial', titulo: 'Vendas fechadas', descricao: 'Oportunidades ganhas no mês (CRM)', tamanho: 'p', Componente: ComVendas },

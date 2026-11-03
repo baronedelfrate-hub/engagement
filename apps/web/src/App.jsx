@@ -50,6 +50,8 @@ import LimparDados from '@/pages/admin/LimparDados';
 import CobrancaKanbanMov from '@/pages/financeiro/cobranca/CobrancaKanbanMov';
 import CobrancaDashboardMov from '@/pages/financeiro/cobranca/CobrancaDashboardMov';
 import MovimentacaoFinanceiraPage from '@/pages/financeiro/MovimentacaoFinanceiraPage';
+import Cartoes from '@/pages/financeiro/cartoes/Cartoes';
+import CartaoDetalhe from '@/pages/financeiro/cartoes/CartaoDetalhe';
 import NovaMovimentacaoPage from '@/pages/financeiro/NovaMovimentacaoPage';
 import ImportarExtratoPage from '@/pages/financeiro/ImportarExtratoPage';
 import ClassificarExtratoPage from '@/pages/financeiro/ClassificarExtratoPage';
@@ -416,6 +418,8 @@ const AnimatedRoutes = () => {
           <Route path="/financeiro/cobranca" element={<ProtectedLayout><PageTransition><CobrancaKanbanMov /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/cobranca/dashboard" element={<ProtectedLayout><PageTransition><CobrancaDashboardMov /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira/nova" element={<ProtectedLayout><PageTransition><NovaMovimentacaoPage /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/cartoes" element={<ProtectedLayout><PageTransition><Cartoes /></PageTransition></ProtectedLayout>} />
+          <Route path="/financeiro/cartoes/:id" element={<ProtectedLayout><PageTransition><CartaoDetalhe /></PageTransition></ProtectedLayout>} />
           <Route path="/movimentacao-financeira" element={<ProtectedLayout><PageTransition><MovimentacaoFinanceiraPage /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa" element={<ProtectedLayout><PageTransition><FluxoCaixaDashboard /></PageTransition></ProtectedLayout>} />
           <Route path="/financeiro/fluxo-caixa/movimentacoes" element={<Navigate to="/movimentacao-financeira" replace />} />

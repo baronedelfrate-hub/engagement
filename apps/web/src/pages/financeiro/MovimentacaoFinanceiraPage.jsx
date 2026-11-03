@@ -345,6 +345,11 @@ const MovimentacaoFinanceiraPage = () => {
                           </Badge>
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap">
+                          {row.provisao && row.status === 'pendente' && (
+                            <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
+                              <Pencil className="mr-1 h-4 w-4" /> Editar
+                            </Button>
+                          )}
                           {podeSubstituir(row) && (
                             <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setSubstituirRow(row)}>
                               <Replace className="mr-1 h-4 w-4" /> Substituir

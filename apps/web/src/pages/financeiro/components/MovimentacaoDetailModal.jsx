@@ -9,7 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, FileText, Download } from 'lucide-react';
+
+// "PROV · ESCOLA (3/11)" -> "PROV · ESCOLA"
+const baseDe = (n) => String(n || '').replace(/\s*\(\d+\/\d+\)\s*$/, '');
+const ajustaDia = (data, dia) => {
+  const [a, m] = String(data).slice(0, 10).split('-').map(Number);
+  const ultimo = new Date(a, m, 0).getDate();
+  return `${a}-${String(m).padStart(2, '0')}-${String(Math.min(dia, ultimo)).padStart(2, '0')}`;
+};
 import SeletorProjeto from '@/components/SeletorProjeto';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
@@ -25,6 +34,8 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
   const [subcategorias, setSubcategorias] = useState([]);
   const [centrosCusto, setCentrosCusto] = useState([]);
   const [bancos, setBancos] = useState([]);
+  const [entidades, setEntidades] = useState([]); // fornecedores (a pagar) ou clientes (a receber)
+  const [serie, setSerie] = useState([]); // próximas provisões da mesma série
 
   const [form, setForm] = useState({});
 
@@ -58,6 +69,9 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
       if (rowRes.error) throw rowRes.error;
       setRow(rowRes.data);
       setForm({
+        numero_titulo: rowRes.data.numero_titulo || '',
+        entidade_id: (rowRes.data.tipo === 'receber' ? rowRes.data.cliente_id : rowRes.data.fornecedor_id) || 'none',
+        aplicarSerie: false,
         status: rowRes.data.status || 'pendente',
         valor_total: rowRes.data.valor_total || '',
         data_emissao: rowRes.data.data_emissao || '',
@@ -79,6 +93,16 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
           supabase.from('centros_custo').select('id, nome').eq('company_id', company_id).order('nome'),
           supabase.from('bancos').select('id, nome').eq('company_id', company_id).order('nome')
         ]);
+        // fornecedores/clientes e, se for provisão de uma série, as próximas parcelas da série
+        const ent = await supabase.from(rowRes.data.tipo === 'receber' ? 'clientes' : 'fornecedores').select('id, nome').eq('company_id', company_id).order('nome');
+        setEntidades(ent.data || []);
+        if (rowRes.data.provisao && Number(rowRes.data.total_parcelas) > 1) {
+          const { data: futuras } = await supabase.from('movimentacao_financeira')
+            .select('id, numero_titulo, parcela_atual, data_vencimento')
+            .eq('company_id', rowRes.data.company_id).eq('provisao', true).eq('status', 'pendente')
+            .like('numero_titulo', `${baseDe(rowRes.data.numero_titulo)} (%`).gt('parcela_atual', rowRes.data.parcela_atual).order('parcela_atual');
+          setSerie(futuras || []);
+        } else setSerie([]);
         setCategorias(catRes.data || []);
         setSubcategorias(subRes.data || []);
         setCentrosCusto(ccRes.data || []);
@@ -126,7 +150,12 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
   const handleSave = async () => {
     setSaving(true);
     try {
+      const entidadeCampos = row.tipo === 'receber'
+        ? { cliente_id: form.entidade_id === 'none' ? null : form.entidade_id }
+        : { fornecedor_id: form.entidade_id === 'none' ? null : form.entidade_id };
       const payload = {
+        numero_titulo: (form.numero_titulo || '').trim() || row.numero_titulo,
+        ...entidadeCampos,
         status: form.status,
         valor_total: Number(form.valor_total) || 0,
         data_emissao: form.data_emissao,
@@ -141,7 +170,28 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
       };
       const { error } = await supabase.from('movimentacao_financeira').update(payload).eq('id', movimentacaoId);
       if (error) throw error;
-      toast({ title: 'Sucesso', description: 'Movimentação atualizada.' });
+
+      // aplicar às próximas provisões da série: valor, classificação, fornecedor/cliente, banco e, se mudou, o nome e o dia do vencimento
+      if (form.aplicarSerie && serie.length > 0) {
+        const comuns = {
+          valor_total: payload.valor_total, categoria_id: payload.categoria_id, subcategoria_id: payload.subcategoria_id,
+          centro_custo_id: payload.centro_custo_id, projeto_id: payload.projeto_id, banco_id: payload.banco_id, ...entidadeCampos, updated_at: payload.updated_at
+        };
+        const r1 = await supabase.from('movimentacao_financeira').update(comuns).in('id', serie.map((s) => s.id));
+        if (r1.error) throw r1.error;
+        const baseAntiga = baseDe(row.numero_titulo); const baseNova = baseDe(payload.numero_titulo);
+        const diaAntigo = Number(String(row.data_vencimento).slice(8, 10)); const diaNovo = Number(String(form.data_vencimento).slice(8, 10));
+        for (const s of serie) {
+          const campos = {};
+          if (baseNova !== baseAntiga) campos.numero_titulo = String(s.numero_titulo).replace(baseAntiga, baseNova);
+          if (diaNovo && diaNovo !== diaAntigo) campos.data_vencimento = ajustaDia(s.data_vencimento, diaNovo);
+          if (Object.keys(campos).length) {
+            const r2 = await supabase.from('movimentacao_financeira').update(campos).eq('id', s.id);
+            if (r2.error) throw r2.error;
+          }
+        }
+      }
+      toast({ title: 'Sucesso', description: form.aplicarSerie && serie.length ? `Provisão e mais ${serie.length} da série atualizadas.` : 'Movimentação atualizada.' });
       onOpenChange(false);
       if (onSaved) onSaved();
     } catch (err) {
@@ -234,6 +284,20 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label>{row?.provisao ? 'Descrição da provisão' : 'Nº / descrição do título'}</Label>
+                <Input value={form.numero_titulo} onChange={(e) => setForm(f => ({ ...f, numero_titulo: e.target.value }))} />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label>{row?.tipo === 'receber' ? 'Cliente' : 'Fornecedor'}</Label>
+                <Select value={form.entidade_id} onValueChange={(v) => setForm(f => ({ ...f, entidade_id: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {entidades.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label>Status</Label>
                 <Select value={form.status} onValueChange={(v) => setForm(f => ({ ...f, status: v }))}>
@@ -310,6 +374,12 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <Label>Observações</Label>
               <Textarea value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />
             </div>
+            {serie.length > 0 && (
+              <label className="flex items-start gap-2 text-sm rounded-md border border-border p-3 bg-muted/40 cursor-pointer">
+                <Checkbox checked={!!form.aplicarSerie} onCheckedChange={(v) => setForm(f => ({ ...f, aplicarSerie: v === true }))} className="mt-0.5" />
+                <span>Aplicar também às <strong>próximas {serie.length} provisões</strong> desta série (valor, categoria, centro de custo, {row?.tipo === 'receber' ? 'cliente' : 'fornecedor'}, banco, e o nome e o dia do vencimento se você mudar).</span>
+              </label>
+            )}
           </div>
         )}
 

@@ -18,6 +18,19 @@ const getBase64ImageFromUrl = async (imageUrl) => {
   });
 };
 
+// Cabe a imagem na caixa (maxW x maxH) sem esticar: mede o tamanho real e mantém a proporção.
+const caberNaCaixa = (dataUrl, maxW, maxH) => new Promise((resolve) => {
+  const img = new Image();
+  img.onload = () => {
+    const w = img.naturalWidth || maxW;
+    const h = img.naturalHeight || maxH;
+    const escala = Math.min(maxW / w, maxH / h);
+    resolve({ width: w * escala, height: h * escala });
+  };
+  img.onerror = () => resolve({ width: maxW, height: maxH });
+  img.src = dataUrl;
+});
+
 const formatCurrency = (val) => {
   return parseFloat(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
@@ -50,7 +63,8 @@ export const exportToExcel = async (data, columns, reportTitle, filtersDescripti
   try {
       const logoBase64 = await getBase64ImageFromUrl(LOGO_URL);
       const imageId = workbook.addImage({ base64: logoBase64, extension: 'png' });
-      ws1.addImage(imageId, { tl: { col: 0, row: 0 }, ext: { width: 120, height: 40 } });
+      const tamanhoExcel = await caberNaCaixa(logoBase64, 120, 40);
+      ws1.addImage(imageId, { tl: { col: 0, row: 0 }, ext: { width: Math.round(tamanhoExcel.width), height: Math.round(tamanhoExcel.height) } });
   } catch(e) {
       console.warn("Could not load logo for Excel", e);
   }
@@ -140,7 +154,8 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
 
   try {
       const logoBase64 = await getBase64ImageFromUrl(LOGO_URL);
-      doc.addImage(logoBase64, 'PNG', 14, 10, 40, 15);
+      const tamanhoPdf = await caberNaCaixa(logoBase64, 40, 15);
+      doc.addImage(logoBase64, 'PNG', 14, 10, tamanhoPdf.width, tamanhoPdf.height);
   } catch (e) {
       console.warn("Could not load logo for PDF", e);
   }

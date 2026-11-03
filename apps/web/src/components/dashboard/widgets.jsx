@@ -157,7 +157,7 @@ const FinFluxoMes = () => {
 const FinProximos = () => {
   const navigate = useNavigate();
   const e = useCarga('titulos', titulosAbertos);
-  const lista = (e.dados || []).slice(0, 8);
+  const lista = (e.dados || []).slice(0, 10);
   const hoje = hojeISO();
   return (
     <Moldura titulo="Próximos vencimentos" descricao="Os títulos em aberto mais próximos (vencidos primeiro)." estado={e} vazio={e.dados && !e.dados.length ? 'Nenhum título em aberto. 🎉' : null}>
@@ -469,7 +469,7 @@ export const WIDGETS = [
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
   { id: 'fin_cartoes', grupo: 'financeiro', titulo: 'Cartões de crédito', descricao: 'Gasto no mês, fatura a pagar e limite disponível', tamanho: 'q', Componente: FinCartoes },
-  { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'q', Componente: FinProximos },
+  { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'l', Componente: FinProximos },
   { id: 'com_faturamento', grupo: 'comercial', titulo: 'Faturamento do mês', descricao: 'Pedidos de venda confirmados no mês e variação', tamanho: 'p', Componente: ComFaturamento },
   { id: 'com_vendas', grupo: 'comercial', titulo: 'Vendas fechadas', descricao: 'Oportunidades ganhas no mês (CRM)', tamanho: 'p', Componente: ComVendas },
   { id: 'com_conversao', grupo: 'comercial', titulo: 'Taxa de conversão', descricao: 'Ganhas ÷ decididas no mês (CRM)', tamanho: 'p', Componente: ComConversao },

@@ -40,10 +40,14 @@ export const resumoVencimentos = (abertos, hoje = hojeISO()) => {
     return { qtd: l.length, valor: l.reduce((s, x) => s + x.saldo, 0) };
   };
   const sete = somaDias(hoje, 7);
+  const trinta = somaDias(hoje, 30);
+  const fimMes = `${hoje.slice(0, 7)}-31`;
   const prov = abertos.filter((x) => x.provisao);
   return {
     provisoes: { qtd: prov.length, valor: Math.round(prov.reduce((s, x) => s + x.saldo, 0) * 100) / 100 },
     pagarVencidos: f('pagar', null, somaDias(hoje, -1)), pagarHoje: f('pagar', hoje, hoje), pagarSemana: f('pagar', somaDias(hoje, 1), sete),
+    pagarMes: f('pagar', hoje, fimMes), pagar30: f('pagar', hoje, trinta), pagarTotal: f('pagar', null, null),
+    receberMes: f('receber', hoje, fimMes), receber30: f('receber', hoje, trinta), receberTotal: f('receber', null, null),
     receberVencidos: f('receber', null, somaDias(hoje, -1)), receberHoje: f('receber', hoje, hoje), receberSemana: f('receber', somaDias(hoje, 1), sete)
   };
 };

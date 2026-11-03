@@ -80,9 +80,19 @@ const FinPagarReceber = () => {
             <Pilula rotulo="Pagar em 7 dias" valor={r.pagarSemana.valor} qtd={r.pagarSemana.qtd} onClick={() => navigate('/financeiro/contas-pagar')} />
           </div>
           <div className="grid grid-cols-3 gap-2">
+            <Pilula rotulo="Pagar até o fim do mês" valor={r.pagarMes.valor} qtd={r.pagarMes.qtd} onClick={() => navigate('/financeiro/contas-pagar')} />
+            <Pilula rotulo="Pagar em 30 dias" valor={r.pagar30.valor} qtd={r.pagar30.qtd} onClick={() => navigate('/financeiro/contas-pagar')} />
+            <Pilula rotulo="Pagar em aberto (total)" valor={r.pagarTotal.valor} qtd={r.pagarTotal.qtd} onClick={() => navigate('/financeiro/contas-pagar')} />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
             <Pilula rotulo="Receber vencidos" valor={r.receberVencidos.valor} qtd={r.receberVencidos.qtd} cor={r.receberVencidos.qtd ? 'text-red-600' : ''} onClick={() => navigate('/financeiro/contas-receber')} />
             <Pilula rotulo="Receber hoje" valor={r.receberHoje.valor} qtd={r.receberHoje.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
             <Pilula rotulo="Receber em 7 dias" valor={r.receberSemana.valor} qtd={r.receberSemana.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Pilula rotulo="Receber até o fim do mês" valor={r.receberMes.valor} qtd={r.receberMes.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
+            <Pilula rotulo="Receber em 30 dias" valor={r.receber30.valor} qtd={r.receber30.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
+            <Pilula rotulo="Receber em aberto (total)" valor={r.receberTotal.valor} qtd={r.receberTotal.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
           </div>
           {r.provisoes.qtd > 0 && <p className="text-[11px] text-muted-foreground">Inclui {r.provisoes.qtd} provisão(ões) em aberto ({moeda(r.provisoes.valor)} no total, de todas as datas).</p>}
         </div>

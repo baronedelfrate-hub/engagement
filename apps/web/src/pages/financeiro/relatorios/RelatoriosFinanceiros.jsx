@@ -19,6 +19,7 @@ import { formatDateOnly } from '@/lib/dateUtils';
 const SOURCE_COLUMNS = {
   'CONTAS_PAGAR': [
     { id: 'numero', label: 'Nº Título', type: 'string' },
+    { id: 'natureza', label: 'Natureza', type: 'string' },
     { id: 'fornecedor_nome', label: 'Fornecedor', type: 'string' },
     { id: 'data_emissao', label: 'Emissão', type: 'date' },
     { id: 'data_vencimento', label: 'Vencimento', type: 'date' },
@@ -30,6 +31,7 @@ const SOURCE_COLUMNS = {
   ],
   'CONTAS_RECEBER': [
     { id: 'numero', label: 'Nº Título', type: 'string' },
+    { id: 'natureza', label: 'Natureza', type: 'string' },
     { id: 'cliente_nome', label: 'Cliente', type: 'string' },
     { id: 'data_emissao', label: 'Emissão', type: 'date' },
     { id: 'data_vencimento', label: 'Vencimento', type: 'date' },
@@ -45,6 +47,7 @@ const initialFilters = {
   dataInicio: '',
   dataFim: '',
   status: 'TODOS',
+  natureza: 'TODOS', // TODOS | TITULO | PROVISAO
   entidadeId: 'TODOS',
   categoriaId: 'TODOS',
   subcategoriaId: 'TODOS',
@@ -94,7 +97,7 @@ const RelatoriosFinanceiros = () => {
     try {
       const isPagar = source === 'CONTAS_PAGAR';
 
-      // Lê os títulos reais (movimentacao_financeira), sem provisões, cancelados e substituídos
+      // Lê a movimentação financeira: títulos reais e provisões em aberto (cancelados e provisões já substituídas ficam de fora)
       let selectQuery = `*,
          categoria:categorias(nome),
          centro_custo:centros_custo(nome),
@@ -110,8 +113,9 @@ const RelatoriosFinanceiros = () => {
 
       let query = supabase.from('movimentacao_financeira').select(selectQuery)
         .eq('tipo', isPagar ? 'pagar' : 'receber')
-        .eq('provisao', false)
         .not('status', 'in', '(cancelado,substituido)');
+      if (filters.natureza === 'TITULO') query = query.eq('provisao', false);
+      else if (filters.natureza === 'PROVISAO') query = query.eq('provisao', true);
 
       // Apply Filters
       if (filters.dataInicio) query = query.gte('data_vencimento', filters.dataInicio);
@@ -140,7 +144,8 @@ const RelatoriosFinanceiros = () => {
       const rotuloStatus = (s) => (s === 'pago' ? (isPagar ? 'Pago' : 'Recebido') : s === 'pago_parcial' ? 'Parcial' : s === 'vencido' ? 'Vencido' : 'Pendente');
       const flat = (data || []).map(item => ({
         ...item,
-        numero: item.numero_titulo,
+        numero: item.provisao ? String(item.numero_titulo || '').replace(/^PROV · /, '') : item.numero_titulo,
+        natureza: item.provisao ? 'Provisão' : 'Título',
         valor_original: item.valor_total,
         status: rotuloStatus(item.status),
         fornecedor_nome: item.fornecedor?.nome || undefined,
@@ -164,6 +169,7 @@ const RelatoriosFinanceiros = () => {
   const getFilterDescription = () => {
     const parts = [];
     if (filters.status !== 'TODOS') parts.push(`Status: ${filters.status}`);
+    if (filters.natureza !== 'TODOS') parts.push(`Natureza: ${filters.natureza === 'PROVISAO' ? 'Só provisões' : 'Só títulos'}`);
     if (filters.categoriaId !== 'TODOS') parts.push(`Categoria: Específica`);
     if (filters.centroCustosId !== 'TODOS') parts.push(`Centro de Custo: Específico`);
     if (filters.entidadeId !== 'TODOS') parts.push(`Entidade: Específica`);

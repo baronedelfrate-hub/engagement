@@ -79,6 +79,21 @@ const RelatoriosFinanceirosFilters = ({ filters, setFilters, onApply, onClear, d
             </div>
         </div>
 
+        {/* Natureza: títulos reais x provisões */}
+        <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Natureza</Label>
+            <Select value={filters.natureza || 'TODOS'} onValueChange={v => handleChange('natureza', v)}>
+                <SelectTrigger className="h-9 text-xs bg-muted border-border text-foreground">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="TODOS">Títulos e provisões</SelectItem>
+                    <SelectItem value="TITULO">Só títulos</SelectItem>
+                    <SelectItem value="PROVISAO">Só provisões</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+
         {/* Entidade */}
         <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">{isPagar ? 'Fornecedor' : 'Cliente'}</Label>

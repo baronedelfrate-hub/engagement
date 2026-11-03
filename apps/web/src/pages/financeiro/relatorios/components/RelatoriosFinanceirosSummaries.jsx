@@ -17,6 +17,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
         let total = 0;
         let pago = 0;
         let pendente = 0;
+        let provisoes = 0;
         
         const byDia = {};
         const byEntidade = {};
@@ -30,6 +31,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
             
             total += val;
             if (isSettled) pago += val; else pendente += val;
+            if (item.provisao) provisoes += val;
 
             // Grouping helpers
             const addGroup = (groupObj, key, label) => {
@@ -54,7 +56,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
         const sortGroups = (obj) => Object.values(obj).sort((a, b) => b.total - a.total);
 
         return {
-            geral: { total, pago, pendente },
+            geral: { total, pago, pendente, provisoes },
             byDia: sortGroups(byDia),
             byEntidade: sortGroups(byEntidade),
             byCategoria: sortGroups(byCategoria),
@@ -132,11 +134,11 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
     return (
         <div className="space-y-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Secção A: Total Geral */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className={`grid grid-cols-1 ${summary.geral.provisoes > 0 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6`}>
                 <GeralCard 
                     title={isPagar ? "Total a Pagar" : "Total a Receber"}
                     value={summary.geral.total} 
-                    subtext="Soma de todos os títulos filtrados"
+                    subtext="Soma de todos os títulos e provisões filtrados"
                     icon={DollarSign}
                     colorClass="bg-blue-500"
                 />
@@ -150,10 +152,19 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
                 <GeralCard 
                     title="Total Pendente" 
                     value={summary.geral.pendente} 
-                    subtext="Títulos aguardando liquidação"
+                    subtext="Títulos e provisões aguardando liquidação"
                     icon={TrendingDown}
                     colorClass="bg-rose-500"
                 />
+                {summary.geral.provisoes > 0 && (
+                    <GeralCard 
+                        title="Dentre o pendente: provisões" 
+                        value={summary.geral.provisoes} 
+                        subtext="Previsto que ainda não virou título"
+                        icon={TrendingDown}
+                        colorClass="bg-amber-500"
+                    />
+                )}
             </div>
 
             {/* Secções Resumo */}

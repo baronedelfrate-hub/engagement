@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import MenuQuadro from './MenuQuadro';
 import { PRIORIDADES, hojeISO, listarQuadros, criarQuadro, tarefasAbertas, listarUsuarios, iniciais } from '@/lib/tarefasService';
 
 const CORES = ['#FE6102', '#2563eb', '#16a34a', '#9333ea', '#db2777', '#0891b2', '#475569'];
@@ -72,7 +73,7 @@ const TarefasQuadros = () => {
               <Card key={q.id} className="cursor-pointer hover:border-primary/50 transition-colors overflow-hidden" onClick={() => navigate(`/tarefas/${q.id}`)}>
                 <div className="h-2" style={{ background: q.cor || CORES[0] }} />
                 <CardContent className="p-5">
-                  <div className="font-semibold text-lg">{q.nome}</div>
+                  <div className="flex items-start justify-between gap-2"><div className="font-semibold text-lg">{q.nome}</div><MenuQuadro quadro={q} qtdTarefas={q.total} onAtualizado={carregar} onExcluido={carregar} variante="ghost" /></div>
                   {q.descricao && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{q.descricao}</p>}
                   <div className="flex items-center gap-2 mt-4 text-sm"><Badge variant="secondary">{q.abertos} em aberto</Badge>{q.atrasados > 0 && <Badge variant="destructive">{q.atrasados} atrasada(s)</Badge>}<span className="text-xs text-muted-foreground ml-auto">{q.total} no total</span></div>
                 </CardContent>

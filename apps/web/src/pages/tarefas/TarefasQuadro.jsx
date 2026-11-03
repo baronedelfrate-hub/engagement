@@ -13,6 +13,7 @@ import {
   PRIORIDADES, hojeISO, iniciais, listarUsuarios, carregarQuadro, criarCartao, criarColuna, atualizarColuna, excluirColuna, moverCartao, ordemEntre
 } from '@/lib/tarefasService';
 import CartaoDialog from './CartaoDialog';
+import MenuQuadro from './MenuQuadro';
 
 const fmt = (iso) => (iso ? iso.split('-').reverse().slice(0, 2).join('/') : '');
 
@@ -78,7 +79,7 @@ const TarefasQuadro = () => {
     if (!titulo) return;
     const naColuna = dados.cartoes.filter((c) => c.coluna_id === coluna.id);
     try {
-      await criarCartao(companyId, userId, id, coluna.id, { titulo, concluido_em: coluna.concluida ? new Date().toISOString() : null }, ordemEntre(naColuna.length ? Math.max(...naColuna.map((c) => Number(c.ordem))) : undefined, undefined));
+      await criarCartao(companyId, userId, id, coluna.id, { titulo, responsavel_id: userId || null, concluido_em: coluna.concluida ? new Date().toISOString() : null }, ordemEntre(naColuna.length ? Math.max(...naColuna.map((c) => Number(c.ordem))) : undefined, undefined));
       setNovos((n) => ({ ...n, [coluna.id]: '' }));
       await carregar();
     } catch (e) { toast({ title: 'Não foi possível criar a tarefa', description: e.message, variant: 'destructive' }); }
@@ -105,7 +106,7 @@ const TarefasQuadro = () => {
       <PageHeader
         title={dados.quadro.nome}
         description={`${abertos.length} em aberto · ${atrasados} atrasada(s) · ${total - abertos.length} concluída(s)`}
-        action={<Button variant="outline" size="sm" onClick={() => navigate('/tarefas')}><ArrowLeft className="w-4 h-4 mr-2" /> Quadros</Button>}
+        action={<div className="flex gap-2"><MenuQuadro quadro={dados.quadro} qtdTarefas={total} onAtualizado={carregar} onExcluido={() => navigate('/tarefas')} /><Button variant="outline" size="sm" onClick={() => navigate('/tarefas')}><ArrowLeft className="w-4 h-4 mr-2" /> Quadros</Button></div>}
       />
 
       <div className="flex flex-wrap items-center gap-2 mb-4">

@@ -79,7 +79,7 @@ export const excluirLancamento = async (id) => ok(await supabase.from('cartao_la
 export const faturasDoCartao = async (cartaoId) => ok(await supabase.from('movimentacao_financeira').select('id, numero_titulo, valor_total, data_vencimento, status, fatura_ciclo, provisao').eq('cartao_id', cartaoId).eq('provisao', false).order('fatura_ciclo'));
 
 // Compra à vista ou parcelada: as parcelas caem nas faturas dos meses seguintes.
-export const criarLancamentos = async (companyId, cartaoId, { data, descricao, valor, categoria_id, subcategoria_id, parcelas = 1, observacoes }) => {
+export const criarLancamentos = async (companyId, cartaoId, { data, descricao, valor, categoria_id, subcategoria_id, centro_custo_id, parcelas = 1, observacoes }) => {
   const n = Math.max(1, Math.min(60, Number(parcelas) || 1));
   const total = Math.round(Number(valor) * 100);
   const base = Math.floor(total / n);
@@ -91,7 +91,7 @@ export const criarLancamentos = async (companyId, cartaoId, { data, descricao, v
       company_id: companyId, cartao_id: cartaoId, data_compra: iso(ano, mes, noMes(ano, mes, d)),
       descricao: n > 1 ? `${descricao.trim()} (${k + 1}/${n})` : descricao.trim(),
       valor: (k === n - 1 ? total - base * (n - 1) : base) / 100,
-      categoria_id: categoria_id || null, subcategoria_id: subcategoria_id || null,
+      categoria_id: categoria_id || null, subcategoria_id: subcategoria_id || null, centro_custo_id: centro_custo_id || null,
       parcela_atual: n > 1 ? k + 1 : null, total_parcelas: n > 1 ? n : null, observacoes: observacoes || null
     };
   });
@@ -102,9 +102,9 @@ export const criarLancamentos = async (companyId, cartaoId, { data, descricao, v
 export const sugerirClassificacao = async (companyId, descricao) => {
   const ass = assinaturaDe(descricao);
   if (!ass) return null;
-  const l = ok(await supabase.from('cartao_lancamentos').select('descricao, categoria_id, subcategoria_id').eq('company_id', companyId).not('categoria_id', 'is', null).order('created_at', { ascending: false }).limit(500));
+  const l = ok(await supabase.from('cartao_lancamentos').select('descricao, categoria_id, subcategoria_id, centro_custo_id').eq('company_id', companyId).not('categoria_id', 'is', null).order('created_at', { ascending: false }).limit(500));
   const achado = l.find((x) => assinaturaDe(x.descricao) === ass);
-  return achado ? { categoria_id: achado.categoria_id, subcategoria_id: achado.subcategoria_id } : null;
+  return achado ? { categoria_id: achado.categoria_id, subcategoria_id: achado.subcategoria_id, centro_custo_id: achado.centro_custo_id } : null;
 };
 
 // Cria ou atualiza a fatura (título a pagar) de um ciclo com a soma dos lançamentos. Fatura já paga não é alterada.

@@ -18,7 +18,7 @@ import {
 import CartaoFormDialog from './CartaoFormDialog';
 
 const sel = 'h-9 rounded-md border border-input bg-background px-2 text-sm w-full';
-const novoLanc = () => ({ data: hojeISO(), descricao: '', valor: '', categoria_id: '', subcategoria_id: '', parcelas: 1 });
+const novoLanc = () => ({ data: hojeISO(), descricao: '', valor: '', categoria_id: '', subcategoria_id: '', centro_custo_id: '', parcelas: 1 });
 
 const CartaoDetalhe = () => {
   const { id } = useParams();
@@ -30,6 +30,7 @@ const CartaoDetalhe = () => {
   const [faturas, setFaturas] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
+  const [centros, setCentros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [aba, setAba] = useState('lancamentos');
   const [f, setF] = useState(novoLanc());
@@ -39,14 +40,15 @@ const CartaoDetalhe = () => {
   const carregar = useCallback(async () => {
     if (!companyId) { setLoading(false); return; }
     try {
-      const [c, lan, fat, cat, sub] = await Promise.all([
+      const [c, lan, fat, cat, sub, cen] = await Promise.all([
         supabase.from('cartoes').select('*').eq('id', id).single(),
         listarLancamentos(id), faturasDoCartao(id),
         supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId).order('ordem'),
-        supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId).order('codigo')
+        supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId).order('codigo'),
+        supabase.from('centros_custo').select('id, codigo, nome').eq('company_id', companyId).eq('ativo', true).order('codigo')
       ]);
       if (c.error) throw new Error(c.error.message);
-      setCartao(c.data); setLancamentos(lan); setFaturas(fat); setCategorias(cat.data || []); setSubcategorias(sub.data || []);
+      setCartao(c.data); setLancamentos(lan); setFaturas(fat); setCategorias(cat.data || []); setSubcategorias(sub.data || []); setCentros(cen.data || []);
     } catch (e) { toast({ title: 'Erro ao carregar o cartão', description: e.message, variant: 'destructive' }); }
     finally { setLoading(false); }
   }, [companyId, id, toast]);
@@ -60,7 +62,7 @@ const CartaoDetalhe = () => {
     if (!f.descricao.trim() || f.categoria_id) return;
     try {
       const s = await sugerirClassificacao(companyId, f.descricao);
-      if (s) setF((x) => ({ ...x, categoria_id: s.categoria_id || '', subcategoria_id: s.subcategoria_id || '' }));
+      if (s) setF((x) => ({ ...x, categoria_id: s.categoria_id || '', subcategoria_id: s.subcategoria_id || '', centro_custo_id: s.centro_custo_id || x.centro_custo_id }));
     } catch { /* sem sugestão */ }
   };
 
@@ -132,6 +134,10 @@ const CartaoDetalhe = () => {
                   <select className={sel} value={f.categoria_id} onChange={(e) => setF({ ...f, categoria_id: e.target.value, subcategoria_id: '' })}><option value="">— escolha —</option>{categorias.map((c) => <option key={c.id} value={c.id}>{c.codigo} {c.nome}</option>)}</select></div>
                 <div className="md:col-span-2"><Label className="text-xs">Subcategoria</Label>
                   <select className={sel} value={f.subcategoria_id} onChange={(e) => setF({ ...f, subcategoria_id: e.target.value })} disabled={!f.categoria_id}><option value="">— escolha —</option>{subsDe(f.categoria_id).map((s) => <option key={s.id} value={s.id}>{s.codigo} {s.nome}</option>)}</select></div>
+                {centros.length > 0 && (
+                  <div className="md:col-span-2"><Label className="text-xs">Centro de custo</Label>
+                    <select className={sel} value={f.centro_custo_id} onChange={(e) => setF({ ...f, centro_custo_id: e.target.value })}><option value="">— nenhum —</option>{centros.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}</select></div>
+                )}
                 <div className="md:col-span-2 flex items-end"><Button onClick={lancar} disabled={salvando} className="gap-1 w-full">{salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Lançar</Button></div>
               </div>
               {f.data && <p className="text-xs text-muted-foreground mt-2">Esta compra cai na fatura de {rotuloCiclo(cicloDaCompra(f.data, cartao.dia_fechamento))}.</p>}
@@ -139,15 +145,16 @@ const CartaoDetalhe = () => {
           </Card>
           <div className="rounded-lg border border-border overflow-x-auto bg-card">
             <table className="w-full text-sm min-w-[860px]">
-              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="text-left p-2">Data</th><th className="text-left p-2">Descrição</th><th className="text-left p-2 w-56">Categoria</th><th className="text-left p-2 w-56">Subcategoria</th><th className="text-right p-2">Valor</th><th className="text-left p-2">Fatura</th><th className="p-2" /></tr></thead>
+              <thead className="bg-muted/50 text-xs uppercase text-muted-foreground"><tr><th className="text-left p-2">Data</th><th className="text-left p-2">Descrição</th><th className="text-left p-2 w-56">Categoria</th><th className="text-left p-2 w-56">Subcategoria</th>{centros.length > 0 && <th className="text-left p-2 w-36">Centro</th>}<th className="text-right p-2">Valor</th><th className="text-left p-2">Fatura</th><th className="p-2" /></tr></thead>
               <tbody className="divide-y divide-border">
-                {lancamentos.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-muted-foreground">Nenhum lançamento ainda.</td></tr>}
+                {lancamentos.length === 0 && <tr><td colSpan={8} className="p-6 text-center text-muted-foreground">Nenhum lançamento ainda.</td></tr>}
                 {lancamentos.map((l) => (
                   <tr key={l.id}>
                     <td className="p-2 whitespace-nowrap">{fmtData(l.data_compra)}</td>
                     <td className="p-2">{l.descricao}{l.observacoes && <div className="text-[11px] text-muted-foreground">{l.observacoes}</div>}</td>
                     <td className="p-2"><select className={sel} value={l.categoria_id || ''} onChange={(e) => reclassificar(l, { categoria_id: e.target.value || null, subcategoria_id: null })}><option value="">— sem categoria —</option>{categorias.map((c) => <option key={c.id} value={c.id}>{c.codigo} {c.nome}</option>)}</select></td>
                     <td className="p-2"><select className={sel} value={l.subcategoria_id || ''} onChange={(e) => reclassificar(l, { subcategoria_id: e.target.value || null })} disabled={!l.categoria_id}><option value="">—</option>{subsDe(l.categoria_id).map((s) => <option key={s.id} value={s.id}>{s.codigo} {s.nome}</option>)}</select></td>
+                    {centros.length > 0 && <td className="p-2"><select className={sel} value={l.centro_custo_id || ''} onChange={(e) => reclassificar(l, { centro_custo_id: e.target.value || null })}><option value="">—</option>{centros.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}</select></td>}
                     <td className={`p-2 text-right font-medium whitespace-nowrap ${Number(l.valor) < 0 ? 'text-emerald-600' : ''}`}>{moeda(l.valor)}</td>
                     <td className="p-2 text-xs whitespace-nowrap">{rotuloCiclo(cicloDaCompra(l.data_compra, cartao.dia_fechamento))}</td>
                     <td className="p-2"><button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => apagar(l)}><Trash2 className="h-4 w-4" /></button></td>

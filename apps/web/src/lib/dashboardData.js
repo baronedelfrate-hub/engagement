@@ -25,6 +25,26 @@ export const titulosAbertos = async (companyId) => {
   return t.map((x) => ({ ...x, nome: x.tipo === 'pagar' ? x.fornecedor?.nome : x.cliente?.nome, saldo: Math.round((Number(x.valor_total) - (pago[x.id] || 0)) * 100) / 100 })).filter((x) => x.saldo > 0.009);
 };
 
+// Provisões ainda em aberto (a pagar e a receber previstos, que não viraram título real). Ficam fora dos títulos em aberto de propósito.
+export const provisoesAbertas = async (companyId) => {
+  const p = ok(await supabase.from('movimentacao_financeira')
+    .select('id, tipo, numero_titulo, valor_total, data_vencimento, cliente:clientes(nome), fornecedor:fornecedores(nome)')
+    .eq('company_id', companyId).eq('provisao', true).eq('status', 'pendente').order('data_vencimento').limit(3000));
+  return p.map((x) => ({ ...x, nome: x.tipo === 'pagar' ? x.fornecedor?.nome : x.cliente?.nome, valor: Number(x.valor_total) || 0 }));
+};
+
+// Resumo das provisões: vencidas (data já passou), no mês, nos próximos 90 dias e total.
+export const resumoProvisoes = (lista, hoje = hojeISO()) => {
+  const fimMes = `${hoje.slice(0, 7)}-31`;
+  const em90 = somaDias(hoje, 90);
+  const f = (tipo, de, ate) => {
+    const l = lista.filter((x) => x.tipo === tipo && (de === null || x.data_vencimento >= de) && (ate === null || x.data_vencimento <= ate));
+    return { qtd: l.length, valor: Math.round(l.reduce((s, x) => s + x.valor, 0) * 100) / 100 };
+  };
+  const bloco = (tipo) => ({ vencidas: f(tipo, null, somaDias(hoje, -1)), mes: f(tipo, hoje, fimMes), prox90: f(tipo, hoje, em90), total: f(tipo, null, null) });
+  return { pagar: bloco('pagar'), receber: bloco('receber') };
+};
+
 // Entradas e saídas realizadas no mês (pelas baixas).
 export const movimentoDoMes = async (companyId, hoje = hojeISO()) => {
   const ini = `${hoje.slice(0, 7)}-01`;

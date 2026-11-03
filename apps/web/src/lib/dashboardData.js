@@ -11,11 +11,11 @@ const ok = ({ data, error }) => {
 export const hojeISO = () => new Date().toISOString().slice(0, 10);
 export const somaDias = (iso, n) => { const d = new Date(`${iso}T12:00:00`); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
 
-// Títulos em aberto (a pagar e a receber), com o saldo já descontadas as baixas parciais. Provisões ficam de fora.
+// Títulos em aberto (a pagar e a receber), com o saldo já descontadas as baixas parciais. Provisões pendentes entram (marcadas com provisao: true); as já substituídas pelo título real ficam de fora.
 export const titulosAbertos = async (companyId) => {
   const t = ok(await supabase.from('movimentacao_financeira')
-    .select('id, tipo, numero_titulo, valor_total, data_vencimento, status, cliente:clientes(nome), fornecedor:fornecedores(nome)')
-    .eq('company_id', companyId).eq('provisao', false).in('status', ['pendente', 'pago_parcial', 'vencido']).order('data_vencimento').limit(3000));
+    .select('id, tipo, numero_titulo, valor_total, data_vencimento, status, provisao, cliente:clientes(nome), fornecedor:fornecedores(nome)')
+    .eq('company_id', companyId).in('status', ['pendente', 'pago_parcial', 'vencido']).order('data_vencimento').limit(3000));
   const pago = {};
   for (let i = 0; i < t.length; i += 150) {
     const ids = t.slice(i, i + 150).map((x) => x.id);
@@ -23,26 +23,6 @@ export const titulosAbertos = async (companyId) => {
     b.forEach((x) => { pago[x.movimentacao_id] = (pago[x.movimentacao_id] || 0) + Number(x.valor_baixa || 0); });
   }
   return t.map((x) => ({ ...x, nome: x.tipo === 'pagar' ? x.fornecedor?.nome : x.cliente?.nome, saldo: Math.round((Number(x.valor_total) - (pago[x.id] || 0)) * 100) / 100 })).filter((x) => x.saldo > 0.009);
-};
-
-// Provisões ainda em aberto (a pagar e a receber previstos, que não viraram título real). Ficam fora dos títulos em aberto de propósito.
-export const provisoesAbertas = async (companyId) => {
-  const p = ok(await supabase.from('movimentacao_financeira')
-    .select('id, tipo, numero_titulo, valor_total, data_vencimento, cliente:clientes(nome), fornecedor:fornecedores(nome)')
-    .eq('company_id', companyId).eq('provisao', true).eq('status', 'pendente').order('data_vencimento').limit(3000));
-  return p.map((x) => ({ ...x, nome: x.tipo === 'pagar' ? x.fornecedor?.nome : x.cliente?.nome, valor: Number(x.valor_total) || 0 }));
-};
-
-// Resumo das provisões: vencidas (data já passou), no mês, nos próximos 90 dias e total.
-export const resumoProvisoes = (lista, hoje = hojeISO()) => {
-  const fimMes = `${hoje.slice(0, 7)}-31`;
-  const em90 = somaDias(hoje, 90);
-  const f = (tipo, de, ate) => {
-    const l = lista.filter((x) => x.tipo === tipo && (de === null || x.data_vencimento >= de) && (ate === null || x.data_vencimento <= ate));
-    return { qtd: l.length, valor: Math.round(l.reduce((s, x) => s + x.valor, 0) * 100) / 100 };
-  };
-  const bloco = (tipo) => ({ vencidas: f(tipo, null, somaDias(hoje, -1)), mes: f(tipo, hoje, fimMes), prox90: f(tipo, hoje, em90), total: f(tipo, null, null) });
-  return { pagar: bloco('pagar'), receber: bloco('receber') };
 };
 
 // Entradas e saídas realizadas no mês (pelas baixas).
@@ -60,7 +40,9 @@ export const resumoVencimentos = (abertos, hoje = hojeISO()) => {
     return { qtd: l.length, valor: l.reduce((s, x) => s + x.saldo, 0) };
   };
   const sete = somaDias(hoje, 7);
+  const prov = abertos.filter((x) => x.provisao);
   return {
+    provisoes: { qtd: prov.length, valor: Math.round(prov.reduce((s, x) => s + x.saldo, 0) * 100) / 100 },
     pagarVencidos: f('pagar', null, somaDias(hoje, -1)), pagarHoje: f('pagar', hoje, hoje), pagarSemana: f('pagar', somaDias(hoje, 1), sete),
     receberVencidos: f('receber', null, somaDias(hoje, -1)), receberHoje: f('receber', hoje, hoje), receberSemana: f('receber', somaDias(hoje, 1), sete)
   };

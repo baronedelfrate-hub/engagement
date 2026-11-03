@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { titulosAbertos, provisoesAbertas, resumoProvisoes, movimentoDoMes, resumoVencimentos, hojeISO, somaDias, resumoExecutivo, faturamentoDoMes, listarEventos, criarEvento, atualizarEvento, excluirEvento, linkGoogleEvento, TIPOS_EVENTO } from '@/lib/dashboardData';
+import { titulosAbertos, movimentoDoMes, resumoVencimentos, hojeISO, somaDias, resumoExecutivo, faturamentoDoMes, listarEventos, criarEvento, atualizarEvento, excluirEvento, linkGoogleEvento, TIPOS_EVENTO } from '@/lib/dashboardData';
 import { listarOportunidades, listarPropostas, ETAPAS, moeda, indicadoresVendas, variacaoPct } from '@/lib/crmService';
 import { listarContratos, valorMensal } from '@/lib/crmContratos';
 import { tarefasAbertas, listarUsuarios, PRIORIDADES, linkGoogleAgenda } from '@/lib/tarefasService';
@@ -71,7 +71,7 @@ const FinPagarReceber = () => {
   const e = useCarga('titulos', titulosAbertos);
   const r = e.dados ? resumoVencimentos(e.dados) : null;
   return (
-    <Moldura titulo="A pagar e a receber" descricao="Saldo em aberto por vencimento (as provisões aparecem no cartão Provisões)." estado={e}>
+    <Moldura titulo="A pagar e a receber" descricao="Saldo em aberto por vencimento, incluindo as provisões." estado={e}>
       {r && (
         <div className="space-y-3">
           <div className="grid grid-cols-3 gap-2">
@@ -84,46 +84,7 @@ const FinPagarReceber = () => {
             <Pilula rotulo="Receber hoje" valor={r.receberHoje.valor} qtd={r.receberHoje.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
             <Pilula rotulo="Receber em 7 dias" valor={r.receberSemana.valor} qtd={r.receberSemana.qtd} cor="text-emerald-600" onClick={() => navigate('/financeiro/contas-receber')} />
           </div>
-        </div>
-      )}
-    </Moldura>
-  );
-};
-
-const FinProvisoes = () => {
-  const navigate = useNavigate();
-  const e = useCarga('provisoes', provisoesAbertas);
-  const lista = e.dados || [];
-  const r = e.dados ? resumoProvisoes(lista) : null;
-  const hoje = hojeISO();
-  const proximas = lista.slice(0, 6);
-  return (
-    <Moldura titulo="Provisões" descricao="Previsto que ainda não virou título (a pagar e a receber)." estado={e} vazio={e.dados && !e.dados.length ? 'Nenhuma provisão em aberto.' : null}>
-      {r && (
-        <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
-            <Pilula rotulo="Pagar no mês" valor={r.pagar.mes.valor} qtd={r.pagar.mes.qtd} onClick={() => navigate('/movimentacao-financeira')} />
-            <Pilula rotulo="Pagar em 90 dias" valor={r.pagar.prox90.valor} qtd={r.pagar.prox90.qtd} onClick={() => navigate('/movimentacao-financeira')} />
-            <Pilula rotulo="Pagar (total)" valor={r.pagar.total.valor} qtd={r.pagar.total.qtd} cor={r.pagar.vencidas.qtd ? 'text-red-600' : ''} onClick={() => navigate('/movimentacao-financeira')} />
-          </div>
-          {r.receber.total.qtd > 0 && (
-            <div className="grid grid-cols-3 gap-2">
-              <Pilula rotulo="Receber no mês" valor={r.receber.mes.valor} qtd={r.receber.mes.qtd} cor="text-emerald-600" onClick={() => navigate('/movimentacao-financeira')} />
-              <Pilula rotulo="Receber em 90 dias" valor={r.receber.prox90.valor} qtd={r.receber.prox90.qtd} cor="text-emerald-600" onClick={() => navigate('/movimentacao-financeira')} />
-              <Pilula rotulo="Receber (total)" valor={r.receber.total.valor} qtd={r.receber.total.qtd} cor="text-emerald-600" onClick={() => navigate('/movimentacao-financeira')} />
-            </div>
-          )}
-          {r.pagar.vencidas.qtd + r.receber.vencidas.qtd > 0 && <p className="text-xs text-red-600">{r.pagar.vencidas.qtd + r.receber.vencidas.qtd} provisão(ões) com a data já passada: substitua pelo título real ou ajuste a data.</p>}
-          <div className="divide-y divide-border">
-            {proximas.map((t) => (
-              <div key={t.id} className="py-1.5 flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/30" onClick={() => navigate('/movimentacao-financeira')}>
-                <Badge variant={t.tipo === 'pagar' ? 'destructive' : 'success'} className="shrink-0">{t.tipo === 'pagar' ? 'pagar' : 'receber'}</Badge>
-                <span className="flex-1 truncate">{String(t.numero_titulo || '').replace(/^PROV · /, '') || t.nome}</span>
-                <span className={`text-xs ${t.data_vencimento < hoje ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>{fmt(t.data_vencimento)}</span>
-                <span className="font-medium whitespace-nowrap">{moeda(t.valor)}</span>
-              </div>
-            ))}
-          </div>
+          {r.provisoes.qtd > 0 && <p className="text-[11px] text-muted-foreground">Inclui {r.provisoes.qtd} provisão(ões) em aberto ({moeda(r.provisoes.valor)} no total, de todas as datas).</p>}
         </div>
       )}
     </Moldura>
@@ -159,7 +120,8 @@ const FinProximos = () => {
         {lista.map((t) => (
           <div key={t.id} className="py-1.5 flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/30" onClick={() => navigate(t.tipo === 'pagar' ? '/financeiro/contas-pagar' : '/financeiro/contas-receber')}>
             <Badge variant={t.tipo === 'pagar' ? 'destructive' : 'success'} className="shrink-0">{t.tipo === 'pagar' ? 'pagar' : 'receber'}</Badge>
-            <span className="flex-1 truncate">{t.nome || t.numero_titulo}</span>
+            <span className="flex-1 truncate">{t.provisao ? String(t.numero_titulo || '').replace(/^PROV · /, '') || t.nome : (t.nome || t.numero_titulo)}</span>
+            {t.provisao && <Badge variant="outline" className="shrink-0 border-amber-500/40 text-amber-600 text-[10px]">provisão</Badge>}
             <span className={`text-xs ${t.data_vencimento < hoje ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>{fmt(t.data_vencimento)}</span>
             <span className="font-medium whitespace-nowrap">{moeda(t.saldo)}</span>
           </div>
@@ -461,7 +423,6 @@ export const WIDGETS = [
   { id: 'graf_evolucao', grupo: 'financeiro', titulo: 'Receitas x despesas', descricao: 'Gráfico dos últimos meses', tamanho: 'l', Componente: GrafEvolucao },
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
-  { id: 'fin_provisoes', grupo: 'financeiro', titulo: 'Provisões', descricao: 'Previsto a pagar e a receber que ainda não virou título', tamanho: 'q', Componente: FinProvisoes },
   { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'q', Componente: FinProximos },
   { id: 'com_faturamento', grupo: 'comercial', titulo: 'Faturamento do mês', descricao: 'Pedidos de venda confirmados no mês e variação', tamanho: 'p', Componente: ComFaturamento },
   { id: 'com_vendas', grupo: 'comercial', titulo: 'Vendas fechadas', descricao: 'Oportunidades ganhas no mês (CRM)', tamanho: 'p', Componente: ComVendas },

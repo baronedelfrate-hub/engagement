@@ -48,15 +48,27 @@ export const resumoVencimentos = (abertos, hoje = hojeISO()) => {
 
 // ---------- painel executivo: caixa, receitas, despesas e ponto de equilíbrio ----------
 // Saldo atual: o último saldo registrado no extrato de cada banco da empresa. Sem extrato, devolve null.
-export const saldoDeCaixa = async (companyId) => {
-  const bancos = ok(await supabase.from('bancos').select('id').eq('company_id', companyId));
+export const posicaoDeCaixa = async (companyId) => {
+  const bancos = ok(await supabase.from('bancos').select('id, limite').eq('company_id', companyId));
   let soma = 0; let achou = false;
+  let limiteTotal = 0; let limiteUsado = 0; let excedido = 0;
   for (const b of bancos) {
     const l = ok(await supabase.from('extrato_bancario').select('saldo_posterior, data_transacao').eq('banco_id', b.id).not('saldo_posterior', 'is', null).order('data_transacao', { ascending: false }).order('created_at', { ascending: false }).limit(1));
-    if (l[0]) { soma += Number(l[0].saldo_posterior); achou = true; }
+    const lim = Math.max(0, Number(b.limite) || 0);
+    limiteTotal += lim;
+    if (l[0]) {
+      const saldo = Number(l[0].saldo_posterior);
+      soma += saldo; achou = true;
+      if (saldo < 0) { limiteUsado += Math.min(-saldo, lim); excedido += Math.max(0, -saldo - lim); }
+    }
   }
-  return achou ? Math.round(soma * 100) / 100 : null;
+  const arred = (v) => Math.round(v * 100) / 100;
+  return {
+    caixa: achou ? arred(soma) : null,
+    limite: limiteTotal > 0 || excedido > 0 ? { total: arred(limiteTotal), usado: arred(limiteUsado), restante: arred(Math.max(0, limiteTotal - limiteUsado)), excedido: arred(excedido) } : null
+  };
 };
+export const saldoDeCaixa = async (companyId) => (await posicaoDeCaixa(companyId)).caixa;
 
 // DRE do ano corrente (regime de caixa, a mesma das telas gerenciais) resumida para os indicadores e o gráfico.
 export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
@@ -66,9 +78,10 @@ export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
     supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId),
     supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId),
     buscarTudo(() => supabase.from('extrato_bancario').select('id, data_transacao, valor, categoria_id, subcategoria_id, cliente_nome, banco_id').eq('company_id', companyId).gte('data_transacao', `${ano}-01-01`).lte('data_transacao', `${ano}-12-31`).order('data_transacao').order('id')),
-    saldoDeCaixa(companyId).catch(() => null)
+    posicaoDeCaixa(companyId).catch(() => ({ caixa: null, limite: null }))
   ]);
   const temDados = movs.length > 0;
+  const { caixa: saldoCaixa, limite: limiteContas } = caixa;
   const dre = montarDRE(movs, { ano, categorias: cats.data || [], subcategorias: subs.data || [] });
   const v = (k, i) => dre.porChave[k].valores[i];
   const receita = (i) => v('receita_bruta', i);
@@ -76,7 +89,7 @@ export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
   const serie = [];
   for (let i = Math.max(0, mes - 5); i <= mes; i += 1) serie.push({ mes: MESES[i], receitas: receita(i), despesas: Math.max(0, despesa(i)) });
   const naoClassificado = dre.porChave.nao_classificado ? Math.abs(dre.porChave.nao_classificado.valores[mes]) : 0;
-  return { temDados, caixa, mesRotulo: `${MESES[mes]}/${ano}`, receitas: receita(mes), despesas: despesa(mes), pe: calcularPEPeriodo(dre, mes, mes), serie, naoClassificado };
+  return { temDados, caixa: saldoCaixa, limite: limiteContas, mesRotulo: `${MESES[mes]}/${ano}`, receitas: receita(mes), despesas: despesa(mes), pe: calcularPEPeriodo(dre, mes, mes), serie, naoClassificado };
 };
 
 // Faturamento do mês: soma dos pedidos de venda confirmados ou faturados (rascunhos e cancelados ficam de fora), pela data do pedido.

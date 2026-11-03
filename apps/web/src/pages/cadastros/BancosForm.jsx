@@ -1,3 +1,4 @@
+import { usoDoLimite } from '@/lib/bancoLimite';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
@@ -31,6 +32,7 @@ const BancosForm = () => {
     conta: '',
     tipo_conta: 'Corrente',
     saldo: '',
+    limite: '',
     data_saldo_inicial: '',
     ativo: true
   });
@@ -44,6 +46,7 @@ const BancosForm = () => {
           setFormData({
             ...data,
             saldo: data.saldo !== undefined && data.saldo !== null ? data.saldo : '',
+            limite: data.limite !== undefined && data.limite !== null ? data.limite : '',
             data_saldo_inicial: data.data_saldo_inicial || ''
           });
           
@@ -110,6 +113,11 @@ const BancosForm = () => {
         throw new Error("O valor do saldo é inválido");
       }
 
+      const limiteNumeric = parseCurrency(formData.limite);
+      if (limiteNumeric < 0) {
+        throw new Error("O limite não pode ser negativo");
+      }
+
       // Validate: if saldo is provided, data_saldo_inicial is required
       if (saldoNumeric !== 0 && !formData.data_saldo_inicial) {
         throw new Error("A data do saldo inicial é obrigatória quando há um saldo inicial");
@@ -130,6 +138,7 @@ const BancosForm = () => {
       const payload = {
         ...formData,
         saldo: saldoNumeric,
+        limite: limiteNumeric,
         data_saldo_inicial: formData.data_saldo_inicial || null,
         // Ensure codigo is string
         codigo: formData.codigo?.toString() || ''
@@ -269,15 +278,44 @@ const BancosForm = () => {
                   name="saldo"
                   type="number"
                   step="0.01"
-                  min="0"
                   value={formData.saldo}
                   onChange={handleChange}
                   placeholder="0,00"
                   className="font-mono"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Use ponto para decimais (ex: 1500.50)
+                  Use ponto para decimais (ex: 1500.50). Pode ser negativo: saldo negativo quer dizer que o limite da conta está em uso.
                 </p>
+              </div>
+
+              {/* Limite da conta */}
+              <div className="space-y-2">
+                <Label htmlFor="limite">Limite da conta (R$)</Label>
+                <Input
+                  id="limite"
+                  name="limite"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.limite}
+                  onChange={handleChange}
+                  placeholder="0,00"
+                  className="font-mono"
+                />
+                {(() => {
+                  const u = usoDoLimite(parseCurrency(formData.saldo), parseCurrency(formData.limite));
+                  if (u.usando) {
+                    const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    return (
+                      <p className={`text-xs font-medium ${u.estourou ? 'text-red-600' : 'text-amber-600'}`}>
+                        {u.estourou
+                          ? `Saldo negativo acima do limite: faltam ${brl(u.excedido)} além dos ${brl(u.limite)} de limite.`
+                          : `Usando o limite: ${brl(u.usado)} de ${brl(u.limite)}${u.percentual != null ? ` (${u.percentual.toLocaleString('pt-BR')}%)` : ''}. Ainda livre: ${brl(u.restante)}.`}
+                      </p>
+                    );
+                  }
+                  return <p className="text-xs text-muted-foreground">Cheque especial, conta garantida ou limite da conta. Quando o saldo ficar negativo, o sistema entende que está usando esse limite.</p>;
+                })()}
               </div>
 
               {/* Initial Balance Date */}

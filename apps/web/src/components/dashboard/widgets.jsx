@@ -266,7 +266,7 @@ const Indicador = ({ rotulo, valor, sub, estado, alerta }) => (
 const useExecutivo = () => useCarga('executivo', resumoExecutivo);
 const SEM_DADOS = 'sem movimento no extrato';
 
-const KpiCaixa = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Caixa" estado={e} valor={d?.caixa === null || d?.caixa === undefined ? '—' : moeda(d.caixa)} sub={d?.caixa === null || d?.caixa === undefined ? 'sem saldo no extrato' : 'saldo do último extrato importado'} />; };
+const KpiCaixa = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Caixa" estado={e} valor={d?.caixa === null || d?.caixa === undefined ? '—' : moeda(d.caixa)} sub={d?.caixa === null || d?.caixa === undefined ? 'sem saldo no extrato' : (d?.limite && (d.limite.usado > 0 || d.limite.excedido > 0) ? `usando ${moeda(d.limite.usado + d.limite.excedido)} de limite · livre ${moeda(d.limite.restante)}` : (d?.limite ? `limite livre ${moeda(d.limite.restante)}` : 'saldo do último extrato importado'))} />; };
 const KpiReceitas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Receitas" estado={e} valor={d?.temDados ? moeda(d.receitas) : '—'} sub={d?.temDados ? `recebido em ${d.mesRotulo}` : SEM_DADOS} />; };
 const KpiDespesas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Despesas" estado={e} valor={d?.temDados ? moeda(d.despesas) : '—'} sub={d?.temDados ? `pago em ${d.mesRotulo}` : SEM_DADOS} />; };
 const KpiPE = () => {

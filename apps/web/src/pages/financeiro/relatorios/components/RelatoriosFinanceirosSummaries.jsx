@@ -68,11 +68,11 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
     const GeralCard = ({ title, value, subtext, icon: Icon, colorClass }) => (
         <Card className="bg-background border-border overflow-hidden relative">
             <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 opacity-20 ${colorClass}`}></div>
-            <CardContent className="p-6 relative z-10">
+            <CardContent className="p-5 relative z-10">
                 <div className="flex justify-between items-start">
                     <div className="space-y-2">
                         <p className="text-sm font-medium text-muted-foreground">{title}</p>
-                        <p className="text-2xl sm:text-3xl font-bold text-white">{formatCurrency(value)}</p>
+                        <p className="text-lg sm:text-xl font-bold text-white whitespace-nowrap tabular-nums">{formatCurrency(value)}</p>
                     </div>
                     <div className={`p-3 rounded-xl bg-muted ${colorClass.replace('bg-', 'text-')}`}>
                         <Icon className="h-5 w-5" />
@@ -134,7 +134,7 @@ const RelatoriosFinanceirosSummaries = ({ data, source }) => {
     return (
         <div className="space-y-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Secção A: Total Geral */}
-            <div className={`grid grid-cols-1 ${summary.geral.provisoes > 0 ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6`}>
+            <div className={`grid grid-cols-1 ${summary.geral.provisoes > 0 ? 'sm:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3'} gap-4`}>
                 <GeralCard 
                     title={isPagar ? "Total a Pagar" : "Total a Receber"}
                     value={summary.geral.total} 

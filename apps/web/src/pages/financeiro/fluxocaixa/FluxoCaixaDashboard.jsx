@@ -15,6 +15,8 @@ import { fetchFluxoCaixaData, fetchVencidos, intervaloDoPeriodo, PERIODOS_FLUXO,
 import FluxoCaixaDashboardChart from './FluxoCaixaDashboardChart';
 import DrilldownModal from './components/DrilldownModal';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { posicaoDeCaixa } from '@/lib/dashboardData';
 
 // Fluxo de caixa a partir da Movimentação Financeira (base única):
 // previsto = títulos pelo vencimento; realizado = baixas pela data do pagamento/recebimento.
@@ -32,6 +34,8 @@ function FluxoCaixaDashboard() {
   const [chartTimeline, setChartTimeline] = useState([]);
   const [movimentacoes, setMovimentacoes] = useState([]);
   const [vencidos, setVencidos] = useState(null);
+  const { company_id: companyId } = useAuthContext();
+  const [posicao, setPosicao] = useState(null); // saldo dos bancos hoje e uso do limite
 
   const [isDrilldownModalOpen, setIsDrilldownModalOpen] = useState(false);
   const [drilldownItems, setDrilldownItems] = useState([]);
@@ -41,10 +45,12 @@ function FluxoCaixaDashboard() {
     setLoading(true);
     try {
       const intervalo = periodo === 'personalizado' ? intervaloCustom : intervaloDoPeriodo(periodo);
-      const [result, venc] = await Promise.all([
+      const [result, venc, pos] = await Promise.all([
         fetchFluxoCaixaData({ ...intervalo, incluirProvisoes, agruparPor }),
         fetchVencidos(),
+        companyId ? posicaoDeCaixa(companyId).catch(() => null) : Promise.resolve(null),
       ]);
+      setPosicao(pos);
       setMatrixData(result.matrix);
       setChartTimeline(result.chartTimeline);
       setMovimentacoes(result.movimentacoes);
@@ -55,7 +61,7 @@ function FluxoCaixaDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [toast, periodo, intervaloCustom, incluirProvisoes, agruparPor]);
+  }, [toast, periodo, intervaloCustom, incluirProvisoes, agruparPor, companyId]);
 
   useEffect(() => {
     loadData();
@@ -159,7 +165,25 @@ function FluxoCaixaDashboard() {
         transition={{ duration: 0.5 }}
         className="space-y-6 min-w-0"
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className={`grid grid-cols-1 ${posicao?.caixa != null ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4`}>
+          {posicao?.caixa != null && (
+            <Card className={posicao.limite && posicao.limite.excedido > 0 ? 'border-red-500/60' : posicao.limite && posicao.limite.usado > 0 ? 'border-amber-500/60' : ''}>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground uppercase font-bold">Disponível hoje (saldo + limite)</p>
+                <h3 className={`text-xl font-mono font-bold ${posicao.disponivel < 0 ? 'text-red-600' : 'text-foreground'}`}>{formatCurrency(posicao.disponivel)}</h3>
+                <p className="text-[11px] text-muted-foreground">Saldo nos bancos: {formatCurrency(posicao.caixa)}</p>
+                {posicao.limite && (
+                  <p className={`text-[11px] ${posicao.limite.excedido > 0 ? 'text-red-600' : posicao.limite.usado > 0 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                    {posicao.limite.excedido > 0
+                      ? `Passou do limite em ${formatCurrency(posicao.limite.excedido)}`
+                      : posicao.limite.usado > 0
+                        ? `Usando ${formatCurrency(posicao.limite.usado)} do limite de ${formatCurrency(posicao.limite.total)} · livre ${formatCurrency(posicao.limite.restante)}`
+                        : `Limite de ${formatCurrency(posicao.limite.total)} sem uso`}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground uppercase font-bold">Saldo Previsto ({rotuloPeriodo})</p>

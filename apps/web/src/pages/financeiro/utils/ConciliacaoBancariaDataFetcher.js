@@ -6,11 +6,11 @@ export const fetchConciliacaoData = async (filters) => {
     const { dataInicio, dataFim, bancoId, statusConciliacao } = filters;
 
     // First, fetch bank info to get data_saldo_inicial
-    let bankInfo = { saldo: 0, data_saldo_inicial: null };
+    let bankInfo = { saldo: 0, data_saldo_inicial: null, limite: 0 };
     if (bancoId && bancoId !== 'TODOS') {
       const { data: bankData, error: bankError } = await supabase
         .from('bancos')
-        .select('saldo, data_saldo_inicial')
+        .select('saldo, data_saldo_inicial, limite')
         .eq('id', bancoId)
         .single();
 
@@ -19,7 +19,7 @@ export const fetchConciliacaoData = async (filters) => {
       }
     } else {
       // "Todos os bancos": se a empresa só tem um banco ativo, usa o saldo inicial dele
-      const { data: ativos } = await supabase.from('bancos').select('id, saldo, data_saldo_inicial').eq('ativo', true);
+      const { data: ativos } = await supabase.from('bancos').select('id, saldo, data_saldo_inicial, limite').eq('ativo', true);
       if (ativos?.length === 1) {
         bankInfo = ativos[0];
         bancoId = ativos[0].id;
@@ -103,6 +103,7 @@ export const fetchConciliacaoData = async (filters) => {
       sistemaBaixas,
       ofxTransacoes,
       saldoInicial: bankInfo.saldo || 0,
+      limite: Number(bankInfo.limite) || 0,
       dataSaldoInicial: bankInfo.data_saldo_inicial || null
     };
 

@@ -1,3 +1,4 @@
+import { usoDoLimite } from '@/lib/bancoLimite';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -28,6 +29,7 @@ const BancosForm = ({ clientId }) => {
       conta: '',
       tipo_conta: 'CORRENTE',
       saldo: 0,
+      limite: 0,
       ativo: true,
     }
   });
@@ -159,6 +161,29 @@ const BancosForm = ({ clientId }) => {
                   step="0.01"
                   {...register('saldo', { valueAsNumber: true })}
                 />
+                <p className="text-xs text-muted-foreground">Pode ser negativo: saldo negativo quer dizer que o limite da conta está em uso.</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="limite">Limite da conta (R$)</Label>
+                <Input
+                  id="limite"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  {...register('limite', { valueAsNumber: true, min: 0 })}
+                />
+                {(() => {
+                  const saldoAtual = Number(watch('saldo')) || 0;
+                  const u = usoDoLimite(saldoAtual, Number(watch('limite')) || 0);
+                  const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                  if (!u.usando) return <p className="text-xs text-muted-foreground">Cheque especial, conta garantida ou limite da conta.</p>;
+                  return (
+                    <p className={`text-xs font-medium ${u.estourou ? 'text-red-600' : 'text-amber-600'}`}>
+                      {u.estourou ? `Saldo negativo acima do limite: faltam ${brl(u.excedido)} além do limite.` : `Usando o limite: ${brl(u.usado)} de ${brl(u.limite)}. Ainda livre: ${brl(u.restante)}.`}
+                    </p>
+                  );
+                })()}
               </div>
 
               <div className="flex items-center gap-2">

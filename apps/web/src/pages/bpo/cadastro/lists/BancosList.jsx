@@ -1,3 +1,4 @@
+import { usoDoLimite } from '@/lib/bancoLimite';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
@@ -119,6 +120,7 @@ const BancosList = ({ clientId }) => {
                   <TableHead>Conta</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Saldo</TableHead>
+                  <TableHead>Limite</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -131,7 +133,15 @@ const BancosList = ({ clientId }) => {
                     <TableCell>{banco.agencia}</TableCell>
                     <TableCell>{banco.conta}</TableCell>
                     <TableCell>{banco.tipo_conta}</TableCell>
-                    <TableCell>R$ {banco.saldo?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell>
+                      <span className={Number(banco.saldo) < 0 ? 'text-red-600 font-medium' : ''}>R$ {Number(banco.saldo || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      {usoDoLimite(banco.saldo, banco.limite).usando && (
+                        <div className={`text-[11px] ${usoDoLimite(banco.saldo, banco.limite).estourou ? 'text-red-600' : 'text-amber-600'}`}>
+                          {usoDoLimite(banco.saldo, banco.limite).estourou ? 'Passou do limite' : 'Usando limite'}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{Number(banco.limite) > 0 ? `R$ ${Number(banco.limite).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '—'}</TableCell>
                     <TableCell>
                       <Badge variant={banco.ativo ? 'default' : 'secondary'}>
                         {banco.ativo ? 'Ativo' : 'Inativo'}

@@ -33,6 +33,7 @@ const ConciliacaoBancariaPage = () => {
     sistemaBaixas: [], 
     ofxTransacoes: [], 
     saldoInicial: 0, 
+    limite: 0,
     dataSaldoInicial: null 
   });
   const [loading, setLoading] = useState(true);
@@ -139,6 +140,7 @@ const ConciliacaoBancariaPage = () => {
             sistemaBaixas={data.sistemaBaixas} 
             ofxTransacoes={data.ofxTransacoes}
             saldoInicial={data.saldoInicial}
+            limite={data.limite}
             dataSaldoInicial={data.dataSaldoInicial}
         />
 

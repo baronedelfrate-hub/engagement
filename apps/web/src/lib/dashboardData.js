@@ -65,6 +65,7 @@ export const posicaoDeCaixa = async (companyId) => {
   const arred = (v) => Math.round(v * 100) / 100;
   return {
     caixa: achou ? arred(soma) : null,
+    disponivel: achou ? arred(soma + limiteTotal) : null, // saldo + limite das contas
     limite: limiteTotal > 0 || excedido > 0 ? { total: arred(limiteTotal), usado: arred(limiteUsado), restante: arred(Math.max(0, limiteTotal - limiteUsado)), excedido: arred(excedido) } : null
   };
 };

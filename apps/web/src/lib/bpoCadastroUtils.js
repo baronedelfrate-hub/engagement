@@ -48,7 +48,7 @@ export const getEntityLabel = (submenu) => {
 
 export const getEntityFields = (entityType) => {
   const fieldConfigs = {
-    bancos: ['codigo', 'nome', 'agencia', 'conta', 'tipo_conta', 'saldo'],
+    bancos: ['codigo', 'nome', 'agencia', 'conta', 'tipo_conta', 'saldo', 'limite'],
     categorias: ['nome', 'descricao'],
     'centros-custo': ['codigo', 'nome', 'descricao'],
     clientes: ['nome', 'email', 'telefone', 'endereco', 'cidade', 'estado', 'cep', 'cnpj_cpf'],
@@ -94,7 +94,7 @@ export const mapSubmenuToService = (submenu) => {
 
 export const getDefaultFormValues = (entityType) => {
   const defaults = {
-    bancos: { codigo: '', nome: '', agencia: '', conta: '', tipo_conta: '', saldo: 0, ativo: true },
+    bancos: { codigo: '', nome: '', agencia: '', conta: '', tipo_conta: '', saldo: 0, limite: 0, ativo: true },
     categorias: { nome: '', descricao: '', ativo: true },
     'centros-custo': { codigo: '', nome: '', descricao: '', ativo: true },
     clientes: { nome: '', email: '', telefone: '', endereco: '', cidade: '', estado: '', cep: '', cnpj_cpf: '', tipo_cliente: 'PF', status: 'ativo' },

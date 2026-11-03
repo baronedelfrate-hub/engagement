@@ -1,3 +1,4 @@
+import { usoDoLimite } from '@/lib/bancoLimite';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowDownToLine, ArrowUpToLine, CheckCircle2, AlertCircle, Scale, Calendar } from 'lucide-react';
@@ -17,7 +18,7 @@ const SummaryCard = ({ title, value, subvalue, icon: Icon, colorClass }) => (
   </Card>
 );
 
-const ConciliacaoSummarySection = ({ sistemaBaixas, ofxTransacoes, saldoInicial, dataSaldoInicial }) => {
+const ConciliacaoSummarySection = ({ sistemaBaixas, ofxTransacoes, saldoInicial, dataSaldoInicial, limite = 0 }) => {
   const totSisPagar = sistemaBaixas.filter(i => i.tipo_geral === 'PAGAR').reduce((a, b) => a + Math.abs(b.valor), 0);
   const totSisRec = sistemaBaixas.filter(i => i.tipo_geral === 'RECEBER').reduce((a, b) => a + b.valor, 0);
   const movimentacaoSis = totSisRec - totSisPagar;
@@ -29,6 +30,10 @@ const ConciliacaoSummarySection = ({ sistemaBaixas, ofxTransacoes, saldoInicial,
   const saldoFinalOfx = (saldoInicial || 0) + movimentacaoOfx;
 
   const diff = saldoFinalSis - saldoFinalOfx;
+  // limite da conta: saldo negativo = limite em uso; disponível = saldo + limite
+  const usoSis = usoDoLimite(saldoFinalSis, limite);
+  const usoOfx = usoDoLimite(saldoFinalOfx, limite);
+  const mostrarLimite = limite > 0 || usoSis.usando || usoOfx.usando;
 
   const concSis = sistemaBaixas.filter(i => i.status_conciliacao === 'Conciliado').length;
   const pendSis = sistemaBaixas.length - concSis;
@@ -67,6 +72,27 @@ const ConciliacaoSummarySection = ({ sistemaBaixas, ofxTransacoes, saldoInicial,
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Limite da conta */}
+      {mostrarLimite && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[['Sistema', usoSis], ['Extrato', usoOfx]].map(([nome, u]) => (
+            <Card key={nome} className={u.estourou ? 'border-red-500/60' : u.usando ? 'border-amber-500/60' : ''}>
+              <CardContent className="p-4">
+                <p className="text-xs text-muted-foreground uppercase font-bold">Saldo disponível — {nome} (saldo + limite)</p>
+                <p className={`text-xl font-bold ${u.disponivel < 0 ? 'text-red-600' : ''}`}>{formatBRL(u.disponivel)}</p>
+                <p className={`text-xs mt-1 ${u.estourou ? 'text-red-600' : u.usando ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                  {u.estourou
+                    ? (u.limite > 0 ? `Passou do limite em ${formatBRL(u.excedido)} (limite de ${formatBRL(u.limite)})` : 'Saldo negativo e a conta não tem limite cadastrado')
+                    : u.usando
+                      ? `Usando ${formatBRL(u.usado)} do limite de ${formatBRL(u.limite)}${u.percentual != null ? ` (${u.percentual.toLocaleString('pt-BR')}%)` : ''} · livre ${formatBRL(u.restante)}`
+                      : `Limite de ${formatBRL(u.limite)} sem uso`}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
       {/* Summary Cards Grid */}

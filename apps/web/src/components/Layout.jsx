@@ -137,6 +137,7 @@ const navigation = [
         children: [
           { name: 'DRE', href: '/controladoria/dre' },
           { name: 'Resultado por Obra', href: '/controladoria/resultado-por-obra' },
+          { name: 'Prestação de Contas da Obra', href: '/controladoria/prestacao-contas-obra' },
           { name: 'Resultado por Centro de Custo', href: '/controladoria/resultado-por-centro-custo' },
           { name: 'Resultado Pessoal', href: '/controladoria/resultado-pessoal' },
           { name: 'Visão da Sócia', href: '/controladoria/visao-socia' },

@@ -1,3 +1,4 @@
+import { painelTerceiros } from '@/lib/prestacaoContas';
 import { resumoDosCartoes } from '@/lib/cartaoService';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -132,6 +133,35 @@ const FinCartoes = () => {
           </div>
         )}
       </div>
+    </Moldura>
+  );
+};
+
+const FinTerceiros = () => {
+  const navigate = useNavigate();
+  const e = useCarga('terceiros', painelTerceiros);
+  const d = e.dados;
+  const Linha = ({ rotulo, valor, cor = '' }) => <div className="flex items-baseline justify-between gap-3 text-sm"><span className="text-muted-foreground text-xs">{rotulo}</span><span className={`font-medium whitespace-nowrap ${cor}`}>{valor}</span></div>;
+  return (
+    <Moldura titulo="Dinheiro de clientes nas obras" descricao="Repasses que passam pela conta: o saldo de cada obra não é dinheiro da empresa." estado={e} vazio={d && !d.temRepasse ? 'Nenhum repasse de cliente classificado ainda.' : null}>
+      {d && d.temRepasse && (
+        <div className="space-y-3">
+          {d.negativas > 0 && <p className="text-xs text-red-600 font-medium">{d.negativas} obra(s) com saldo negativo: foi pago mais do que o cliente depositou.</p>}
+          <div className="space-y-1.5">
+            <Linha rotulo="Saldo nos bancos" valor={d.caixa === null ? '—' : moeda(d.caixa)} />
+            <Linha rotulo="Dinheiro dos clientes (obras)" valor={moeda(d.total)} cor={d.total < 0 ? 'text-red-600' : 'text-amber-600'} />
+            <div className="flex items-baseline justify-between gap-3 border-t border-border pt-1.5"><span className="text-xs font-medium">Caixa próprio estimado</span><span className={`font-bold whitespace-nowrap ${d.proprio !== null && d.proprio < 0 ? 'text-red-600' : 'text-emerald-600'}`}>{d.proprio === null ? '—' : moeda(d.proprio)}</span></div>
+          </div>
+          <div className="divide-y divide-border">
+            {d.obras.slice(0, 6).map((o) => (
+              <div key={o.id} className="py-1.5 flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/30" onClick={() => navigate('/controladoria/prestacao-contas-obra')}>
+                <span className="flex-1 truncate">{o.nome}</span>
+                <span className={`font-medium whitespace-nowrap ${o.saldo < 0 ? 'text-red-600' : ''}`}>{moeda(o.saldo)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </Moldura>
   );
 };
@@ -469,6 +499,7 @@ export const WIDGETS = [
   { id: 'fin_fluxo_mes', grupo: 'financeiro', titulo: 'Movimento do mês', descricao: 'Entradas, saídas e resultado realizado', tamanho: 'q', Componente: FinFluxoMes },
   { id: 'fin_pagar_receber', grupo: 'financeiro', titulo: 'A pagar e a receber', descricao: 'Vencidos, hoje e próximos 7 dias', tamanho: 'l', Componente: FinPagarReceber },
   { id: 'fin_cartoes', grupo: 'financeiro', titulo: 'Cartões de crédito', descricao: 'Gasto no mês, fatura a pagar e limite disponível', tamanho: 'q', Componente: FinCartoes },
+  { id: 'fin_terceiros', grupo: 'financeiro', titulo: 'Dinheiro de clientes nas obras', descricao: 'Saldo de cada obra e caixa próprio', tamanho: 'q', Componente: FinTerceiros },
   { id: 'fin_proximos', grupo: 'financeiro', titulo: 'Próximos vencimentos', descricao: 'Lista dos títulos mais próximos', tamanho: 'l', Componente: FinProximos },
   { id: 'com_faturamento', grupo: 'comercial', titulo: 'Faturamento do mês', descricao: 'Pedidos de venda confirmados no mês e variação', tamanho: 'p', Componente: ComFaturamento },
   { id: 'com_vendas', grupo: 'comercial', titulo: 'Vendas fechadas', descricao: 'Oportunidades ganhas no mês (CRM)', tamanho: 'p', Componente: ComVendas },

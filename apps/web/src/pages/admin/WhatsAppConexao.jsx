@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
+import { configurarRecebimento, sincronizarChat } from '@/lib/whatsappChat';
 import { statusWhatsApp, qrCodeWhatsApp, criarInstanciaWhatsApp, desconectarWhatsApp, removerInstanciaWhatsApp, enviarWhatsApp, telefoneValido } from '@/lib/whatsappService';
 
 const ROTULO = { open: 'Conectado', close: 'Desconectado', connecting: 'Conectando…', sem_instancia: 'Sem instância', inexistente: 'Instância não encontrada' };
@@ -77,7 +78,13 @@ const WhatsAppConexao = () => {
     if (!qr) return undefined;
     const t = setInterval(async () => {
       const r = await consultar(true);
-      if (r?.conectado) { toast({ title: 'WhatsApp conectado!', description: 'A empresa já pode enviar mensagens.' }); return; }
+      if (r?.conectado) {
+        toast({ title: 'WhatsApp conectado!', description: 'A empresa já pode enviar mensagens. Ativando o recebimento e trazendo as conversas…' });
+        // ao conectar: aponta o recebimento para o ERP e baixa as conversas recentes (falhas aqui não atrapalham a conexão)
+        configurarRecebimento(alvo).then(() => sincronizarChat(alvo)).then((x) => toast({ title: 'Conversas trazidas para o ERP', description: `${x?.conversas || 0} conversas e ${x?.mensagens || 0} mensagens. Veja em WhatsApp, no menu.` }))
+          .catch((e) => toast({ title: 'Conectado, mas o recebimento não foi ativado', description: `${e.message} Abra WhatsApp no menu e clique na engrenagem.`, variant: 'destructive' }));
+        return;
+      }
       if (Date.now() - ultimoQr.current > 25000) gerarQr(false);
     }, 4000);
     return () => clearInterval(t);

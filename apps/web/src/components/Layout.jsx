@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import { MessageCircle, 
   Home, TrendingUp, DollarSign, Package, Briefcase, Users, Settings, 
   BarChart2, ChevronRight, ShoppingCart, Percent, Scale, 
   HeartHandshake as Handshake, Building2, FolderCog, Activity, 
@@ -21,6 +21,7 @@ import { MODULO_DO_MENU } from '@/lib/modulos';
 // Define the navigation structure
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'WhatsApp', href: '/whatsapp', icon: MessageCircle },
   {
     name: 'Tarefas',
     icon: ClipboardList,

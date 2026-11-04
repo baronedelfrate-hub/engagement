@@ -26,6 +26,7 @@ import DashboardAdmin from '@/pages/admin/DashboardAdmin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
 import WhatsAppConexao from '@/pages/admin/WhatsAppConexao';
+import WhatsAppPage from '@/pages/whatsapp/WhatsAppPage';
 import PainelCarteira from '@/pages/admin/PainelCarteira';
 import ModulosPorCliente from '@/pages/admin/ModulosPorCliente';
 import ModuloNaoContratado from '@/pages/ModuloNaoContratado';
@@ -530,6 +531,7 @@ const AnimatedRoutes = () => {
           
           <Route path="/admin/carteira" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PainelCarteira /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/modulos" element={<SuperAdminRoute><ProtectedLayout><PageTransition><ModulosPorCliente /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/whatsapp" element={<ProtectedLayout><PageTransition><WhatsAppPage /></PageTransition></ProtectedLayout>} />
           <Route path="/configuracoes/whatsapp" element={<ProtectedLayout><PageTransition><WhatsAppConexao /></PageTransition></ProtectedLayout>} />
           <Route path="/admin/whatsapp" element={<Navigate to="/configuracoes/whatsapp" replace />} />
           <Route path="/admin/usuarios" element={<SuperAdminRoute><ProtectedLayout><PageTransition><UsuariosPage mode="list" /></PageTransition></ProtectedLayout></SuperAdminRoute>} />

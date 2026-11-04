@@ -52,7 +52,12 @@ export const listarContatos = async (companyId) => {
   if (error) throw new Error(error.message);
   return data || [];
 };
-export const baixarContatos = (empresaId) => chamar({ acao: 'contatos', empresa_id: empresaId });
+// Baixa a agenda do WhatsApp e já aplica os nomes (e telefones) às conversas que existem.
+export const baixarContatos = async (empresaId) => {
+  const r = await chamar({ acao: 'contatos', empresa_id: empresaId });
+  const { data } = await supabase.rpc('whatsapp_aplicar_contatos', { p_company: empresaId });
+  return { ...r, conversasNomeadas: Number(data) || 0 };
+};
 export const iniciarConversa = (telefone, nome, empresaId) => chamar({ acao: 'iniciar_conversa', telefone, nome, empresa_id: empresaId });
 export const definirNome = (conversaId, nome) => supabase.rpc('whatsapp_definir_nome', { p_conversa: conversaId, p_nome: nome });
 

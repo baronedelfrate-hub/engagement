@@ -204,7 +204,7 @@ const WhatsAppPage = () => {
   };
   const baixarAgenda = async () => {
     setBaixandoContatos(true);
-    try { const r = await baixarContatos(companyId); toast({ title: 'Contatos baixados', description: `${r.contatos || 0} contatos trazidos do WhatsApp.` }); setContatos(await listarContatos(companyId)); }
+    try { const r = await baixarContatos(companyId); toast({ title: 'Contatos baixados', description: `${r.contatos || 0} contatos trazidos do WhatsApp e ${r.conversasNomeadas || 0} conversas receberam nome.` }); setContatos(await listarContatos(companyId)); await carregarConversas(); }
     catch (e) { toast({ title: 'Não foi possível baixar os contatos', description: e.message, variant: 'destructive' }); }
     finally { setBaixandoContatos(false); }
   };

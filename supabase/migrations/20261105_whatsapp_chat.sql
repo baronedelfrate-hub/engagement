@@ -112,3 +112,22 @@ language sql security definer set search_path = public as $$
      or (select role from public.profiles where id = auth.uid()) = 'superadmin');
 $$;
 grant execute on function public.whatsapp_renomear_contato(uuid, text, text) to authenticated;
+
+-- Depois de baixar os contatos: dá às conversas o nome (e o telefone) que a agenda tem para o mesmo contato.
+create or replace function public.whatsapp_aplicar_contatos(p_company uuid) returns integer
+language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  if not (p_company = (select company_id from public.profiles where id = auth.uid())
+          or (select role from public.profiles where id = auth.uid()) = 'superadmin') then return 0; end if;
+  update public.whatsapp_conversas c set nome = k.nome_whatsapp
+    from public.whatsapp_contatos k
+   where k.company_id = c.company_id and k.jid = c.jid and c.company_id = p_company and k.nome_whatsapp is not null
+     and not c.eh_grupo and c.apelido is null and (c.nome is null or c.nome ~ '^[0-9+\s()-]+$');
+  get diagnostics n = row_count;
+  update public.whatsapp_conversas c set telefone = k.telefone
+    from public.whatsapp_contatos k
+   where k.company_id = c.company_id and k.jid = c.jid and c.company_id = p_company and k.telefone is not null and c.telefone is null and not c.eh_grupo;
+  return n;
+end $$;
+grant execute on function public.whatsapp_aplicar_contatos(uuid) to authenticated;

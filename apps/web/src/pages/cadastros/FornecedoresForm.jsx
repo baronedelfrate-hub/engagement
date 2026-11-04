@@ -18,6 +18,7 @@ import { Loader2, ArrowLeft, Save, Truck } from 'lucide-react';
 import CnpjInput from '@/components/CnpjInput';
 import { formatCnpj, unformatCnpj } from '@/lib/cnpjUtils';
 import { validateNumericField, validateCNPJ } from '@/lib/validationUtils';
+import { TIPOS_PIX } from '@/lib/chavePix';
 
 const FornecedoresForm = () => {
   const { id } = useParams();
@@ -41,7 +42,9 @@ const FornecedoresForm = () => {
     tipo_fornecedor: 'PJ',
     status: 'ativo',
     cnae_principal: '',
-    situacao_cadastral: ''
+    situacao_cadastral: '',
+    tipo_chave_pix: '',
+    chave_pix: ''
   });
 
   useEffect(() => {
@@ -55,6 +58,8 @@ const FornecedoresForm = () => {
             fantasia: res.data.fantasia || '',
             numero: res.data.numero !== null && res.data.numero !== undefined ? res.data.numero.toString() : '',
             complemento: res.data.complemento || '',
+            tipo_chave_pix: res.data.tipo_chave_pix || '',
+            chave_pix: res.data.chave_pix || '',
             bairro: res.data.bairro || '',
             cnae_principal: res.data.cnae_principal || '',
             situacao_cadastral: res.data.situacao_cadastral !== null && res.data.situacao_cadastral !== undefined ? res.data.situacao_cadastral.toString() : '',
@@ -122,6 +127,8 @@ const FornecedoresForm = () => {
         cnpj: unformatCnpj(formData.cnpj),
         email: formData.email,
         telefone: formData.telefone,
+        tipo_chave_pix: formData.chave_pix ? (formData.tipo_chave_pix || null) : null,
+        chave_pix: formData.chave_pix ? formData.chave_pix.trim() : null,
         cep: formData.cep,
         endereco: formData.endereco,
         numero: validateNumericField(formData.numero),
@@ -246,6 +253,20 @@ const FornecedoresForm = () => {
                   onChange={handleChange}
                   placeholder="(00) 0000-0000"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipo_chave_pix">Tipo da chave Pix</Label>
+                <Select value={formData.tipo_chave_pix || 'nenhum'} onValueChange={(val) => handleSelectChange('tipo_chave_pix', val === 'nenhum' ? '' : val)}>
+                  <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nenhum">Sem chave Pix</SelectItem>
+                    {TIPOS_PIX.map((t) => <SelectItem key={t.id} value={t.id}>{t.rotulo}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="chave_pix">Chave Pix</Label>
+                <Input id="chave_pix" name="chave_pix" value={formData.chave_pix} onChange={handleChange} placeholder="Chave para pagar este fornecedor" />
               </div>
             </div>
 

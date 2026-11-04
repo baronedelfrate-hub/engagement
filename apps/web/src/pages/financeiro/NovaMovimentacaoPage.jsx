@@ -43,6 +43,7 @@ const NovaMovimentacaoPage = () => {
   const [periodicidade, setPeriodicidade] = useState('mensal');
 
   const [documentos, setDocumentos] = useState([]);
+  const [comprovantes, setComprovantes] = useState([]);
   const [observacoes, setObservacoes] = useState('');
 
   // Dropdown Data
@@ -99,6 +100,10 @@ const NovaMovimentacaoPage = () => {
   const removeFile = (index) => {
     setDocumentos((prev) => prev.filter((_, i) => i !== index));
   };
+  const handleComprovanteChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) setComprovantes((prev) => [...prev, ...Array.from(e.target.files)]);
+  };
+  const removeComprovante = (index) => setComprovantes((prev) => prev.filter((_, i) => i !== index));
 
   const addPeriod = (dateStr, num, freq) => {
     const d = new Date(dateStr + 'T12:00:00Z');
@@ -172,8 +177,9 @@ const NovaMovimentacaoPage = () => {
       }
 
       // Upload Documents (linked to parent)
-      if (documentos.length > 0 && currentParentId) {
-        const uploadPromises = documentos.map(async (file) => {
+      const arquivos = [...documentos.map((f) => ({ f, tipo: 'nota' })), ...comprovantes.map((f) => ({ f, tipo: 'comprovante' }))];
+      if (arquivos.length > 0 && currentParentId) {
+        const uploadPromises = arquivos.map(async ({ f: file, tipo }) => {
           const fileExt = file.name.split('.').pop();
           const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
           const filePath = `${company_id}/${currentParentId}/${fileName}`;
@@ -191,7 +197,7 @@ const NovaMovimentacaoPage = () => {
           return {
             movimentacao_id: currentParentId,
             company_id,
-            tipo_documento: 'nota',
+            tipo_documento: tipo,
             nome_arquivo: file.name,
             storage_path: filePath,
             created_by: user?.id
@@ -437,7 +443,7 @@ const NovaMovimentacaoPage = () => {
 
           <Card className="bg-background border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-lg text-foreground">Documentos Anexos</CardTitle>
+              <CardTitle className="text-lg text-foreground">Documentos (notas, recibos, boletos)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-center bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer relative">
@@ -469,6 +475,30 @@ const NovaMovimentacaoPage = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-background border-border shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg text-foreground">Comprovante de pagamento</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-center bg-muted/10 hover:bg-muted/30 transition-colors cursor-pointer relative">
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground font-medium">Clique para anexar o comprovante</p>
+                <p className="text-xs text-muted-foreground/80 mt-1">PDF ou imagem (máx. 10MB). Pode anexar depois, na movimentação.</p>
+                <input type="file" multiple accept="application/pdf,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleComprovanteChange} />
+              </div>
+              {comprovantes.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {comprovantes.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 border border-border rounded-md bg-background">
+                      <div className="flex items-center gap-2 overflow-hidden"><FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" /><span className="text-sm text-foreground truncate">{file.name}</span></div>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10 shrink-0" onClick={() => removeComprovante(idx)}><X className="h-3 w-3" /></Button>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>

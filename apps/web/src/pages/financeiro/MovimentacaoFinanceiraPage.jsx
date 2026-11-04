@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2, CalendarClock, Replace, Undo2 } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2, CalendarClock, Replace, Undo2, Paperclip, Receipt } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,7 @@ import BaixaMovimentacaoModal from './components/BaixaMovimentacaoModal';
 import ProvisaoDialog from './components/ProvisaoDialog';
 import SubstituirProvisaoDialog from './components/SubstituirProvisaoDialog';
 import { formatDateOnly } from '@/lib/dateUtils';
+import ChavePix from '@/components/financeiro/ChavePix';
 import { buscarTudo } from '@/services/extratoAsaasService';
 
 const POR_PAGINA = 50;
@@ -95,7 +96,8 @@ const MovimentacaoFinanceiraPage = () => {
             subcategoria_id,
             centro_custo_id,
             cliente:clientes(nome),
-            fornecedor:fornecedores(nome),
+            fornecedor:fornecedores(nome, chave_pix, tipo_chave_pix),
+            docs:movimentacao_documentos(tipo_documento),
             baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto, data_baixa)
           `)
           .eq('company_id', company_id)
@@ -326,6 +328,13 @@ const MovimentacaoFinanceiraPage = () => {
                         </td>
                         <td className="px-6 py-4 text-foreground">
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
+                          {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && <div><ChavePix fornecedor={row.fornecedor} /></div>}
+                          {(row.docs || []).length > 0 && (
+                            <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground">
+                              {row.docs.some((d) => d.tipo_documento !== 'comprovante') && <span className="inline-flex items-center gap-0.5" title="Tem documento anexado"><Paperclip className="h-3 w-3" /> doc</span>}
+                              {row.docs.some((d) => d.tipo_documento === 'comprovante') && <span className="inline-flex items-center gap-0.5 text-emerald-600" title="Tem comprovante anexado"><Receipt className="h-3 w-3" /> comprovante</span>}
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-foreground">
                           {formatDateOnly(row.data_vencimento)}

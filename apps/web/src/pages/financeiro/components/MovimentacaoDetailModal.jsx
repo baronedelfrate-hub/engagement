@@ -20,6 +20,8 @@ const ajustaDia = (data, dia) => {
   return `${a}-${String(m).padStart(2, '0')}-${String(Math.min(dia, ultimo)).padStart(2, '0')}`;
 };
 import SeletorProjeto from '@/components/SeletorProjeto';
+import AnexosMovimentacao from '@/components/financeiro/AnexosMovimentacao';
+import ChavePix from '@/components/financeiro/ChavePix';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
   const { toast } = useToast();
@@ -53,7 +55,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
           .select(`
             *,
             cliente:clientes(nome),
-            fornecedor:fornecedores(nome),
+            fornecedor:fornecedores(nome, chave_pix, tipo_chave_pix),
             categoria:categorias(nome),
             subcategoria:subcategorias(nome),
             centro_custo:centros_custo(nome),
@@ -94,7 +96,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
           supabase.from('bancos').select('id, nome').eq('company_id', company_id).order('nome')
         ]);
         // fornecedores/clientes e, se for provisão de uma série, as próximas parcelas da série
-        const ent = await supabase.from(rowRes.data.tipo === 'receber' ? 'clientes' : 'fornecedores').select('id, nome').eq('company_id', company_id).order('nome');
+        const ent = await supabase.from(rowRes.data.tipo === 'receber' ? 'clientes' : 'fornecedores').select(rowRes.data.tipo === 'receber' ? 'id, nome' : 'id, nome, chave_pix, tipo_chave_pix').eq('company_id', company_id).order('nome');
         setEntidades(ent.data || []);
         if (rowRes.data.provisao && Number(rowRes.data.total_parcelas) > 1) {
           const { data: futuras } = await supabase.from('movimentacao_financeira')
@@ -222,7 +224,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
             <div className="grid grid-cols-2 gap-4">
               <div><Label className="text-muted-foreground">Nº Título</Label><p className="font-mono text-foreground">{row.numero_titulo}</p></div>
               <div><Label className="text-muted-foreground">Tipo</Label><p><Badge variant="outline">{row.tipo?.toUpperCase()}</Badge></p></div>
-              <div><Label className="text-muted-foreground">{row.tipo?.toLowerCase() === 'receber' ? 'Cliente' : 'Fornecedor'}</Label><p className="text-foreground">{entidadeNome || '-'}</p></div>
+              <div><Label className="text-muted-foreground">{row.tipo?.toLowerCase() === 'receber' ? 'Cliente' : 'Fornecedor'}</Label><p className="text-foreground">{entidadeNome || '-'}</p>{row.tipo?.toLowerCase() !== 'receber' && <ChavePix fornecedor={row.fornecedor} />}</div>
               <div><Label className="text-muted-foreground">Status</Label><p><Badge variant="secondary" className="capitalize">{row.status}</Badge></p></div>
               <div><Label className="text-muted-foreground">Valor Total</Label><p className="text-foreground">R$ {parseFloat(row.valor_total || 0).toFixed(2)}</p></div>
               <div><Label className="text-muted-foreground">Emissão</Label><p className="text-foreground">{row.data_emissao ? new Date(row.data_emissao + 'T12:00:00').toLocaleDateString() : '-'}</p></div>
@@ -260,26 +262,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                 </div>
               )}
             </div>
-            <div>
-              <Label className="text-muted-foreground">Documentos Anexos</Label>
-              {documentos.length === 0 ? (
-                <p className="text-sm text-muted-foreground mt-1">Nenhum documento anexado.</p>
-              ) : (
-                <div className="space-y-2 mt-2">
-                  {documentos.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-2 border border-border rounded-md">
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <span className="text-sm text-foreground truncate">{doc.nome_arquivo}</span>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => handleDownload(doc)} title="Baixar">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel onChange={onSaved} />
           </div>
         ) : (
           <div className="space-y-4">
@@ -297,6 +280,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                     {entidades.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                {row?.tipo !== 'receber' && <ChavePix fornecedor={entidades.find((e) => e.id === form.entidade_id)} />}
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>
@@ -374,6 +358,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <Label>Observações</Label>
               <Textarea value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />
             </div>
+            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel onChange={onSaved} />
             {serie.length > 0 && (
               <label className="flex items-start gap-2 text-sm rounded-md border border-border p-3 bg-muted/40 cursor-pointer">
                 <Checkbox checked={!!form.aplicarSerie} onCheckedChange={(v) => setForm(f => ({ ...f, aplicarSerie: v === true }))} className="mt-0.5" />

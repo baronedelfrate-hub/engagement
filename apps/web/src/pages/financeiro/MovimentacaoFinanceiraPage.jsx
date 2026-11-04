@@ -294,7 +294,7 @@ const MovimentacaoFinanceiraPage = () => {
           
           <div className="rounded-md border border-border bg-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
+              <table className="w-full min-w-[1150px] text-xs text-left">
                 <thead className="text-xs text-muted-foreground bg-muted/50 uppercase border-b border-border">
                   <tr>
                     <th className="px-2.5 py-2 font-medium">Nº Título</th>
@@ -324,8 +324,8 @@ const MovimentacaoFinanceiraPage = () => {
                     </tr>
                   ) : (
                     filteredData.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((row) => (
-                      <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                        <td className="px-2.5 py-1.5 font-mono text-[11px] text-foreground min-w-[200px]">
+                      <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors align-middle">
+                        <td className="px-2.5 py-1.5 font-mono text-[11px] leading-tight text-foreground min-w-[300px]">
                           {row.numero_titulo}
                           {row.provisao && <Badge variant="outline" className="ml-2 border-amber-500/40 text-amber-600 bg-amber-500/10 font-sans">Provisão</Badge>}
                           {!row.provisao && row.provisao_id && <Badge variant="outline" className="ml-2 border-blue-500/40 text-blue-600 bg-blue-500/10 font-sans">Substitui provisão</Badge>}
@@ -335,7 +335,7 @@ const MovimentacaoFinanceiraPage = () => {
                             {row.tipo?.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="px-2.5 py-1.5 text-foreground">
+                        <td className="px-2.5 py-1.5 text-foreground min-w-[230px] leading-tight">
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
                           {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && <div><ChavePix fornecedor={row.fornecedor} /></div>}
                           {(row.docs || []).length > 0 && (

@@ -68,3 +68,47 @@ create policy whatsmidia_select on storage.objects for select to authenticated u
   bucket_id = 'whatsapp-midia' and (
     (storage.foldername(name))[1] = (select p.company_id::text from public.profiles p where p.id = auth.uid())
     or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'superadmin')));
+
+-- Número do telefone, nome dado no ERP (apelido) e agenda de contatos por empresa.
+alter table public.whatsapp_conversas add column if not exists telefone text;
+alter table public.whatsapp_conversas add column if not exists apelido text;
+update public.whatsapp_conversas set nome = null where nome ~ '^[0-9]+$';
+create table if not exists public.whatsapp_contatos (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references public.empresas(id) on delete cascade,
+  jid text not null,
+  nome_whatsapp text,
+  apelido text,
+  telefone text,
+  created_at timestamptz not null default now(),
+  unique (company_id, jid)
+);
+alter table public.whatsapp_contatos enable row level security;
+create policy "Acesso por empresa" on public.whatsapp_contatos for select using (
+  (select role from public.profiles where id = auth.uid()) = 'superadmin'
+  or company_id = (select company_id from public.profiles where id = auth.uid()));
+revoke insert, update, delete on public.whatsapp_contatos from anon, authenticated;
+
+create or replace function public.whatsapp_definir_nome(p_conversa uuid, p_nome text) returns void
+language plpgsql security definer set search_path = public as $$
+declare v_company uuid; v_jid text; v_tel text; v_nome text := nullif(trim(p_nome), '');
+begin
+  select c.company_id, c.jid, c.telefone into v_company, v_jid, v_tel from public.whatsapp_conversas c
+   where c.id = p_conversa and (c.company_id = (select company_id from public.profiles where id = auth.uid())
+     or (select role from public.profiles where id = auth.uid()) = 'superadmin');
+  if v_company is null then return; end if;
+  update public.whatsapp_conversas set apelido = v_nome where id = p_conversa;
+  if v_jid not like '%@g.us' then
+    insert into public.whatsapp_contatos(company_id, jid, apelido, telefone) values (v_company, v_jid, v_nome, v_tel)
+    on conflict (company_id, jid) do update set apelido = excluded.apelido;
+  end if;
+end $$;
+grant execute on function public.whatsapp_definir_nome(uuid, text) to authenticated;
+
+create or replace function public.whatsapp_renomear_contato(p_contato uuid, p_nome text, p_telefone text) returns void
+language sql security definer set search_path = public as $$
+  update public.whatsapp_contatos t set apelido = nullif(trim(p_nome), ''), telefone = coalesce(nullif(regexp_replace(coalesce(p_telefone,''), '\D', '', 'g'), ''), t.telefone)
+  where t.id = p_contato and (t.company_id = (select company_id from public.profiles where id = auth.uid())
+     or (select role from public.profiles where id = auth.uid()) = 'superadmin');
+$$;
+grant execute on function public.whatsapp_renomear_contato(uuid, text, text) to authenticated;

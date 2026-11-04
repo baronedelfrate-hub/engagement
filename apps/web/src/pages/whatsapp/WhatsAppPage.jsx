@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Check, CheckCheck, FileText, Loader2, MessageCircle, Mic, Paperclip, RefreshCw, Search, Send, Settings, Square, Users, X } from 'lucide-react';
+import { Check, CheckCheck, Download, FileText, Loader2, MessageCircle, Mic, Paperclip, Pencil, RefreshCw, Search, Send, Settings, Square, UserPlus, Users, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -10,7 +11,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { statusWhatsApp } from '@/lib/whatsappService';
 import {
   listarConversas, listarMensagens, marcarLida, urlDaMidia, enviarTextoChat, enviarArquivoChat, enviarAudioChat,
-  sincronizarChat, baixarMidiaChat, configurarRecebimento, nomeDaConversa
+  sincronizarChat, baixarMidiaChat, configurarRecebimento, nomeDaConversa, subtituloDaConversa,
+  listarContatos, baixarContatos, iniciarConversa, definirNome, formatarTelefoneBR
 } from '@/lib/whatsappChat';
 
 const hora = (d) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -66,6 +68,15 @@ const WhatsAppPage = () => {
   const [gravando, setGravando] = useState(false);
   const [segundos, setSegundos] = useState(0);
   const [sincronizando, setSincronizando] = useState(false);
+  const [novaAberta, setNovaAberta] = useState(false);
+  const [contatos, setContatos] = useState([]);
+  const [buscaContato, setBuscaContato] = useState('');
+  const [novoNome, setNovoNome] = useState('');
+  const [novoTel, setNovoTel] = useState('');
+  const [criando, setCriando] = useState(false);
+  const [baixandoContatos, setBaixandoContatos] = useState(false);
+  const [editandoNome, setEditandoNome] = useState(false);
+  const [nomeEdicao, setNomeEdicao] = useState('');
   const fimRef = useRef(null); const gravadorRef = useRef(null); const pedacosRef = useRef([]); const relogioRef = useRef(null);
   const ativaRef = useRef(null);
   ativaRef.current = ativaId;
@@ -171,6 +182,44 @@ const WhatsAppPage = () => {
     catch (e) { toast({ title: 'Não foi possível ativar', description: e.message, variant: 'destructive' }); }
   };
 
+  const abrirNova = async () => {
+    setNovaAberta(true); setBuscaContato(''); setNovoNome(''); setNovoTel('');
+    try { setContatos(await listarContatos(companyId)); } catch (e) { /* lista vazia */ }
+  };
+  const abrirConversaDe = async (c) => {
+    // contato que já tem conversa: abre. Senão, precisa do telefone para começar.
+    const existente = conversas.find((x) => x.jid === c.jid);
+    if (existente) { setAtivaId(existente.id); setNovaAberta(false); return; }
+    if (!c.telefone) { toast({ title: 'Sem telefone', description: 'Este contato não tem o número visível. Use "Novo contato" com o telefone.', variant: 'destructive' }); return; }
+    await criarConversa(c.telefone, c.apelido || c.nome_whatsapp || '');
+  };
+  const criarConversa = async (tel, nome) => {
+    setCriando(true);
+    try {
+      const r = await iniciarConversa(tel, nome, companyId);
+      await carregarConversas();
+      setAtivaId(r.conversa_id); setNovaAberta(false);
+    } catch (e) { toast({ title: 'Não foi possível iniciar a conversa', description: e.message, variant: 'destructive' }); }
+    finally { setCriando(false); }
+  };
+  const baixarAgenda = async () => {
+    setBaixandoContatos(true);
+    try { const r = await baixarContatos(companyId); toast({ title: 'Contatos baixados', description: `${r.contatos || 0} contatos trazidos do WhatsApp.` }); setContatos(await listarContatos(companyId)); }
+    catch (e) { toast({ title: 'Não foi possível baixar os contatos', description: e.message, variant: 'destructive' }); }
+    finally { setBaixandoContatos(false); }
+  };
+  const salvarNome = async () => {
+    if (!ativa) return;
+    const { error } = await definirNome(ativa.id, nomeEdicao);
+    if (error) { toast({ title: 'Não foi possível salvar o nome', description: error.message, variant: 'destructive' }); return; }
+    setEditandoNome(false); await carregarConversas();
+  };
+  const contatosFiltrados = useMemo(() => {
+    const q = buscaContato.trim().toLowerCase(); const dq = q.replace(/\D/g, '');
+    return contatos.filter((c) => c.apelido || c.nome_whatsapp || c.telefone).filter((c) => !q
+      || (c.apelido || '').toLowerCase().includes(q) || (c.nome_whatsapp || '').toLowerCase().includes(q) || (dq && (c.telefone || '').includes(dq))).slice(0, 80);
+  }, [contatos, buscaContato]);
+
   if (authLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
@@ -188,6 +237,7 @@ const WhatsAppPage = () => {
           <div className="p-2 border-b flex items-center gap-2">
             <div className="relative flex-1"><Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-8 h-9" placeholder="Buscar conversa" value={busca} onChange={(e) => setBusca(e.target.value)} /></div>
             <Button variant="ghost" size="icon" className="h-9 w-9" title="Sincronizar conversas" onClick={sincronizar} disabled={sincronizando}>{sincronizando ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
+            <Button variant="ghost" size="icon" className="h-9 w-9" title="Nova conversa / novo contato" onClick={abrirNova}><UserPlus className="h-4 w-4" /></Button>
             {podeGerir && <Button variant="ghost" size="icon" className="h-9 w-9" title="Ativar recebimento de mensagens" onClick={ativarRecebimento}><Settings className="h-4 w-4" /></Button>}
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -213,7 +263,14 @@ const WhatsAppPage = () => {
               <header className="px-4 py-2.5 bg-background border-b flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setAtivaId(null)}><X className="h-4 w-4" /></Button>
                 <div className="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">{ativa.eh_grupo ? <Users className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}</div>
-                <div className="min-w-0"><div className="font-medium text-sm truncate">{nomeDaConversa(ativa)}</div><div className="text-[11px] text-muted-foreground">{ativa.eh_grupo ? 'Grupo' : ativa.jid.split('@')[0]}</div></div>
+                <div className="min-w-0 flex-1">
+                  {editandoNome ? (
+                    <div className="flex items-center gap-1"><Input autoFocus className="h-8" value={nomeEdicao} onChange={(e) => setNomeEdicao(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') salvarNome(); if (e.key === 'Escape') setEditandoNome(false); }} placeholder="Nome do contato" /><Button size="icon" variant="ghost" className="h-8 w-8" onClick={salvarNome}><Check className="h-4 w-4" /></Button></div>
+                  ) : (
+                    <div className="flex items-center gap-1"><span className="font-medium text-sm truncate">{nomeDaConversa(ativa)}</span>{!ativa.eh_grupo && <button type="button" title="Dar nome a este contato" className="p-1 rounded hover:bg-muted" onClick={() => { setNomeEdicao(ativa.apelido || (ativa.nome && !/^[0-9+\s()-]+$/.test(ativa.nome) ? ativa.nome : '')); setEditandoNome(true); }}><Pencil className="h-3.5 w-3.5 text-muted-foreground" /></button>}</div>
+                  )}
+                  <div className="text-[11px] text-muted-foreground">{subtituloDaConversa(ativa)}</div>
+                </div>
               </header>
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5">
                 {mensagens.map((m, i) => {
@@ -262,6 +319,37 @@ const WhatsAppPage = () => {
           )}
         </section>
       </div>
+      <Dialog open={novaAberta} onOpenChange={setNovaAberta}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Nova conversa</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-md border p-3 space-y-2">
+              <div className="text-sm font-medium">Novo contato</div>
+              <Input placeholder="Nome" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} />
+              <Input placeholder="Telefone com DDD, ex.: (19) 99999-9999" value={novoTel} onChange={(e) => setNovoTel(e.target.value)} />
+              <Button className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={criando || novoTel.replace(/\D/g, '').length < 10} onClick={() => criarConversa(novoTel, novoNome)}>
+                {criando ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MessageCircle className="h-4 w-4 mr-2" />}Iniciar conversa
+              </Button>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm font-medium">Ou escolha um contato</div>
+                <Button variant="outline" size="sm" className="h-8 gap-1" onClick={baixarAgenda} disabled={baixandoContatos}>{baixandoContatos ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}Baixar contatos do WhatsApp</Button>
+              </div>
+              <Input placeholder="Buscar por nome ou telefone" value={buscaContato} onChange={(e) => setBuscaContato(e.target.value)} className="mb-2" />
+              <div className="border rounded-md max-h-64 overflow-y-auto divide-y">
+                {contatosFiltrados.length === 0 && <p className="p-3 text-xs text-muted-foreground">Nenhum contato. Clique em "Baixar contatos do WhatsApp" ou cadastre um novo acima.</p>}
+                {contatosFiltrados.map((c) => (
+                  <button key={c.id} type="button" onClick={() => abrirConversaDe(c)} className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm">
+                    <div className="font-medium truncate">{c.apelido || c.nome_whatsapp || formatarTelefoneBR(c.telefone)}</div>
+                    <div className="text-[11px] text-muted-foreground">{c.telefone ? formatarTelefoneBR(c.telefone) : 'Número oculto pelo WhatsApp'}{c.apelido && c.nome_whatsapp && c.apelido !== c.nome_whatsapp ? ` · WhatsApp: ${c.nome_whatsapp}` : ''}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

@@ -56,6 +56,15 @@ const dataDe = (ts: unknown) => {
   const n = typeof ts === 'object' && ts ? Number((ts as Obj).low ?? 0) : Number(ts ?? 0);
   return n > 0 ? new Date((n > 1e12 ? n : n * 1000)).toISOString() : new Date().toISOString();
 };
+const soDigitos = (t: unknown) => String(t ?? '').replace(/\D/g, '');
+// O WhatsApp novo identifica muitos contatos por um "LID" (ex.: 2759...@lid), que NÃO é o telefone. O telefone vem em remoteJidAlt/senderPn quando disponível.
+const telefoneDe = (jid: unknown) => (/@s\.whatsapp\.net$/.test(String(jid ?? '')) ? soDigitos(String(jid).split('@')[0]) : null);
+const nomeValido = (n: unknown) => { const t = String(n ?? '').trim(); return t && !/^[0-9+\s()-]+$/.test(t) ? t : null; };
+const normalizarTelefone = (bruto: string) => {
+  let n = soDigitos(bruto).replace(/^0+/, '');
+  if (n.length === 10 || n.length === 11) n = `55${n}`;
+  return /^55\d{10,11}$/.test(n) ? n : null;
+};
 const STATUS: Record<string, string> = { SERVER_ACK: 'enviada', DELIVERY_ACK: 'entregue', READ: 'lida', PLAYED: 'lida' };
 
 Deno.serve(async (req) => {
@@ -66,14 +75,18 @@ Deno.serve(async (req) => {
   const cab = { apikey: chave, 'Content-Type': 'application/json' };
 
   // ---- conversas e mensagens (compartilhado pelo webhook, pela sincronização e pelo envio) ----
-  const garantirConversa = async (companyId: string, instancia: string, jid: string, nome?: string | null) => {
-    const { data: ex } = await admin.from('whatsapp_conversas').select('id, nome').eq('company_id', companyId).eq('jid', jid).maybeSingle();
+  const garantirConversa = async (companyId: string, instancia: string, jid: string, nome?: string | null, telefone?: string | null) => {
+    const { data: ex } = await admin.from('whatsapp_conversas').select('id, nome, telefone').eq('company_id', companyId).eq('jid', jid).maybeSingle();
+    const nomeOk = nomeValido(nome);
     if (ex) {
-      if (nome && !ex.nome) await admin.from('whatsapp_conversas').update({ nome }).eq('id', ex.id);
+      const mudar: Obj = {};
+      if (nomeOk && !ex.nome) mudar.nome = nomeOk;
+      if (telefone && !ex.telefone) mudar.telefone = telefone;
+      if (Object.keys(mudar).length) await admin.from('whatsapp_conversas').update(mudar).eq('id', ex.id);
       return ex.id as string;
     }
     const grupo = jid.endsWith('@g.us');
-    let titulo = nome ?? null;
+    let titulo = nomeOk;
     if (grupo && base) {
       try {
         const r = await fetch(`${base}/group/findGroupInfos/${encodeURIComponent(instancia)}?groupJid=${encodeURIComponent(jid)}`, { headers: cab });
@@ -81,12 +94,21 @@ Deno.serve(async (req) => {
         if (r.ok && t?.subject) titulo = String(t.subject);
       } catch { /* sem nome do grupo */ }
     }
-    const { data: nova, error } = await admin.from('whatsapp_conversas').insert({ company_id: companyId, jid, nome: titulo, eh_grupo: grupo }).select('id').single();
+    const { data: nova, error } = await admin.from('whatsapp_conversas').insert({ company_id: companyId, jid, nome: titulo, eh_grupo: grupo, telefone: telefone ?? telefoneDe(jid) }).select('id').single();
     if (error) { // corrida: outra chamada criou ao mesmo tempo
       const { data: de } = await admin.from('whatsapp_conversas').select('id').eq('company_id', companyId).eq('jid', jid).single();
       return de!.id as string;
     }
     return nova.id as string;
+  };
+
+  // Agenda: guarda o nome do WhatsApp e o telefone sem apagar o nome dado no ERP (apelido).
+  const guardarContato = async (companyId: string, jid: string, nome?: string | null, telefone?: string | null) => {
+    if (jid.endsWith('@g.us') || jid.endsWith('@broadcast') || jid.endsWith('@newsletter')) return;
+    const linha: Obj = { company_id: companyId, jid };
+    const n = nomeValido(nome); if (n) linha.nome_whatsapp = n;
+    const tel = telefone ?? telefoneDe(jid); if (tel) linha.telefone = tel;
+    await admin.from('whatsapp_contatos').upsert(linha, { onConflict: 'company_id,jid' });
   };
 
   const baixarMidia = async (companyId: string, instancia: string, conversaId: string, messageId: string, tipo: string, mime?: string, nome?: string, key?: Obj) => {
@@ -116,7 +138,9 @@ Deno.serve(async (req) => {
     const deMim = !!key.fromMe;
     const grupo = jid.endsWith('@g.us');
     const nomeConversa = !deMim && !grupo ? (d.pushName ?? null) : null;
-    const conversaId = await garantirConversa(companyId, instancia, jid, nomeConversa);
+    const telefone = grupo ? null : (telefoneDe(jid) ?? telefoneDe(key.remoteJidAlt) ?? telefoneDe(key.senderPn) ?? telefoneDe(d.senderPn) ?? null);
+    const conversaId = await garantirConversa(companyId, instancia, jid, nomeConversa, telefone);
+    if (!grupo && (nomeConversa || telefone)) await guardarContato(companyId, jid, nomeConversa, telefone);
     const { data: ja } = await admin.from('whatsapp_mensagens').select('id').eq('company_id', companyId).eq('message_id', messageId).maybeSingle();
     if (ja) return; // já gravada (por exemplo, enviada pelo ERP)
     const quando = dataDe(d.messageTimestamp);
@@ -208,7 +232,7 @@ Deno.serve(async (req) => {
       let conversas = 0; let mensagens = 0;
       for (const c of chats) {
         const jid = String(c.remoteJid ?? c.id);
-        const conversaId = await garantirConversa(empresa, instancia, jid, c.pushName ?? c.name ?? c.subject ?? null);
+        const conversaId = await garantirConversa(empresa, instancia, jid, c.pushName ?? c.name ?? c.subject ?? null, telefoneDe(c.lastMessage?.key?.remoteJidAlt));
         conversas++;
         try {
           const rm = await fetch(`${base}/chat/findMessages/${inst_enc}`, { method: 'POST', headers: cab, body: JSON.stringify({ where: { key: { remoteJid: jid } }, page: 1, offset: 30 }) });
@@ -225,6 +249,46 @@ Deno.serve(async (req) => {
       return json({ success: true, conversas, mensagens });
     }
 
+    if (b.acao === 'contatos') {
+      const r = await fetch(`${base}/chat/findContacts/${inst_enc}`, { method: 'POST', headers: cab, body: JSON.stringify({}) });
+      const t = await r.json().catch(() => ([]));
+      if (!r.ok) return json({ error: `Não foi possível baixar os contatos: ${JSON.stringify(t?.response?.message ?? t?.message ?? t).slice(0, 200)}` }, 502);
+      const lista: Obj[] = Array.isArray(t) ? t : (t?.contacts ?? t?.records ?? []);
+      let total = 0;
+      for (const c of lista.slice(0, 3000)) {
+        const jid = String(c.remoteJid ?? c.id ?? '');
+        if (!jid) continue;
+        const tel = telefoneDe(jid) ?? telefoneDe(c.remoteJidAlt) ?? telefoneDe(c.phoneNumber) ?? (c.phoneNumber ? soDigitos(c.phoneNumber) : null);
+        await guardarContato(empresa, jid, c.pushName ?? c.name ?? null, tel);
+        total++;
+      }
+      return json({ success: true, contatos: total });
+    }
+
+    if (b.acao === 'iniciar_conversa') {
+      const num = normalizarTelefone(String(b.telefone ?? ''));
+      if (!num) return json({ error: 'Telefone inválido. Use DDD + número, por exemplo (19) 99999-9999.' }, 400);
+      let jid = `${num}@s.whatsapp.net`;
+      try { // confere se o número tem WhatsApp (e devolve o formato correto, com ou sem o 9)
+        const rv = await fetch(`${base}/chat/whatsappNumbers/${inst_enc}`, { method: 'POST', headers: cab, body: JSON.stringify({ numbers: [num] }) });
+        const tv = await rv.json().catch(() => ([]));
+        const item: Obj | undefined = Array.isArray(tv) ? tv[0] : undefined;
+        if (rv.ok && item) {
+          if (item.exists === false) return json({ error: 'Este número não tem WhatsApp.' }, 404);
+          if (item.jid) jid = String(item.jid);
+        }
+      } catch { /* segue com o número informado */ }
+      const tel = telefoneDe(jid) ?? num;
+      const nome = nomeValido(b.nome);
+      const conversaId = await garantirConversa(empresa, instancia, jid, null, tel);
+      await guardarContato(empresa, jid, null, tel);
+      if (nome) {
+        await admin.from('whatsapp_conversas').update({ apelido: nome }).eq('id', conversaId);
+        await admin.from('whatsapp_contatos').update({ apelido: nome }).eq('company_id', empresa).eq('jid', jid);
+      }
+      return json({ success: true, conversa_id: conversaId });
+    }
+
     if (b.acao === 'midia') {
       const { data: msg } = await admin.from('whatsapp_mensagens').select('id, conversa_id, message_id, tipo, midia_mime, midia_nome, de_mim').eq('id', b.mensagem_id).eq('company_id', empresa).maybeSingle();
       if (!msg) return json({ error: 'Mensagem não encontrada.' }, 404);
@@ -237,8 +301,12 @@ Deno.serve(async (req) => {
 
     if (b.acao === 'enviar') {
       const jid = String(b.jid ?? '');
-      if (!/^[0-9]{8,20}@(s\.whatsapp\.net|g\.us)$/.test(jid)) return json({ error: 'Conversa inválida.' }, 400);
-      const destino = jid.endsWith('@g.us') ? jid : jid.split('@')[0];
+      if (!/^[0-9]{8,24}@(s\.whatsapp\.net|g\.us|lid)$/.test(jid)) return json({ error: 'Conversa inválida.' }, 400);
+      let destino = jid.endsWith('@g.us') ? jid : jid.split('@')[0];
+      if (jid.endsWith('@lid')) { // contato identificado por LID: usa o telefone quando se sabe, senão o próprio identificador
+        const { data: cv } = await admin.from('whatsapp_conversas').select('telefone').eq('company_id', empresa).eq('jid', jid).maybeSingle();
+        destino = cv?.telefone ? String(cv.telefone) : jid;
+      }
       const tipo: string = ['texto', 'arquivo', 'audio'].includes(b.tipo) ? b.tipo : 'texto';
       const texto = String(b.texto ?? '').trim();
       if (texto.length > 4000) return json({ error: 'A mensagem passa de 4000 caracteres.' }, 400);

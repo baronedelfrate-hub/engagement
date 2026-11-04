@@ -21,3 +21,7 @@ create policy movdocs_delete on storage.objects for delete to authenticated usin
   bucket_id = 'movimentacao-docs' and (
     (storage.foldername(name))[1] = (select p.company_id::text from public.profiles p where p.id = auth.uid())
     or exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'superadmin')));
+
+-- O comprovante continua no título quando a baixa é estornada (a ligação com a baixa é só desfeita).
+alter table public.movimentacao_documentos drop constraint if exists movimentacao_documentos_baixa_id_fkey;
+alter table public.movimentacao_documentos add constraint movimentacao_documentos_baixa_id_fkey foreign key (baixa_id) references public.movimentacao_baixas(id) on delete set null;

@@ -18,7 +18,7 @@ const Bloco = ({ titulo, dica, icone: Icone, tipo, docs, enviando, onEnviar, onB
       <div className="space-y-2 mt-2">
         {docs.map((doc) => (
           <div key={doc.id} className="flex items-center justify-between p-2 border border-border rounded-md">
-            <div className="flex items-center gap-2 overflow-hidden"><FileText className="h-4 w-4 shrink-0 text-muted-foreground" /><span className="text-sm truncate">{doc.nome_arquivo}</span></div>
+            <div className="flex items-center gap-2 overflow-hidden"><FileText className="h-4 w-4 shrink-0 text-muted-foreground" /><span className="text-sm truncate">{doc.nome_arquivo}</span>{doc.baixa && <span className="text-[11px] text-muted-foreground whitespace-nowrap">· baixa de {String(doc.baixa.data_baixa).slice(0, 10).split('-').reverse().join('/')}</span>}</div>
             <div className="flex shrink-0">
               <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => onBaixar(doc)} title="Abrir / baixar"><Download className="h-4 w-4" /></Button>
               {editavel && <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onExcluir(doc)} title="Remover"><Trash2 className="h-4 w-4" /></Button>}
@@ -47,7 +47,7 @@ const AnexosMovimentacao = ({ movimentacaoId, companyId, editavel = true, onChan
 
   const carregar = useCallback(async () => {
     if (!movimentacaoId) return;
-    const { data } = await supabase.from('movimentacao_documentos').select('*').eq('movimentacao_id', movimentacaoId).order('created_at');
+    const { data } = await supabase.from('movimentacao_documentos').select('*, baixa:movimentacao_baixas(data_baixa, valor_baixa)').eq('movimentacao_id', movimentacaoId).order('created_at');
     setDocs(data || []);
   }, [movimentacaoId]);
   useEffect(() => { carregar(); }, [carregar]);

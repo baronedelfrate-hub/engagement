@@ -97,7 +97,7 @@ const MovimentacaoFinanceiraPage = () => {
             centro_custo_id,
             cliente:clientes(nome),
             fornecedor:fornecedores(nome, chave_pix, tipo_chave_pix),
-            docs:movimentacao_documentos(tipo_documento),
+            docs:movimentacao_documentos(id, tipo_documento, storage_path, nome_arquivo),
             baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto, data_baixa)
           `)
           .eq('company_id', company_id)
@@ -122,6 +122,15 @@ const MovimentacaoFinanceiraPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // um comprovante abre direto; vários abrem o detalhe da movimentação
+  const abrirComprovante = async (row) => {
+    const comps = (row.docs || []).filter((d) => d.tipo_documento === 'comprovante');
+    if (comps.length !== 1) { setModalState({ open: true, mode: 'view', id: row.id }); return; }
+    const { data, error } = await supabase.storage.from('movimentacao-docs').createSignedUrl(comps[0].storage_path, 120);
+    if (error || !data?.signedUrl) { toast({ title: 'Erro', description: 'Não foi possível abrir o comprovante.', variant: 'destructive' }); return; }
+    window.open(data.signedUrl, '_blank');
   };
 
   const handleDelete = async (id) => {
@@ -332,7 +341,7 @@ const MovimentacaoFinanceiraPage = () => {
                           {(row.docs || []).length > 0 && (
                             <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground">
                               {row.docs.some((d) => d.tipo_documento !== 'comprovante') && <span className="inline-flex items-center gap-0.5" title="Tem documento anexado"><Paperclip className="h-3 w-3" /> doc</span>}
-                              {row.docs.some((d) => d.tipo_documento === 'comprovante') && <span className="inline-flex items-center gap-0.5 text-emerald-600" title="Tem comprovante anexado"><Receipt className="h-3 w-3" /> comprovante</span>}
+                              {row.docs.some((d) => d.tipo_documento === 'comprovante') && <button type="button" className="inline-flex items-center gap-0.5 text-emerald-600 hover:underline" title="Abrir o comprovante de pagamento" onClick={() => abrirComprovante(row)}><Receipt className="h-3 w-3" /> comprovante</button>}
                             </div>
                           )}
                         </td>

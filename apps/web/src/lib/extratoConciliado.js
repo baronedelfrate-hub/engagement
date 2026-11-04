@@ -55,7 +55,10 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
   }
   const movIds = [...new Set([...porExtrato.values()].flat().map((b) => b.movimentacao_id))];
   const movs = new Map();
+  const comprovantes = new Map();
   for (const lote of em(movIds)) {
+    ok(await supabase.from('movimentacao_documentos').select('movimentacao_id, nome_arquivo').eq('tipo_documento', 'comprovante').in('movimentacao_id', lote))
+      .forEach((d) => { const l = comprovantes.get(d.movimentacao_id) || []; l.push(d.nome_arquivo); comprovantes.set(d.movimentacao_id, l); });
     ok(await supabase.from('movimentacao_financeira')
       .select('id, tipo, numero_titulo, observacoes, data_vencimento, parcela_atual, total_parcelas, fornecedor:fornecedores(nome, cnpj), cliente:clientes(nome, cnpj_cpf)')
       .in('id', lote)).forEach((m) => movs.set(m.id, m));
@@ -91,6 +94,7 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
       centroCusto: cc.get(e.centro_custo_id)?.nome || '',
       obra: prj.get(e.projeto_id) ? `${prj.get(e.projeto_id).codigo ? `${prj.get(e.projeto_id).codigo} - ` : ''}${prj.get(e.projeto_id).nome}` : '',
       observacao: obs,
+      comprovante: ts.flatMap((t) => comprovantes.get(t.id) || []).join(' | '),
       entrada: valor > 0 ? valor : 0,
       saida: valor < 0 ? -valor : 0,
       valor,

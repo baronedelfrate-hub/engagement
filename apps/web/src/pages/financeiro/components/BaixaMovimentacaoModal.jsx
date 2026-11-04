@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Upload, X, FileText } from 'lucide-react';
 import SeletorProjeto from '@/components/SeletorProjeto';
 
 const hoje = () => new Date().toISOString().split('T')[0];
@@ -28,9 +28,11 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
   const [titulo, setTitulo] = useState(null);
   const [saldo, setSaldo] = useState(0);
   const [form, setForm] = useState({});
+  const [comprovantes, setComprovantes] = useState([]);
 
   useEffect(() => {
     if (!open || !movimentacaoId) return;
+    setComprovantes([]);
     (async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -118,7 +120,21 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
         .eq('id', titulo.id);
       if (tituloError) throw tituloError;
 
-      toast({ title: 'Baixa registrada', description: `${isPagar ? 'Pagamento' : 'Recebimento'} de ${brl(totalEfetivo)} lançado e disponível na Conciliação Bancária.` });
+      // comprovante: se o envio falhar a baixa fica valendo e o arquivo pode ser anexado depois, na movimentação
+      let falhouComprovante = false;
+      for (const f of comprovantes) {
+        try {
+          const ext = (f.name.split('.').pop() || 'pdf').toLowerCase();
+          const empresaId = titulo.company_id || company_id;
+          const caminho = `${empresaId}/${titulo.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+          const up = await supabase.storage.from('movimentacao-docs').upload(caminho, f);
+          if (up.error) throw up.error;
+          const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: titulo.id, baixa_id: baixaId, company_id: empresaId, tipo_documento: 'comprovante', nome_arquivo: f.name, storage_path: caminho, created_by: user?.id || null });
+          if (ins.error) throw ins.error;
+        } catch (e) { falhouComprovante = true; }
+      }
+      if (falhouComprovante) toast({ title: 'Baixa registrada, mas o comprovante não subiu', description: 'Anexe o comprovante de novo pela movimentação financeira.', variant: 'destructive' });
+      toast({ title: 'Baixa registrada', description: `${isPagar ? 'Pagamento' : 'Recebimento'} de ${brl(totalEfetivo)} lançado e disponível na Conciliação Bancária.${comprovantes.length && !falhouComprovante ? ' Comprovante anexado.' : ''}` });
       onOpenChange(false);
       if (onSaved) onSaved();
     } catch (err) {
@@ -220,6 +236,21 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea rows={2} value={form.observacoes} onChange={setInput('observacoes')} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Comprovante de pagamento (opcional)</Label>
+              <label className="flex items-center gap-2 border-2 border-dashed border-border rounded-md px-3 py-3 text-sm text-muted-foreground cursor-pointer hover:bg-muted/30">
+                <Upload className="h-4 w-4" /> Clique para anexar o comprovante (PDF ou imagem, até 10 MB)
+                <input type="file" multiple accept="application/pdf,image/*" className="hidden"
+                  onChange={(e) => { const novos = Array.from(e.target.files || []).filter((f) => f.size <= 10 * 1024 * 1024); setComprovantes((p) => [...p, ...novos]); e.target.value = ''; }} />
+              </label>
+              {comprovantes.map((f, i) => (
+                <div key={i} className="flex items-center justify-between p-2 border border-border rounded-md">
+                  <span className="flex items-center gap-2 text-sm truncate"><FileText className="h-4 w-4 shrink-0 text-muted-foreground" />{f.name}</span>
+                  <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setComprovantes((p) => p.filter((_, k) => k !== i))}><X className="h-3 w-3" /></Button>
+                </div>
+              ))}
             </div>
           </div>
         )}

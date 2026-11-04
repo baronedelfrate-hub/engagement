@@ -24,6 +24,7 @@ const COLUNAS = [
   ['Centro de custo', 16, (l) => l.centroCusto],
   ['Obra / projeto', 22, (l) => l.obra],
   ['Observação', 40, (l) => l.observacao],
+  ['Comprovante anexado', 26, (l) => (l.comprovante ? `Sim: ${l.comprovante}` : 'Não')],
   ['Situação', 14, (l) => (l.conciliado ? 'Conciliado' : 'Não conciliado')]
 ];
 

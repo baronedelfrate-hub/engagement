@@ -50,7 +50,8 @@ export const useWhatsAppNotificacoes = (companyId) => {
         const corpo = (m.texto && m.texto.trim()) || RESUMO[m.tipo] || 'Mensagem';
         const quem = c?.eh_grupo && m.remetente_nome ? `${m.remetente_nome}: ` : '';
         const msg = `${quem}${corpo}`.slice(0, 140);
-        toast({ title: `WhatsApp · ${titulo}`, description: msg });
+        // verde bem clarinho (cor do WhatsApp) para diferenciar dos avisos do sistema
+        toast({ title: `WhatsApp · ${titulo}`, description: msg, className: 'bg-[#e7f8ec] border-emerald-300 border-l-4 border-l-emerald-500 text-emerald-950 dark:bg-emerald-950 dark:border-emerald-700 dark:text-emerald-50' });
         beep();
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
           try {

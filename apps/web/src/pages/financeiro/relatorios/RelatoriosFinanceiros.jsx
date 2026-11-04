@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
@@ -87,12 +87,17 @@ const RelatoriosFinanceiros = () => {
     localStorage.setItem('relatoriosFinFiltros', JSON.stringify(filters));
   }, [filters]);
 
+  // Busca de novo sempre que o módulo ou qualquer filtro muda (o botão "Aplicar Filtros" continua valendo).
+  // Sem isso o relatório e as exportações ficavam com os dados da primeira carga, ignorando as datas do filtro.
   useEffect(() => {
-    // Fetch data on source change or initial load
-    fetchReportData();
-  }, [source]); 
+    const t = setTimeout(() => { fetchReportData(); }, 350);
+    return () => clearTimeout(t);
+  }, [source, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pedidoAtual = useRef(0);
 
   const fetchReportData = async () => {
+    const meuPedido = ++pedidoAtual.current;
     setLoadingData(true);
     try {
       const isPagar = source === 'CONTAS_PAGAR';
@@ -157,17 +162,19 @@ const RelatoriosFinanceiros = () => {
         banco_nome: item.banco?.nome || undefined
       }));
 
+      if (meuPedido !== pedidoAtual.current) return; // chegou uma resposta mais nova: ignora esta
       setFilteredData(flat);
     } catch (err) {
       console.error(err);
       toast({ title: "Erro", description: "Falha ao gerar relatório: " + err.message, variant: "destructive" });
     } finally {
-      setLoadingData(false);
+      if (meuPedido === pedidoAtual.current) setLoadingData(false);
     }
   };
 
   const getFilterDescription = () => {
     const parts = [];
+    if (filters.dataInicio || filters.dataFim) parts.push(`Vencimento: ${filters.dataInicio ? formatDateOnly(filters.dataInicio) : 'início'} a ${filters.dataFim ? formatDateOnly(filters.dataFim) : 'fim'}`);
     if (filters.status !== 'TODOS') parts.push(`Status: ${filters.status}`);
     if (filters.natureza !== 'TODOS') parts.push(`Natureza: ${filters.natureza === 'PROVISAO' ? 'Só provisões' : 'Só títulos'}`);
     if (filters.categoriaId !== 'TODOS') parts.push(`Categoria: Específica`);

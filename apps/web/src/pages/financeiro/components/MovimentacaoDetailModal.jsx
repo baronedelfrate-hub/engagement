@@ -22,6 +22,7 @@ const ajustaDia = (data, dia) => {
 import SeletorProjeto from '@/components/SeletorProjeto';
 import AnexosMovimentacao from '@/components/financeiro/AnexosMovimentacao';
 import ChavePix from '@/components/financeiro/ChavePix';
+import { numeroDocumentoValido } from '@/lib/nomeAnexo';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
   const { toast } = useToast();
@@ -262,7 +263,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                 </div>
               )}
             </div>
-            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel onChange={onSaved} />
+            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel contexto={{ fornecedor: entidadeNome, documento: numeroDocumentoValido(row?.numero_titulo), dataDocumento: row?.data_emissao || row?.data_vencimento, dataComprovante: (baixas[baixas.length - 1]?.data_baixa) || undefined }} onChange={onSaved} />
           </div>
         ) : (
           <div className="space-y-4">
@@ -358,7 +359,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <Label>Observações</Label>
               <Textarea value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />
             </div>
-            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel onChange={onSaved} />
+            <AnexosMovimentacao movimentacaoId={movimentacaoId} companyId={row?.company_id || company_id} editavel contexto={{ fornecedor: entidadeNome, documento: numeroDocumentoValido(row?.numero_titulo), dataDocumento: row?.data_emissao || row?.data_vencimento, dataComprovante: (baixas[baixas.length - 1]?.data_baixa) || undefined }} onChange={onSaved} />
             {serie.length > 0 && (
               <label className="flex items-start gap-2 text-sm rounded-md border border-border p-3 bg-muted/40 cursor-pointer">
                 <Checkbox checked={!!form.aplicarSerie} onCheckedChange={(v) => setForm(f => ({ ...f, aplicarSerie: v === true }))} className="mt-0.5" />

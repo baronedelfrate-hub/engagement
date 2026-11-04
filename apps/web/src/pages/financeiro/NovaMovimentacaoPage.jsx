@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import PageHeader from '@/components/PageHeader';
 import { ArrowLeft, Loader2, Upload, X, File as FileIcon } from 'lucide-react';
 import SeletorProjeto, { projetoOuNulo } from '@/components/SeletorProjeto';
+import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 
 const semNone = (v) => (!v || v === 'none' ? null : v);
 
@@ -178,6 +179,8 @@ const NovaMovimentacaoPage = () => {
 
       // Upload Documents (linked to parent)
       const arquivos = [...documentos.map((f) => ({ f, tipo: 'nota' })), ...comprovantes.map((f) => ({ f, tipo: 'comprovante' }))];
+      const nomesUsados = [];
+      const entidadeNome = (tipo === 'pagar' ? fornecedores : clientes).find((x) => x.id === entidadeId)?.nome;
       if (arquivos.length > 0 && currentParentId) {
         const uploadPromises = arquivos.map(async ({ f: file, tipo }) => {
           const fileExt = file.name.split('.').pop();
@@ -198,7 +201,7 @@ const NovaMovimentacaoPage = () => {
             movimentacao_id: currentParentId,
             company_id,
             tipo_documento: tipo,
-            nome_arquivo: file.name,
+            nome_arquivo: (() => { const n = nomePadraoAnexo({ data: tipo === 'comprovante' ? undefined : dataEmissao, fornecedor: entidadeNome, documento: numeroTitulo, nomeOriginal: file.name, jaExistentes: nomesUsados }); nomesUsados.push(n); return n; })(),
             storage_path: filePath,
             created_by: user?.id
           };

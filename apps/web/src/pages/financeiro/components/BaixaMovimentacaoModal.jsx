@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, CheckCircle2, Upload, X, FileText } from 'lucide-react';
 import SeletorProjeto from '@/components/SeletorProjeto';
+import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 
 const hoje = () => new Date().toISOString().split('T')[0];
 const num = (v) => Number(v) || 0;
@@ -122,6 +123,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
 
       // comprovante: se o envio falhar a baixa fica valendo e o arquivo pode ser anexado depois, na movimentação
       let falhouComprovante = false;
+      const nomesUsados = [];
       for (const f of comprovantes) {
         try {
           const ext = (f.name.split('.').pop() || 'pdf').toLowerCase();
@@ -129,7 +131,9 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
           const caminho = `${empresaId}/${titulo.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
           const up = await supabase.storage.from('movimentacao-docs').upload(caminho, f);
           if (up.error) throw up.error;
-          const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: titulo.id, baixa_id: baixaId, company_id: empresaId, tipo_documento: 'comprovante', nome_arquivo: f.name, storage_path: caminho, created_by: user?.id || null });
+          const nomeFinal = nomePadraoAnexo({ data: form.data_baixa, fornecedor: (isPagar ? titulo.fornecedor?.nome : titulo.cliente?.nome), documento: titulo.numero_titulo, nomeOriginal: f.name, jaExistentes: nomesUsados });
+          nomesUsados.push(nomeFinal);
+          const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: titulo.id, baixa_id: baixaId, company_id: empresaId, tipo_documento: 'comprovante', nome_arquivo: nomeFinal, storage_path: caminho, created_by: user?.id || null });
           if (ins.error) throw ins.error;
         } catch (e) { falhouComprovante = true; }
       }

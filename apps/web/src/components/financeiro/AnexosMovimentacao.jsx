@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 
 const BUCKET = 'movimentacao-docs';
 const MAX_MB = 10;
@@ -39,7 +40,8 @@ const Bloco = ({ titulo, dica, icone: Icone, tipo, docs, enviando, onEnviar, onB
 );
 
 // Dois campos de anexo da movimentação: documentos (notas, recibos, boletos) e comprovante de pagamento.
-const AnexosMovimentacao = ({ movimentacaoId, companyId, editavel = true, onChange }) => {
+// contexto: { fornecedor, documento, dataDocumento, dataComprovante } para montar o nome padrão do arquivo.
+const AnexosMovimentacao = ({ movimentacaoId, companyId, editavel = true, onChange, contexto = {} }) => {
   const { toast } = useToast();
   const { user } = useAuthContext();
   const [docs, setDocs] = useState([]);
@@ -56,13 +58,16 @@ const AnexosMovimentacao = ({ movimentacaoId, companyId, editavel = true, onChan
     if (!arquivos.length) return;
     setEnviando(tipo);
     try {
+      const nomes = docs.map((d) => d.nome_arquivo);
       for (const f of arquivos) {
         if (f.size > MAX_MB * 1024 * 1024) { toast({ title: 'Arquivo grande demais', description: `${f.name} passa de ${MAX_MB} MB.`, variant: 'destructive' }); continue; }
         const ext = (f.name.split('.').pop() || 'pdf').toLowerCase();
         const caminho = `${companyId}/${movimentacaoId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const up = await supabase.storage.from(BUCKET).upload(caminho, f);
         if (up.error) throw up.error;
-        const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: movimentacaoId, company_id: companyId, tipo_documento: tipo, nome_arquivo: f.name, storage_path: caminho, created_by: user?.id });
+        const nomeFinal = nomePadraoAnexo({ data: tipo === 'comprovante' ? contexto.dataComprovante : contexto.dataDocumento, fornecedor: contexto.fornecedor, documento: contexto.documento, nomeOriginal: f.name, jaExistentes: nomes });
+        nomes.push(nomeFinal);
+        const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: movimentacaoId, company_id: companyId, tipo_documento: tipo, nome_arquivo: nomeFinal, storage_path: caminho, created_by: user?.id });
         if (ins.error) throw ins.error;
       }
       await carregar(); onChange?.();

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Check, CheckCheck, Download, FileText, Loader2, MessageCircle, Mic, Paperclip, Pencil, RefreshCw, Search, Send, Settings, Square, UserPlus, Users, X } from 'lucide-react';
+import { Bell, BellOff, Check, CheckCheck, Download, FileText, Loader2, MessageCircle, Mic, Paperclip, Pencil, RefreshCw, Search, Send, Settings, Square, UserPlus, Users, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import { statusWhatsApp } from '@/lib/whatsappService';
+import { avisosDoNavegador, pedirAvisosDoNavegador } from '@/hooks/useWhatsAppNotificacoes';
 import {
   listarConversas, listarMensagens, marcarLida, urlDaMidia, enviarTextoChat, enviarArquivoChat, enviarAudioChat,
   sincronizarChat, baixarMidiaChat, configurarRecebimento, nomeDaConversa, subtituloDaConversa,
@@ -80,6 +81,8 @@ const WhatsAppPage = () => {
   const fimRef = useRef(null); const gravadorRef = useRef(null); const pedacosRef = useRef([]); const relogioRef = useRef(null);
   const ativaRef = useRef(null);
   ativaRef.current = ativaId;
+  const [avisos, setAvisos] = useState(avisosDoNavegador());
+  useEffect(() => { window.__whatsappConversaAberta = ativaId; return () => { window.__whatsappConversaAberta = null; }; }, [ativaId]);
 
   const ativa = useMemo(() => conversas.find((c) => c.id === ativaId) || null, [conversas, ativaId]);
 
@@ -237,6 +240,9 @@ const WhatsAppPage = () => {
           <div className="p-2 border-b flex items-center gap-2">
             <div className="relative flex-1"><Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-8 h-9" placeholder="Buscar conversa" value={busca} onChange={(e) => setBusca(e.target.value)} /></div>
             <Button variant="ghost" size="icon" className="h-9 w-9" title="Sincronizar conversas" onClick={sincronizar} disabled={sincronizando}>{sincronizando ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
+            {avisos !== 'indisponivel' && <Button variant="ghost" size="icon" className="h-9 w-9" title={avisos === 'granted' ? 'Avisos do navegador ligados' : avisos === 'denied' ? 'Avisos bloqueados no navegador (libere nas permissões do site)' : 'Ligar avisos do navegador'}
+              onClick={async () => { const r = await pedirAvisosDoNavegador(); setAvisos(r); if (r === 'granted') toast({ title: 'Avisos ligados', description: 'Você será avisado de novas mensagens mesmo com outra aba aberta.' }); }}>
+              {avisos === 'granted' ? <Bell className="h-4 w-4 text-emerald-600" /> : <BellOff className="h-4 w-4" />}</Button>}
             <Button variant="ghost" size="icon" className="h-9 w-9" title="Nova conversa / novo contato" onClick={abrirNova}><UserPlus className="h-4 w-4" /></Button>
             {podeGerir && <Button variant="ghost" size="icon" className="h-9 w-9" title="Ativar recebimento de mensagens" onClick={ativarRecebimento}><Settings className="h-4 w-4" /></Button>}
           </div>

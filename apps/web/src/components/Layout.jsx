@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useWhatsAppNotificacoes } from '@/hooks/useWhatsAppNotificacoes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, 
   Home, TrendingUp, DollarSign, Package, Briefcase, Users, Settings, 
@@ -430,13 +431,16 @@ const Layout = ({ children }) => {
   let moduloAtivo = () => true;
   let profileName = null;
   let authLogout = null;
+  let empresaDoZap = null;
   try {
     const auth = useAuthContext();
     isSuperAdmin = auth?.isSuperAdmin ?? false;
     moduloAtivo = auth?.moduloAtivo ?? (() => true);
     profileName = auth?.profile?.nome || auth?.user?.email || null;
     authLogout = auth?.logout;
+    empresaDoZap = auth?.company_id ?? null;
   } catch (e) {}
+  const { naoLidas: zapNaoLidas } = useWhatsAppNotificacoes(empresaDoZap);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
@@ -569,8 +573,12 @@ const Layout = ({ children }) => {
                       )
                     }
                   >
-                    <item.icon className="h-5 w-5" />
+                    <span className="relative">
+                      <item.icon className="h-5 w-5" />
+                      {item.href === '/whatsapp' && zapNaoLidas > 0 && !isSidebarOpen && <span className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white text-[10px] leading-none rounded-full px-1 py-0.5">{zapNaoLidas > 99 ? '99+' : zapNaoLidas}</span>}
+                    </span>
                     {isSidebarOpen && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>{item.name}</motion.span>}
+                    {isSidebarOpen && item.href === '/whatsapp' && zapNaoLidas > 0 && <span className="ml-auto bg-emerald-500 text-white text-[11px] leading-none rounded-full px-1.5 py-1">{zapNaoLidas > 99 ? '99+' : zapNaoLidas}</span>}
                   </NavLink>
                 ) : (
                   <MenuItem

@@ -73,8 +73,8 @@ const WhatsAppPage = () => {
   const ativa = useMemo(() => conversas.find((c) => c.id === ativaId) || null, [conversas, ativaId]);
 
   const carregarConversas = useCallback(async () => {
-    try { setConversas(await listarConversas()); } catch (e) { toast({ title: 'Erro ao carregar conversas', description: e.message, variant: 'destructive' }); }
-  }, [toast]);
+    try { setConversas(await listarConversas(companyId)); } catch (e) { toast({ title: 'Erro ao carregar conversas', description: e.message, variant: 'destructive' }); }
+  }, [toast, companyId]);
   const carregarMensagens = useCallback(async (id) => {
     if (!id) return setMensagens([]);
     try { setMensagens(await listarMensagens(id)); } catch (e) { toast({ title: 'Erro ao carregar mensagens', description: e.message, variant: 'destructive' }); }
@@ -82,7 +82,7 @@ const WhatsAppPage = () => {
 
   useEffect(() => {
     if (authLoading || !companyId) return;
-    statusWhatsApp().then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
+    statusWhatsApp(companyId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
     carregarConversas();
   }, [authLoading, companyId, carregarConversas]);
 
@@ -111,7 +111,7 @@ const WhatsAppPage = () => {
     const t = texto.trim();
     if (!t || !ativa || enviando) return;
     setEnviando(true);
-    try { await enviarTextoChat(ativa.jid, t); setTexto(''); await apos(); }
+    try { await enviarTextoChat(ativa.jid, t, companyId); setTexto(''); await apos(); }
     catch (e) { toast({ title: 'Não foi possível enviar', description: e.message, variant: 'destructive' }); }
     finally { setEnviando(false); }
   };
@@ -121,7 +121,7 @@ const WhatsAppPage = () => {
     try {
       for (const f of arquivos) {
         if (f.size > 15 * 1024 * 1024) { toast({ title: 'Arquivo grande demais', description: `${f.name} passa de 15 MB.`, variant: 'destructive' }); continue; }
-        await enviarArquivoChat(ativa.jid, f, arquivos.length === 1 ? texto.trim() : '');
+        await enviarArquivoChat(ativa.jid, f, arquivos.length === 1 ? texto.trim() : '', companyId);
       }
       setTexto(''); await apos();
     } catch (e) { toast({ title: 'Não foi possível enviar o arquivo', description: e.message, variant: 'destructive' }); }
@@ -149,7 +149,7 @@ const WhatsAppPage = () => {
       const blob = new Blob(pedacosRef.current, { type: g.mimeType || 'audio/webm' });
       if (blob.size < 800) return;
       setEnviando(true);
-      try { await enviarAudioChat(ativa.jid, blob); await apos(); }
+      try { await enviarAudioChat(ativa.jid, blob, companyId); await apos(); }
       catch (e) { toast({ title: 'Não foi possível enviar o áudio', description: e.message, variant: 'destructive' }); }
       finally { setEnviando(false); }
     };
@@ -160,14 +160,14 @@ const WhatsAppPage = () => {
   const sincronizar = async () => {
     setSincronizando(true);
     try {
-      const r = await sincronizarChat();
+      const r = await sincronizarChat(companyId);
       await carregarConversas(); if (ativaId) await carregarMensagens(ativaId);
       toast({ title: 'Conversas sincronizadas', description: `${r.conversas || 0} conversas, ${r.mensagens || 0} mensagens novas.` });
     } catch (e) { toast({ title: 'Não foi possível sincronizar', description: e.message, variant: 'destructive' }); }
     finally { setSincronizando(false); }
   };
   const ativarRecebimento = async () => {
-    try { await configurarRecebimento(); toast({ title: 'Recebimento ativado', description: 'Agora as mensagens novas chegam aqui. Use "Sincronizar" para trazer as conversas recentes.' }); }
+    try { await configurarRecebimento(companyId); toast({ title: 'Recebimento ativado', description: 'Agora as mensagens novas chegam aqui. Use "Sincronizar" para trazer as conversas recentes.' }); }
     catch (e) { toast({ title: 'Não foi possível ativar', description: e.message, variant: 'destructive' }); }
   };
 
@@ -224,7 +224,7 @@ const WhatsAppPage = () => {
                       <div className={`flex ${m.de_mim ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[78%] rounded-lg px-2.5 py-1.5 shadow-sm text-sm ${m.de_mim ? 'bg-[#d9fdd3] dark:bg-emerald-900/60' : 'bg-background'}`}>
                           {ativa.eh_grupo && !m.de_mim && m.remetente_nome && <div className="text-[11px] font-semibold text-emerald-700">{m.remetente_nome}</div>}
-                          {['imagem', 'video', 'audio', 'documento', 'figurinha'].includes(m.tipo) && <div className="mb-1"><Midia m={m} onBaixada={apos} /></div>}
+                          {['imagem', 'video', 'audio', 'documento', 'figurinha'].includes(m.tipo) && <div className="mb-1"><Midia m={m} empresaId={companyId} onBaixada={apos} /></div>}
                           {m.texto && <div className="whitespace-pre-wrap break-words">{m.texto}</div>}
                           <div className="flex items-center justify-end gap-1 text-[10px] text-muted-foreground mt-0.5">{hora(m.data)}{m.de_mim && <Ticks status={m.status} />}</div>
                         </div>

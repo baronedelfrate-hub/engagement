@@ -12,9 +12,9 @@ const chamar = async (body) => {
   return data;
 };
 
-export const listarConversas = async (limite = 200) => {
+export const listarConversas = async (companyId, limite = 200) => {
   const { data, error } = await supabase.from('whatsapp_conversas').select('id, jid, nome, eh_grupo, ultima_mensagem, ultima_data, nao_lidas')
-    .order('ultima_data', { ascending: false, nullsFirst: false }).limit(limite);
+    .eq('company_id', companyId).order('ultima_data', { ascending: false, nullsFirst: false }).limit(limite);
   if (error) throw new Error(error.message);
   return data || [];
 };

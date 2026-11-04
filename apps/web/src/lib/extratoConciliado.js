@@ -35,8 +35,9 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
   const cat = mapa(categorias); const sub = mapa(subs); const cc = mapa(centros); const prj = mapa(projetos); const bco = mapa(bancos);
   const banco = bancoId && bancoId !== 'TODOS' ? bco.get(bancoId) : null;
 
-  // Com um banco escolhido, lê desde o saldo inicial para poder mostrar o saldo de cada linha.
-  const inicioLeitura = banco?.data_saldo_inicial && (!de || de > banco.data_saldo_inicial) ? banco.data_saldo_inicial : de;
+  // Lê desde o saldo inicial de cada banco para poder mostrar o saldo bancário de cada linha.
+  const iniciais = bancos.filter((b) => b.data_saldo_inicial && (!banco || b.id === banco.id)).map((b) => b.data_saldo_inicial);
+  const inicioLeitura = de ? [de, ...iniciais].sort()[0] : null;
   const extrato = await buscarTudo(() => {
     let q = supabase.from('extrato_bancario')
       .select('id, banco_id, data_transacao, descricao, valor, numero_documento, nota_fiscal, status_conciliacao, categoria_id, subcategoria_id, centro_custo_id, projeto_id, cliente_nome, estornada')
@@ -64,12 +65,13 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
       .in('id', lote)).forEach((m) => movs.set(m.id, m));
   }
 
-  let saldo = banco && banco.data_saldo_inicial ? arred(banco.saldo) : null;
+  const saldoDoBanco = new Map(bancos.filter((b) => b.data_saldo_inicial).map((b) => [b.id, arred(b.saldo)]));
   const linhas = [];
   for (const e of extrato) {
     const valor = arred(e.valor);
-    const dentroDoSaldo = banco?.data_saldo_inicial ? e.data_transacao >= banco.data_saldo_inicial : false;
-    if (saldo !== null && dentroDoSaldo && !e.estornada) saldo = arred(saldo + valor);
+    const bk = bco.get(e.banco_id);
+    const dentroDoSaldo = !!bk?.data_saldo_inicial && e.data_transacao >= bk.data_saldo_inicial;
+    if (dentroDoSaldo && !e.estornada) saldoDoBanco.set(bk.id, arred((saldoDoBanco.get(bk.id) || 0) + valor));
     if (de && e.data_transacao < de) continue; // lido só para acumular o saldo
     const baixas = porExtrato.get(e.id) || [];
     const ts = baixas.map((b) => movs.get(b.movimentacao_id)).filter(Boolean);
@@ -79,6 +81,7 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
     const doc = ts.map((t) => t.fornecedor?.cnpj || t.cliente?.cnpj_cpf).filter(Boolean);
     linhas.push({
       id: e.id,
+      bancoId: e.banco_id,
       data: e.data_transacao,
       banco: bco.get(e.banco_id)?.nome || '',
       documento: documentoDoBanco(e.numero_documento),
@@ -98,13 +101,21 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
       entrada: valor > 0 ? valor : 0,
       saida: valor < 0 ? -valor : 0,
       valor,
-      saldo: saldo !== null && dentroDoSaldo ? saldo : null,
+      saldo: dentroDoSaldo ? saldoDoBanco.get(bk.id) : null,
       conciliado: e.status_conciliacao === 'Conciliado',
       classificado: !!e.categoria_id,
       estornada: !!e.estornada
     });
   }
-  return { banco, bancos, linhas };
+  // saldo bancário inicial e final de cada conta no período (sobre todas as linhas, antes do filtro "Mostrar")
+  const saldos = bancos.filter((b) => b.data_saldo_inicial && (!banco || b.id === banco.id)).map((b) => {
+    const ls = linhas.filter((l) => l.bancoId === b.id && l.saldo !== null);
+    const base = { bancoId: b.id, nome: b.nome, agencia: b.agencia, conta: b.conta };
+    if (!ls.length) return (!de && !ate) ? { ...base, inicial: arred(b.saldo), final: arred(b.saldo), dataInicial: b.data_saldo_inicial, dataFinal: b.data_saldo_inicial } : { ...base, inicial: null, final: null };
+    const p0 = ls[0]; const u0 = ls[ls.length - 1];
+    return { ...base, inicial: arred(p0.saldo - p0.valor), final: u0.saldo, dataInicial: de || b.data_saldo_inicial, dataFinal: u0.data };
+  });
+  return { banco, bancos, linhas, saldos };
 };
 
 export const filtrarPorSituacao = (linhas, situacao) => {
@@ -114,11 +125,9 @@ export const filtrarPorSituacao = (linhas, situacao) => {
   return linhas;
 };
 
-export const resumir = (linhas, banco, de) => {
+export const resumir = (linhas, saldos = []) => {
   const entradas = arred(linhas.reduce((s, l) => s + l.entrada, 0));
   const saidas = arred(linhas.reduce((s, l) => s + l.saida, 0));
-  const primeira = linhas.find((l) => l.saldo !== null);
-  const ultima = [...linhas].reverse().find((l) => l.saldo !== null);
   const porCategoria = new Map();
   linhas.forEach((l) => {
     const k = l.classificado ? `${l.codigoCategoria} ${l.categoria}`.trim() : 'SEM CATEGORIA';
@@ -126,12 +135,19 @@ export const resumir = (linhas, banco, de) => {
     r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
     porCategoria.set(k, r);
   });
+  const unico = saldos.length === 1 ? saldos[0] : null;
   return {
     entradas, saidas, resultado: arred(entradas - saidas), qtd: linhas.length,
     semCategoria: linhas.filter((l) => !l.classificado).length,
     naoConciliadas: linhas.filter((l) => !l.conciliado).length,
-    saldoInicial: primeira ? arred(primeira.saldo - primeira.valor) : (banco?.data_saldo_inicial && !de ? arred(banco.saldo) : null),
-    saldoFinal: ultima ? ultima.saldo : null,
+    saldos,
+    saldoInicial: unico ? unico.inicial : null,
+    saldoFinal: unico ? unico.final : null,
+    dataSaldoInicial: unico?.dataInicial || null,
+    dataSaldoFinal: unico?.dataFinal || null,
     porCategoria: [...porCategoria.values()].sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas))
   };
 };
+
+// "Sicredi ag 0731 cc 68774-1: inicial R$ x (29/10) · final R$ y (03/11)"
+export const textoSaldos = (resumo) => (resumo.saldos || []).filter((s) => s.inicial !== null).map((s) => `${s.nome}${s.conta ? ` cc ${s.conta}` : ''}: saldo inicial ${moeda(s.inicial)} (${fmtData(s.dataInicial)}) · saldo final ${moeda(s.final)} (${fmtData(s.dataFinal)})`);

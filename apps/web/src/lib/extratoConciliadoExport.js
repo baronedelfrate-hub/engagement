@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { finalizarPdf } from '@/lib/pdfSaida';
-import { moeda, fmtData } from '@/lib/extratoConciliado';
+import { moeda, fmtData, textoSaldos } from '@/lib/extratoConciliado';
 
 const BRL = '"R$" #,##0.00;[Red]-"R$" #,##0.00';
 const nomeArquivo = (empresa, banco, ext) => `Extrato_conciliado_${String(empresa || 'empresa').replace(/[^A-Za-z0-9]+/g, '_')}${banco ? `_${String(banco.nome).replace(/[^A-Za-z0-9]+/g, '_')}_${banco.conta || ''}` : ''}.${ext}`;
@@ -35,8 +35,10 @@ export const exportarExtratoExcel = async ({ empresa, filtros, linhas, resumo, b
   ws.addRow([`Extrato conciliado — ${empresa}`]).font = { size: 15, bold: true, color: { argb: 'FF1E3A8A' } };
   ws.addRow([filtros]).font = { italic: true, size: 10 };
   ws.addRow([`Emitido em ${fmtData(new Date().toISOString())}`]).font = { size: 9, color: { argb: 'FF666666' } };
-  // linhas 4 e 5 em branco; o cabeçalho fica na linha 6
-  ws.addRow([]); ws.addRow([]);
+  // linha 4: saldo bancário inicial e final; linha 5 em branco; o cabeçalho fica na linha 6
+  const ts = textoSaldos(resumo);
+  ws.addRow([ts.length ? ts.join('   |   ') : 'Saldo bancário: escolha um banco com saldo inicial cadastrado.']).font = { bold: true, size: 10, color: { argb: 'FF1E3A8A' } };
+  ws.addRow([]);
   const header = ws.getRow(6);
   [...COLUNAS.map((c) => c[0]), 'Entrada (R$)', 'Saída (R$)', 'Saldo (R$)'].forEach((t, i) => { header.getCell(i + 1).value = t; });
   header.eachCell((c) => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } }; c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.alignment = { vertical: 'middle', wrapText: true }; });
@@ -65,8 +67,9 @@ export const exportarExtratoExcel = async ({ empresa, filtros, linhas, resumo, b
   rs.addRow([filtros]).font = { italic: true, size: 10 };
   rs.addRow([]);
   [['Lançamentos', resumo.qtd], ['Entradas', resumo.entradas], ['Saídas', resumo.saidas], ['Resultado do período', resumo.resultado],
-    ['Saldo inicial', resumo.saldoInicial], ['Saldo final', resumo.saldoFinal], ['Sem categoria', resumo.semCategoria], ['Não conciliadas', resumo.naoConciliadas]]
+    ['Saldo bancário inicial', resumo.saldoInicial], ['Saldo bancário final', resumo.saldoFinal], ['Sem categoria', resumo.semCategoria], ['Não conciliadas', resumo.naoConciliadas]]
     .forEach(([k, v]) => { const r = rs.addRow([k, v]); r.getCell(1).font = { bold: true }; if (typeof v === 'number' && !['Lançamentos', 'Sem categoria', 'Não conciliadas'].includes(k)) r.getCell(2).numFmt = BRL; });
+  (resumo.saldos || []).filter((x) => x.inicial !== null).forEach((x) => { const r = rs.addRow([`${x.nome}${x.conta ? ` cc ${x.conta}` : ''}`, x.inicial, x.final]); r.getCell(2).numFmt = BRL; r.getCell(3).numFmt = BRL; });
   rs.addRow([]);
   const h = rs.addRow(['Categoria', 'Lançamentos', 'Entradas (R$)', 'Saídas (R$)']);
   h.eachCell((c) => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } }; c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; });
@@ -84,9 +87,12 @@ export const exportarExtratoPdf = ({ empresa, filtros, linhas, resumo, banco }, 
   doc.setFontSize(9); doc.setTextColor(90, 90, 90); doc.text(`${filtros} · emitido em ${fmtData(new Date().toISOString())}`, 28, 46);
   doc.autoTable({
     startY: 54, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 138] },
-    head: [['Entradas', 'Saídas', 'Resultado', 'Saldo inicial', 'Saldo final', 'Sem categoria', 'Não conciliadas']],
-    body: [[moeda(resumo.entradas), moeda(resumo.saidas), moeda(resumo.resultado), resumo.saldoInicial === null ? '—' : moeda(resumo.saldoInicial), resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal), String(resumo.semCategoria), String(resumo.naoConciliadas)]]
+    head: [['Entradas', 'Saídas', 'Resultado', 'Saldo bancário inicial', 'Saldo bancário final', 'Sem categoria', 'Não conciliadas']],
+    body: [[moeda(resumo.entradas), moeda(resumo.saidas), moeda(resumo.resultado), resumo.saldoInicial === null ? (resumo.saldos?.length > 1 ? 'ver abaixo' : '—') : moeda(resumo.saldoInicial), resumo.saldoFinal === null ? (resumo.saldos?.length > 1 ? 'ver abaixo' : '—') : moeda(resumo.saldoFinal), String(resumo.semCategoria), String(resumo.naoConciliadas)]]
   });
+  if ((resumo.saldos || []).length > 1) {
+    doc.autoTable({ startY: doc.lastAutoTable.finalY + 6, theme: 'plain', styles: { fontSize: 8 }, body: textoSaldos(resumo).map((t) => [t]) });
+  }
   doc.autoTable({
     startY: doc.lastAutoTable.finalY + 8, theme: 'striped', styles: { fontSize: 6.5, cellPadding: 2, overflow: 'linebreak' }, headStyles: { fillColor: [30, 58, 138], fontSize: 7 },
     head: [['Data', 'Nº doc.', 'Histórico do banco', 'Fornecedor / cliente', 'Título / NF', 'Categoria', 'Centro / obra', 'Observação', 'Valor', 'Saldo', 'Sit.']],

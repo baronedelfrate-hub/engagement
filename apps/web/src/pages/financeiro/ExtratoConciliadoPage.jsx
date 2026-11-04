@@ -43,7 +43,7 @@ const ExtratoConciliadoPage = () => {
   useEffect(() => { if (!authLoading) carregar(); }, [authLoading, carregar]);
 
   const linhas = useMemo(() => (dados ? filtrarPorSituacao(dados.linhas, situacao) : []), [dados, situacao]);
-  const resumo = useMemo(() => (dados ? resumir(linhas, dados.banco, de) : null), [dados, linhas, de]);
+  const resumo = useMemo(() => (dados ? resumir(linhas, dados.saldos) : null), [dados, linhas]);
   const filtros = useMemo(() => {
     const b = dados?.banco ? `${dados.banco.nome} ag ${dados.banco.agencia || '-'} cc ${dados.banco.conta || '-'}` : 'Todos os bancos';
     const p = de || ate ? `${de ? fmtData(de) : 'início'} a ${ate ? fmtData(ate) : 'hoje'}` : 'todo o período';
@@ -86,11 +86,35 @@ const ExtratoConciliadoPage = () => {
       {loading || !resumo ? <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-            <Cartao t="Entradas" v={moeda(resumo.entradas)} cor="text-emerald-600" />
-            <Cartao t="Saídas" v={moeda(resumo.saidas)} cor="text-red-600" />
-            <Cartao t="Saldo inicial → final" v={resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal)} sub={resumo.saldoInicial === null ? 'Escolha um banco com saldo inicial para ver o saldo' : `Inicial ${moeda(resumo.saldoInicial)}`} />
-            <Cartao t="Lançamentos" v={String(resumo.qtd)} sub={`${resumo.semCategoria} sem categoria · ${resumo.naoConciliadas} não conciliados`} />
+            <Cartao t="Entradas" v={moeda(resumo.entradas)} cor="text-emerald-600" sub={`${resumo.qtd} lançamentos`} />
+            <Cartao t="Saídas" v={moeda(resumo.saidas)} cor="text-red-600" sub={`${resumo.semCategoria} sem categoria · ${resumo.naoConciliadas} não conciliados`} />
+            {dados.saldos.length === 1 ? (
+              <>
+                <Cartao t="Saldo bancário inicial" v={resumo.saldoInicial === null ? '—' : moeda(resumo.saldoInicial)} sub={resumo.dataSaldoInicial ? `em ${fmtData(resumo.dataSaldoInicial)}` : 'sem lançamentos no período'} />
+                <Cartao t="Saldo bancário final" v={resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal)} sub={resumo.dataSaldoFinal ? `em ${fmtData(resumo.dataSaldoFinal)}` : ''} />
+              </>
+            ) : (
+              <Card className="col-span-2"><CardContent className="p-4 text-xs text-muted-foreground">
+                {dados.saldos.length === 0 ? 'Nenhum banco tem saldo inicial cadastrado. Cadastre o saldo inicial no cadastro do banco para ver o saldo bancário.' : 'Escolha um banco para ver o saldo bancário inicial e final, ou veja o de todas as contas na tabela abaixo.'}
+              </CardContent></Card>
+            )}
           </div>
+          {dados.saldos.length > 1 && (
+            <div className="border rounded-md mb-3 overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-muted/50 text-left"><tr>{['Saldo bancário por conta', 'Inicial', 'Final'].map((h) => <th key={h} className={`px-3 py-2 font-medium ${h !== 'Saldo bancário por conta' ? 'text-right' : ''}`}>{h}</th>)}</tr></thead>
+                <tbody>
+                  {dados.saldos.map((b) => (
+                    <tr key={b.bancoId} className="border-t">
+                      <td className="px-3 py-1.5">{b.nome}{b.agencia ? ` · ag ${b.agencia}` : ''}{b.conta ? ` · cc ${b.conta}` : ''}</td>
+                      <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.inicial === null ? '—' : <>{moeda(b.inicial)} <span className="text-muted-foreground">({fmtData(b.dataInicial)})</span></>}</td>
+                      <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.final === null ? '—' : <>{moeda(b.final)} <span className="text-muted-foreground">({fmtData(b.dataFinal)})</span></>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           {(resumo.semCategoria > 0 || resumo.naoConciliadas > 0) && (
             <div className="flex items-center gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">
               <AlertTriangle className="h-4 w-4 shrink-0" />

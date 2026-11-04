@@ -294,18 +294,18 @@ const MovimentacaoFinanceiraPage = () => {
           
           <div className="rounded-md border border-border bg-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
+              <table className="w-full text-xs text-left">
                 <thead className="text-xs text-muted-foreground bg-muted/50 uppercase border-b border-border">
                   <tr>
-                    <th className="px-6 py-3 font-medium">Nº Título</th>
-                    <th className="px-6 py-3 font-medium">Tipo</th>
-                    <th className="px-6 py-3 font-medium">Cliente/Fornecedor</th>
-                    <th className="px-6 py-3 font-medium">Vencimento</th>
-                    <th className="px-6 py-3 font-medium">Valor</th>
-                    <th className="px-6 py-3 font-medium">Em aberto</th>
-                    <th className="px-6 py-3 font-medium">Pago em</th>
-                    <th className="px-6 py-3 font-medium">Status</th>
-                    <th className="px-6 py-3 font-medium text-right">Ações</th>
+                    <th className="px-2.5 py-2 font-medium">Nº Título</th>
+                    <th className="px-2.5 py-2 font-medium">Tipo</th>
+                    <th className="px-2.5 py-2 font-medium">Cliente/Fornecedor</th>
+                    <th className="px-2.5 py-2 font-medium">Vencimento</th>
+                    <th className="px-2.5 py-2 font-medium">Valor</th>
+                    <th className="px-2.5 py-2 font-medium">Em aberto</th>
+                    <th className="px-2.5 py-2 font-medium">Pago em</th>
+                    <th className="px-2.5 py-2 font-medium">Status</th>
+                    <th className="px-2.5 py-2 font-medium text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -325,17 +325,17 @@ const MovimentacaoFinanceiraPage = () => {
                   ) : (
                     filteredData.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((row) => (
                       <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
-                        <td className="px-6 py-4 font-mono text-foreground">
+                        <td className="px-2.5 py-1.5 font-mono text-[11px] text-foreground min-w-[200px]">
                           {row.numero_titulo}
                           {row.provisao && <Badge variant="outline" className="ml-2 border-amber-500/40 text-amber-600 bg-amber-500/10 font-sans">Provisão</Badge>}
                           {!row.provisao && row.provisao_id && <Badge variant="outline" className="ml-2 border-blue-500/40 text-blue-600 bg-blue-500/10 font-sans">Substitui provisão</Badge>}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-2.5 py-1.5">
                           <Badge variant="outline" className={row.tipo?.toUpperCase() === 'PAGAR' ? 'border-red-500/30 text-red-500 bg-red-500/10' : 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10'}>
                             {row.tipo?.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-foreground">
+                        <td className="px-2.5 py-1.5 text-foreground">
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
                           {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && <div><ChavePix fornecedor={row.fornecedor} /></div>}
                           {(row.docs || []).length > 0 && (
@@ -345,24 +345,24 @@ const MovimentacaoFinanceiraPage = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-foreground">
+                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
                           {formatDateOnly(row.data_vencimento)}
                         </td>
-                        <td className="px-6 py-4 font-medium text-foreground">
-                          R$ {parseFloat(row.valor_total || 0).toFixed(2)}
+                        <td className="px-2.5 py-1.5 font-medium text-foreground whitespace-nowrap">
+                          {parseFloat(row.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </td>
-                        <td className="px-6 py-4 text-foreground">
-                          R$ {saldoEmAberto(row).toFixed(2)}
+                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
+                          {saldoEmAberto(row).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </td>
-                        <td className="px-6 py-4 text-foreground">
+                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
                           {dataPagamento(row) ? formatDateOnly(dataPagamento(row)) : '—'}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-2.5 py-1.5">
                           <Badge variant="secondary" className="capitalize text-foreground">
                             {row.status === 'substituido' ? 'substituída' : (row.status || '').replace('_', ' ')}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                        <td className="px-2.5 py-1.5 text-right whitespace-nowrap">
                           {row.provisao && row.status === 'pendente' && (
                             <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
                               <Pencil className="mr-1 h-4 w-4" /> Editar

@@ -391,27 +391,19 @@ const MovimentacaoFinanceiraPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border">
-                              {podeSubstituir(row) && (
-                                <DropdownMenuItem onClick={() => setSubstituirRow(row)}>
-                                  <Replace className="mr-2 h-4 w-4" /> Substituir provisão
-                                </DropdownMenuItem>
-                              )}
                               {row.provisao && row.status === 'substituido' && (
                                 <DropdownMenuItem onClick={() => reabrirProvisao(row)}>
                                   <Undo2 className="mr-2 h-4 w-4" /> Reabrir provisão
                                 </DropdownMenuItem>
                               )}
-                              {podeBaixar(row) && (
-                                <DropdownMenuItem onClick={() => setBaixaId(row.id)}>
-                                  <CheckCircle2 className="mr-2 h-4 w-4" /> Baixar título
-                                </DropdownMenuItem>
-                              )}
                               <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'view' })}>
                                 <Eye className="mr-2 h-4 w-4" /> Visualizar
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
-                                <Pencil className="mr-2 h-4 w-4" /> Editar
-                              </DropdownMenuItem>
+                              {!(row.provisao && row.status === 'pendente') && (
+                                <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
+                                  <Pencil className="mr-2 h-4 w-4" /> Editar
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={() => handleDelete(row.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                                 <Trash className="mr-2 h-4 w-4" /> Excluir
                               </DropdownMenuItem>

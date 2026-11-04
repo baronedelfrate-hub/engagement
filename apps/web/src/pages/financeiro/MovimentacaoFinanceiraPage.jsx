@@ -363,26 +363,6 @@ const MovimentacaoFinanceiraPage = () => {
                           </Badge>
                         </td>
                         <td className="px-2.5 py-1.5 text-right whitespace-nowrap">
-                          {row.provisao && row.status === 'pendente' && (
-                            <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
-                              <Pencil className="mr-1 h-4 w-4" /> Editar
-                            </Button>
-                          )}
-                          {podeSubstituir(row) && (
-                            <Button size="sm" variant="outline" className="mr-2 h-8" onClick={() => setSubstituirRow(row)}>
-                              <Replace className="mr-1 h-4 w-4" /> Substituir
-                            </Button>
-                          )}
-                          {podeBaixar(row) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="mr-2 h-8"
-                              onClick={() => setBaixaId(row.id)}
-                            >
-                              <CheckCircle2 className="mr-1 h-4 w-4" /> Baixar
-                            </Button>
-                          )}
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">
@@ -391,6 +371,16 @@ const MovimentacaoFinanceiraPage = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-popover border-border">
+                              {podeBaixar(row) && (
+                                <DropdownMenuItem onClick={() => setBaixaId(row.id)}>
+                                  <CheckCircle2 className="mr-2 h-4 w-4" /> Baixar título
+                                </DropdownMenuItem>
+                              )}
+                              {podeSubstituir(row) && (
+                                <DropdownMenuItem onClick={() => setSubstituirRow(row)}>
+                                  <Replace className="mr-2 h-4 w-4" /> Substituir provisão
+                                </DropdownMenuItem>
+                              )}
                               {row.provisao && row.status === 'substituido' && (
                                 <DropdownMenuItem onClick={() => reabrirProvisao(row)}>
                                   <Undo2 className="mr-2 h-4 w-4" /> Reabrir provisão
@@ -399,11 +389,9 @@ const MovimentacaoFinanceiraPage = () => {
                               <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'view' })}>
                                 <Eye className="mr-2 h-4 w-4" /> Visualizar
                               </DropdownMenuItem>
-                              {!(row.provisao && row.status === 'pendente') && (
-                                <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
-                                  <Pencil className="mr-2 h-4 w-4" /> Editar
-                                </DropdownMenuItem>
-                              )}
+                              <DropdownMenuItem onClick={() => setModalState({ open: true, id: row.id, mode: 'edit' })}>
+                                <Pencil className="mr-2 h-4 w-4" /> Editar
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDelete(row.id)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                                 <Trash className="mr-2 h-4 w-4" /> Excluir
                               </DropdownMenuItem>

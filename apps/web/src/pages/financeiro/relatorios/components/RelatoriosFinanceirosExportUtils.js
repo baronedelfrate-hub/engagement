@@ -168,16 +168,40 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
   doc.setTextColor(100, 100, 100);
   doc.text(filtersDescription, 14, 42);
 
-  // Main Table
+  // Main Table: os lançamentos de cada dia de vencimento, com o total do dia logo abaixo
   const tableColumn = columns.map(c => c.label);
-  const tableRows = data.map(row => {
-      return columns.map(col => {
-          let val = row[col.id];
-          if (col.type === 'date' && val) return formatDateOnly(val);
-          if (col.type === 'currency') return formatCurrency(val);
-          return val || '-';
-      });
+  const valorIdx = columns.findIndex(c => c.type === 'currency');
+  const celulaDe = (row, col) => {
+      let val = row[col.id];
+      if (col.type === 'date' && val) return formatDateOnly(val);
+      if (col.type === 'currency') return formatCurrency(val);
+      return val || '-';
+  };
+  const soma = (linhas, filtro) => linhas.filter(filtro).reduce((s, r) => s + parseFloat(r.valor_original || 0), 0);
+  const ehPago = (r) => r.status === 'Pago' || r.status === 'Recebido';
+  const estiloTotal = { fontStyle: 'bold', fillColor: [226, 232, 240], textColor: [30, 58, 138] };
+  const linhaTotal = (rotulo, linhas) => {
+      const detalhe = `${rotulo}  |  ${linhas.length} lançamento(s)  |  ${isPagar ? 'Pago' : 'Recebido'}: ${formatCurrency(soma(linhas, ehPago))}  |  Pendente: ${formatCurrency(soma(linhas, r => !ehPago(r)))}`;
+      if (valorIdx < 0) return [{ content: detalhe, colSpan: columns.length, styles: estiloTotal }];
+      const depois = columns.length - valorIdx - 1;
+      return [
+          { content: detalhe, colSpan: valorIdx, styles: estiloTotal },
+          { content: formatCurrency(soma(linhas, () => true)), styles: estiloTotal },
+          ...(depois > 0 ? [{ content: '', colSpan: depois, styles: estiloTotal }] : [])
+      ];
+  };
+  const tableRows = [];
+  const dias = [];
+  data.forEach(row => {
+      const dia = row.data_vencimento || 'Sem data';
+      const ultimo = dias[dias.length - 1];
+      if (!ultimo || ultimo.dia !== dia) dias.push({ dia, linhas: [row] }); else ultimo.linhas.push(row);
   });
+  dias.forEach(g => {
+      g.linhas.forEach(row => tableRows.push(columns.map(col => celulaDe(row, col))));
+      tableRows.push(linhaTotal(`TOTAL DO DIA ${g.dia === 'Sem data' ? 'SEM DATA' : formatDateOnly(g.dia)}`, g.linhas));
+  });
+  if (dias.length > 1) tableRows.push(linhaTotal('TOTAL GERAL', data));
 
   doc.autoTable({
       head: [tableColumn],
@@ -211,12 +235,10 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
       });
   };
 
-  const byDia = groupData(data, i => i.data_vencimento, i => i.data_vencimento ? formatDateOnly(i.data_vencimento) : 'Sem Data');
   const byEntidade = groupData(data, i => isPagar ? i.fornecedor_id : i.cliente_id, i => isPagar ? i.fornecedor_nome : i.cliente_nome);
   const byCategoria = groupData(data, i => i.categoria_id, i => i.categoria_nome);
   const byCentro = groupData(data, i => i.centro_custo_id, i => i.centro_custo_nome);
 
-  addPdfSummary('Resumo por Dia', byDia);
   addPdfSummary(isPagar ? 'Resumo por Fornecedor' : 'Resumo por Cliente', byEntidade);
   addPdfSummary('Resumo por Categoria', byCategoria);
   addPdfSummary('Resumo por Centro de Custo', byCentro);

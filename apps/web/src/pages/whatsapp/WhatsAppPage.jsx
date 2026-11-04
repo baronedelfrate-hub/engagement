@@ -13,7 +13,7 @@ import { avisosDoNavegador, pedirAvisosDoNavegador } from '@/hooks/useWhatsAppNo
 import {
   listarConversas, listarMensagens, marcarLida, urlDaMidia, enviarTextoChat, enviarArquivoChat, enviarAudioChat,
   sincronizarChat, baixarMidiaChat, configurarRecebimento, nomeDaConversa, subtituloDaConversa,
-  listarContatos, baixarContatos, iniciarConversa, definirNome, formatarTelefoneBR
+  listarContatos, baixarContatos, iniciarConversa, definirNome, formatarTelefoneBR, buscarFotos, urlsDasFotos
 } from '@/lib/whatsappChat';
 
 const hora = (d) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -52,6 +52,16 @@ const Midia = ({ m, empresaId, onBaixada }) => {
   return <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-2 underline"><FileText className="h-4 w-4 shrink-0" /><span className="truncate">{m.midia_nome || 'Documento'}</span></a>;
 };
 
+// Foto do contato (ou ícone quando não há foto).
+const Foto = ({ c, fotos, tam = 'h-10 w-10', icone = 'h-5 w-5' }) => {
+  const url = c?.foto_path ? fotos[c.foto_path] : null;
+  return (
+    <div className={`${tam} rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 overflow-hidden`}>
+      {url ? <img src={url} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} /> : (c?.eh_grupo ? <Users className={icone} /> : <MessageCircle className={icone} />)}
+    </div>
+  );
+};
+
 const Ticks = ({ status }) => (status === 'lida' ? <CheckCheck className="h-3.5 w-3.5 text-sky-500" /> : status === 'entregue' ? <CheckCheck className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />);
 
 // Tela estilo WhatsApp Web: conversas à esquerda, mensagens à direita; texto, anexo e áudio.
@@ -82,6 +92,8 @@ const WhatsAppPage = () => {
   const ativaRef = useRef(null);
   ativaRef.current = ativaId;
   const [avisos, setAvisos] = useState(avisosDoNavegador());
+  const [fotos, setFotos] = useState({});
+  const buscouFotos = useRef(false);
   useEffect(() => { window.__whatsappConversaAberta = ativaId; return () => { window.__whatsappConversaAberta = null; }; }, [ativaId]);
 
   const ativa = useMemo(() => conversas.find((c) => c.id === ativaId) || null, [conversas, ativaId]);
@@ -99,6 +111,17 @@ const WhatsAppPage = () => {
     statusWhatsApp(companyId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
     carregarConversas();
   }, [authLoading, companyId, carregarConversas]);
+
+  // fotos: links temporários das que já foram copiadas; e uma busca por sessão das que faltam
+  useEffect(() => {
+    const faltam = conversas.filter((c) => c.foto_path && !fotos[c.foto_path]).map((c) => c.foto_path);
+    if (faltam.length) urlsDasFotos(faltam).then((m) => setFotos((f) => ({ ...f, ...m })));
+  }, [conversas]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (buscouFotos.current || !conectado || !conversas.length || !conversas.some((c) => !c.foto_path)) return;
+    buscouFotos.current = true;
+    buscarFotos(companyId).then(() => carregarConversas()).catch(() => { /* fotos são opcionais */ });
+  }, [conectado, conversas.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // tempo real: mensagem nova ou conversa atualizada
   useEffect(() => {
@@ -250,7 +273,7 @@ const WhatsAppPage = () => {
             {filtradas.length === 0 && <p className="p-4 text-sm text-muted-foreground">Nenhuma conversa ainda. Conecte o número, ative o recebimento (engrenagem) e clique em sincronizar.</p>}
             {filtradas.map((c) => (
               <button key={c.id} type="button" onClick={() => setAtivaId(c.id)} className={`w-full text-left px-3 py-2.5 border-b flex gap-3 hover:bg-muted/50 ${c.id === ativaId ? 'bg-muted' : ''}`}>
-                <div className="h-10 w-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">{c.eh_grupo ? <Users className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}</div>
+                <Foto c={c} fotos={fotos} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2"><span className="font-medium text-sm truncate">{nomeDaConversa(c)}</span><span className={`text-[11px] shrink-0 ${c.nao_lidas ? 'text-emerald-600 font-semibold' : 'text-muted-foreground'}`}>{curto(c.ultima_data)}</span></div>
                   <div className="flex items-center justify-between gap-2"><span className="text-xs text-muted-foreground truncate">{c.ultima_mensagem || ''}</span>{c.nao_lidas > 0 && <span className="bg-emerald-500 text-white text-[11px] rounded-full px-1.5 min-w-[18px] text-center">{c.nao_lidas}</span>}</div>
@@ -268,7 +291,7 @@ const WhatsAppPage = () => {
             <>
               <header className="px-4 py-2.5 bg-background border-b flex items-center gap-3">
                 <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setAtivaId(null)}><X className="h-4 w-4" /></Button>
-                <div className="h-9 w-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">{ativa.eh_grupo ? <Users className="h-4 w-4" /> : <MessageCircle className="h-4 w-4" />}</div>
+                <Foto c={ativa} fotos={fotos} tam="h-9 w-9" icone="h-4 w-4" />
                 <div className="min-w-0 flex-1">
                   {editandoNome ? (
                     <div className="flex items-center gap-1"><Input autoFocus className="h-8" value={nomeEdicao} onChange={(e) => setNomeEdicao(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') salvarNome(); if (e.key === 'Escape') setEditandoNome(false); }} placeholder="Nome do contato" /><Button size="icon" variant="ghost" className="h-8 w-8" onClick={salvarNome}><Check className="h-4 w-4" /></Button></div>

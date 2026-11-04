@@ -131,3 +131,7 @@ begin
   return n;
 end $$;
 grant execute on function public.whatsapp_aplicar_contatos(uuid) to authenticated;
+
+-- Foto do contato (copiada do WhatsApp para a pasta privada whatsapp-midia, em <empresa>/fotos/<conversa>.jpg).
+alter table public.whatsapp_conversas add column if not exists foto_path text;
+alter table public.whatsapp_conversas add column if not exists foto_atualizada timestamptz;

@@ -13,7 +13,7 @@ const chamar = async (body) => {
 };
 
 export const listarConversas = async (companyId, limite = 200) => {
-  const { data, error } = await supabase.from('whatsapp_conversas').select('id, jid, nome, apelido, telefone, eh_grupo, ultima_mensagem, ultima_data, nao_lidas')
+  const { data, error } = await supabase.from('whatsapp_conversas').select('id, jid, nome, apelido, telefone, eh_grupo, ultima_mensagem, ultima_data, nao_lidas, foto_path, foto_atualizada')
     .eq('company_id', companyId).order('ultima_data', { ascending: false, nullsFirst: false }).limit(limite);
   if (error) throw new Error(error.message);
   return data || [];
@@ -45,6 +45,16 @@ export const enviarAudioChat = async (jid, blob, empresaId) =>
   chamar({ acao: 'enviar', tipo: 'audio', jid, empresa_id: empresaId, anexo: { base64: await blobParaBase64(blob), filename: 'audio.webm', mimetype: blob.type || 'audio/webm' } });
 export const sincronizarChat = (empresaId) => chamar({ acao: 'sincronizar', empresa_id: empresaId });
 export const baixarMidiaChat = (mensagemId, empresaId) => chamar({ acao: 'midia', mensagem_id: mensagemId, empresa_id: empresaId });
+// Copia as fotos de perfil das conversas (a função pula as que já foram verificadas há pouco) e devolve links temporários para exibi-las.
+export const buscarFotos = (empresaId) => chamar({ acao: 'fotos', empresa_id: empresaId });
+export const urlsDasFotos = async (paths) => {
+  const unicos = [...new Set((paths || []).filter(Boolean))];
+  if (!unicos.length) return {};
+  const { data, error } = await supabase.storage.from('whatsapp-midia').createSignedUrls(unicos, 3600);
+  if (error) return {};
+  return Object.fromEntries((data || []).filter((x) => x.signedUrl).map((x) => [x.path, x.signedUrl]));
+};
+
 export const configurarRecebimento = (empresaId) => chamar({ acao: 'configurar_webhook', empresa_id: empresaId });
 
 export const listarContatos = async (companyId) => {

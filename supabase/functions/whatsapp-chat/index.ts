@@ -289,6 +289,39 @@ Deno.serve(async (req) => {
       return json({ success: true, conversa_id: conversaId });
     }
 
+    if (b.acao === 'fotos') {
+      // Copia a foto de perfil de cada conversa para a pasta privada (a URL do WhatsApp expira). Refaz a cada 7 dias; sem foto, tenta de novo depois de 1 dia.
+      const limite = Math.min(Number(b.limite) || 40, 80);
+      const { data: lista } = await admin.from('whatsapp_conversas').select('id, jid, telefone, foto_path, foto_atualizada').eq('company_id', empresa).order('ultima_data', { ascending: false, nullsFirst: false }).limit(300);
+      const agora = Date.now();
+      const alvos = (lista ?? []).filter((c) => {
+        const t = c.foto_atualizada ? new Date(c.foto_atualizada).getTime() : 0;
+        return c.foto_path ? agora - t > 7 * 86400000 : agora - t > 86400000;
+      }).slice(0, limite);
+      let atualizadas = 0;
+      for (const c of alvos) {
+        let caminho: string | null = c.foto_path ?? null;
+        try {
+          const r = await fetch(`${base}/chat/fetchProfilePictureUrl/${inst_enc}`, { method: 'POST', headers: cab, body: JSON.stringify({ number: c.telefone ?? c.jid }) });
+          const t = await r.json().catch(() => ({}));
+          const link: string | undefined = t?.profilePictureUrl ?? t?.profilePicUrl ?? t?.url;
+          if (r.ok && link) {
+            const img = await fetch(link);
+            if (img.ok) {
+              const bytes = new Uint8Array(await img.arrayBuffer());
+              if (bytes.length > 0 && bytes.length < 3 * 1024 * 1024) {
+                const novo = `${empresa}/fotos/${c.id}.jpg`;
+                const up = await admin.storage.from(BUCKET).upload(novo, bytes, { contentType: img.headers.get('content-type')?.split(';')[0] || 'image/jpeg', upsert: true });
+                if (!up.error) { caminho = novo; atualizadas++; }
+              }
+            }
+          }
+        } catch { /* sem foto para este contato */ }
+        await admin.from('whatsapp_conversas').update({ foto_path: caminho, foto_atualizada: new Date().toISOString() }).eq('id', c.id);
+      }
+      return json({ success: true, verificadas: alvos.length, atualizadas });
+    }
+
     if (b.acao === 'midia') {
       const { data: msg } = await admin.from('whatsapp_mensagens').select('id, conversa_id, message_id, tipo, midia_mime, midia_nome, de_mim').eq('id', b.mensagem_id).eq('company_id', empresa).maybeSingle();
       if (!msg) return json({ error: 'Mensagem não encontrada.' }, 404);

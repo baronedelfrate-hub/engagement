@@ -24,6 +24,7 @@ import AnexosMovimentacao from '@/components/financeiro/AnexosMovimentacao';
 import ChavePix from '@/components/financeiro/ChavePix';
 import CodigoBoleto from '@/components/financeiro/CodigoBoleto';
 import { numeroDocumentoValido } from '@/lib/nomeAnexo';
+import { TIPOS_PIX } from '@/lib/chavePix';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
   const { toast } = useToast();
@@ -86,7 +87,9 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         projeto_id: rowRes.data.projeto_id || 'none',
         banco_id: rowRes.data.banco_id || 'none',
         observacoes: rowRes.data.observacoes || '',
-        codigo_barras: rowRes.data.codigo_barras || ''
+        codigo_barras: rowRes.data.codigo_barras || '',
+        chave_pix: rowRes.data.fornecedor?.chave_pix || '',
+        tipo_chave_pix: rowRes.data.fornecedor?.tipo_chave_pix || ''
       });
       setDocumentos(docsRes.data || []);
       setBaixas(baixasRes.data || []);
@@ -176,6 +179,15 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
       };
       const { error } = await supabase.from('movimentacao_financeira').update(payload).eq('id', movimentacaoId);
       if (error) throw error;
+      // chave Pix digitada aqui vai para o cadastro do fornecedor
+      if (row.tipo !== 'receber' && form.entidade_id !== 'none') {
+        const atual = entidades.find((x) => x.id === form.entidade_id);
+        const nova = form.chave_pix.trim() || null; const tipoNovo = nova ? (form.tipo_chave_pix || null) : null;
+        if ((atual?.chave_pix || null) !== nova || (atual?.tipo_chave_pix || null) !== tipoNovo) {
+          const rf = await supabase.from('fornecedores').update({ chave_pix: nova, tipo_chave_pix: tipoNovo }).eq('id', form.entidade_id);
+          if (rf.error) throw rf.error;
+        }
+      }
 
       // aplicar às próximas provisões da série: valor, classificação, fornecedor/cliente, banco e, se mudou, o nome e o dia do vencimento
       if (form.aplicarSerie && serie.length > 0) {
@@ -280,14 +292,28 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               </div>
               <div className="space-y-2 col-span-2">
                 <Label>{row?.tipo === 'receber' ? 'Cliente' : 'Fornecedor'}</Label>
-                <Select value={form.entidade_id} onValueChange={(v) => setForm(f => ({ ...f, entidade_id: v }))}>
+                <Select value={form.entidade_id} onValueChange={(v) => setForm(f => { const e = entidades.find((x) => x.id === v); return { ...f, entidade_id: v, chave_pix: e?.chave_pix || '', tipo_chave_pix: e?.tipo_chave_pix || '' }; })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Nenhum</SelectItem>
                     {entidades.map(e => <SelectItem key={e.id} value={e.id}>{e.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                {row?.tipo !== 'receber' && <ChavePix fornecedor={entidades.find((e) => e.id === form.entidade_id)} />}
+                {row?.tipo !== 'receber' && form.entidade_id !== 'none' && (
+                  <div className="mt-2 rounded-md border border-emerald-300/70 bg-emerald-50/50 p-3 space-y-2">
+                    <div className="text-xs font-medium">Chave Pix do fornecedor <span className="font-normal text-muted-foreground">(fica no cadastro do fornecedor e vale para todos os pagamentos dele)</span></div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Select value={form.tipo_chave_pix || 'nenhum'} onValueChange={(v) => setForm((f) => ({ ...f, tipo_chave_pix: v === 'nenhum' ? '' : v }))}>
+                        <SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nenhum">Tipo</SelectItem>
+                          {TIPOS_PIX.map((t) => <SelectItem key={t.id} value={t.id}>{t.rotulo}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Input className="col-span-2 font-mono" value={form.chave_pix} onChange={(e) => setForm((f) => ({ ...f, chave_pix: e.target.value }))} placeholder="Chave Pix" />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Status</Label>

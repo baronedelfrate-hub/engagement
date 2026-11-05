@@ -167,6 +167,7 @@ const navigation = [
           { name: 'Dashboard', href: '/admin/dashboard' },
           { name: 'Carteira de Clientes', href: '/admin/carteira' },
           { name: 'Módulos por Cliente', href: '/admin/modulos' },
+          { name: 'Disparo de Resultados', href: '/admin/disparo-resultados' },
           { name: 'Usuários', href: '/admin/usuarios' },
           { name: 'Times', href: '/admin/times' },
           { name: 'Faturamento', href: '/admin/faturamento' },

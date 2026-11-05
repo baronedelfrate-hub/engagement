@@ -22,6 +22,7 @@ const ajustaDia = (data, dia) => {
 import SeletorProjeto from '@/components/SeletorProjeto';
 import AnexosMovimentacao from '@/components/financeiro/AnexosMovimentacao';
 import ChavePix from '@/components/financeiro/ChavePix';
+import CodigoBoleto from '@/components/financeiro/CodigoBoleto';
 import { numeroDocumentoValido } from '@/lib/nomeAnexo';
 
 const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'view', onSaved }) => {
@@ -84,7 +85,8 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         centro_custo_id: rowRes.data.centro_custo_id || 'none',
         projeto_id: rowRes.data.projeto_id || 'none',
         banco_id: rowRes.data.banco_id || 'none',
-        observacoes: rowRes.data.observacoes || ''
+        observacoes: rowRes.data.observacoes || '',
+        codigo_barras: rowRes.data.codigo_barras || ''
       });
       setDocumentos(docsRes.data || []);
       setBaixas(baixasRes.data || []);
@@ -169,6 +171,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
         projeto_id: form.projeto_id === 'none' ? null : form.projeto_id,
         banco_id: form.banco_id === 'none' ? null : form.banco_id,
         observacoes: form.observacoes,
+        codigo_barras: form.codigo_barras?.trim() || null,
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase.from('movimentacao_financeira').update(payload).eq('id', movimentacaoId);
@@ -237,6 +240,9 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
               <div><Label className="text-muted-foreground">Projeto</Label><p className="text-foreground">{row.projeto ? `${row.projeto.codigo ? row.projeto.codigo + ' - ' : ''}${row.projeto.nome}` : 'Não se aplica'}</p></div>
               <div><Label className="text-muted-foreground">Banco</Label><p className="text-foreground">{row.banco?.nome || '-'}</p></div>
             </div>
+            {row.codigo_barras && (
+              <div><Label className="text-muted-foreground">Boleto</Label><div><CodigoBoleto codigo={row.codigo_barras} /></div></div>
+            )}
             {row.observacoes && (
               <div><Label className="text-muted-foreground">Observações</Label><p className="text-foreground whitespace-pre-wrap">{row.observacoes}</p></div>
             )}
@@ -355,6 +361,12 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                 </Select>
               </div>
             </div>
+            {row?.tipo !== 'receber' && (
+              <div className="space-y-2">
+                <Label>Boleto: código de barras / linha digitável</Label>
+                <Input className="font-mono" value={form.codigo_barras} onChange={(e) => setForm(f => ({ ...f, codigo_barras: e.target.value }))} placeholder="Cole aqui o código do boleto" />
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />

@@ -17,6 +17,7 @@ import ProvisaoDialog from './components/ProvisaoDialog';
 import SubstituirProvisaoDialog from './components/SubstituirProvisaoDialog';
 import { formatDateOnly } from '@/lib/dateUtils';
 import ChavePix from '@/components/financeiro/ChavePix';
+import CodigoBoleto from '@/components/financeiro/CodigoBoleto';
 import { buscarTudo } from '@/services/extratoAsaasService';
 
 const POR_PAGINA = 50;
@@ -90,6 +91,7 @@ const MovimentacaoFinanceiraPage = () => {
             company_id,
             provisao,
             provisao_id,
+            codigo_barras,
             cliente_id,
             fornecedor_id,
             categoria_id,
@@ -338,6 +340,7 @@ const MovimentacaoFinanceiraPage = () => {
                         <td className="px-2.5 py-1.5 text-foreground min-w-[230px] leading-tight">
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
                           {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && <div><ChavePix fornecedor={row.fornecedor} /></div>}
+                          {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && row.codigo_barras && <div><CodigoBoleto codigo={row.codigo_barras} /></div>}
                           {(row.docs || []).length > 0 && (
                             <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground">
                               {row.docs.some((d) => d.tipo_documento !== 'comprovante') && <span className="inline-flex items-center gap-0.5" title="Tem documento anexado"><Paperclip className="h-3 w-3" /> doc</span>}

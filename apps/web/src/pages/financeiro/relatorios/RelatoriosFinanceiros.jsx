@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet';
 import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle } from 'lucide-react';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
+import { montarTextoPagamentos } from '@/lib/mensagemPagamentos';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -111,7 +112,7 @@ const RelatoriosFinanceiros = () => {
          banco:bancos(nome)`;
 
       if (isPagar) {
-        selectQuery += ', fornecedor:fornecedores(nome)';
+        selectQuery += ', fornecedor:fornecedores(nome, chave_pix, tipo_chave_pix)';
       } else {
         selectQuery += ', cliente:clientes(nome)';
       }
@@ -154,6 +155,8 @@ const RelatoriosFinanceiros = () => {
         valor_original: item.valor_total,
         status: rotuloStatus(item.status),
         fornecedor_nome: item.fornecedor?.nome || undefined,
+        fornecedor_pix: item.fornecedor?.chave_pix || undefined,
+        fornecedor_tipo_pix: item.fornecedor?.tipo_chave_pix || undefined,
         cliente_nome: item.cliente?.nome || undefined,
         categoria_nome: item.categoria?.nome || undefined,
         centro_custo_nome: item.centro_custo?.nome || undefined,
@@ -330,6 +333,7 @@ const RelatoriosFinanceiros = () => {
               titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'} por WhatsApp`}
               descricao={getFilterDescription()}
               tipo="relatorio_pagar" refTipo="relatorio_financeiro" refId={null}
+              blocoExtra={source === 'CONTAS_PAGAR' ? { pergunta: 'Colocar na mensagem o valor e a chave Pix (ou o código do boleto) de cada pagamento?', ajuda: 'Útil quando você não tem senha de operador e a própria pessoa lança o pagamento no banco: cada chave vem sozinha em uma linha, para copiar com um toque. Só entram os pagamentos ainda em aberto.', texto: montarTextoPagamentos(filteredData) } : null}
               mensagemInicial={`Olá! Tudo bem?\n\nSegue o relatório de *${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}*${dateRangeStr ? ` (${dateRangeStr})` : ''}.\n\nRegistros: *${filteredData.length}*\nValor total: *${filteredData.reduce((s, r) => s + Number(r.valor_original || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*\n\nO PDF traz o detalhamento e os resumos por dia, ${source === 'CONTAS_PAGAR' ? 'fornecedor' : 'cliente'}, categoria e centro de custo.`}
               anexos={[{ rotulo: 'Relatório em PDF', gerar: () => exportToPDF(filteredData, SOURCE_COLUMNS[source], `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`, getFilterDescription(), source, { base64: true }) }]}
             />

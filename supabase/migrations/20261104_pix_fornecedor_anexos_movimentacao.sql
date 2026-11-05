@@ -25,3 +25,6 @@ create policy movdocs_delete on storage.objects for delete to authenticated usin
 -- O comprovante continua no título quando a baixa é estornada (a ligação com a baixa é só desfeita).
 alter table public.movimentacao_documentos drop constraint if exists movimentacao_documentos_baixa_id_fkey;
 alter table public.movimentacao_documentos add constraint movimentacao_documentos_baixa_id_fkey foreign key (baixa_id) references public.movimentacao_baixas(id) on delete set null;
+
+-- Código de barras / linha digitável do boleto, para copiar na hora de pagar.
+alter table public.movimentacao_financeira add column if not exists codigo_barras text;

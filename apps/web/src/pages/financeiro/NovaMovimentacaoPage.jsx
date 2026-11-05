@@ -46,6 +46,7 @@ const NovaMovimentacaoPage = () => {
   const [documentos, setDocumentos] = useState([]);
   const [comprovantes, setComprovantes] = useState([]);
   const [observacoes, setObservacoes] = useState('');
+  const [codigoBarras, setCodigoBarras] = useState('');
 
   // Dropdown Data
   const [clientes, setClientes] = useState([]);
@@ -157,6 +158,7 @@ const NovaMovimentacaoPage = () => {
           projeto_id: projetoOuNulo(projetoId),
           banco_id: semNone(bancoId),
           status: 'pendente',
+          codigo_barras: tipo === 'pagar' && codigoBarras.trim() ? codigoBarras.trim() : null,
           observacoes,
           parcela_atual: i,
           total_parcelas: parcelsCount,
@@ -443,6 +445,19 @@ const NovaMovimentacaoPage = () => {
               )}
             </CardContent>
           </Card>
+
+          {tipo === 'pagar' && (
+            <Card className="bg-background border-border shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg text-foreground">Boleto (opcional)</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Label>Código de barras / linha digitável</Label>
+                <Input value={codigoBarras} onChange={(e) => setCodigoBarras(e.target.value)} placeholder="Cole aqui o código do boleto" className="font-mono" />
+                <p className="text-xs text-muted-foreground">Fica na movimentação e no relatório para quem for pagar copiar o código com um clique. Em parcelamento, o mesmo código vai para todas as parcelas: ajuste depois em cada uma.</p>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="bg-background border-border shadow-sm">
             <CardHeader>

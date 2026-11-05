@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, MessageCircle, Paperclip, Send } from 'lucide-react';
+import { Copy, Loader2, MessageCircle, Paperclip, Send } from 'lucide-react';
+import { copiarTexto } from '@/lib/chavePix';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,20 +13,34 @@ import { enviarWhatsApp, telefoneValido, formatarTelefone } from '@/lib/whatsapp
 // Caixa de envio de WhatsApp (Evolution API). Quem chama informa o texto e, se quiser, um anexo (um documento por mensagem).
 // anexos: [{ rotulo, gerar: async () => ({ nome|filename, base64 }), marcado?: boolean }] — só o primeiro marcado vai.
 // sugestoes: [{ nome, telefone }]
-const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsApp', descricao, tipo, refTipo, refId, paraInicial = '', mensagemInicial = '', anexos = [], sugestoes = [], onEnviado }) => {
+const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsApp', descricao, tipo, refTipo, refId, paraInicial = '', mensagemInicial = '', anexos = [], sugestoes = [], blocoExtra = null, onEnviado }) => {
   const { toast } = useToast();
   const [para, setPara] = useState('');
   const [mensagem, setMensagem] = useState('');
   const [marcado, setMarcado] = useState(-1);
   const [enviando, setEnviando] = useState(false);
+  const [incluirBloco, setIncluirBloco] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setPara(paraInicial ? formatarTelefone(paraInicial) : ''); setMensagem(mensagemInicial);
     setMarcado(anexos.findIndex((a) => a.marcado !== false));
+    setIncluirBloco(false);
     // reinicia só quando a caixa abre
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // O bloco (valor e chave Pix de cada pagamento) entra e sai do fim da mensagem conforme a marcação.
+  const alternarBloco = (ligado) => {
+    setIncluirBloco(ligado);
+    const bloco = blocoExtra?.texto || '';
+    if (!bloco) return;
+    setMensagem((m) => (ligado ? `${m.trimEnd()}\n\n${bloco}` : m.replace(`\n\n${bloco}`, '').replace(bloco, '').trimEnd()));
+  };
+  const copiarMensagem = async () => {
+    const ok = await copiarTexto(mensagem);
+    toast(ok ? { title: 'Mensagem copiada' } : { title: 'Não foi possível copiar', variant: 'destructive' });
+  };
 
   const enviar = async () => {
     if (!telefoneValido(para)) { toast({ title: 'Telefone inválido', description: 'Use DDD + número, por exemplo (19) 99999-9999.', variant: 'destructive' }); return; }
@@ -65,7 +80,16 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
               </div>
             )}
           </div>
-          <div><Label className="text-xs">Mensagem</Label><Textarea rows={8} value={mensagem} onChange={(e) => setMensagem(e.target.value)} /></div>
+          {blocoExtra?.texto && (
+            <label className="flex items-start gap-2 text-sm rounded-md border border-emerald-300 bg-emerald-50/60 p-3 cursor-pointer">
+              <Checkbox checked={incluirBloco} onCheckedChange={(v) => alternarBloco(v === true)} className="mt-0.5" />
+              <span><strong>{blocoExtra.pergunta}</strong>{blocoExtra.ajuda && <span className="block text-xs text-muted-foreground mt-0.5">{blocoExtra.ajuda}</span>}</span>
+            </label>
+          )}
+          <div>
+            <div className="flex items-center justify-between"><Label className="text-xs">Mensagem</Label><button type="button" onClick={copiarMensagem} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Copy className="h-3.5 w-3.5" /> Copiar mensagem</button></div>
+            <Textarea rows={blocoExtra?.texto && incluirBloco ? 14 : 8} value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
+          </div>
           {anexos.length > 0 && (
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1"><Paperclip className="h-3.5 w-3.5" /> Anexo (a mensagem vai como legenda do arquivo)</Label>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { limparChavePix } from '@/lib/chavePix';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -182,7 +183,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
       // chave Pix digitada aqui vai para o cadastro do fornecedor
       if (row.tipo !== 'receber' && form.entidade_id !== 'none') {
         const atual = entidades.find((x) => x.id === form.entidade_id);
-        const nova = form.chave_pix.trim() || null; const tipoNovo = nova ? (form.tipo_chave_pix || null) : null;
+        const nova = limparChavePix(form.tipo_chave_pix, form.chave_pix) || null; const tipoNovo = nova ? (form.tipo_chave_pix || null) : null;
         if ((atual?.chave_pix || null) !== nova || (atual?.tipo_chave_pix || null) !== tipoNovo) {
           const rf = await supabase.from('fornecedores').update({ chave_pix: nova, tipo_chave_pix: tipoNovo }).eq('id', form.entidade_id);
           if (rf.error) throw rf.error;
@@ -310,7 +311,7 @@ const MovimentacaoDetailModal = ({ open, onOpenChange, movimentacaoId, mode = 'v
                           {TIPOS_PIX.map((t) => <SelectItem key={t.id} value={t.id}>{t.rotulo}</SelectItem>)}
                         </SelectContent>
                       </Select>
-                      <Input className="col-span-2 font-mono" value={form.chave_pix} onChange={(e) => setForm((f) => ({ ...f, chave_pix: e.target.value }))} placeholder="Chave Pix" />
+                      <Input className="col-span-2 font-mono" value={form.chave_pix} onChange={(e) => setForm((f) => ({ ...f, chave_pix: limparChavePix(f.tipo_chave_pix, e.target.value) }))} placeholder="Chave Pix" />
                     </div>
                   </div>
                 )}

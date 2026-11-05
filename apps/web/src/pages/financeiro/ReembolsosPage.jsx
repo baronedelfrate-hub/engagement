@@ -12,7 +12,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import { moeda, fmtData } from '@/lib/extratoConciliado';
-import { TIPOS_PIX } from '@/lib/chavePix';
+import { TIPOS_PIX, limparChavePix } from '@/lib/chavePix';
 import { gerarReembolsoPdf, gerarReembolsoExcel, totalItens } from '@/lib/reembolsoExport';
 
 const BUCKET = 'movimentacao-docs';
@@ -173,8 +173,8 @@ const ReembolsosPage = () => {
         <div><Label>Beneficiário *</Label><Input value={r.beneficiario} onChange={(e) => set('beneficiario', e.target.value)} placeholder="Nome de quem será reembolsado" /></div>
         <div><Label>CPF / CNPJ</Label><Input value={r.cpf_cnpj || ''} onChange={(e) => set('cpf_cnpj', e.target.value)} /></div>
         <div><Label>Referência</Label><Input value={r.referencia || ''} onChange={(e) => set('referencia', e.target.value)} placeholder="Ex.: Transporte e alimentação — outubro/2026" /></div>
-        <div><Label>Tipo da chave Pix</Label><select className={`${sel} w-full`} value={r.tipo_chave_pix || ''} onChange={(e) => set('tipo_chave_pix', e.target.value)}>{TIPOS_PIX.map((t) => <option key={t.id} value={t.id}>{t.rotulo}</option>)}</select></div>
-        <div><Label>Chave Pix</Label><Input value={r.chave_pix || ''} onChange={(e) => set('chave_pix', e.target.value)} /></div>
+        <div><Label>Tipo da chave Pix</Label><select className={`${sel} w-full`} value={r.tipo_chave_pix || ''} onChange={(e) => setR((p) => ({ ...p, tipo_chave_pix: e.target.value, chave_pix: limparChavePix(e.target.value, p.chave_pix) }))}>{TIPOS_PIX.map((t) => <option key={t.id} value={t.id}>{t.rotulo}</option>)}</select></div>
+        <div><Label>Chave Pix</Label><Input value={r.chave_pix || ''} onChange={(e) => setR((p) => ({ ...p, chave_pix: limparChavePix(p.tipo_chave_pix, e.target.value) }))} /></div>
         <div><Label>Quem aprova</Label><Input value={r.aprovador || ''} onChange={(e) => set('aprovador', e.target.value)} placeholder="Ex.: Andréia" /></div>
         <div><Label>Situação</Label><select className={`${sel} w-full`} value={r.status} onChange={(e) => set('status', e.target.value)}>{STATUS.map(([v, t]) => <option key={v} value={v}>{t}</option>)}</select></div>
         <div className="md:col-span-2"><Label>Observações</Label><Input value={r.observacoes || ''} onChange={(e) => set('observacoes', e.target.value)} /></div>

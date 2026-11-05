@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { limparChavePix } from '@/lib/chavePix';
 import { useNavigate, useParams } from 'react-router-dom';
 import { erpServices } from '@/lib/erpServices';
 import { useToast } from '@/components/ui/use-toast';
@@ -128,7 +129,7 @@ const FornecedoresForm = () => {
         email: formData.email,
         telefone: formData.telefone,
         tipo_chave_pix: formData.chave_pix ? (formData.tipo_chave_pix || null) : null,
-        chave_pix: formData.chave_pix ? formData.chave_pix.trim() : null,
+        chave_pix: formData.chave_pix ? (limparChavePix(formData.tipo_chave_pix, formData.chave_pix) || null) : null,
         cep: formData.cep,
         endereco: formData.endereco,
         numero: validateNumericField(formData.numero),
@@ -266,7 +267,7 @@ const FornecedoresForm = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="chave_pix">Chave Pix</Label>
-                <Input id="chave_pix" name="chave_pix" value={formData.chave_pix} onChange={handleChange} placeholder="Chave para pagar este fornecedor" />
+                <Input id="chave_pix" name="chave_pix" value={formData.chave_pix} onChange={(e) => setFormData((p) => ({ ...p, chave_pix: limparChavePix(p.tipo_chave_pix, e.target.value) }))} placeholder="Chave para pagar este fornecedor" />
               </div>
             </div>
 

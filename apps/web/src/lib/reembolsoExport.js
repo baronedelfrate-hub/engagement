@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { finalizarPdf } from '@/lib/pdfSaida';
 import { moeda, fmtData } from '@/lib/extratoConciliado';
-import { rotuloTipoPix } from '@/lib/chavePix';
+import { rotuloTipoPix, limparChavePix } from '@/lib/chavePix';
 
 const slug = (s) => String(s || 'reembolso').replace(/[^A-Za-z0-9]+/g, '_');
 const nomeArquivo = (r, ext) => `Reembolso_${String(r.numero || '').padStart(3, '0')}_${slug(r.beneficiario)}.${ext}`;
@@ -19,7 +19,7 @@ export const gerarReembolsoPdf = async ({ empresa, reembolso: r, itens, imagens 
   const W = doc.internal.pageSize.getWidth(); const H = doc.internal.pageSize.getHeight();
   doc.setFontSize(16); doc.setTextColor(30, 58, 138); doc.text(`Relatório de reembolso nº ${String(r.numero || '').padStart(3, '0')}`, 40, 42);
   doc.setFontSize(9); doc.setTextColor(90, 90, 90); doc.text(`${empresa || ''} · emitido em ${fmtData(new Date().toISOString())}`, 40, 57);
-  const pix = r.chave_pix ? `${rotuloTipoPix(r.tipo_chave_pix) ? `${rotuloTipoPix(r.tipo_chave_pix)}: ` : ''}${r.chave_pix}` : '—';
+  const pix = r.chave_pix ? `${rotuloTipoPix(r.tipo_chave_pix) ? `${rotuloTipoPix(r.tipo_chave_pix)}: ` : ''}${limparChavePix(r.tipo_chave_pix, r.chave_pix)}` : '—';
   doc.autoTable({
     startY: 68, theme: 'grid', styles: { fontSize: 9, cellPadding: 4 }, columnStyles: { 0: { fontStyle: 'bold', cellWidth: 110, fillColor: [238, 242, 255] } },
     body: [['Beneficiário', r.beneficiario || ''], ['CPF / CNPJ', r.cpf_cnpj || '—'], ['Chave Pix', pix], ['Referência', r.referencia || '—'], ['Aprovador', r.aprovador || '—']]
@@ -63,7 +63,7 @@ const BRL = '"R$" #,##0.00;[Red]-"R$" #,##0.00';
 export const gerarReembolsoExcel = async ({ empresa, reembolso: r, itens }) => {
   const wb = new ExcelJS.Workbook(); const ws = wb.addWorksheet('Reembolso');
   ws.addRow([`Relatório de reembolso — ${empresa || ''}`]).font = { size: 14, bold: true, color: { argb: 'FF1E3A8A' } };
-  [['Beneficiário', r.beneficiario], ['CPF / CNPJ', r.cpf_cnpj], ['Chave Pix', r.chave_pix], ['Referência', r.referencia]].forEach(([k, v]) => { const x = ws.addRow([k, v || '']); x.getCell(1).font = { bold: true }; });
+  [['Beneficiário', r.beneficiario], ['CPF / CNPJ', r.cpf_cnpj], ['Chave Pix', limparChavePix(r.tipo_chave_pix, r.chave_pix)], ['Referência', r.referencia]].forEach(([k, v]) => { const x = ws.addRow([k, v || '']); x.getCell(1).font = { bold: true }; });
   ws.addRow([]);
   const h = ws.addRow(['Data', 'Descrição', 'Categoria', 'Valor (R$)', 'Comprovante']);
   h.eachCell((c) => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } }; c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; });

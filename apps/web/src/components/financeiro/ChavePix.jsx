@@ -15,7 +15,7 @@ const ChavePix = ({ fornecedor, className = '' }) => {
   return (
     <span className={`inline-flex flex-wrap items-center gap-x-1 text-[11px] text-muted-foreground ${className}`}>
       <span className="font-medium text-emerald-700 dark:text-emerald-400">PIX{fornecedor.tipo_chave_pix ? ` ${rotuloTipoPix(fornecedor.tipo_chave_pix)}` : ''}:</span>
-      <span className="font-mono select-all">{fornecedor.chave_pix}</span>
+      <span className="font-mono select-all">{valorParaCopiar(fornecedor.tipo_chave_pix, fornecedor.chave_pix)}</span>
       <button type="button" onClick={copiar} title="Copiar chave Pix" className="rounded p-0.5 hover:bg-muted"><Copy className="h-3.5 w-3.5" /></button>
     </span>
   );

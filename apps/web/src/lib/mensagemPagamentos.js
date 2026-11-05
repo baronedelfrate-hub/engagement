@@ -35,6 +35,6 @@ export const montarTextoPagamentos = (linhas) => {
 export const listarChavesParaCopiar = (linhas) => (linhas || []).filter((r) => !pago(r)).map((r) => {
   const nome = r.fornecedor_nome || r.cliente_nome || 'Sem fornecedor';
   if (r.codigo_barras) return { nome, valor: moeda(r.valor_original), vencimento: dataBR(r.data_vencimento), tipo: 'Boleto', exibir: String(r.codigo_barras).trim(), copiar: String(r.codigo_barras).replace(/\D/g, '') };
-  if (r.fornecedor_pix) return { nome, valor: moeda(r.valor_original), vencimento: dataBR(r.data_vencimento), tipo: `Pix${r.fornecedor_tipo_pix ? ` ${rotuloTipoPix(r.fornecedor_tipo_pix)}` : ''}`, exibir: r.fornecedor_pix, copiar: valorParaCopiar(r.fornecedor_tipo_pix, r.fornecedor_pix) };
+  if (r.fornecedor_pix) return { nome, valor: moeda(r.valor_original), vencimento: dataBR(r.data_vencimento), tipo: `Pix${r.fornecedor_tipo_pix ? ` ${rotuloTipoPix(r.fornecedor_tipo_pix)}` : ''}`, exibir: valorParaCopiar(r.fornecedor_tipo_pix, r.fornecedor_pix), copiar: valorParaCopiar(r.fornecedor_tipo_pix, r.fornecedor_pix) };
   return { nome, valor: moeda(r.valor_original), vencimento: dataBR(r.data_vencimento), tipo: '', exibir: '', copiar: '' };
 });

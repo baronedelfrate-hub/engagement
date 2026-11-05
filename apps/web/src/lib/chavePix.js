@@ -9,6 +9,8 @@ export const TIPOS_PIX = [
 export const rotuloTipoPix = (t) => TIPOS_PIX.find((x) => x.id === t)?.rotulo || '';
 // CPF, CNPJ e celular vão só com números (é o que o app do banco aceita); e-mail e chave aleatória vão como estão.
 export const valorParaCopiar = (tipo, chave) => (['cpf', 'cnpj', 'celular'].includes(tipo) ? String(chave || '').replace(/\D/g, '') : String(chave || '').trim());
+// CPF, CNPJ e celular são guardados só com números; e-mail e chave aleatória ficam como foram digitados.
+export const limparChavePix = (tipo, chave) => { const v = String(chave || '').trim(); return ['cpf', 'cnpj', 'celular'].includes(tipo) ? v.replace(/\D/g, '') : v; };
 export const copiarTexto = async (texto) => {
   try { await navigator.clipboard.writeText(texto); return true; } catch (e) {
     try {

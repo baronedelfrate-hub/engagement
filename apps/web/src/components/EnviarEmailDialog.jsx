@@ -58,7 +58,7 @@ const EnviarEmailDialog = ({ open, onOpenChange, titulo = 'Enviar por e-mail', d
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!enviando) onOpenChange(o); }}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Mail className="h-5 w-5" /> {titulo}</DialogTitle>
           {descricao && <DialogDescription>{descricao}</DialogDescription>}
@@ -87,7 +87,7 @@ const EnviarEmailDialog = ({ open, onOpenChange, titulo = 'Enviar por e-mail', d
           )}
           <p className="text-xs text-muted-foreground">O e-mail sai em nome da sua empresa e as respostas chegam no seu e-mail de login.</p>
         </div>
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 sticky bottom-0 bg-background pt-3 -mb-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={enviando}>Cancelar</Button>
           <Button onClick={enviar} disabled={enviando}>{enviando ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}Enviar</Button>
         </DialogFooter>

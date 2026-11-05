@@ -63,7 +63,7 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!enviando) onOpenChange(o); }}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><MessageCircle className="h-5 w-5 text-emerald-600" /> {titulo}</DialogTitle>
           {descricao && <DialogDescription>{descricao}</DialogDescription>}
@@ -88,7 +88,7 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
           )}
           <div>
             <div className="flex items-center justify-between"><Label className="text-xs">Mensagem</Label><button type="button" onClick={copiarMensagem} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Copy className="h-3.5 w-3.5" /> Copiar mensagem</button></div>
-            <Textarea rows={blocoExtra?.texto && incluirBloco ? 14 : 8} value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
+            <Textarea rows={8} className="max-h-[38vh]" value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
           </div>
           {anexos.length > 0 && (
             <div className="space-y-1.5">
@@ -100,7 +100,7 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
           )}
           <p className="text-xs text-muted-foreground">Sai pelo número de WhatsApp da sua empresa (Cadastros → WhatsApp (conexão)). Use *negrito* e _itálico_ do próprio WhatsApp se quiser.</p>
         </div>
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 sticky bottom-0 bg-background pt-3 -mb-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={enviando}>Cancelar</Button>
           <Button onClick={enviar} disabled={enviando} className="bg-emerald-600 hover:bg-emerald-700 text-white">{enviando ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}Enviar</Button>
         </DialogFooter>

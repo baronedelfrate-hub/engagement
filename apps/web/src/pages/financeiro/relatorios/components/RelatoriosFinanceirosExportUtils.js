@@ -212,37 +212,31 @@ export const exportToPDF = async (data, columns, reportTitle, filtersDescription
       alternateRowStyles: { fillColor: [248, 250, 252] },
   });
 
-  // Summaries
-  const addPdfSummary = (title, dataGroup) => {
-      doc.addPage();
-      doc.setFontSize(14);
-      doc.setTextColor(234, 88, 12); // Orange
-      doc.text(title, 14, 20);
-
-      const head = [['Descrição', 'Total', 'Pago/Recebido', 'Pendente']];
-      const body = dataGroup.map(item => [
-          item.label,
-          formatCurrency(item.total),
-          formatCurrency(item.pago),
-          formatCurrency(item.pendente)
-      ]);
-
-      doc.autoTable({
-          head, body,
-          startY: 25,
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [30, 58, 138], textColor: 255 }
-      });
-  };
-
+  // Resumos: na MESMA página, lado a lado, logo abaixo da tabela (só se couberem; o Excel traz todos os resumos). O PDF fica com o menor número de páginas.
   const byEntidade = groupData(data, i => isPagar ? i.fornecedor_id : i.cliente_id, i => isPagar ? i.fornecedor_nome : i.cliente_nome);
   const byCategoria = groupData(data, i => i.categoria_id, i => i.categoria_nome);
-  const byCentro = groupData(data, i => i.centro_custo_id, i => i.centro_custo_nome);
-
-  addPdfSummary(isPagar ? 'Resumo por Fornecedor' : 'Resumo por Cliente', byEntidade);
-  addPdfSummary('Resumo por Categoria', byCategoria);
-  addPdfSummary('Resumo por Centro de Custo', byCentro);
-  addPdfSummary('Resumo por Projeto', groupData(data, i => i.projeto_id, i => i.projeto_nome));
+  const alturaPagina = doc.internal.pageSize.height;
+  const larguraPagina = doc.internal.pageSize.getWidth();
+  const linhasResumo = Math.max(byEntidade.length, byCategoria.length) + 2;
+  const yResumo = doc.lastAutoTable.finalY + 8;
+  if (yResumo + 8 + linhasResumo * 5.5 < alturaPagina - 16) {
+      const meio = larguraPagina / 2;
+      const tabelaResumo = (titulo, grupo, esquerda) => {
+          doc.setFontSize(9);
+          doc.setTextColor(234, 88, 12);
+          doc.text(titulo, esquerda ? 14 : meio + 3, yResumo);
+          doc.autoTable({
+              head: [['Descrição', 'Total', 'Pago/Recebido', 'Pendente']],
+              body: grupo.map(item => [item.label, formatCurrency(item.total), formatCurrency(item.pago), formatCurrency(item.pendente)]),
+              startY: yResumo + 2,
+              margin: { left: esquerda ? 14 : meio + 3, right: esquerda ? meio + 3 : 14 },
+              styles: { fontSize: 7, cellPadding: 1.5 },
+              headStyles: { fillColor: [30, 58, 138], textColor: 255 }
+          });
+      };
+      tabelaResumo(isPagar ? 'Resumo por Fornecedor' : 'Resumo por Cliente', byEntidade, true);
+      tabelaResumo('Resumo por Categoria', byCategoria, false);
+  }
 
   // Footer
   const pageCount = doc.internal.getNumberOfPages();

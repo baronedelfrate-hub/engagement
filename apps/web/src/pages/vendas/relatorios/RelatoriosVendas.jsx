@@ -3,9 +3,10 @@ import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
 import { 
     FileText, Settings, Table, Search, FileSpreadsheet, 
-    ArrowUpDown, Eye, Edit, Trash2, MoreHorizontal
+    ArrowUpDown, Eye, Edit, Trash2, MoreHorizontal, Printer
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import { comImpressao } from '@/lib/pdfSaida';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -186,6 +187,11 @@ const RelatoriosVendas = () => {
         exportToPDF(sortedData, COLUMNS_DEF, title, `Período: ${filters.dataInicio || '*'} a ${filters.dataFim || '*'}`);
     };
 
+    const handleImprimir = () => {
+        const title = `Relatório de ${source === 'pedidos_venda' ? 'Pedidos de Venda' : 'Orçamentos'}`;
+        comImpressao(() => exportToPDF(sortedData, COLUMNS_DEF, title, `Período: ${filters.dataInicio || '*'} a ${filters.dataFim || '*'}`));
+    };
+
     const handleExportExcel = () => {
         const title = `Relatorio_${source}`;
         exportToExcel(sortedData, COLUMNS_DEF, title, `Período: ${filters.dataInicio || '*'} a ${filters.dataFim || '*'}`);
@@ -312,6 +318,9 @@ const RelatoriosVendas = () => {
                                 disabled={sortedData.length === 0}
                             >
                                 <FileText className="h-4 w-4" /> PDF
+                            </Button>
+                            <Button variant="outline" className="gap-2" onClick={handleImprimir} disabled={sortedData.length === 0}>
+                                <Printer className="h-4 w-4" /> Imprimir
                             </Button>
                             <Button 
                                 variant="outline" 

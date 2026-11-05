@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle, Eye } from 'lucide-react';
+import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle, Eye, Printer } from 'lucide-react';
 import PreviaPdfDialog from '@/components/PreviaPdfDialog';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
@@ -219,6 +219,19 @@ const RelatoriosFinanceiros = () => {
     }
   };
 
+  const handleImprimir = async () => {
+    setExportingPdf(true);
+    try {
+      const title = `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`;
+      await exportToPDF(filteredData, SOURCE_COLUMNS[source], title, getFilterDescription(), source, { imprimir: true });
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Erro", description: "Não foi possível preparar a impressão.", variant: "destructive" });
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   const handleExportPDF = async () => {
     setExportingPdf(true);
     try {
@@ -320,6 +333,15 @@ const RelatoriosFinanceiros = () => {
                 >
                   {exportingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2 text-rose-500" />} 
                   Exportar PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleImprimir}
+                  disabled={exportingPdf || loadingData || filteredData.length === 0}
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
+                >
+                  <Printer className="h-4 w-4 mr-2 text-slate-500" />
+                  Imprimir
                 </Button>
                 <Button 
                   variant="outline" 

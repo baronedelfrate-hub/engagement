@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { AlertTriangle, Download, FileDown, HardHat, Loader2 } from 'lucide-react';
+import { AlertTriangle, Download, FileDown, HardHat, Loader2, Printer } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +61,7 @@ const PrestacaoContasObra = () => {
     a.download = `prestacao_de_contas_${nomeObra.replace(/[^A-Za-z0-9]+/g, '_')}.csv`;
     a.click();
   };
-  const exportarPdf = () => { try { gerarPrestacaoPdf({ empresa, obra: nomeObra, periodo, resumo: r }); } catch (e) { toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' }); } };
+  const exportarPdf = (imprimir = false) => { try { gerarPrestacaoPdf({ empresa, obra: nomeObra, periodo, resumo: r }, imprimir ? { imprimir: true } : {}); } catch (e) { toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' }); } };
 
   if (authLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!companyId) return <p className="text-sm text-muted-foreground py-10 text-center">Entre com o usuário de uma empresa para ver as obras dela.</p>;
@@ -73,7 +73,7 @@ const PrestacaoContasObra = () => {
       <Helmet><title>Prestação de Contas da Obra - Engagement ERP</title></Helmet>
       <PageHeader title="Prestação de Contas da Obra" icon={HardHat}
         description="O dinheiro que o cliente depositou, o que foi pago por conta dele e o saldo de cada obra. Vem do extrato classificado, então bate com a conciliação."
-        action={<div className="flex gap-2"><Button variant="outline" size="sm" className="gap-1" disabled={!r || loading} onClick={exportarCSV}><Download className="h-4 w-4" /> CSV</Button><Button size="sm" className="gap-1" disabled={!r || loading} onClick={exportarPdf}><FileDown className="h-4 w-4" /> PDF para o cliente</Button></div>} />
+        action={<div className="flex gap-2"><Button variant="outline" size="sm" className="gap-1" disabled={!r || loading} onClick={exportarCSV}><Download className="h-4 w-4" /> CSV</Button><Button size="sm" className="gap-1" disabled={!r || loading} onClick={() => exportarPdf()}><FileDown className="h-4 w-4" /> PDF para o cliente</Button><Button variant="outline" size="sm" className="gap-1" disabled={!r || loading} onClick={() => exportarPdf(true)}><Printer className="h-4 w-4" /> Imprimir</Button></div>} />
 
       <div className="flex flex-wrap items-end gap-3 mb-4">
         <div><Label className="text-xs">Obra</Label>

@@ -2,9 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
 import {
     FileText, Settings, Save, Table, AlertTriangle,
-    FilterX, Download, Search, FileSpreadsheet, DollarSign
+    FilterX, Download, Search, FileSpreadsheet, DollarSign, Printer
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import { comImpressao } from '@/lib/pdfSaida';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -357,6 +358,13 @@ const RelatoriosCompras = () => {
                                 onClick={() => exportToPDF(filteredData, getActiveColumns(), `Relatório Compras - ${source}`, generateDesc())}
                             >
                                 <FileText className="h-4 w-4" /> PDF
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="gap-2"
+                                onClick={() => comImpressao(() => exportToPDF(filteredData, getActiveColumns(), `Relatório Compras - ${source}`, generateDesc()))}
+                            >
+                                <Printer className="h-4 w-4" /> Imprimir
                             </Button>
                             <Button
                                 variant="outline"

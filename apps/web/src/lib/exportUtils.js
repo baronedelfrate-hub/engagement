@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { finalizarPdf } from '@/lib/pdfSaida';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -163,5 +164,5 @@ export const exportToPDF = (data, columns, reportTitle, filtersDescription) => {
   });
 
   const fileName = `relatorio_${reportTitle.replace(/\s+/g, '_').toLowerCase()}.pdf`;
-  doc.save(fileName);
+  finalizarPdf(doc, fileName);
 };

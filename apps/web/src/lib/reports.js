@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { finalizarPdf } from '@/lib/pdfSaida';
 import 'jspdf-autotable';
 import { formatDateOnly } from './dateUtils';
 
@@ -122,5 +123,5 @@ export const generateRelatorioFinanceiroPDF = (data, title, type) => {
   doc.setTextColor(0, 128, 0);
   doc.text(`Total ${type === 'PAGAR' ? 'Pago' : 'Recebido'}: R$ ${totalPago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, finalY + 20);
 
-  doc.save(`${title.replace(/\s+/g, '_').toLowerCase()}.pdf`);
+  finalizarPdf(doc, `${title.replace(/\s+/g, '_').toLowerCase()}.pdf`);
 };

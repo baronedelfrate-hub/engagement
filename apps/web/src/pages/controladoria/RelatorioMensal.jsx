@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet, Mail, MessageCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, FileDown, FileSpreadsheet, Mail, MessageCircle, Printer } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
@@ -66,11 +66,11 @@ function RelatorioMensal() {
     return { qtd: sem.length, valor: sem.reduce((s, m) => s + Number(m.valor), 0) };
   }, [dre, movs, categorias]);
 
-  const gerar = async () => {
+  const gerar = async (imprimir = false) => {
     setGerando(true);
     try {
-      const nome = await gerarRelatorioMensalPdf({ empresa, ano, mes, dre, pe, dash, naoClassificado });
-      toast({ title: 'Relatório gerado', description: `Arquivo ${nome} baixado.` });
+      const nome = await gerarRelatorioMensalPdf({ empresa, ano, mes, dre, pe, dash, naoClassificado }, imprimir ? { imprimir: true } : {});
+      toast({ title: imprimir ? 'Impressão preparada' : 'Relatório gerado', description: imprimir ? 'Escolha a impressora na janela que abriu.' : `Arquivo ${nome} baixado.` });
     } catch (e) {
       toast({ title: 'Erro ao gerar o PDF', description: e.message || 'Tente novamente.', variant: 'destructive' });
     } finally {
@@ -109,8 +109,11 @@ function RelatorioMensal() {
           <Checkbox checked={incluirSocios} onCheckedChange={(v) => alternarSocios(v === true)} />
           Incluir retiradas de sócios no ponto de equilíbrio
         </label>
-        <Button onClick={gerar} disabled={!pronto || gerando} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button onClick={() => gerar()} disabled={!pronto || gerando} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
           {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Gerar PDF
+        </Button>
+        <Button onClick={() => gerar(true)} disabled={!pronto || gerando} variant="outline" className="gap-2">
+          <Printer className="h-4 w-4" /> Imprimir
         </Button>
         <Button onClick={gerarExcel} disabled={!pronto || gerandoExcel} variant="outline" className="gap-2">
           {gerandoExcel ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Gerar Excel

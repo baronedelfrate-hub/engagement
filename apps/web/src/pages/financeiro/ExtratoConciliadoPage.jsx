@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { AlertTriangle, FileDown, FileSpreadsheet, Loader2, ScrollText } from 'lucide-react';
+import { AlertTriangle, FileDown, FileSpreadsheet, Loader2, Printer, ScrollText } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +53,7 @@ const ExtratoConciliadoPage = () => {
   const baixar = async (tipo) => {
     try {
       const args = { empresa, filtros, linhas, resumo, banco: dados.banco };
-      if (tipo === 'xlsx') await exportarExtratoExcel(args); else exportarExtratoPdf(args);
+      if (tipo === 'xlsx') await exportarExtratoExcel(args); else exportarExtratoPdf(args, tipo === 'imprimir' ? { imprimir: true } : {});
     } catch (e) { toast({ title: 'Não foi possível gerar o arquivo', description: e.message, variant: 'destructive' }); }
   };
 
@@ -67,7 +67,7 @@ const ExtratoConciliadoPage = () => {
       <Helmet><title>Extrato Conciliado - Engagement ERP</title></Helmet>
       <PageHeader title="Extrato Conciliado" icon={ScrollText}
         description="O extrato do banco com tudo o que o sistema sabe de cada linha: fornecedor ou cliente, título, nota fiscal, categoria, centro de custo, obra e observação. Pronto para enviar à contabilidade."
-        action={<div className="flex gap-2"><Button variant="outline" size="sm" className="gap-1" disabled={!resumo || loading || !linhas.length} onClick={() => baixar('xlsx')}><FileSpreadsheet className="h-4 w-4" /> Excel</Button><Button size="sm" className="gap-1" disabled={!resumo || loading || !linhas.length} onClick={() => baixar('pdf')}><FileDown className="h-4 w-4" /> PDF</Button></div>} />
+        action={<div className="flex gap-2"><Button variant="outline" size="sm" className="gap-1" disabled={!resumo || loading || !linhas.length} onClick={() => baixar('xlsx')}><FileSpreadsheet className="h-4 w-4" /> Excel</Button><Button size="sm" className="gap-1" disabled={!resumo || loading || !linhas.length} onClick={() => baixar('pdf')}><FileDown className="h-4 w-4" /> PDF</Button><Button variant="outline" size="sm" className="gap-1" disabled={!resumo || loading || !linhas.length} onClick={() => baixar('imprimir')}><Printer className="h-4 w-4" /> Imprimir</Button></div>} />
 
       <div className="flex flex-wrap items-end gap-3 mb-4">
         <div><Label className="text-xs">Banco</Label>

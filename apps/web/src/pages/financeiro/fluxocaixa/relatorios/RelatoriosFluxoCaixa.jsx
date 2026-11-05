@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2, FileDown, FileSpreadsheet } from 'lucide-react';
+import { Filter, Eye, AlertCircle, RefreshCcw, WifiOff, Loader2, FileDown, FileSpreadsheet, Printer } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import SelecionarColunasFluxo from './components/SelecionarColunasFluxo';
 import { formatDateOnly } from '@/lib/dateUtils';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { gerarFluxoCaixaPdf, gerarFluxoCaixaExcel } from '@/lib/relatorioFluxoCaixaExport';
+import { comImpressao } from '@/lib/pdfSaida';
 
 const RelatoriosFluxoCaixa = () => {
   const [filters, setFilters] = useState({
@@ -101,9 +102,9 @@ const RelatoriosFluxoCaixa = () => {
     }
     setExportando(formato);
     try {
-      const gerar = formato === 'pdf' ? gerarFluxoCaixaPdf : gerarFluxoCaixaExcel;
+      const gerar = formato === 'pdf' ? gerarFluxoCaixaPdf : formato === 'imprimir' ? (a) => comImpressao(() => gerarFluxoCaixaPdf(a)) : gerarFluxoCaixaExcel;
       const nome = await gerar({ empresa, filtros: { ...filters, projetoNome: projetosDoPeriodo.find(([id]) => id === filters.projeto)?.[1] }, linhas: data, colunas: selectedColumns, centrosMap: centrosCustoMap });
-      toast({ title: formato === 'pdf' ? 'PDF gerado' : 'Planilha gerada', description: `Arquivo ${nome} baixado.` });
+      toast({ title: formato === 'imprimir' ? 'Impressão preparada' : formato === 'pdf' ? 'PDF gerado' : 'Planilha gerada', description: formato === 'imprimir' ? 'Escolha a impressora na janela que abriu.' : `Arquivo ${nome} baixado.` });
     } catch (e) {
       toast({ title: 'Erro ao exportar', description: e.message || 'Tente novamente.', variant: 'destructive' });
     } finally {
@@ -255,6 +256,9 @@ const RelatoriosFluxoCaixa = () => {
                         </Button>
                         <Button variant="outline" size="sm" className="gap-2" disabled={isLoading || data.length === 0 || exportando !== null} onClick={() => exportar('pdf')}>
                             {exportando === 'pdf' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Exportar PDF
+                        </Button>
+                        <Button variant="outline" size="sm" className="gap-2" disabled={isLoading || data.length === 0 || exportando !== null} onClick={() => exportar('imprimir')}>
+                            {exportando === 'imprimir' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />} Imprimir
                         </Button>
                         <Button variant="outline" size="sm" className="gap-2" disabled={isLoading || data.length === 0 || exportando !== null} onClick={() => exportar('excel')}>
                             {exportando === 'excel' ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />} Exportar Excel

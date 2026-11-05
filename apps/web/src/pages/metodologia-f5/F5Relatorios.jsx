@@ -13,6 +13,7 @@ import PermissionGate from '@/components/PermissionGate';
 import { F5_PERMISSIONS, logF5Audit } from '@/lib/permissions';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { finalizarPdf } from '@/lib/pdfSaida';
 
 // Progresso de uma etapa é calculado a partir dos itens de checklist concluídos
 // (não existe coluna percentual_conclusao no schema real de f5_etapas/f5_projetos).
@@ -167,7 +168,7 @@ function F5Relatorios() {
       theme: 'striped'
     });
 
-    doc.save(`F5_Executivo_${reportData.project.nome}.pdf`);
+    finalizarPdf(doc, `F5_Executivo_${reportData.project.nome}.pdf`);
     await logF5Audit('EXPORT', 'PROJECT', reportData.project.id, { message: 'Generated Executive PDF Report' });
     await loadAuditLogs(reportData.project.id);
     toast({ title: "Sucesso", description: "Relatório Executivo gerado." });
@@ -215,7 +216,7 @@ function F5Relatorios() {
       yPos = doc.lastAutoTable.finalY + 15;
     });
 
-    doc.save(`F5_Detalhado_${reportData.project.nome}.pdf`);
+    finalizarPdf(doc, `F5_Detalhado_${reportData.project.nome}.pdf`);
     await logF5Audit('EXPORT', 'PROJECT', reportData.project.id, { message: 'Generated Detailed PDF Report' });
     await loadAuditLogs(reportData.project.id);
     toast({ title: "Sucesso", description: "Relatório Detalhado gerado." });

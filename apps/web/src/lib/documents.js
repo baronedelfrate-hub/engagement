@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import { finalizarPdf } from '@/lib/pdfSaida';
 import 'jspdf-autotable';
 import { formatDateOnly } from './dateUtils';
 
@@ -81,7 +82,7 @@ export const generatePDF = (type, data, entityName) => {
     doc.text(data.observacoes, 20, finalY + 16, { maxWidth: 170 });
   }
 
-  doc.save(`${type}_${data.id}.pdf`);
+  finalizarPdf(doc, `${type}_${data.id}.pdf`);
 };
 
 export const generateWhatsAppLink = (type, data, entityName) => {

@@ -1,4 +1,5 @@
 // Relatório de Diagnóstico Financeiro (PDF, A4) — documento para o cliente. Não inclui as notas internas nem a consolidação.
+import { finalizarPdf } from '@/lib/pdfSaida';
 import {
   SECOES_QUESTIONARIO, DIMENSOES_MATURIDADE, ESCALA_MATURIDADE, EXPLICACAO_NIVEL,
   calcularMaturidade, faixaVolume, planoRecomendado
@@ -175,6 +176,6 @@ export const gerarDiagnosticoPdf = async ({ cliente, diagnostico, consultorNome 
   }
 
   const nomeArquivo = `Diagnostico_${(cliente.nome || 'cliente').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '_')}.pdf`;
-  doc.save(nomeArquivo);
+  finalizarPdf(doc, nomeArquivo);
   return nomeArquivo;
 };

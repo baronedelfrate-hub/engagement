@@ -1,5 +1,6 @@
 // Exportação do Relatório de Fluxo de Caixa em PDF e Excel. jsPDF e xlsx são carregados só ao exportar.
 // Cada linha traz as colunas Previsto e Realizado lado a lado (saídas negativas); o mesmo título na mesma data vira uma linha só.
+import { finalizarPdf } from '@/lib/pdfSaida';
 const num = (v) => Number(v) || 0;
 const r2 = (v) => Math.round(v * 100) / 100;
 const fmt = (v) => {
@@ -184,7 +185,7 @@ export const gerarFluxoCaixaPdf = async (dados) => {
   }
 
   const nome = nomeArquivo(empresa, filtros, 'pdf');
-  doc.save(nome);
+  finalizarPdf(doc, nome);
   return nome;
 };
 

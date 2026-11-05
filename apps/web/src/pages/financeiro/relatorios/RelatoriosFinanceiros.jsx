@@ -315,7 +315,7 @@ const RelatoriosFinanceiros = () => {
                 {loadingData && <Loader2 className="inline-block ml-3 h-4 w-4 animate-spin text-orange-500" />}
               </div>
               
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto sm:max-w-full sm:justify-end">
                 <Button
                   variant="outline"
                   onClick={handlePreviaPDF}

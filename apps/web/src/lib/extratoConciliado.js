@@ -142,6 +142,13 @@ export const resumir = (linhas, saldos = []) => {
     r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
     porObra.set(k, r);
   });
+  const porCentro = new Map();
+  linhas.forEach((l) => {
+    const k = l.centroCusto || 'SEM CENTRO DE CUSTO';
+    const r = porCentro.get(k) || { centro: k, entradas: 0, saidas: 0, qtd: 0 };
+    r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
+    porCentro.set(k, r);
+  });
   const unico = saldos.length === 1 ? saldos[0] : null;
   return {
     entradas, saidas, resultado: arred(entradas - saidas), qtd: linhas.length,
@@ -153,6 +160,7 @@ export const resumir = (linhas, saldos = []) => {
     dataSaldoInicial: unico?.dataInicial || null,
     dataSaldoFinal: unico?.dataFinal || null,
     porCategoria: [...porCategoria.values()].sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas)),
+    porCentro: [...porCentro.values()].sort((a, b) => (a.centro === 'SEM CENTRO DE CUSTO') - (b.centro === 'SEM CENTRO DE CUSTO') || (b.entradas + b.saidas) - (a.entradas + a.saidas)),
     porObra: [...porObra.values()].sort((a, b) => (a.obra === 'SEM OBRA') - (b.obra === 'SEM OBRA') || (b.entradas + b.saidas) - (a.entradas + a.saidas))
   };
 };

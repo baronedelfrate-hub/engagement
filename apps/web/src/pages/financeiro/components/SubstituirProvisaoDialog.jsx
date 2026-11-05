@@ -14,7 +14,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { insertWithCompanyId } from '@/lib/companyUtils';
 import { somarMeses } from '@/lib/provisoes';
 import { formatDateOnly } from '@/lib/dateUtils';
-import { Loader2, Replace } from 'lucide-react';
+import { Loader2, Replace, Upload, X, FileText } from 'lucide-react';
+import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 import SeletorProjeto from '@/components/SeletorProjeto';
 
 const brl = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -33,14 +34,16 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
   const [candidatos, setCandidatos] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [marcados, setMarcados] = useState(new Set());
+  const [boletos, setBoletos] = useState([]); // arquivos do boleto a anexar ao lançamento criado
 
   const pagar = provisao?.tipo === 'pagar';
 
   useEffect(() => {
     if (!open || !provisao) return;
     setAba('criar');
-    setMarcados(new Set());
+    setMarcados(new Set()); setBoletos([]);
     setForm({
+      codigoBarras: '',
       numero: '',
       entidadeId: ou(pagar ? provisao.fornecedor_id : provisao.cliente_id),
       valor: String(provisao.valor_total ?? ''),
@@ -98,6 +101,7 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
         subcategoria_id: nulo(form.subcategoriaId),
         centro_custo_id: nulo(form.centroCustoId),
         projeto_id: nulo(form.projetoId),
+        codigo_barras: pagar && form.codigoBarras?.trim() ? form.codigoBarras.trim() : null,
         status: 'pendente',
         provisao: false,
         provisao_id: provisao.id,
@@ -109,7 +113,23 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
       if (error) throw error;
       novoId = data?.id;
       await marcarSubstituida();
-      toast({ title: 'Provisão substituída', description: 'O lançamento real entrou no lugar da provisão no previsto do fluxo de caixa.' });
+      // boleto(s) anexado(s): se o envio falhar, o lançamento continua valendo e dá para anexar depois
+      let falhouAnexo = false;
+      const usados = [];
+      for (const f of boletos) {
+        try {
+          const ext = (f.name.split('.').pop() || 'pdf').toLowerCase();
+          const caminho = `${provisao.company_id}/${novoId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+          const up = await supabase.storage.from('movimentacao-docs').upload(caminho, f);
+          if (up.error) throw up.error;
+          const nome = nomePadraoAnexo({ data: form.vencimento, fornecedor: entidades.find((x) => x.id === form.entidadeId)?.nome, documento: form.numero, nomeOriginal: f.name, jaExistentes: usados });
+          usados.push(nome);
+          const ins = await supabase.from('movimentacao_documentos').insert({ movimentacao_id: novoId, company_id: provisao.company_id, tipo_documento: 'nota', nome_arquivo: nome, storage_path: caminho, created_by: user?.id || null });
+          if (ins.error) throw ins.error;
+        } catch (e) { falhouAnexo = true; }
+      }
+      if (falhouAnexo) toast({ title: 'Lançamento criado, mas o boleto não subiu', description: 'Anexe o boleto de novo em Detalhes da movimentação.', variant: 'destructive' });
+      toast({ title: 'Provisão substituída', description: `O lançamento real entrou no lugar da provisão no previsto do fluxo de caixa.${boletos.length && !falhouAnexo ? ' Boleto anexado.' : ''}` });
       onOpenChange(false);
       if (onDone) onDone();
     } catch (e) {
@@ -223,6 +243,31 @@ const SubstituirProvisaoDialog = ({ open, onOpenChange, provisao, onDone }) => {
                 <SeletorProjeto value={form.projetoId || 'none'} onChange={set('projetoId')} empresaId={provisao.company_id} />
               </div>
             </div>
+            {pagar && (
+              <div className="rounded-md border border-blue-200 bg-blue-50/40 p-3 space-y-3">
+                <div className="text-sm font-medium">Boleto</div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Código de barras / linha digitável</Label>
+                  <Input className="font-mono" value={form.codigoBarras || ''} onChange={setInput('codigoBarras')} placeholder="Cole aqui o código do boleto" />
+                  <p className="text-[11px] text-muted-foreground">Fica no lançamento, com o botão de copiar, na lista e no relatório enviado por WhatsApp.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Anexar o boleto (PDF ou imagem)</Label>
+                  <label className="flex items-center gap-2 border-2 border-dashed border-border rounded-md px-3 py-2 text-sm text-muted-foreground cursor-pointer hover:bg-muted/30">
+                    <Upload className="h-4 w-4" /> Clique para escolher o arquivo do boleto
+                    <input type="file" multiple accept="application/pdf,image/*" className="hidden"
+                      onChange={(e) => { const novos = Array.from(e.target.files || []).filter((f) => f.size <= 10 * 1024 * 1024); setBoletos((l) => [...l, ...novos]); e.target.value = ''; }} />
+                  </label>
+                  {boletos.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between p-2 border border-border rounded-md bg-background">
+                      <span className="flex items-center gap-2 text-sm truncate"><FileText className="h-4 w-4 shrink-0 text-muted-foreground" />{f.name}</span>
+                      <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setBoletos((l) => l.filter((_, k) => k !== i))}><X className="h-3 w-3" /></Button>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-muted-foreground">O arquivo é renomeado no padrão DATA - FIN - FORNECEDOR - Nº DO DOCUMENTO.</p>
+                </div>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Observações</Label>
               <Textarea rows={2} value={form.observacoes || ''} onChange={setInput('observacoes')} />

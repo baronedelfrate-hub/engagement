@@ -90,6 +90,28 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
             <div className="flex items-center justify-between"><Label className="text-xs">Mensagem</Label><button type="button" onClick={copiarMensagem} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Copy className="h-3.5 w-3.5" /> Copiar mensagem</button></div>
             <Textarea rows={8} className="max-h-[38vh]" value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
           </div>
+          {blocoExtra?.itens?.length > 0 && incluirBloco && (
+            <div className="rounded-md border">
+              <div className="px-3 py-1.5 text-xs font-medium bg-muted/50 border-b">Copiar a chave Pix ou o código do boleto de cada pagamento</div>
+              <div className="max-h-48 overflow-y-auto divide-y">
+                {blocoExtra.itens.map((it, i) => (
+                  <div key={i} className="px-3 py-2 text-xs">
+                    <div className="font-medium truncate">{it.nome} <span className="font-normal text-muted-foreground">· {it.valor} · {it.vencimento}</span></div>
+                    {it.copiar ? (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className={`font-medium ${it.tipo === 'Boleto' ? 'text-blue-700' : 'text-emerald-700'}`}>{it.tipo.toUpperCase()}:</span>
+                        <span className="font-mono break-all select-all">{it.exibir}</span>
+                        <button type="button" title={`Copiar ${it.tipo === 'Boleto' ? 'o código do boleto' : 'a chave Pix'}`} className="rounded p-0.5 hover:bg-muted shrink-0"
+                          onClick={async () => { const ok = await copiarTexto(it.copiar); toast(ok ? { title: it.tipo === 'Boleto' ? 'Código do boleto copiado' : 'Chave Pix copiada', description: it.exibir } : { title: 'Não foi possível copiar', variant: 'destructive' }); }}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ) : <div className="text-muted-foreground mt-0.5">Sem chave Pix nem boleto cadastrados.</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {anexos.length > 0 && (
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1"><Paperclip className="h-3.5 w-3.5" /> Anexo (a mensagem vai como legenda do arquivo)</Label>

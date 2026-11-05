@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle } from 'lucide-react';
+import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle, Eye } from 'lucide-react';
+import PreviaPdfDialog from '@/components/PreviaPdfDialog';
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { montarTextoPagamentos, listarChavesParaCopiar } from '@/lib/mensagemPagamentos';
@@ -83,6 +84,8 @@ const RelatoriosFinanceiros = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [previa, setPrevia] = useState(null); // { nome, base64 }
+  const [gerandoPrevia, setGerandoPrevia] = useState(false);
   const [exportingExcel, setExportingExcel] = useState(false);
 
   useEffect(() => {
@@ -202,6 +205,20 @@ const RelatoriosFinanceiros = () => {
     ? `${filters.dataInicio ? formatDateOnly(filters.dataInicio) : 'Início'} até ${filters.dataFim ? formatDateOnly(filters.dataFim) : 'Fim'}`
     : null;
 
+  const handlePreviaPDF = async () => {
+    setGerandoPrevia(true);
+    try {
+      const title = `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`;
+      const r = await exportToPDF(filteredData, SOURCE_COLUMNS[source], title, getFilterDescription(), source, { base64: true });
+      setPrevia({ nome: r.nome, base64: r.base64 });
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Erro", description: "Não foi possível gerar a prévia do PDF.", variant: "destructive" });
+    } finally {
+      setGerandoPrevia(false);
+    }
+  };
+
   const handleExportPDF = async () => {
     setExportingPdf(true);
     try {
@@ -286,6 +303,15 @@ const RelatoriosFinanceiros = () => {
               </div>
               
               <div className="flex gap-3 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  onClick={handlePreviaPDF}
+                  disabled={gerandoPrevia || loadingData || filteredData.length === 0}
+                  className="bg-muted border-border text-foreground hover:bg-muted hover:text-foreground flex-1 sm:flex-none"
+                >
+                  {gerandoPrevia ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Eye className="h-4 w-4 mr-2 text-blue-600" />}
+                  Visualizar PDF
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={handleExportPDF} 
@@ -338,6 +364,7 @@ const RelatoriosFinanceiros = () => {
               mensagemInicial={mensagemRelatorioFinanceiro({ source, periodo: dateRangeStr, linhas: filteredData })}
               anexos={[{ rotulo: 'Relatório em PDF', gerar: () => exportToPDF(filteredData, SOURCE_COLUMNS[source], `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`, getFilterDescription(), source, { base64: true }) }]}
             />
+            <PreviaPdfDialog open={!!previa} onOpenChange={(o) => { if (!o) setPrevia(null); }} titulo={`Prévia · ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`} nome={previa?.nome} base64={previa?.base64} />
             <EnviarEmailDialog
               open={emailAberto} onOpenChange={setEmailAberto}
               titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}`}

@@ -74,6 +74,10 @@ export const exportarExtratoExcel = async ({ empresa, filtros, linhas, resumo, b
   const h = rs.addRow(['Categoria', 'Lançamentos', 'Entradas (R$)', 'Saídas (R$)']);
   h.eachCell((c) => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } }; c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; });
   resumo.porCategoria.forEach((c) => { const r = rs.addRow([c.categoria, c.qtd, c.entradas, c.saidas]); r.getCell(3).numFmt = BRL; r.getCell(4).numFmt = BRL; });
+  rs.addRow([]);
+  const ho = rs.addRow(['Obra', 'Lançamentos', 'Entradas (R$)', 'Saídas (R$)']);
+  ho.eachCell((c) => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } }; c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; });
+  (resumo.porObra || []).forEach((c) => { const r = rs.addRow([c.obra, c.qtd, c.entradas, c.saidas]); r.getCell(3).numFmt = BRL; r.getCell(4).numFmt = BRL; });
   rs.getColumn(1).width = 52; [2, 3, 4].forEach((n) => { rs.getColumn(n).width = 18; });
 
   const buf = await wb.xlsx.writeBuffer();
@@ -106,11 +110,22 @@ export const exportarExtratoPdf = ({ empresa, filtros, linhas, resumo, banco }, 
     columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 42 }, 8: { halign: 'right', cellWidth: 56 }, 9: { halign: 'right', cellWidth: 56 }, 10: { cellWidth: 28 } },
     didParseCell: (d) => { if (d.section === 'body' && d.column.index === 5 && d.cell.raw === 'SEM CATEGORIA') d.cell.styles.textColor = [185, 28, 28]; }
   });
+  // Resumo por categoria (esquerda) e por obra (direita), lado a lado na mesma folha
+  const H = doc.internal.pageSize.getHeight();
+  const nLinhas = Math.max(resumo.porCategoria.length, (resumo.porObra || []).length);
+  let yResumo = doc.lastAutoTable.finalY + 14;
+  if (yResumo + 24 + nLinhas * 13 > H - 30) { doc.addPage(); yResumo = 40; }
+  const larg = (W - 56 - 14) / 2;
+  const estiloResumo = { startY: yResumo, theme: 'grid', styles: { fontSize: 7.5, cellPadding: 2 }, headStyles: { fillColor: [30, 58, 138] }, tableWidth: larg, columnStyles: { 1: { halign: 'right', cellWidth: 40 }, 2: { halign: 'right', cellWidth: 62 }, 3: { halign: 'right', cellWidth: 62 } } };
   doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 14, theme: 'grid', styles: { fontSize: 8 }, headStyles: { fillColor: [30, 58, 138] },
-    head: [['Resumo por categoria', 'Lançamentos', 'Entradas', 'Saídas']],
-    body: resumo.porCategoria.map((c) => [c.categoria, String(c.qtd), moeda(c.entradas), moeda(c.saidas)]),
-    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } }
+    ...estiloResumo, margin: { left: 28, right: 28 + larg + 14 },
+    head: [['Resumo por categoria', 'Lanç.', 'Entradas', 'Saídas']],
+    body: resumo.porCategoria.map((c) => [c.categoria, String(c.qtd), moeda(c.entradas), moeda(c.saidas)])
+  });
+  doc.autoTable({
+    ...estiloResumo, margin: { left: 28 + larg + 14, right: 28 },
+    head: [['Resumo por obra', 'Lanç.', 'Entradas', 'Saídas']],
+    body: (resumo.porObra || []).map((c) => [c.obra, String(c.qtd), moeda(c.entradas), moeda(c.saidas)])
   });
   const n = doc.internal.getNumberOfPages();
   for (let i = 1; i <= n; i += 1) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(150); doc.text(`Página ${i} de ${n}`, W - 28, doc.internal.pageSize.getHeight() - 14, { align: 'right' }); }

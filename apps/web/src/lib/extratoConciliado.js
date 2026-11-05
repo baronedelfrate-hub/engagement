@@ -135,6 +135,13 @@ export const resumir = (linhas, saldos = []) => {
     r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
     porCategoria.set(k, r);
   });
+  const porObra = new Map();
+  linhas.forEach((l) => {
+    const k = l.obra || 'SEM OBRA';
+    const r = porObra.get(k) || { obra: k, entradas: 0, saidas: 0, qtd: 0 };
+    r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
+    porObra.set(k, r);
+  });
   const unico = saldos.length === 1 ? saldos[0] : null;
   return {
     entradas, saidas, resultado: arred(entradas - saidas), qtd: linhas.length,
@@ -145,7 +152,8 @@ export const resumir = (linhas, saldos = []) => {
     saldoFinal: unico ? unico.final : null,
     dataSaldoInicial: unico?.dataInicial || null,
     dataSaldoFinal: unico?.dataFinal || null,
-    porCategoria: [...porCategoria.values()].sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas))
+    porCategoria: [...porCategoria.values()].sort((a, b) => (b.entradas + b.saidas) - (a.entradas + a.saidas)),
+    porObra: [...porObra.values()].sort((a, b) => (a.obra === 'SEM OBRA') - (b.obra === 'SEM OBRA') || (b.entradas + b.saidas) - (a.entradas + a.saidas))
   };
 };
 

@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { CheckCircle2, Loader2, MessageCircle, Send, XCircle } from 'lucide-react';
+import { CheckCircle2, Eye, Loader2, MessageCircle, Send, XCircle } from 'lucide-react';
+import PreviaPdfDialog from '@/components/PreviaPdfDialog';
+import PreviaMensagemWhatsApp from '@/components/PreviaMensagemWhatsApp';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +51,10 @@ const DisparoResultados = () => {
   const [abertura, setAbertura] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState([]);
+  const [previa, setPrevia] = useState(null); // { titulo, nome, base64 }
+  const [gerandoPrevia, setGerandoPrevia] = useState('');
+  const [verAbertura, setVerAbertura] = useState(false);
+  const cachePdf = useRef(new Map()); // o que foi visto na prévia é o que vai no envio
 
   const set = (k) => (v) => setP((x) => ({ ...x, [k]: v }));
   const marca = (k) => (v) => setMarcados((m) => ({ ...m, [k]: v === true }));
@@ -73,7 +79,7 @@ const DisparoResultados = () => {
 
   useEffect(() => {
     if (!empresaId) return;
-    let vivo = true; setCarregandoEmpresa(true); setMarcados({}); setResultado([]);
+    let vivo = true; setCarregandoEmpresa(true); setMarcados({}); setResultado([]); cachePdf.current.clear();
     Promise.all([listarObras(empresaId), listarBancos(empresaId), listarPedidos(empresaId).catch(() => []), listarPropostasDaEmpresa(empresaId).catch(() => [])])
       .then(([o, b, pe, pr]) => { if (!vivo) return; setObras(o); setBancos(b); setPedidos(pe); setPropostas(pr); setP((x) => ({ ...x, obraId: 'TODOS', bancoId: 'TODOS', pedidoId: '', propostaId: '' })); setAbertura(`Olá! Seguem os resultados de ${nomeDaEmpresa(empresas.find((e) => e.id === empresaId))}.`); })
       .catch((e) => toast({ title: 'Erro ao carregar a empresa', description: e.message, variant: 'destructive' }))
@@ -91,6 +97,19 @@ const DisparoResultados = () => {
     { k: 'proposta', titulo: 'Proposta comercial', gerar: () => { if (!p.propostaId) throw new Error('Escolha a proposta.'); return gerarProposta(empresaId, p.propostaId); } }
   ], [empresaId, p]);
 
+  const chaveDoPdf = (it) => `${empresaId}|${it.k}|${JSON.stringify(p)}`;
+  const pdfDe = async (it) => {
+    const ch = chaveDoPdf(it);
+    if (!cachePdf.current.has(ch)) cachePdf.current.set(ch, await it.gerar());
+    return cachePdf.current.get(ch);
+  };
+  const verPrevia = async (it) => {
+    setGerandoPrevia(it.k);
+    try { const r = await pdfDe(it); setPrevia({ titulo: it.titulo, nome: r.nome, base64: r.base64 }); }
+    catch (e) { toast({ title: 'Não foi possível gerar a prévia', description: e.message, variant: 'destructive' }); }
+    finally { setGerandoPrevia(''); }
+  };
+
   const numeros = useMemo(() => [...new Set(destinos.split(/[\n,;]+/).map((x) => x.trim()).filter(Boolean))], [destinos]);
   const invalidos = numeros.filter((n) => !telefoneValido(n));
   const selecionados = itens.filter((i) => marcados[i.k]);
@@ -104,7 +123,7 @@ const DisparoResultados = () => {
       // 1) gera cada PDF uma vez
       const prontos = [];
       for (const it of selecionados) {
-        try { prontos.push({ it, pdf: await it.gerar() }); anota({ ok: true, texto: `${it.titulo}: PDF gerado` }); }
+        try { prontos.push({ it, pdf: await pdfDe(it) }); anota({ ok: true, texto: `${it.titulo}: PDF gerado` }); }
         catch (e) { anota({ ok: false, texto: `${it.titulo}: ${e.message}` }); }
       }
       if (!prontos.length) { toast({ title: 'Nenhum relatório pôde ser gerado', variant: 'destructive' }); return; }
@@ -122,7 +141,7 @@ const DisparoResultados = () => {
       }
       toast({ title: 'Disparo concluído', description: 'Veja o resumo abaixo.' });
     } finally { setEnviando(false); }
-  }, [selecionados, numeros, abertura, empresaId, empresa, minhaEmpresa, toast]);
+  }, [selecionados, numeros, abertura, empresaId, empresa, minhaEmpresa, toast, p]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (authLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!isSuperAdmin) return <p className="text-sm text-muted-foreground py-10 text-center">Esta tela é só para o superadmin.</p>;
@@ -130,7 +149,14 @@ const DisparoResultados = () => {
   const Linha = ({ k, titulo, children }) => (
     <div className={`rounded-md border p-3 ${marcados[k] ? 'border-emerald-400 bg-emerald-50/40' : ''}`}>
       <label className="flex items-center gap-2 text-sm font-medium cursor-pointer"><Checkbox checked={!!marcados[k]} onCheckedChange={marca(k)} />{titulo}</label>
-      {marcados[k] && <div className="mt-2 flex flex-wrap items-end gap-3 pl-6">{children}</div>}
+      {marcados[k] && (
+        <div className="mt-2 flex flex-wrap items-end gap-3 pl-6">
+          {children}
+          <Button type="button" variant="outline" size="sm" className="h-9 gap-1" disabled={!!gerandoPrevia} onClick={() => verPrevia(itens.find((i) => i.k === k))}>
+            {gerandoPrevia === k ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}Ver prévia
+          </Button>
+        </div>
+      )}
     </div>
   );
   const Campo = ({ r, children }) => <div><Label className="text-xs">{r}</Label>{children}</div>;
@@ -204,6 +230,15 @@ const DisparoResultados = () => {
               <Textarea rows={3} value={destinos} onChange={(e) => setDestinos(e.target.value)} placeholder={'(19) 99999-9999\n(11) 98888-7777'} />
               {invalidos.length > 0 && <p className="text-xs text-red-600">Telefone inválido: {invalidos.join(', ')}</p>}
               <div><Label className="text-xs">Mensagem de abertura (opcional; vai antes dos PDFs)</Label><Textarea rows={2} value={abertura} onChange={(e) => setAbertura(e.target.value)} /></div>
+              <div>
+                <button type="button" onClick={() => setVerAbertura((v) => !v)} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Eye className="h-3.5 w-3.5" />{verAbertura ? 'Esconder a prévia' : 'Ver como vai chegar (abertura e arquivos)'}</button>
+                {verAbertura && (
+                  <div className="mt-1.5 space-y-2">
+                    {abertura.trim() && <PreviaMensagemWhatsApp texto={abertura} />}
+                    {selecionados.map((i) => <PreviaMensagemWhatsApp key={i.k} texto={`${i.titulo} — ${nomeDaEmpresa(empresa)}`} arquivos={['PDF']} />)}
+                  </div>
+                )}
+              </div>
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <span className="text-xs text-muted-foreground">{selecionados.length} relatório(s) × {numeros.length} número(s) = {selecionados.length * numeros.length} arquivo(s) para enviar{abertura.trim() ? ' + a abertura' : ''}.</span>
                 <Button onClick={enviar} disabled={!podeEnviar} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Enviar</Button>
@@ -221,6 +256,7 @@ const DisparoResultados = () => {
           )}
         </>
       )}
+      <PreviaPdfDialog open={!!previa} onOpenChange={(o) => { if (!o) setPrevia(null); }} titulo={previa?.titulo} nome={previa?.nome} base64={previa?.base64} />
     </>
   );
 };

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Copy, Loader2, MessageCircle, Paperclip, Send } from 'lucide-react';
+import { Copy, Eye, Loader2, MessageCircle, Paperclip, Send } from 'lucide-react';
+import PreviaPdfDialog from '@/components/PreviaPdfDialog';
+import PreviaMensagemWhatsApp from '@/components/PreviaMensagemWhatsApp';
 import { copiarTexto } from '@/lib/chavePix';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +22,15 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
   const [marcado, setMarcado] = useState(-1);
   const [enviando, setEnviando] = useState(false);
   const [incluirBloco, setIncluirBloco] = useState(false);
+  const [verMensagem, setVerMensagem] = useState(false);
+  const [previa, setPrevia] = useState(null); // { titulo, nome, base64 }
+  const [gerandoPrevia, setGerandoPrevia] = useState(-1);
 
   useEffect(() => {
     if (!open) return;
     setPara(paraInicial ? formatarTelefone(paraInicial) : ''); setMensagem(mensagemInicial);
     setMarcado(anexos.findIndex((a) => a.marcado !== false));
-    setIncluirBloco(false);
+    setIncluirBloco(false); setVerMensagem(false); setPrevia(null);
     // reinicia só quando a caixa abre
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -40,6 +45,16 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
   const copiarMensagem = async () => {
     const ok = await copiarTexto(mensagem);
     toast(ok ? { title: 'Mensagem copiada' } : { title: 'Não foi possível copiar', variant: 'destructive' });
+  };
+
+  const verPrevia = async (i) => {
+    setGerandoPrevia(i);
+    try {
+      const r = await anexos[i].gerar();
+      if (!r?.base64) throw new Error('Não foi possível gerar o arquivo.');
+      setPrevia({ titulo: anexos[i].rotulo, nome: r.filename || r.nome || 'relatorio.pdf', base64: r.base64 });
+    } catch (e) { toast({ title: 'Não foi possível abrir a prévia', description: e.message, variant: 'destructive' }); }
+    finally { setGerandoPrevia(-1); }
   };
 
   const enviar = async () => {
@@ -90,6 +105,10 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
             <div className="flex items-center justify-between"><Label className="text-xs">Mensagem</Label><button type="button" onClick={copiarMensagem} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Copy className="h-3.5 w-3.5" /> Copiar mensagem</button></div>
             <Textarea rows={8} className="max-h-[38vh]" value={mensagem} onChange={(e) => setMensagem(e.target.value)} />
           </div>
+          <div>
+            <button type="button" onClick={() => setVerMensagem((v) => !v)} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Eye className="h-3.5 w-3.5" />{verMensagem ? 'Esconder a prévia da mensagem' : 'Ver como a mensagem vai chegar'}</button>
+            {verMensagem && <div className="mt-1.5"><PreviaMensagemWhatsApp texto={mensagem} arquivos={marcado >= 0 ? [`${anexos[marcado].rotulo} (PDF)`] : []} /></div>}
+          </div>
           {blocoExtra?.itens?.length > 0 && incluirBloco && (
             <div className="rounded-md border">
               <div className="px-3 py-1.5 text-xs font-medium bg-muted/50 border-b">Copiar a chave Pix ou o código do boleto de cada pagamento</div>
@@ -116,7 +135,12 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1"><Paperclip className="h-3.5 w-3.5" /> Anexo (a mensagem vai como legenda do arquivo)</Label>
               {anexos.map((a, i) => (
-                <label key={a.rotulo} className="flex items-center gap-2 text-sm"><Checkbox checked={marcado === i} onCheckedChange={(v) => setMarcado(v === true ? i : -1)} /> {a.rotulo}</label>
+                <div key={a.rotulo} className="flex items-center justify-between gap-2">
+                  <label className="flex items-center gap-2 text-sm"><Checkbox checked={marcado === i} onCheckedChange={(v) => setMarcado(v === true ? i : -1)} /> {a.rotulo}</label>
+                  <Button type="button" variant="outline" size="sm" className="h-7 gap-1" onClick={() => verPrevia(i)} disabled={gerandoPrevia >= 0}>
+                    {gerandoPrevia === i ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Eye className="h-3.5 w-3.5" />}Ver prévia
+                  </Button>
+                </div>
               ))}
             </div>
           )}
@@ -127,6 +151,7 @@ const EnviarWhatsAppDialog = ({ open, onOpenChange, titulo = 'Enviar por WhatsAp
           <Button onClick={enviar} disabled={enviando} className="bg-emerald-600 hover:bg-emerald-700 text-white">{enviando ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}Enviar</Button>
         </DialogFooter>
       </DialogContent>
+      <PreviaPdfDialog open={!!previa} onOpenChange={(o) => { if (!o) setPrevia(null); }} titulo={previa?.titulo} nome={previa?.nome} base64={previa?.base64} />
     </Dialog>
   );
 };

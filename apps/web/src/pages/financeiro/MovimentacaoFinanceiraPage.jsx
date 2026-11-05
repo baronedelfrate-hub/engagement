@@ -107,7 +107,8 @@ const MovimentacaoFinanceiraPage = () => {
           .order('id', { ascending: true });
 
         if (filtroTipo !== 'Todos') query = query.eq('tipo', filtroTipo);
-        if (filtroStatus !== 'Todos') query = query.eq('status', filtroStatus);
+        // provisão já substituída por um lançamento real some da lista (só aparece escolhendo "Provisão substituída" no filtro de status)
+        if (filtroStatus !== 'Todos') query = query.eq('status', filtroStatus); else query = query.neq('status', 'substituido');
         if (filtroNatureza !== 'Todos') query = query.eq('provisao', filtroNatureza === 'provisao');
         if (dateStart) query = query.gte('data_vencimento', dateStart);
         if (dateEnd) query = query.lte('data_vencimento', dateEnd);

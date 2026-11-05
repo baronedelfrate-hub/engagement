@@ -10,7 +10,7 @@ const PreviaPdfDialog = ({ open, onOpenChange, titulo = 'Prévia do arquivo', no
   useEffect(() => {
     if (!open || !base64) { setUrl(null); return undefined; }
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-    const u = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    const u = URL.createObjectURL(new Blob([bytes], { type: /\.(jpe?g)$/i.test(nome) ? 'image/jpeg' : /\.png$/i.test(nome) ? 'image/png' : 'application/pdf' }));
     setUrl(u);
     return () => URL.revokeObjectURL(u);
   }, [open, base64]);

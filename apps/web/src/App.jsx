@@ -28,6 +28,8 @@ import UsuariosPage from '@/pages/admin/usuarios/UsuariosPage';
 import WhatsAppConexao from '@/pages/admin/WhatsAppConexao';
 import WhatsAppPage from '@/pages/whatsapp/WhatsAppPage';
 import DisparoResultados from '@/pages/admin/DisparoResultados';
+import DocumentosPessoais from '@/pages/admin/DocumentosPessoais';
+import DocumentosEmpresa from '@/pages/cadastros/DocumentosEmpresa';
 import PainelCarteira from '@/pages/admin/PainelCarteira';
 import ModulosPorCliente from '@/pages/admin/ModulosPorCliente';
 import ModuloNaoContratado from '@/pages/ModuloNaoContratado';
@@ -534,6 +536,8 @@ const AnimatedRoutes = () => {
           
           <Route path="/admin/carteira" element={<SuperAdminRoute><ProtectedLayout><PageTransition><PainelCarteira /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/admin/disparo-resultados" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DisparoResultados /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/admin/documentos-pessoais" element={<SuperAdminRoute><ProtectedLayout><PageTransition><DocumentosPessoais /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
+          <Route path="/cadastros/documentos-empresa" element={<ProtectedLayout><PageTransition><DocumentosEmpresa /></PageTransition></ProtectedLayout>} />
           <Route path="/admin/modulos" element={<SuperAdminRoute><ProtectedLayout><PageTransition><ModulosPorCliente /></PageTransition></ProtectedLayout></SuperAdminRoute>} />
           <Route path="/whatsapp" element={<ProtectedLayout><PageTransition><WhatsAppPage /></PageTransition></ProtectedLayout>} />
           <Route path="/configuracoes/whatsapp" element={<ProtectedLayout><PageTransition><WhatsAppConexao /></PageTransition></ProtectedLayout>} />

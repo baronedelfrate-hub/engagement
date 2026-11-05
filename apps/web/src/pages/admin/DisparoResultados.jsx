@@ -1,19 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { CheckCircle2, Eye, Loader2, MessageCircle, Send, XCircle } from 'lucide-react';
-import PreviaPdfDialog from '@/components/PreviaPdfDialog';
-import PreviaMensagemWhatsApp from '@/components/PreviaMensagemWhatsApp';
+import { Eye, Loader2, MessageCircle, Send } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
+import PreviaPdfDialog from '@/components/PreviaPdfDialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
-import { enviarWhatsApp, statusWhatsApp, telefoneValido, formatarTelefone } from '@/lib/whatsappService';
 import { supabase } from '@/lib/customSupabaseClient';
+import { statusWhatsApp } from '@/lib/whatsappService';
+import { montarTextoPagamentos, listarChavesParaCopiar } from '@/lib/mensagemPagamentos';
+import { mensagemRelatorioFinanceiro, blocoPagamentosDoRelatorio } from '@/lib/mensagemRelatorioFinanceiro';
 import {
   listarEmpresas, nomeDaEmpresa, listarObras, listarBancos, listarPedidos, listarPropostasDaEmpresa,
   gerarMensal, gerarFinanceiro, gerarPrestacao, gerarExtrato, gerarPedido, gerarProposta, dataBR
@@ -23,23 +24,20 @@ const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm';
 const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const hoje = new Date();
 const iso = (d) => d.toISOString().slice(0, 10);
-const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-// Superadmin: gera relatórios de qualquer empresa e envia pelo WhatsApp da própria empresa dele.
+// Superadmin: gera cada relatório de QUALQUER empresa e envia, um a um, pelo WhatsApp conectado escolhido.
+// Usa a mesma caixa de envio das telas das empresas (prévia fiel, valor e chave Pix no contas a pagar).
 const DisparoResultados = () => {
   const { toast } = useToast();
   const { company_id: empresaDoContexto, isSuperAdmin, loading: authLoading } = useAuthContext();
-  const [remetentes, setRemetentes] = useState([]); // empresas que têm um WhatsApp conectado pelo sistema
-  const [minhaEmpresa, setMinhaEmpresa] = useState('');
+  const [remetentes, setRemetentes] = useState([]);
+  const [remetenteId, setRemetenteId] = useState('');
+  const [conectado, setConectado] = useState(null);
   const [empresas, setEmpresas] = useState([]);
   const [empresaId, setEmpresaId] = useState('');
-  const [conectado, setConectado] = useState(null);
   const [obras, setObras] = useState([]); const [bancos, setBancos] = useState([]); const [pedidos, setPedidos] = useState([]); const [propostas, setPropostas] = useState([]);
   const [carregandoEmpresa, setCarregandoEmpresa] = useState(false);
-
-  // parâmetros e marcação de cada relatório
-  const [marcados, setMarcados] = useState({});
   const [p, setP] = useState({
     ano: hoje.getFullYear(), mes: hoje.getMonth() === 0 ? 0 : hoje.getMonth() - 1,
     pagarDe: iso(hoje), pagarAte: iso(new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)), pagarAberto: true,
@@ -47,17 +45,13 @@ const DisparoResultados = () => {
     obraId: 'TODOS', obraDe: '', obraAte: '', bancoId: 'TODOS', extratoDe: iso(new Date(hoje.getFullYear(), hoje.getMonth(), 1)), extratoAte: iso(hoje),
     pedidoId: '', propostaId: ''
   });
-  const [destinos, setDestinos] = useState('');
-  const [abertura, setAbertura] = useState('');
-  const [enviando, setEnviando] = useState(false);
-  const [resultado, setResultado] = useState([]);
-  const [previa, setPrevia] = useState(null); // { titulo, nome, base64 }
-  const [gerandoPrevia, setGerandoPrevia] = useState('');
-  const [verAbertura, setVerAbertura] = useState(false);
-  const cachePdf = useRef(new Map()); // o que foi visto na prévia é o que vai no envio
+  const [trabalhando, setTrabalhando] = useState(''); // chave do relatório sendo gerado
+  const [previa, setPrevia] = useState(null);
+  const [envio, setEnvio] = useState(null); // { titulo, descricao, mensagem, bloco, pdf }
+  const cachePdf = useRef(new Map());
 
   const set = (k) => (v) => setP((x) => ({ ...x, [k]: v }));
-  const marca = (k) => (v) => setMarcados((m) => ({ ...m, [k]: v === true }));
+  const empresa = useMemo(() => empresas.find((e) => e.id === empresaId), [empresas, empresaId]);
 
   useEffect(() => {
     if (authLoading || !isSuperAdmin) return;
@@ -65,98 +59,80 @@ const DisparoResultados = () => {
     supabase.from('whatsapp_instancias').select('company_id, empresa:empresas(razao_social, nome_fantasia)').then(({ data }) => {
       const lista = (data || []).map((r) => ({ id: r.company_id, nome: nomeDaEmpresa(r.empresa) }));
       setRemetentes(lista);
-      setMinhaEmpresa((atual) => atual || (lista.find((x) => x.id === empresaDoContexto) ? empresaDoContexto : (lista[0]?.id || '')));
+      setRemetenteId((atual) => atual || (lista.find((x) => x.id === empresaDoContexto) ? empresaDoContexto : (lista[0]?.id || '')));
     });
   }, [authLoading, isSuperAdmin, empresaDoContexto, toast]);
-  // estado da conexão do WhatsApp escolhido para enviar
+
   useEffect(() => {
-    if (!minhaEmpresa) { setConectado(false); return; }
+    if (!remetenteId) { setConectado(false); return; }
     setConectado(null);
-    statusWhatsApp(minhaEmpresa).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
-  }, [minhaEmpresa]);
-
-  const empresa = useMemo(() => empresas.find((e) => e.id === empresaId), [empresas, empresaId]);
+    statusWhatsApp(remetenteId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
+  }, [remetenteId]);
 
   useEffect(() => {
-    if (!empresaId) return;
-    let vivo = true; setCarregandoEmpresa(true); setMarcados({}); setResultado([]); cachePdf.current.clear();
+    if (!empresaId) return undefined;
+    let vivo = true; setCarregandoEmpresa(true); cachePdf.current.clear();
     Promise.all([listarObras(empresaId), listarBancos(empresaId), listarPedidos(empresaId).catch(() => []), listarPropostasDaEmpresa(empresaId).catch(() => [])])
-      .then(([o, b, pe, pr]) => { if (!vivo) return; setObras(o); setBancos(b); setPedidos(pe); setPropostas(pr); setP((x) => ({ ...x, obraId: 'TODOS', bancoId: 'TODOS', pedidoId: '', propostaId: '' })); setAbertura(`Olá! Seguem os resultados de ${nomeDaEmpresa(empresas.find((e) => e.id === empresaId))}.`); })
+      .then(([o, b, pe, pr]) => { if (!vivo) return; setObras(o); setBancos(b); setPedidos(pe); setPropostas(pr); setP((x) => ({ ...x, obraId: 'TODOS', bancoId: 'TODOS', pedidoId: '', propostaId: '' })); })
       .catch((e) => toast({ title: 'Erro ao carregar a empresa', description: e.message, variant: 'destructive' }))
       .finally(() => vivo && setCarregandoEmpresa(false));
     return () => { vivo = false; };
-  }, [empresaId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [empresaId, toast]);
 
-  const itens = useMemo(() => [
-    { k: 'mensal', titulo: 'Relatório mensal (DRE, ponto de equilíbrio e indicadores)', gerar: () => gerarMensal(empresaId, { ano: Number(p.ano), mes: Number(p.mes) }) },
-    { k: 'pagar', titulo: 'Contas a pagar', gerar: () => gerarFinanceiro(empresaId, 'CONTAS_PAGAR', { de: p.pagarDe, ate: p.pagarAte, soEmAberto: p.pagarAberto }) },
-    { k: 'receber', titulo: 'Contas a receber', gerar: () => gerarFinanceiro(empresaId, 'CONTAS_RECEBER', { de: p.receberDe, ate: p.receberAte, soEmAberto: p.receberAberto }) },
-    { k: 'obra', titulo: 'Prestação de contas da obra', gerar: () => gerarPrestacao(empresaId, { obraId: p.obraId, de: p.obraDe, ate: p.obraAte }) },
-    { k: 'extrato', titulo: 'Extrato conciliado', gerar: () => gerarExtrato(empresaId, { bancoId: p.bancoId, de: p.extratoDe, ate: p.extratoAte }) },
-    { k: 'pedido', titulo: 'Pedido de compra', gerar: () => { if (!p.pedidoId) throw new Error('Escolha o pedido de compra.'); return gerarPedido(empresaId, p.pedidoId); } },
-    { k: 'proposta', titulo: 'Proposta comercial', gerar: () => { if (!p.propostaId) throw new Error('Escolha a proposta.'); return gerarProposta(empresaId, p.propostaId); } }
-  ], [empresaId, p]);
+  // cada relatório: como gerar e qual mensagem/bloco acompanham o envio
+  const relatorios = useMemo(() => ({
+    mensal: { titulo: 'Relatório mensal (DRE, ponto de equilíbrio e indicadores)', gerar: () => gerarMensal(empresaId, { ano: Number(p.ano), mes: Number(p.mes) }) },
+    pagar: { titulo: 'Contas a pagar', gerar: () => gerarFinanceiro(empresaId, 'CONTAS_PAGAR', { de: p.pagarDe, ate: p.pagarAte, soEmAberto: p.pagarAberto }), financeiro: 'CONTAS_PAGAR' },
+    receber: { titulo: 'Contas a receber', gerar: () => gerarFinanceiro(empresaId, 'CONTAS_RECEBER', { de: p.receberDe, ate: p.receberAte, soEmAberto: p.receberAberto }), financeiro: 'CONTAS_RECEBER' },
+    obra: { titulo: 'Prestação de contas da obra', gerar: () => gerarPrestacao(empresaId, { obraId: p.obraId, de: p.obraDe, ate: p.obraAte }) },
+    extrato: { titulo: 'Extrato conciliado', gerar: () => gerarExtrato(empresaId, { bancoId: p.bancoId, de: p.extratoDe, ate: p.extratoAte }) },
+    pedido: { titulo: 'Pedido de compra', gerar: () => { if (!p.pedidoId) throw new Error('Escolha o pedido de compra.'); return gerarPedido(empresaId, p.pedidoId); } },
+    proposta: { titulo: 'Proposta comercial', gerar: () => { if (!p.propostaId) throw new Error('Escolha a proposta.'); return gerarProposta(empresaId, p.propostaId); } }
+  }), [empresaId, p]);
 
-  const chaveDoPdf = (it) => `${empresaId}|${it.k}|${JSON.stringify(p)}`;
-  const pdfDe = async (it) => {
-    const ch = chaveDoPdf(it);
-    if (!cachePdf.current.has(ch)) cachePdf.current.set(ch, await it.gerar());
+  const pdfDe = async (k) => {
+    const ch = `${empresaId}|${k}|${JSON.stringify(p)}`;
+    if (!cachePdf.current.has(ch)) cachePdf.current.set(ch, await relatorios[k].gerar());
     return cachePdf.current.get(ch);
   };
-  const verPrevia = async (it) => {
-    setGerandoPrevia(it.k);
-    try { const r = await pdfDe(it); setPrevia({ titulo: it.titulo, nome: r.nome, base64: r.base64 }); }
+  const verPrevia = async (k) => {
+    setTrabalhando(k);
+    try { const r = await pdfDe(k); setPrevia({ titulo: relatorios[k].titulo, nome: r.nome, base64: r.base64 }); }
     catch (e) { toast({ title: 'Não foi possível gerar a prévia', description: e.message, variant: 'destructive' }); }
-    finally { setGerandoPrevia(''); }
+    finally { setTrabalhando(''); }
   };
-
-  const numeros = useMemo(() => [...new Set(destinos.split(/[\n,;]+/).map((x) => x.trim()).filter(Boolean))], [destinos]);
-  const invalidos = numeros.filter((n) => !telefoneValido(n));
-  const selecionados = itens.filter((i) => marcados[i.k]);
-  const podeEnviar = !!empresaId && selecionados.length > 0 && numeros.length > 0 && invalidos.length === 0 && conectado && !enviando;
-
-  const enviar = useCallback(async () => {
-    setEnviando(true); setResultado([]);
-    const log = [];
-    const anota = (r) => { log.push(r); setResultado([...log]); };
+  const prepararEnvio = async (k) => {
+    if (!remetenteId || conectado === false) { toast({ title: 'Escolha um WhatsApp conectado para enviar', variant: 'destructive' }); return; }
+    setTrabalhando(k);
     try {
-      // 1) gera cada PDF uma vez
-      const prontos = [];
-      for (const it of selecionados) {
-        try { prontos.push({ it, pdf: await pdfDe(it) }); anota({ ok: true, texto: `${it.titulo}: PDF gerado` }); }
-        catch (e) { anota({ ok: false, texto: `${it.titulo}: ${e.message}` }); }
+      const r = await pdfDe(k);
+      const nomeEmpresa = nomeDaEmpresa(empresa);
+      let mensagem = `Olá! Segue ${r.rotulo || relatorios[k].titulo} de ${nomeEmpresa}.`;
+      let bloco = null;
+      if (relatorios[k].financeiro) {
+        mensagem = mensagemRelatorioFinanceiro({ source: relatorios[k].financeiro, periodo: r.periodo, linhas: r.linhas });
+        if (relatorios[k].financeiro === 'CONTAS_PAGAR') bloco = blocoPagamentosDoRelatorio(montarTextoPagamentos(r.linhas), listarChavesParaCopiar(r.linhas));
       }
-      if (!prontos.length) { toast({ title: 'Nenhum relatório pôde ser gerado', variant: 'destructive' }); return; }
-      // 2) envia, um número por vez: abertura em texto e depois cada PDF
-      for (const para of numeros) {
-        const comum = { tipo: 'outro', para, ref_tipo: 'disparo_resultados', ref_id: empresaId, empresa_id: minhaEmpresa };
-        try {
-          if (abertura.trim()) { await enviarWhatsApp({ ...comum, mensagem: abertura.trim() }); await esperar(900); }
-          for (const { pdf } of prontos) {
-            await enviarWhatsApp({ ...comum, mensagem: `${pdf.rotulo} — ${nomeDaEmpresa(empresa)}`, anexo: { filename: pdf.nome, base64: pdf.base64, mimetype: 'application/pdf' } });
-            anota({ ok: true, texto: `${formatarTelefone(para)}: ${pdf.rotulo} enviado` });
-            await esperar(1200);
-          }
-        } catch (e) { anota({ ok: false, texto: `${formatarTelefone(para)}: ${e.message}` }); }
-      }
-      toast({ title: 'Disparo concluído', description: 'Veja o resumo abaixo.' });
-    } finally { setEnviando(false); }
-  }, [selecionados, numeros, abertura, empresaId, empresa, minhaEmpresa, toast, p]); // eslint-disable-line react-hooks/exhaustive-deps
+      setEnvio({ titulo: `Enviar ${relatorios[k].titulo.toLowerCase()} por WhatsApp`, descricao: `${nomeEmpresa}${r.periodo ? ` · vencimento ${r.periodo}` : ''}`, mensagem, bloco, pdf: r });
+    } catch (e) { toast({ title: 'Não foi possível preparar o envio', description: e.message, variant: 'destructive' }); }
+    finally { setTrabalhando(''); }
+  };
 
   if (authLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!isSuperAdmin) return <p className="text-sm text-muted-foreground py-10 text-center">Esta tela é só para o superadmin.</p>;
 
-  const Linha = ({ k, titulo, children }) => (
-    <div className={`rounded-md border p-3 ${marcados[k] ? 'border-emerald-400 bg-emerald-50/40' : ''}`}>
-      <label className="flex items-center gap-2 text-sm font-medium cursor-pointer"><Checkbox checked={!!marcados[k]} onCheckedChange={marca(k)} />{titulo}</label>
-      {marcados[k] && (
-        <div className="mt-2 flex flex-wrap items-end gap-3 pl-6">
-          {children}
-          <Button type="button" variant="outline" size="sm" className="h-9 gap-1" disabled={!!gerandoPrevia} onClick={() => verPrevia(itens.find((i) => i.k === k))}>
-            {gerandoPrevia === k ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}Ver prévia
-          </Button>
-        </div>
-      )}
+  const Cartao = ({ k, children }) => (
+    <div className="rounded-md border p-3">
+      <div className="text-sm font-medium mb-2">{relatorios[k].titulo}</div>
+      <div className="flex flex-wrap items-end gap-3">
+        {children}
+        <Button type="button" variant="outline" size="sm" className="h-9 gap-1" disabled={!!trabalhando || carregandoEmpresa} onClick={() => verPrevia(k)}>
+          {trabalhando === k ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}Ver prévia
+        </Button>
+        <Button type="button" size="sm" className="h-9 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!!trabalhando || carregandoEmpresa || !conectado} onClick={() => prepararEnvio(k)}>
+          {trabalhando === k ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Enviar por WhatsApp
+        </Button>
+      </div>
     </div>
   );
   const Campo = ({ r, children }) => <div><Label className="text-xs">{r}</Label>{children}</div>;
@@ -165,12 +141,12 @@ const DisparoResultados = () => {
   return (
     <>
       <Helmet><title>Disparo de Resultados - Engagement ERP</title></Helmet>
-      <PageHeader title="Disparo de Resultados" icon={Send} description="Escolha uma empresa, marque os relatórios e envie por WhatsApp para qualquer número. Sai sempre pelo seu WhatsApp (o da sua empresa)." />
+      <PageHeader title="Disparo de Resultados" icon={Send} description="Escolha uma empresa e envie cada relatório, um por vez, por WhatsApp para qualquer número. A caixa de envio é a mesma das telas das empresas: prévia fiel e, no contas a pagar, valor e chave Pix." />
 
       <div className={`mb-4 rounded-md border px-3 py-2 text-sm flex flex-wrap items-center gap-2 ${conectado ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-800'}`}>
         <MessageCircle className="h-4 w-4" />
         <span>Enviar pelo WhatsApp de:</span>
-        <select className={`${sel} bg-white`} value={minhaEmpresa} onChange={(e) => setMinhaEmpresa(e.target.value)}>
+        <select className={`${sel} bg-white`} value={remetenteId} onChange={(e) => setRemetenteId(e.target.value)}>
           {remetentes.length === 0 && <option value="">Nenhum WhatsApp conectado no sistema</option>}
           {remetentes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
         </select>
@@ -178,7 +154,7 @@ const DisparoResultados = () => {
       </div>
 
       <Card className="mb-4">
-        <CardHeader className="pb-2"><CardTitle className="text-base">1. Empresa</CardTitle><CardDescription>Os dados dos relatórios são desta empresa.</CardDescription></CardHeader>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Empresa dos dados</CardTitle><CardDescription>Os relatórios abaixo são desta empresa.</CardDescription></CardHeader>
         <CardContent>
           <select className={`${sel} w-full max-w-xl`} value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
             <option value="">Escolha a empresa…</option>
@@ -188,73 +164,50 @@ const DisparoResultados = () => {
       </Card>
 
       {empresaId && (
-        <>
-          <Card className="mb-4">
-            <CardHeader className="pb-2"><CardTitle className="text-base">2. Relatórios</CardTitle><CardDescription>Marque quantos quiser. Cada um vai como um PDF.</CardDescription></CardHeader>
-            <CardContent className="space-y-2">
-              {carregandoEmpresa && <div className="text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Carregando dados da empresa…</div>}
-              <Linha k="mensal" titulo="Relatório mensal (DRE, ponto de equilíbrio e indicadores)">
-                <Campo r="Mês"><select className={sel} value={p.mes} onChange={(e) => set('mes')(Number(e.target.value))}>{MESES.map((m, i) => <option key={m} value={i}>{m}</option>)}</select></Campo>
-                <Campo r="Ano"><Input type="number" className="h-9 w-24" value={p.ano} onChange={(e) => set('ano')(e.target.value)} /></Campo>
-              </Linha>
-              <Linha k="pagar" titulo="Contas a pagar">
-                <Campo r="Vencimento de">{dataInput('pagarDe')}</Campo><Campo r="até">{dataInput('pagarAte')}</Campo>
-                <label className="flex items-center gap-2 text-sm pb-1"><Checkbox checked={p.pagarAberto} onCheckedChange={(v) => set('pagarAberto')(v === true)} />Só em aberto</label>
-              </Linha>
-              <Linha k="receber" titulo="Contas a receber">
-                <Campo r="Vencimento de">{dataInput('receberDe')}</Campo><Campo r="até">{dataInput('receberAte')}</Campo>
-                <label className="flex items-center gap-2 text-sm pb-1"><Checkbox checked={p.receberAberto} onCheckedChange={(v) => set('receberAberto')(v === true)} />Só em aberto</label>
-              </Linha>
-              <Linha k="obra" titulo="Prestação de contas da obra">
-                <Campo r="Obra"><select className={`${sel} w-64`} value={p.obraId} onChange={(e) => set('obraId')(e.target.value)}><option value="TODOS">Todas as obras</option>{obras.map((o) => <option key={o.id} value={o.id}>{o.codigo ? `${o.codigo} - ` : ''}{o.nome}</option>)}</select></Campo>
-                <Campo r="De (opcional)">{dataInput('obraDe')}</Campo><Campo r="Até (opcional)">{dataInput('obraAte')}</Campo>
-              </Linha>
-              <Linha k="extrato" titulo="Extrato conciliado">
-                <Campo r="Banco"><select className={`${sel} w-64`} value={p.bancoId} onChange={(e) => set('bancoId')(e.target.value)}><option value="TODOS">Todos os bancos</option>{bancos.map((b) => <option key={b.id} value={b.id}>{b.nome}{b.conta ? ` · cc ${b.conta}` : ''}</option>)}</select></Campo>
-                <Campo r="De">{dataInput('extratoDe')}</Campo><Campo r="Até">{dataInput('extratoAte')}</Campo>
-              </Linha>
-              <Linha k="pedido" titulo="Pedido de compra">
-                <Campo r="Pedido"><select className={`${sel} w-80`} value={p.pedidoId} onChange={(e) => set('pedidoId')(e.target.value)}><option value="">Escolha…</option>{pedidos.map((x) => <option key={x.id} value={x.id}>{x.numero || x.id.slice(0, 6)} · {x.fornecedor?.nome || 'sem fornecedor'} · {moeda(x.valor_total)}{x.data_pedido ? ` · ${dataBR(x.data_pedido)}` : ''}</option>)}</select></Campo>
-                {pedidos.length === 0 && <span className="text-xs text-muted-foreground pb-2">Esta empresa não tem pedidos de compra.</span>}
-              </Linha>
-              <Linha k="proposta" titulo="Proposta comercial">
-                <Campo r="Proposta"><select className={`${sel} w-80`} value={p.propostaId} onChange={(e) => set('propostaId')(e.target.value)}><option value="">Escolha…</option>{propostas.map((x) => <option key={x.id} value={x.id}>{x.numero || 'Rascunho'} · {x.titulo}{x.conta?.nome ? ` · ${x.conta.nome}` : ''}</option>)}</select></Campo>
-                {propostas.length === 0 && <span className="text-xs text-muted-foreground pb-2">Esta empresa não tem propostas.</span>}
-              </Linha>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Relatórios</CardTitle><CardDescription>Ajuste o período, veja a prévia e envie. Cada relatório é enviado separadamente.</CardDescription></CardHeader>
+          <CardContent className="space-y-2">
+            {carregandoEmpresa && <div className="text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" />Carregando dados da empresa…</div>}
+            <Cartao k="pagar">
+              <Campo r="Vencimento de">{dataInput('pagarDe')}</Campo><Campo r="até">{dataInput('pagarAte')}</Campo>
+              <label className="flex items-center gap-2 text-sm pb-2"><Checkbox checked={p.pagarAberto} onCheckedChange={(v) => set('pagarAberto')(v === true)} />Só em aberto</label>
+            </Cartao>
+            <Cartao k="receber">
+              <Campo r="Vencimento de">{dataInput('receberDe')}</Campo><Campo r="até">{dataInput('receberAte')}</Campo>
+              <label className="flex items-center gap-2 text-sm pb-2"><Checkbox checked={p.receberAberto} onCheckedChange={(v) => set('receberAberto')(v === true)} />Só em aberto</label>
+            </Cartao>
+            <Cartao k="mensal">
+              <Campo r="Mês"><select className={sel} value={p.mes} onChange={(e) => set('mes')(Number(e.target.value))}>{MESES.map((m, i) => <option key={m} value={i}>{m}</option>)}</select></Campo>
+              <Campo r="Ano"><Input type="number" className="h-9 w-24" value={p.ano} onChange={(e) => set('ano')(e.target.value)} /></Campo>
+            </Cartao>
+            <Cartao k="obra">
+              <Campo r="Obra"><select className={`${sel} w-64`} value={p.obraId} onChange={(e) => set('obraId')(e.target.value)}><option value="TODOS">Todas as obras</option>{obras.map((o) => <option key={o.id} value={o.id}>{o.codigo ? `${o.codigo} - ` : ''}{o.nome}</option>)}</select></Campo>
+              <Campo r="De (opcional)">{dataInput('obraDe')}</Campo><Campo r="Até (opcional)">{dataInput('obraAte')}</Campo>
+            </Cartao>
+            <Cartao k="extrato">
+              <Campo r="Banco"><select className={`${sel} w-64`} value={p.bancoId} onChange={(e) => set('bancoId')(e.target.value)}><option value="TODOS">Todos os bancos</option>{bancos.map((b) => <option key={b.id} value={b.id}>{b.nome}{b.conta ? ` · cc ${b.conta}` : ''}</option>)}</select></Campo>
+              <Campo r="De">{dataInput('extratoDe')}</Campo><Campo r="Até">{dataInput('extratoAte')}</Campo>
+            </Cartao>
+            <Cartao k="pedido">
+              <Campo r="Pedido"><select className={`${sel} w-80`} value={p.pedidoId} onChange={(e) => set('pedidoId')(e.target.value)}><option value="">Escolha…</option>{pedidos.map((x) => <option key={x.id} value={x.id}>{x.numero || x.id.slice(0, 6)} · {x.fornecedor?.nome || 'sem fornecedor'} · {moeda(x.valor_total)}{x.data_pedido ? ` · ${dataBR(x.data_pedido)}` : ''}</option>)}</select></Campo>
+              {pedidos.length === 0 && <span className="text-xs text-muted-foreground pb-2">Esta empresa não tem pedidos de compra.</span>}
+            </Cartao>
+            <Cartao k="proposta">
+              <Campo r="Proposta"><select className={`${sel} w-80`} value={p.propostaId} onChange={(e) => set('propostaId')(e.target.value)}><option value="">Escolha…</option>{propostas.map((x) => <option key={x.id} value={x.id}>{x.numero || 'Rascunho'} · {x.titulo}{x.conta?.nome ? ` · ${x.conta.nome}` : ''}</option>)}</select></Campo>
+              {propostas.length === 0 && <span className="text-xs text-muted-foreground pb-2">Esta empresa não tem propostas.</span>}
+            </Cartao>
+          </CardContent>
+        </Card>
+      )}
 
-          <Card className="mb-4">
-            <CardHeader className="pb-2"><CardTitle className="text-base">3. Para quem enviar</CardTitle><CardDescription>Um ou vários números, um por linha (com DDD). Todos recebem os mesmos relatórios.</CardDescription></CardHeader>
-            <CardContent className="space-y-3">
-              <Textarea rows={3} value={destinos} onChange={(e) => setDestinos(e.target.value)} placeholder={'(19) 99999-9999\n(11) 98888-7777'} />
-              {invalidos.length > 0 && <p className="text-xs text-red-600">Telefone inválido: {invalidos.join(', ')}</p>}
-              <div><Label className="text-xs">Mensagem de abertura (opcional; vai antes dos PDFs)</Label><Textarea rows={2} value={abertura} onChange={(e) => setAbertura(e.target.value)} /></div>
-              <div>
-                <button type="button" onClick={() => setVerAbertura((v) => !v)} className="text-xs inline-flex items-center gap-1 text-primary hover:underline"><Eye className="h-3.5 w-3.5" />{verAbertura ? 'Esconder a prévia' : 'Ver como vai chegar (abertura e arquivos)'}</button>
-                {verAbertura && (
-                  <div className="mt-1.5 space-y-2">
-                    {abertura.trim() && <PreviaMensagemWhatsApp texto={abertura} />}
-                    {selecionados.map((i) => <PreviaMensagemWhatsApp key={i.k} texto={`${i.titulo} — ${nomeDaEmpresa(empresa)}`} arquivos={['PDF']} />)}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <span className="text-xs text-muted-foreground">{selecionados.length} relatório(s) × {numeros.length} número(s) = {selecionados.length * numeros.length} arquivo(s) para enviar{abertura.trim() ? ' + a abertura' : ''}.</span>
-                <Button onClick={enviar} disabled={!podeEnviar} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Enviar</Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {resultado.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-base">Resumo</CardTitle></CardHeader>
-              <CardContent className="space-y-1 text-sm">
-                {resultado.map((r, i) => <div key={i} className={`flex items-start gap-2 ${r.ok ? 'text-foreground' : 'text-red-600'}`}>{r.ok ? <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" /> : <XCircle className="h-4 w-4 mt-0.5 shrink-0" />}<span>{r.texto}</span></div>)}
-              </CardContent>
-            </Card>
-          )}
-        </>
+      {envio && (
+        <EnviarWhatsAppDialog
+          open onOpenChange={(o) => { if (!o) setEnvio(null); }}
+          titulo={envio.titulo} descricao={envio.descricao}
+          tipo="outro" refTipo="disparo_resultados" refId={empresaId} empresaRemetente={remetenteId}
+          mensagemInicial={envio.mensagem} blocoExtra={envio.bloco}
+          anexos={[{ rotulo: 'Relatório em PDF', gerar: async () => envio.pdf }]}
+        />
       )}
       <PreviaPdfDialog open={!!previa} onOpenChange={(o) => { if (!o) setPrevia(null); }} titulo={previa?.titulo} nome={previa?.nome} base64={previa?.base64} />
     </>

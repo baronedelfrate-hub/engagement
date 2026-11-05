@@ -4,6 +4,7 @@ import { Loader2, Download, Table as TableIcon, Filter, Mail, MessageCircle } fr
 import EnviarEmailDialog from '@/components/EnviarEmailDialog';
 import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { montarTextoPagamentos, listarChavesParaCopiar } from '@/lib/mensagemPagamentos';
+import { mensagemRelatorioFinanceiro, blocoPagamentosDoRelatorio } from '@/lib/mensagemRelatorioFinanceiro';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -333,8 +334,8 @@ const RelatoriosFinanceiros = () => {
               titulo={`Enviar o relatório de ${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'} por WhatsApp`}
               descricao={getFilterDescription()}
               tipo="relatorio_pagar" refTipo="relatorio_financeiro" refId={null}
-              blocoExtra={source === 'CONTAS_PAGAR' ? { pergunta: 'Colocar na mensagem o valor e a chave Pix (ou o código do boleto) de cada pagamento?', ajuda: 'Útil quando você não tem senha de operador e a própria pessoa lança o pagamento no banco: cada chave vem sozinha em uma linha, para copiar com um toque. Só entram os pagamentos ainda em aberto.', texto: montarTextoPagamentos(filteredData), itens: listarChavesParaCopiar(filteredData) } : null}
-              mensagemInicial={`Olá! Tudo bem?\n\nSegue o relatório de *${source === 'CONTAS_PAGAR' ? 'contas a pagar' : 'contas a receber'}*${dateRangeStr ? ` (${dateRangeStr})` : ''}.\n\nRegistros: *${filteredData.length}*\nValor total: *${filteredData.reduce((s, r) => s + Number(r.valor_original || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*\n\nO PDF traz o detalhamento e os resumos por dia, ${source === 'CONTAS_PAGAR' ? 'fornecedor' : 'cliente'}, categoria e centro de custo.`}
+              blocoExtra={source === 'CONTAS_PAGAR' ? blocoPagamentosDoRelatorio(montarTextoPagamentos(filteredData), listarChavesParaCopiar(filteredData)) : null}
+              mensagemInicial={mensagemRelatorioFinanceiro({ source, periodo: dateRangeStr, linhas: filteredData })}
               anexos={[{ rotulo: 'Relatório em PDF', gerar: () => exportToPDF(filteredData, SOURCE_COLUMNS[source], `Relatório Financeiro - ${source === 'CONTAS_PAGAR' ? 'Contas a Pagar' : 'Contas a Receber'}`, getFilterDescription(), source, { base64: true }) }]}
             />
             <EnviarEmailDialog

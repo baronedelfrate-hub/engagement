@@ -61,7 +61,7 @@ export const COLUNAS_FINANCEIRO = {
 };
 export const gerarFinanceiro = async (empresaId, source, { de, ate, soEmAberto = true }) => {
   const pagar = source === 'CONTAS_PAGAR';
-  const sel = `*, categoria:categorias(nome), centro_custo:centros_custo(nome), subcategoria:subcategorias(nome), projeto:projetos(nome, codigo), banco:bancos(nome), ${pagar ? 'fornecedor:fornecedores(nome)' : 'cliente:clientes(nome)'}`;
+  const sel = `*, categoria:categorias(nome), centro_custo:centros_custo(nome), subcategoria:subcategorias(nome), projeto:projetos(nome, codigo), banco:bancos(nome), ${pagar ? 'fornecedor:fornecedores(nome, chave_pix, tipo_chave_pix)' : 'cliente:clientes(nome)'}`;
   let q = supabase.from('movimentacao_financeira').select(sel).eq('company_id', empresaId).eq('tipo', pagar ? 'pagar' : 'receber').not('status', 'in', '(cancelado,substituido)');
   if (de) q = q.gte('data_vencimento', de);
   if (ate) q = q.lte('data_vencimento', ate);
@@ -71,13 +71,13 @@ export const gerarFinanceiro = async (empresaId, source, { de, ate, soEmAberto =
   const rotulo = (s) => (s === 'pago' ? (pagar ? 'Pago' : 'Recebido') : s === 'pago_parcial' ? 'Parcial' : s === 'vencido' ? 'Vencido' : 'Pendente');
   const flat = dados.map((i) => ({
     ...i, numero: i.provisao ? String(i.numero_titulo || '').replace(/^PROV · /, '') : i.numero_titulo, natureza: i.provisao ? 'Provisão' : 'Título', valor_original: i.valor_total, status: rotulo(i.status),
-    fornecedor_nome: i.fornecedor?.nome, cliente_nome: i.cliente?.nome, categoria_nome: i.categoria?.nome, centro_custo_nome: i.centro_custo?.nome,
+    fornecedor_nome: i.fornecedor?.nome, fornecedor_pix: i.fornecedor?.chave_pix || undefined, fornecedor_tipo_pix: i.fornecedor?.tipo_chave_pix || undefined, cliente_nome: i.cliente?.nome, categoria_nome: i.categoria?.nome, centro_custo_nome: i.centro_custo?.nome,
     projeto_nome: i.projeto ? `${i.projeto.codigo ? `${i.projeto.codigo} - ` : ''}${i.projeto.nome}` : 'Não se aplica'
   }));
   const titulo = `Relatório Financeiro - ${pagar ? 'Contas a Pagar' : 'Contas a Receber'}`;
   const desc = `Vencimento: ${de ? dataBR(de) : 'início'} a ${ate ? dataBR(ate) : 'fim'}${soEmAberto ? ' | Só em aberto' : ''}`;
   const r = await exportToPDF(flat, COLUNAS_FINANCEIRO[source], titulo, desc, source, { base64: true });
-  return { ...r, rotulo: pagar ? 'Contas a pagar' : 'Contas a receber' };
+  return { ...r, rotulo: pagar ? 'Contas a pagar' : 'Contas a receber', linhas: flat, periodo: `${de ? dataBR(de) : 'início'} a ${ate ? dataBR(ate) : 'fim'}` };
 };
 
 // ---------- prestação de contas da obra ----------

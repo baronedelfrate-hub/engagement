@@ -3,6 +3,9 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { buscarTudo } from '@/services/extratoAsaasService';
 import { montarDRE, calcularPEPeriodo, MESES } from '@/lib/dreGerencial';
 
+// Último dia do mês de uma data AAAA-MM-DD (30 dias em novembro, 28/29 em fevereiro...); '-31' fixo dava erro de data inválida.
+const ultimoDiaDoMes = (iso) => { const [a, m] = iso.slice(0, 7).split('-').map(Number); return `${iso.slice(0, 7)}-${String(new Date(a, m, 0).getDate()).padStart(2, '0')}`; };
+
 const ok = ({ data, error }) => {
   if (error) throw new Error(error.message);
   return data;
@@ -28,7 +31,7 @@ export const titulosAbertos = async (companyId) => {
 // Entradas e saídas realizadas no mês (pelas baixas).
 export const movimentoDoMes = async (companyId, hoje = hojeISO()) => {
   const ini = `${hoje.slice(0, 7)}-01`;
-  const fim = `${hoje.slice(0, 7)}-31`;
+  const fim = ultimoDiaDoMes(hoje);
   const b = ok(await supabase.from('movimentacao_baixas').select('valor_baixa, data_baixa, movimentacao:movimentacao_financeira(tipo)').eq('company_id', companyId).gte('data_baixa', ini).lte('data_baixa', fim).limit(5000));
   const soma = (tipo) => b.filter((x) => x.movimentacao?.tipo === tipo).reduce((s, x) => s + Number(x.valor_baixa || 0), 0);
   return { entradas: soma('receber'), saidas: soma('pagar') };
@@ -41,7 +44,7 @@ export const resumoVencimentos = (abertos, hoje = hojeISO()) => {
   };
   const sete = somaDias(hoje, 7);
   const trinta = somaDias(hoje, 30);
-  const fimMes = `${hoje.slice(0, 7)}-31`;
+  const fimMes = ultimoDiaDoMes(hoje);
   const prov = abertos.filter((x) => x.provisao);
   return {
     provisoes: { qtd: prov.length, valor: Math.round(prov.reduce((s, x) => s + x.saldo, 0) * 100) / 100 },

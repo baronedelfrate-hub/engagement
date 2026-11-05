@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { enviarWhatsApp, statusWhatsApp, telefoneValido, formatarTelefone } from '@/lib/whatsappService';
+import { supabase } from '@/lib/customSupabaseClient';
 import {
   listarEmpresas, nomeDaEmpresa, listarObras, listarBancos, listarPedidos, listarPropostasDaEmpresa,
   gerarMensal, gerarFinanceiro, gerarPrestacao, gerarExtrato, gerarPedido, gerarProposta, dataBR
@@ -26,7 +27,9 @@ const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency',
 // Superadmin: gera relatórios de qualquer empresa e envia pelo WhatsApp da própria empresa dele.
 const DisparoResultados = () => {
   const { toast } = useToast();
-  const { company_id: minhaEmpresa, isSuperAdmin, loading: authLoading } = useAuthContext();
+  const { company_id: empresaDoContexto, isSuperAdmin, loading: authLoading } = useAuthContext();
+  const [remetentes, setRemetentes] = useState([]); // empresas que têm um WhatsApp conectado pelo sistema
+  const [minhaEmpresa, setMinhaEmpresa] = useState('');
   const [empresas, setEmpresas] = useState([]);
   const [empresaId, setEmpresaId] = useState('');
   const [conectado, setConectado] = useState(null);
@@ -53,8 +56,18 @@ const DisparoResultados = () => {
   useEffect(() => {
     if (authLoading || !isSuperAdmin) return;
     listarEmpresas().then(setEmpresas).catch((e) => toast({ title: 'Erro ao listar empresas', description: e.message, variant: 'destructive' }));
-    if (minhaEmpresa) statusWhatsApp(minhaEmpresa).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
-  }, [authLoading, isSuperAdmin, minhaEmpresa, toast]);
+    supabase.from('whatsapp_instancias').select('company_id, empresa:empresas(razao_social, nome_fantasia)').then(({ data }) => {
+      const lista = (data || []).map((r) => ({ id: r.company_id, nome: nomeDaEmpresa(r.empresa) }));
+      setRemetentes(lista);
+      setMinhaEmpresa((atual) => atual || (lista.find((x) => x.id === empresaDoContexto) ? empresaDoContexto : (lista[0]?.id || '')));
+    });
+  }, [authLoading, isSuperAdmin, empresaDoContexto, toast]);
+  // estado da conexão do WhatsApp escolhido para enviar
+  useEffect(() => {
+    if (!minhaEmpresa) { setConectado(false); return; }
+    setConectado(null);
+    statusWhatsApp(minhaEmpresa).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
+  }, [minhaEmpresa]);
 
   const empresa = useMemo(() => empresas.find((e) => e.id === empresaId), [empresas, empresaId]);
 
@@ -128,9 +141,14 @@ const DisparoResultados = () => {
       <Helmet><title>Disparo de Resultados - Engagement ERP</title></Helmet>
       <PageHeader title="Disparo de Resultados" icon={Send} description="Escolha uma empresa, marque os relatórios e envie por WhatsApp para qualquer número. Sai sempre pelo seu WhatsApp (o da sua empresa)." />
 
-      <div className={`mb-4 rounded-md border px-3 py-2 text-sm flex items-center gap-2 ${conectado ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-800'}`}>
+      <div className={`mb-4 rounded-md border px-3 py-2 text-sm flex flex-wrap items-center gap-2 ${conectado ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-amber-300 bg-amber-50 text-amber-800'}`}>
         <MessageCircle className="h-4 w-4" />
-        {conectado === null ? 'Conferindo o WhatsApp…' : conectado ? 'Seu WhatsApp está conectado: os envios saem por ele.' : 'Seu WhatsApp não está conectado. Conecte em Configurações > WhatsApp antes de enviar.'}
+        <span>Enviar pelo WhatsApp de:</span>
+        <select className={`${sel} bg-white`} value={minhaEmpresa} onChange={(e) => setMinhaEmpresa(e.target.value)}>
+          {remetentes.length === 0 && <option value="">Nenhum WhatsApp conectado no sistema</option>}
+          {remetentes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
+        </select>
+        <span>{conectado === null ? 'conferindo…' : conectado ? '· conectado, os envios saem por ele.' : '· desconectado. Conecte em Configurações > WhatsApp antes de enviar.'}</span>
       </div>
 
       <Card className="mb-4">

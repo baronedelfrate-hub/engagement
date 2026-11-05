@@ -1,5 +1,5 @@
 // Texto de pagamentos para colar/enviar por WhatsApp: valor, vencimento e a chave Pix (ou o código do boleto) de cada um,
-// cada chave em uma linha sozinha, dentro de um bloco ```monoespaçado``` (o WhatsApp mostra o botão Copiar nesse bloco). Só entra o que ainda não foi pago.
+// cada chave em uma linha sozinha, entre ```crases```: no envio, cada uma vira uma mensagem só com o código (ver planoMensagens). Só entra o que ainda não foi pago.
 import { rotuloTipoPix, valorParaCopiar } from '@/lib/chavePix';
 
 const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

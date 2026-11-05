@@ -1,7 +1,8 @@
 // Plano das mensagens de WhatsApp: é o MESMO plano que a prévia mostra e que o envio executa, para a prévia ser fiel.
 // - Com arquivo: o texto vai como legenda se couber (o WhatsApp limita a legenda a ~1000 caracteres); se não couber, o arquivo vai com o nome do relatório
 //   como legenda e o texto segue em mensagem(ns) de texto.
-// - O bloco de pagamentos (valor e chave Pix / boleto) sempre vai em mensagem(ns) de texto separadas, uma chave por linha.
+// - O bloco de pagamentos (valor e chave Pix / boleto) sempre vai em mensagens de texto separadas. Cada chave Pix / código de boleto
+//   (linha entre ```crases```) vai sozinho numa mensagem, para o destinatário copiá-lo com um toque (o WhatsApp só copia a mensagem inteira).
 export const LIMITE_LEGENDA = 1000;
 export const LIMITE_TEXTO = 3500;
 
@@ -35,6 +36,12 @@ export const planejarMensagens = ({ texto, bloco, anexo }) => {
     if (t && t.length <= LIMITE_LEGENDA) out.push({ tipo: 'arquivo', legenda: t });
     else { out.push({ tipo: 'arquivo', legenda: anexo.rotulo || 'Relatório' }); dividirTexto(t).forEach((x) => out.push({ tipo: 'texto', texto: x })); }
   } else dividirTexto(t).forEach((x) => out.push({ tipo: 'texto', texto: x }));
-  dividirTexto(b).forEach((x) => out.push({ tipo: 'texto', texto: x }));
+  let pendente = [];
+  const soltar = () => { dividirTexto(pendente.join('\n')).forEach((x) => out.push({ tipo: 'texto', texto: x })); pendente = []; };
+  b.split('\n').forEach((l) => {
+    const m = l.trim().match(/^```([^`]+)```$/);
+    if (m) { soltar(); out.push({ tipo: 'texto', texto: m[1].trim() }); } else pendente.push(l);
+  });
+  soltar();
   return out;
 };

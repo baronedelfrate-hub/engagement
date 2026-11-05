@@ -189,11 +189,12 @@ const MovimentacaoFinanceiraPage = () => {
   return (
     <div className="space-y-6">
       <PageHeader 
+        compacto
         title="Movimentação Financeira" 
         description="Gestão unificada de contas a pagar e receber."
         action={
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => setProvisaoAberta(true)} disabled={!company_id}>
+            <Button variant="outline" size="sm" onClick={() => setProvisaoAberta(true)} disabled={!company_id}>
               <CalendarClock className="mr-2 h-4 w-4" /> Nova Provisão
             </Button>
             <Button 
@@ -217,20 +218,20 @@ const MovimentacaoFinanceiraPage = () => {
         </Alert>
       ) : (
         <>
-          <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex flex-col md:flex-row gap-2 items-end">
             <div className="relative flex-1 w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPagina(1); }}
                 placeholder="Buscar por número ou entidade..."
-                className="pl-9 bg-background border-border text-foreground"
+                className="pl-9 h-8 text-xs bg-background border-border text-foreground"
               />
             </div>
 
-            <div className="flex gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+            <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
               <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                <SelectTrigger className="w-[140px] bg-background border-border text-foreground">
+                <SelectTrigger className="w-[130px] h-8 text-xs bg-background border-border text-foreground">
                   <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
@@ -241,7 +242,7 @@ const MovimentacaoFinanceiraPage = () => {
               </Select>
 
               <Select value={filtroNatureza} onValueChange={setFiltroNatureza}>
-                <SelectTrigger className="w-[150px] bg-background border-border text-foreground">
+                <SelectTrigger className="w-[130px] h-8 text-xs bg-background border-border text-foreground">
                   <SelectValue placeholder="Natureza" />
                 </SelectTrigger>
                 <SelectContent>
@@ -252,7 +253,7 @@ const MovimentacaoFinanceiraPage = () => {
               </Select>
 
               <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-                <SelectTrigger className="w-[140px] bg-background border-border text-foreground">
+                <SelectTrigger className="w-[130px] h-8 text-xs bg-background border-border text-foreground">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -271,7 +272,7 @@ const MovimentacaoFinanceiraPage = () => {
                   type="date" 
                   value={dateStart}
                   onChange={(e) => setDateStart(e.target.value)}
-                  className="w-[140px] bg-background border-border text-foreground text-sm block"
+                  className="w-[128px] h-8 bg-background border-border text-foreground text-xs block"
                   title="Data Vencimento Inicial"
                 />
                 <span className="text-muted-foreground">até</span>
@@ -279,7 +280,7 @@ const MovimentacaoFinanceiraPage = () => {
                   type="date" 
                   value={dateEnd}
                   onChange={(e) => setDateEnd(e.target.value)}
-                  className="w-[140px] bg-background border-border text-foreground text-sm block"
+                  className="w-[128px] h-8 bg-background border-border text-foreground text-xs block"
                   title="Data Vencimento Final"
                 />
               </div>
@@ -296,18 +297,18 @@ const MovimentacaoFinanceiraPage = () => {
           
           <div className="rounded-md border border-border bg-card overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1150px] text-xs text-left">
-                <thead className="text-xs text-muted-foreground bg-muted/50 uppercase border-b border-border">
+              <table className="w-full min-w-[960px] text-xs text-left">
+                <thead className="text-[10.5px] text-muted-foreground bg-muted/50 uppercase border-b border-border">
                   <tr>
-                    <th className="px-2.5 py-2 font-medium">Nº Título</th>
-                    <th className="px-2.5 py-2 font-medium">Tipo</th>
-                    <th className="px-2.5 py-2 font-medium">Cliente/Fornecedor</th>
-                    <th className="px-2.5 py-2 font-medium">Vencimento</th>
-                    <th className="px-2.5 py-2 font-medium">Valor</th>
-                    <th className="px-2.5 py-2 font-medium">Em aberto</th>
-                    <th className="px-2.5 py-2 font-medium">Pago em</th>
-                    <th className="px-2.5 py-2 font-medium">Status</th>
-                    <th className="px-2.5 py-2 font-medium text-right">Ações</th>
+                    <th className="px-2 py-1.5 font-medium">Nº Título</th>
+                    <th className="px-2 py-1.5 font-medium">Tipo</th>
+                    <th className="px-2 py-1.5 font-medium">Cliente/Fornecedor</th>
+                    <th className="px-2 py-1.5 font-medium">Vencimento</th>
+                    <th className="px-2 py-1.5 font-medium">Valor</th>
+                    <th className="px-2 py-1.5 font-medium">Em aberto</th>
+                    <th className="px-2 py-1.5 font-medium">Pago em</th>
+                    <th className="px-2 py-1.5 font-medium">Status</th>
+                    <th className="px-2 py-1.5 font-medium text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -327,17 +328,17 @@ const MovimentacaoFinanceiraPage = () => {
                   ) : (
                     filteredData.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((row) => (
                       <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors align-middle">
-                        <td className="px-2.5 py-1.5 font-mono text-[11px] leading-tight text-foreground min-w-[300px]">
+                        <td className="px-2 py-1 font-mono text-[10.5px] leading-tight text-foreground min-w-[210px] max-w-[260px]">
                           {row.numero_titulo}
                           {row.provisao && <Badge variant="outline" className="ml-2 border-amber-500/40 text-amber-600 bg-amber-500/10 font-sans">Provisão</Badge>}
                           {!row.provisao && row.provisao_id && <Badge variant="outline" className="ml-2 border-blue-500/40 text-blue-600 bg-blue-500/10 font-sans">Substitui provisão</Badge>}
                         </td>
-                        <td className="px-2.5 py-1.5">
+                        <td className="px-2 py-1">
                           <Badge variant="outline" className={row.tipo?.toUpperCase() === 'PAGAR' ? 'border-red-500/30 text-red-500 bg-red-500/10' : 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10'}>
                             {row.tipo?.toUpperCase()}
                           </Badge>
                         </td>
-                        <td className="px-2.5 py-1.5 text-foreground min-w-[230px] leading-tight">
+                        <td className="px-2 py-1 text-foreground min-w-[170px] max-w-[230px] leading-tight">
                           {row.tipo?.toLowerCase() === 'receber' ? (row.cliente?.nome || '-') : (row.fornecedor?.nome || '-')}
                           {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && <div><ChavePix fornecedor={row.fornecedor} /></div>}
                           {row.tipo?.toLowerCase() !== 'receber' && row.status !== 'substituido' && row.codigo_barras && <div><CodigoBoleto codigo={row.codigo_barras} /></div>}
@@ -348,24 +349,24 @@ const MovimentacaoFinanceiraPage = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
+                        <td className="px-2 py-1 text-foreground whitespace-nowrap">
                           {formatDateOnly(row.data_vencimento)}
                         </td>
-                        <td className="px-2.5 py-1.5 font-medium text-foreground whitespace-nowrap">
+                        <td className="px-2 py-1 font-medium text-foreground whitespace-nowrap">
                           {parseFloat(row.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </td>
-                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
+                        <td className="px-2 py-1 text-foreground whitespace-nowrap">
                           {saldoEmAberto(row).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                         </td>
-                        <td className="px-2.5 py-1.5 text-foreground whitespace-nowrap">
+                        <td className="px-2 py-1 text-foreground whitespace-nowrap">
                           {dataPagamento(row) ? formatDateOnly(dataPagamento(row)) : '—'}
                         </td>
-                        <td className="px-2.5 py-1.5">
+                        <td className="px-2 py-1">
                           <Badge variant="secondary" className="capitalize text-foreground">
                             {row.status === 'substituido' ? 'substituída' : (row.status || '').replace('_', ' ')}
                           </Badge>
                         </td>
-                        <td className="px-2.5 py-1.5 text-right whitespace-nowrap">
+                        <td className="px-2 py-1 text-right whitespace-nowrap">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">

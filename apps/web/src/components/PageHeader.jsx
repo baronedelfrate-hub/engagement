@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-function PageHeader({ title, description, action, actions, showBack = false }) {
+function PageHeader({ title, description, action, actions, showBack = false, compacto = false }) {
   const navigate = useNavigate();
   // Várias telas passam `actions` (plural); aceitar os dois evita o botão sumir em silêncio
   const acao = action ?? actions;
@@ -14,7 +14,7 @@ function PageHeader({ title, description, action, actions, showBack = false }) {
       initial={{ opacity: 0, y: -30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
-      className="mb-8 relative z-10"
+      className={compacto ? 'mb-3 relative z-10' : 'mb-8 relative z-10'}
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -33,7 +33,7 @@ function PageHeader({ title, description, action, actions, showBack = false }) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1, duration: 0.5 }}
-              className="text-3xl md:text-4xl font-bold text-foreground tracking-tight"
+              className={compacto ? 'text-xl md:text-2xl font-bold text-foreground tracking-tight' : 'text-3xl md:text-4xl font-bold text-foreground tracking-tight'}
             >
               {title}
             </motion.h1>
@@ -42,7 +42,7 @@ function PageHeader({ title, description, action, actions, showBack = false }) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="text-muted-foreground mt-1 text-lg font-light"
+                className={compacto ? 'text-muted-foreground mt-0.5 text-sm font-light' : 'text-muted-foreground mt-1 text-lg font-light'}
               >
                 {description}
               </motion.p>

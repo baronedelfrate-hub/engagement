@@ -150,4 +150,4 @@ export const resumir = (linhas, saldos = []) => {
 };
 
 // "Sicredi ag 0731 cc 68774-1: inicial R$ x (29/10) · final R$ y (03/11)"
-export const textoSaldos = (resumo) => (resumo.saldos || []).filter((s) => s.inicial !== null).map((s) => `${s.nome}${s.conta ? ` cc ${s.conta}` : ''}: saldo inicial ${moeda(s.inicial)} (${fmtData(s.dataInicial)}) · saldo final ${moeda(s.final)} (${fmtData(s.dataFinal)})`);
+export const textoSaldos = (resumo) => (resumo.saldos || []).filter((s) => s.final !== null && s.final !== undefined).map((s) => `${s.nome}${s.conta ? ` cc ${s.conta}` : ''}: saldo final ${moeda(s.final)} (${fmtData(s.dataFinal)})`);

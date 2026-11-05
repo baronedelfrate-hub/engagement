@@ -85,29 +85,27 @@ const ExtratoConciliadoPage = () => {
 
       {loading || !resumo ? <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
             <Cartao t="Entradas" v={moeda(resumo.entradas)} cor="text-emerald-600" sub={`${resumo.qtd} lançamentos`} />
             <Cartao t="Saídas" v={moeda(resumo.saidas)} cor="text-red-600" sub={`${resumo.semCategoria} sem categoria · ${resumo.naoConciliadas} não conciliados`} />
             {dados.saldos.length === 1 ? (
               <>
-                <Cartao t="Saldo bancário inicial" v={resumo.saldoInicial === null ? '—' : moeda(resumo.saldoInicial)} sub={resumo.dataSaldoInicial ? `em ${fmtData(resumo.dataSaldoInicial)}` : 'sem lançamentos no período'} />
                 <Cartao t="Saldo bancário final" v={resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal)} sub={resumo.dataSaldoFinal ? `em ${fmtData(resumo.dataSaldoFinal)}` : ''} />
               </>
             ) : (
               <Card className="col-span-2"><CardContent className="p-4 text-xs text-muted-foreground">
-                {dados.saldos.length === 0 ? 'Nenhum banco tem saldo inicial cadastrado. Cadastre o saldo inicial no cadastro do banco para ver o saldo bancário.' : 'Escolha um banco para ver o saldo bancário inicial e final, ou veja o de todas as contas na tabela abaixo.'}
+                {dados.saldos.length === 0 ? 'Nenhum banco tem saldo inicial cadastrado. Cadastre o saldo inicial no cadastro do banco para ver o saldo bancário.' : 'Escolha um banco para ver o saldo bancário final, ou veja o de todas as contas na tabela abaixo.'}
               </CardContent></Card>
             )}
           </div>
           {dados.saldos.length > 1 && (
             <div className="border rounded-md mb-3 overflow-x-auto">
               <table className="w-full text-xs">
-                <thead className="bg-muted/50 text-left"><tr>{['Saldo bancário por conta', 'Inicial', 'Final'].map((h) => <th key={h} className={`px-3 py-2 font-medium ${h !== 'Saldo bancário por conta' ? 'text-right' : ''}`}>{h}</th>)}</tr></thead>
+                <thead className="bg-muted/50 text-left"><tr>{['Saldo bancário por conta', 'Final'].map((h) => <th key={h} className={`px-3 py-2 font-medium ${h !== 'Saldo bancário por conta' ? 'text-right' : ''}`}>{h}</th>)}</tr></thead>
                 <tbody>
                   {dados.saldos.map((b) => (
                     <tr key={b.bancoId} className="border-t">
                       <td className="px-3 py-1.5">{b.nome}{b.agencia ? ` · ag ${b.agencia}` : ''}{b.conta ? ` · cc ${b.conta}` : ''}</td>
-                      <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.inicial === null ? '—' : <>{moeda(b.inicial)} <span className="text-muted-foreground">({fmtData(b.dataInicial)})</span></>}</td>
                       <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.final === null ? '—' : <>{moeda(b.final)} <span className="text-muted-foreground">({fmtData(b.dataFinal)})</span></>}</td>
                     </tr>
                   ))}

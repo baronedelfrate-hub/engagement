@@ -3,7 +3,8 @@ import { FileText } from 'lucide-react';
 
 // Como as mensagens vão chegar no WhatsApp: um balão verde para cada mensagem, com *negrito* e _itálico_, e o arquivo anexo quando houver.
 // mensagens: [{ tipo: 'arquivo', arquivo, legenda } | { tipo: 'texto', texto }]
-const formatar = (linha, chave) => String(linha).split(/(\*[^*\n]+\*|_[^_\n]+_)/g).map((p, i) => {
+const formatar = (linha, chave) => String(linha).split(/(```[^`\n]+```|\*[^*\n]+\*|_[^_\n]+_)/g).map((p, i) => {
+  if (/^```[^`\n]+```$/.test(p)) return <code key={`${chave}-${i}`} className="font-mono text-[13px] bg-black/5 rounded px-1 select-all">{p.slice(3, -3)}</code>;
   if (/^\*[^*\n]+\*$/.test(p)) return <strong key={`${chave}-${i}`}>{p.slice(1, -1)}</strong>;
   if (/^_[^_\n]+_$/.test(p)) return <em key={`${chave}-${i}`}>{p.slice(1, -1)}</em>;
   return <React.Fragment key={`${chave}-${i}`}>{p}</React.Fragment>;

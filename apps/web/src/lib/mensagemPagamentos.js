@@ -1,5 +1,5 @@
 // Texto de pagamentos para colar/enviar por WhatsApp: valor, vencimento e a chave Pix (ou o código do boleto) de cada um,
-// cada chave em uma linha sozinha para o destinatário copiar com um toque. Só entra o que ainda não foi pago.
+// cada chave em uma linha sozinha, dentro de um bloco ```monoespaçado``` (o WhatsApp mostra o botão Copiar nesse bloco). Só entra o que ainda não foi pago.
 import { rotuloTipoPix, valorParaCopiar } from '@/lib/chavePix';
 
 const moeda = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -21,8 +21,8 @@ export const montarTextoPagamentos = (linhas) => {
       const nome = r.fornecedor_nome || r.cliente_nome || 'Sem fornecedor';
       const desc = String(r.numero || '').trim();
       partes.push(`${i + 1}) *${nome}* — ${moeda(r.valor_original)}${desc && desc !== nome ? `\n${desc}` : ''}`);
-      if (r.codigo_barras) partes.push(`Boleto (código de barras):\n${String(r.codigo_barras).replace(/\D/g, '')}`);
-      else if (r.fornecedor_pix) partes.push(`Pix${r.fornecedor_tipo_pix ? ` (${rotuloTipoPix(r.fornecedor_tipo_pix)})` : ''}:\n${valorParaCopiar(r.fornecedor_tipo_pix, r.fornecedor_pix)}`);
+      if (r.codigo_barras) partes.push(`Boleto (código de barras):\n\`\`\`${String(r.codigo_barras).replace(/\D/g, '')}\`\`\``);
+      else if (r.fornecedor_pix) partes.push(`Pix${r.fornecedor_tipo_pix ? ` (${rotuloTipoPix(r.fornecedor_tipo_pix)})` : ''}:\n\`\`\`${valorParaCopiar(r.fornecedor_tipo_pix, r.fornecedor_pix)}\`\`\``);
       else partes.push('(sem chave Pix nem boleto cadastrados)');
       partes.push('');
     });

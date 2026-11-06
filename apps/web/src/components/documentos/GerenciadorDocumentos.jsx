@@ -78,10 +78,12 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
   }, [isSuperAdmin, remetenteId]);
 
   useEffect(() => {
-    if (pessoal || !isSuperAdmin) return;
-    supabase.from('empresas').select('id, razao_social, nome_fantasia, cnpj').order('razao_social').then(({ data }) => setEmpresas(data || []));
-  }, [pessoal, isSuperAdmin]);
-  const nomeEmp = (e) => e?.nome_fantasia || e?.razao_social || 'Empresa';
+    if (pessoal) return;
+    supabase.rpc('empresas_para_mover').then(({ data }) => setEmpresas(data || []));
+  }, [pessoal]);
+  const nomeEmp = (e) => e?.nome || 'Empresa';
+  // Move documentos quem tem acesso a mais de uma empresa (superadmin ou login do BPO).
+  const podeMover = !pessoal && empresas.length > 1;
 
   // Move o arquivo para a pasta da outra empresa e troca a empresa do registro.
   const moverPara = async (doc, destinoId) => {
@@ -89,7 +91,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
     const novo = `${destinoId}/${nome}`;
     const mv = await supabase.storage.from(bucket).move(doc.storage_path, novo);
     if (mv.error) throw mv.error;
-    const up = await supabase.from(tabela).update({ company_id: destinoId, storage_path: novo }).eq('id', doc.id);
+    const up = await supabase.rpc('mover_doc_empresa', { p_doc: doc.id, p_destino: destinoId, p_path: novo });
     if (up.error) { await supabase.storage.from(bucket).move(novo, doc.storage_path); throw up.error; }
   };
 
@@ -187,7 +189,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
         <div className="flex items-end"><Button className="gap-1 w-full" disabled={enviando} onClick={enviar}>{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Guardar documento</Button></div>
       </CardContent></Card>
 
-      {!pessoal && isSuperAdmin && (
+      {podeMover && (
         <div className="mb-3">
           <Button variant="outline" size="sm" className="gap-1" disabled={movendo || docs.length === 0} onClick={moverPorCnpj}>{movendo ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRightLeft className="h-4 w-4" />} Mover para a empresa certa (pelo CNPJ no nome do arquivo)</Button>
         </div>
@@ -223,7 +225,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
                       <div className="flex items-center gap-1 shrink-0">
                         {v && <span className={`text-[11px] px-1.5 py-0.5 rounded border whitespace-nowrap ${v.cls}`}>{v.texto}</span>}
                         <Button variant="ghost" size="icon" className="h-8 w-8" title="Abrir (link temporário)" onClick={() => abrir(d)}><ExternalLink className="h-4 w-4" /></Button>
-                        {!pessoal && isSuperAdmin && <Button variant="ghost" size="icon" className="h-8 w-8" title="Mover para outra empresa" onClick={() => setMoverDoc(d)}><ArrowRightLeft className="h-4 w-4" /></Button>}
+                        {podeMover && <Button variant="ghost" size="icon" className="h-8 w-8" title="Mover para outra empresa" onClick={() => setMoverDoc(d)}><ArrowRightLeft className="h-4 w-4" /></Button>}
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" title="Enviar por WhatsApp" onClick={() => setEnvio(d)}><MessageCircle className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={() => excluir(d)}><Trash2 className="h-4 w-4" /></Button>
                       </div>

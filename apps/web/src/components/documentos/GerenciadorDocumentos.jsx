@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ExternalLink, FileText, History, Loader2, MessageCircle, Trash2, Upload } from 'lucide-react';
+import { ArrowRightLeft, ExternalLink, FileText, History, Loader2, MessageCircle, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -40,6 +40,9 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
   const [remetentes, setRemetentes] = useState([]);
   const [remetenteId, setRemetenteId] = useState('');
   const [conectado, setConectado] = useState(null);
+  const [empresas, setEmpresas] = useState([]);
+  const [movendo, setMovendo] = useState(false);
+  const [moverDoc, setMoverDoc] = useState(null);
   const [form, setForm] = useState({ tipo: tipos[0].id, titular: '', titulo: '', validade: '', observacoes: '', arquivo: null });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const rotulo = (id) => tipos.find((t) => t.id === id)?.rotulo || id;
@@ -73,6 +76,50 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
     setConectado(null);
     statusWhatsApp(remetenteId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
   }, [isSuperAdmin, remetenteId]);
+
+  useEffect(() => {
+    if (pessoal || !isSuperAdmin) return;
+    supabase.from('empresas').select('id, razao_social, nome_fantasia, cnpj').order('razao_social').then(({ data }) => setEmpresas(data || []));
+  }, [pessoal, isSuperAdmin]);
+  const nomeEmp = (e) => e?.nome_fantasia || e?.razao_social || 'Empresa';
+
+  // Move o arquivo para a pasta da outra empresa e troca a empresa do registro.
+  const moverPara = async (doc, destinoId) => {
+    const nome = doc.storage_path.split('/').pop();
+    const novo = `${destinoId}/${nome}`;
+    const mv = await supabase.storage.from(bucket).move(doc.storage_path, novo);
+    if (mv.error) throw mv.error;
+    const up = await supabase.from(tabela).update({ company_id: destinoId, storage_path: novo }).eq('id', doc.id);
+    if (up.error) { await supabase.storage.from(bucket).move(novo, doc.storage_path); throw up.error; }
+  };
+
+  // Documentos cujo nome de arquivo traz o CNPJ (completo ou a raiz de 8 dígitos) de OUTRA empresa do sistema.
+  const planoDeMovimento = () => {
+    const alvo = empresas.filter((e) => String(e.cnpj || '').replace(/\D/g, '').length === 14);
+    return docs.map((d) => {
+      const dig = String(d.nome_arquivo).replace(/\D/g, '');
+      const e = alvo.find((x) => dig.includes(String(x.cnpj).replace(/\D/g, '')) || dig.includes(String(x.cnpj).replace(/\D/g, '').slice(0, 8)));
+      return e && e.id !== companyId ? { doc: d, destino: e } : null;
+    }).filter(Boolean);
+  };
+  const moverPorCnpj = async () => {
+    const plano = planoDeMovimento();
+    if (!plano.length) { toast({ title: 'Nenhum documento de outra empresa encontrado', description: 'Procurei o CNPJ das empresas cadastradas no nome dos arquivos.' }); return; }
+    const resumo = plano.map((x) => `• ${x.doc.nome_arquivo} → ${nomeEmp(x.destino)}`).join('\n');
+    if (!window.confirm(`Mover ${plano.length} documento(s) para a empresa certa?\n\n${resumo}`)) return;
+    setMovendo(true); let ok = 0; const falhas = [];
+    for (const x of plano) { try { await moverPara(x.doc, x.destino.id); ok += 1; } catch (e) { falhas.push(`${x.doc.nome_arquivo}: ${e.message}`); } }
+    setMovendo(false);
+    toast({ title: `${ok} documento(s) movido(s)`, description: falhas.length ? `Falharam ${falhas.length}: ${falhas.join(' | ')}` : undefined, variant: falhas.length ? 'destructive' : undefined });
+    carregar();
+  };
+  const moverUm = async (destinoId) => {
+    if (!moverDoc || !destinoId) return;
+    setMovendo(true);
+    try { await moverPara(moverDoc, destinoId); toast({ title: 'Documento movido' }); setMoverDoc(null); carregar(); }
+    catch (e) { toast({ title: 'Não foi possível mover', description: e.message, variant: 'destructive' }); }
+    finally { setMovendo(false); }
+  };
 
   const registrar = (doc, acao, destino) => (pessoal
     ? supabase.from('docs_pessoais_acessos').insert({ doc_id: doc.id, titular: doc.titular, nome_arquivo: doc.nome_arquivo, acao, destino: destino || null }).then(() => {})
@@ -140,6 +187,11 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
         <div className="flex items-end"><Button className="gap-1 w-full" disabled={enviando} onClick={enviar}>{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Guardar documento</Button></div>
       </CardContent></Card>
 
+      {!pessoal && isSuperAdmin && (
+        <div className="mb-3">
+          <Button variant="outline" size="sm" className="gap-1" disabled={movendo || docs.length === 0} onClick={moverPorCnpj}>{movendo ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRightLeft className="h-4 w-4" />} Mover para a empresa certa (pelo CNPJ no nome do arquivo)</Button>
+        </div>
+      )}
       {isSuperAdmin && (
         <div className="flex items-center gap-2 mb-3 text-sm">
           <Label className="text-xs text-muted-foreground">Enviar pelo WhatsApp de:</Label>
@@ -171,6 +223,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
                       <div className="flex items-center gap-1 shrink-0">
                         {v && <span className={`text-[11px] px-1.5 py-0.5 rounded border whitespace-nowrap ${v.cls}`}>{v.texto}</span>}
                         <Button variant="ghost" size="icon" className="h-8 w-8" title="Abrir (link temporário)" onClick={() => abrir(d)}><ExternalLink className="h-4 w-4" /></Button>
+                        {!pessoal && isSuperAdmin && <Button variant="ghost" size="icon" className="h-8 w-8" title="Mover para outra empresa" onClick={() => setMoverDoc(d)}><ArrowRightLeft className="h-4 w-4" /></Button>}
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" title="Enviar por WhatsApp" onClick={() => setEnvio(d)}><MessageCircle className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={() => excluir(d)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
@@ -190,6 +243,19 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
               {acessos.map((a) => <div key={a.id} className="p-2 flex flex-wrap gap-x-3"><span className="text-muted-foreground">{fmtDataHora(a.created_at)}</span><strong>{{ abrir: 'Abriu', enviar: 'Enviou por WhatsApp', excluir: 'Excluiu' }[a.acao] || a.acao}</strong><span>{a.titular} · {a.nome_arquivo}</span>{a.destino && <span className="text-muted-foreground">para {a.destino}</span>}</div>)}
             </div>
           )}
+        </div>
+      )}
+
+      {moverDoc && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setMoverDoc(null)}>
+          <div className="bg-background rounded-lg p-4 w-full max-w-md space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="text-sm font-semibold">Mover "{moverDoc.nome_arquivo}" para:</div>
+            <select className={`${sel} w-full`} defaultValue="" onChange={(e) => moverUm(e.target.value)} disabled={movendo}>
+              <option value="">Escolha a empresa…</option>
+              {empresas.filter((e) => e.id !== companyId).map((e) => <option key={e.id} value={e.id}>{nomeEmp(e)}{e.cnpj ? ` · ${e.cnpj}` : ''}</option>)}
+            </select>
+            <div className="text-right"><Button variant="outline" size="sm" onClick={() => setMoverDoc(null)}>Cancelar</Button></div>
+          </div>
         </div>
       )}
 

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lock, AlertCircle } from 'lucide-react';
+import { Loader2, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import EngagementLogo from '@/components/EngagementLogo';
 
 const SetPassword = () => {
@@ -16,6 +16,7 @@ const SetPassword = () => {
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [verSenha, setVerSenha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -93,9 +94,9 @@ const SetPassword = () => {
                   </div>
                   <Input
                     id="password"
-                    type="password"
+                    type={verSenha ? 'text' : 'password'}
                     placeholder="Mínimo 8 caracteres"
-                    className={`pl-10 text-foreground bg-background ${errors.password ? 'border-destructive' : ''}`}
+                    className={`pl-10 pr-10 text-foreground bg-background ${errors.password ? 'border-destructive' : ''}`}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -103,6 +104,9 @@ const SetPassword = () => {
                     }}
                     disabled={loading}
                   />
+                  <button type="button" tabIndex={-1} onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'Esconder a senha' : 'Mostrar a senha'} title={verSenha ? 'Esconder a senha' : 'Mostrar a senha'} className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
+                    {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 {errors.password && (
                   <p className="text-sm font-medium text-destructive flex items-center mt-1">
@@ -120,8 +124,8 @@ const SetPassword = () => {
                   </div>
                   <Input
                     id="confirmPassword"
-                    type="password"
-                    className={`pl-10 text-foreground bg-background ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    type={verSenha ? 'text' : 'password'}
+                    className={`pl-10 pr-10 text-foreground bg-background ${errors.confirmPassword ? 'border-destructive' : ''}`}
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
@@ -129,6 +133,9 @@ const SetPassword = () => {
                     }}
                     disabled={loading}
                   />
+                  <button type="button" tabIndex={-1} onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'Esconder a senha' : 'Mostrar a senha'} title={verSenha ? 'Esconder a senha' : 'Mostrar a senha'} className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground">
+                    {verSenha ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 {errors.confirmPassword && (
                   <p className="text-sm font-medium text-destructive flex items-center mt-1">

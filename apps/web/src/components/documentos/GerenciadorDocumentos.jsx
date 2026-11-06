@@ -9,6 +9,7 @@ import EnviarWhatsAppDialog from '@/components/EnviarWhatsAppDialog';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
+import { statusWhatsApp } from '@/lib/whatsappService';
 
 const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm';
 const MAX_MB = 15;
@@ -38,6 +39,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
   const [envio, setEnvio] = useState(null);
   const [remetentes, setRemetentes] = useState([]);
   const [remetenteId, setRemetenteId] = useState('');
+  const [conectado, setConectado] = useState(null);
   const [form, setForm] = useState({ tipo: tipos[0].id, titular: '', titulo: '', validade: '', observacoes: '', arquivo: null });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const rotulo = (id) => tipos.find((t) => t.id === id)?.rotulo || id;
@@ -64,6 +66,13 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
       setRemetentes(lista); setRemetenteId((a) => a || lista[0]?.id || '');
     });
   }, [isSuperAdmin]);
+
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    if (!remetenteId) { setConectado(false); return; }
+    setConectado(null);
+    statusWhatsApp(remetenteId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
+  }, [isSuperAdmin, remetenteId]);
 
   const registrar = (doc, acao, destino) => (pessoal
     ? supabase.from('docs_pessoais_acessos').insert({ doc_id: doc.id, titular: doc.titular, nome_arquivo: doc.nome_arquivo, acao, destino: destino || null }).then(() => {})
@@ -138,6 +147,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
             {remetentes.length === 0 && <option value="">Nenhum WhatsApp conectado</option>}
             {remetentes.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
           </select>
+          {conectado === null ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : conectado ? <span className="text-xs text-emerald-600">● conectado</span> : <span className="text-xs text-red-600">● desconectado — reconecte em Cadastros &gt; WhatsApp (conexão)</span>}
         </div>
       )}
 

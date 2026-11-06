@@ -1,14 +1,17 @@
 // Envio de WhatsApp pela função enviar-whatsapp (Evolution API). O servidor normaliza o número, envia texto ou documento e registra em whatsapp_envios.
 import { supabase } from '@/lib/customSupabaseClient';
 
+// "Connection Closed" vem do WhatsApp quando o aparelho da empresa está desconectado do sistema.
+const amigavel = (msg) => (/connection closed|not connected|disconnected|close/i.test(String(msg)) ? 'O WhatsApp desta empresa está desconectado do sistema. Reconecte em Cadastros > WhatsApp (conexão) lendo o QR code e tente de novo.' : msg);
+
 const chamar = async (body) => {
   const { data, error } = await supabase.functions.invoke('enviar-whatsapp', { body });
   if (error) {
     let msg = error.message;
     try { const j = await error.context?.json?.(); if (j?.error) msg = j.error; } catch { /* mantém a mensagem genérica */ }
-    throw new Error(msg);
+    throw new Error(amigavel(msg));
   }
-  if (data?.error) throw new Error(data.error);
+  if (data?.error) throw new Error(amigavel(data.error));
   return data;
 };
 

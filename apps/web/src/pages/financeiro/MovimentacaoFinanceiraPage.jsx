@@ -179,6 +179,20 @@ const MovimentacaoFinanceiraPage = () => {
     );
   });
 
+  // totais do que está na tela (já com a busca e os filtros); cancelado e provisão substituída não somam
+  const brlTot = (v) => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const totais = (() => {
+    const t = { qtd: 0, pagar: { valor: 0, aberto: 0 }, receber: { valor: 0, aberto: 0 } };
+    for (const r of filteredData) {
+      if (['cancelado', 'substituido'].includes(r.status)) continue;
+      const g = String(r.tipo).toLowerCase() === 'receber' ? t.receber : t.pagar;
+      g.valor += Number(r.valor_total) || 0;
+      g.aberto += saldoEmAberto(r);
+      t.qtd += 1;
+    }
+    return t;
+  })();
+
   if (authLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
@@ -288,6 +302,21 @@ const MovimentacaoFinanceiraPage = () => {
               </div>
             </div>
           </div>
+
+          {!loading && totais.qtd > 0 && (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-md border bg-muted/40 px-4 py-2 text-sm">
+              <span className="text-muted-foreground">{totais.qtd} título(s)</span>
+              {totais.pagar.valor > 0 && (
+                <span>A pagar: <strong className="text-red-600">{brlTot(totais.pagar.valor)}</strong> <span className="text-xs text-muted-foreground">(em aberto {brlTot(totais.pagar.aberto)})</span></span>
+              )}
+              {totais.receber.valor > 0 && (
+                <span>A receber: <strong className="text-emerald-600">{brlTot(totais.receber.valor)}</strong> <span className="text-xs text-muted-foreground">(em aberto {brlTot(totais.receber.aberto)})</span></span>
+              )}
+              {totais.pagar.valor > 0 && totais.receber.valor > 0 && (
+                <span>Saldo (receber − pagar): <strong>{brlTot(totais.receber.valor - totais.pagar.valor)}</strong></span>
+              )}
+            </div>
+          )}
 
           {error && (
             <Alert variant="destructive">

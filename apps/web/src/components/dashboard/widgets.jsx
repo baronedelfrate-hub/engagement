@@ -344,10 +344,11 @@ const useExecutivo = () => useCarga('executivo', resumoExecutivo);
 const SEM_DADOS = 'sem movimento no extrato';
 
 const KpiCaixa = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Caixa" estado={e} valor={d?.caixa === null || d?.caixa === undefined ? '—' : moeda(d.caixa)} sub={d?.caixa === null || d?.caixa === undefined ? 'sem saldo no extrato' : (d?.limite && (d.limite.usado > 0 || d.limite.excedido > 0) ? `usando ${moeda(d.limite.usado + d.limite.excedido)} de limite · livre ${moeda(d.limite.restante)}` : (d?.limite ? `limite livre ${moeda(d.limite.restante)}` : 'saldo do último extrato importado'))} />; };
-const KpiReceitas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Receitas" estado={e} valor={d?.temDados ? moeda(d.receitas) : '—'} sub={d?.temDados ? `recebido em ${d.mesRotulo}` : SEM_DADOS} />; };
-const KpiDespesas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo="Despesas" estado={e} valor={d?.temDados ? moeda(d.despesas) : '—'} sub={d?.temDados ? `pago em ${d.mesRotulo}` : SEM_DADOS} />; };
+const KpiReceitas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo={d?.pessoal ? 'Entradas' : 'Receitas'} estado={e} valor={d?.temDados ? moeda(d.receitas) : '—'} sub={d?.temDados ? `${d?.pessoal ? 'entrou' : 'recebido'} em ${d.mesRotulo}` : SEM_DADOS} />; };
+const KpiDespesas = () => { const e = useExecutivo(); const d = e.dados; return <Indicador rotulo={d?.pessoal ? 'Gastos' : 'Despesas'} estado={e} valor={d?.temDados ? moeda(d.despesas) : '—'} sub={d?.temDados ? `${d?.pessoal ? 'gasto' : 'pago'} em ${d.mesRotulo}` : SEM_DADOS} />; };
 const KpiPE = () => {
   const e = useExecutivo(); const d = e.dados; const pe = d?.pe;
+  if (d?.pessoal) return <Indicador rotulo="Saldo do mês" estado={e} alerta={d.saldoMes < 0} valor={moeda(d.saldoMes)} sub={`entradas − gastos em ${d.mesRotulo}`} />;
   const ok = d?.temDados && pe?.temDado && !pe.peImpossivel;
   return <Indicador rotulo="Ponto de equilíbrio" estado={e} alerta={ok && !pe.acima} valor={ok ? moeda(pe.pe) : '—'} sub={!d?.temDados ? SEM_DADOS : (pe?.peImpossivel ? 'margem negativa neste mês' : (ok ? `${pe.acima ? 'acima' : 'abaixo'} do ponto em ${moeda(Math.abs(pe.folga))}` : ''))} />;
 };
@@ -356,7 +357,7 @@ const GrafEvolucao = () => {
   const e = useExecutivo();
   const serie = e.dados?.serie || [];
   return (
-    <Moldura titulo="Receitas x despesas" descricao="Últimos meses do ano (regime de caixa)." estado={e} vazio={e.dados && !e.dados.temDados ? 'Sem movimento no extrato neste ano.' : null}>
+    <Moldura titulo={e.dados?.pessoal ? 'Entradas x gastos' : 'Receitas x despesas'} descricao="Últimos meses do ano (regime de caixa)." estado={e} vazio={e.dados && !e.dados.temDados ? 'Sem movimento no extrato neste ano.' : null}>
       <div className="h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={serie} margin={{ left: 0, right: 8 }}>
@@ -365,8 +366,8 @@ const GrafEvolucao = () => {
             <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tick={{ fontSize: 12 }} />
             <Tooltip formatter={(v, n) => [moeda(v), n]} />
             <Legend />
-            <Bar dataKey="receitas" name="Receitas" fill="#FE6102" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="despesas" name="Despesas" fill="#FFB27A" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="receitas" name={e.dados?.pessoal ? 'Entradas' : 'Receitas'} fill="#FE6102" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="despesas" name={e.dados?.pessoal ? 'Gastos' : 'Despesas'} fill="#FFB27A" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

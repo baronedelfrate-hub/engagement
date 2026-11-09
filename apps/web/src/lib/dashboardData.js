@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/customSupabaseClient';
 import { buscarTudo } from '@/services/extratoAsaasService';
 import { montarDRE, calcularPEPeriodo, MESES } from '@/lib/dreGerencial';
+import { montarResultadoPessoal } from '@/lib/resultadoPessoal';
 
 // Último dia do mês de uma data AAAA-MM-DD (30 dias em novembro, 28/29 em fevereiro...); '-31' fixo dava erro de data inválida.
 const ultimoDiaDoMes = (iso) => { const [a, m] = iso.slice(0, 7).split('-').map(Number); return `${iso.slice(0, 7)}-${String(new Date(a, m, 0).getDate()).padStart(2, '0')}`; };
@@ -84,14 +85,22 @@ export const saldoDeCaixa = async (companyId) => (await posicaoDeCaixa(companyId
 export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
   const ano = Number(hoje.slice(0, 4));
   const mes = Number(hoje.slice(5, 7)) - 1;
-  const [cats, subs, movs, caixa] = await Promise.all([
+  const [cats, subs, movs, caixa, emp] = await Promise.all([
     supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId),
     supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId),
     buscarTudo(() => supabase.from('extrato_bancario').select('id, data_transacao, valor, categoria_id, subcategoria_id, cliente_nome, banco_id').eq('company_id', companyId).gte('data_transacao', `${ano}-01-01`).lte('data_transacao', `${ano}-12-31`).order('data_transacao').order('id')),
-    posicaoDeCaixa(companyId).catch(() => ({ caixa: null, limite: null }))
+    posicaoDeCaixa(companyId).catch(() => ({ caixa: null, limite: null })),
+    supabase.from('empresas').select('tipo_pessoa').eq('id', companyId).maybeSingle()
   ]);
   const temDados = movs.length > 0;
   const { caixa: saldoCaixa, limite: limiteContas } = caixa;
+  if (emp?.data?.tipo_pessoa === 'PF') {
+    // pessoa física: sem DRE nem ponto de equilíbrio; entradas, gastos e saldo do orçamento pessoal
+    const r = montarResultadoPessoal(movs, { ano, categorias: cats.data || [], subcategorias: subs.data || [] });
+    const serie = [];
+    for (let i = Math.max(0, mes - 5); i <= mes; i += 1) serie.push({ mes: MESES[i], receitas: r.totalEntradas.valores[i], despesas: Math.max(0, -r.totalGastos.valores[i]) });
+    return { pessoal: true, temDados, caixa: saldoCaixa, limite: limiteContas, mesRotulo: `${MESES[mes]}/${ano}`, receitas: r.totalEntradas.valores[mes], despesas: -r.totalGastos.valores[mes], saldoMes: r.saldo.valores[mes], pe: null, serie, naoClassificado: Math.abs(r.pendente.valores[mes]) };
+  }
   const dre = montarDRE(movs, { ano, categorias: cats.data || [], subcategorias: subs.data || [] });
   const v = (k, i) => dre.porChave[k].valores[i];
   const receita = (i) => v('receita_bruta', i);

@@ -110,7 +110,7 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
   // saldo bancário inicial e final de cada conta no período (sobre todas as linhas, antes do filtro "Mostrar")
   const saldos = bancos.filter((b) => b.data_saldo_inicial && (!banco || b.id === banco.id)).map((b) => {
     const ls = linhas.filter((l) => l.bancoId === b.id && l.saldo !== null);
-    const base = { bancoId: b.id, nome: b.nome, agencia: b.agencia, conta: b.conta };
+    const base = { bancoId: b.id, nome: b.nome, agencia: b.agencia, conta: b.conta, limite: Math.max(0, Number(b.limite) || 0) };
     if (!ls.length) return (!de && !ate) ? { ...base, inicial: arred(b.saldo), final: arred(b.saldo), dataInicial: b.data_saldo_inicial, dataFinal: b.data_saldo_inicial } : { ...base, inicial: null, final: null };
     const p0 = ls[0]; const u0 = ls[ls.length - 1];
     return { ...base, inicial: arred(p0.saldo - p0.valor), final: u0.saldo, dataInicial: de || b.data_saldo_inicial, dataFinal: u0.data };
@@ -166,4 +166,14 @@ export const resumir = (linhas, saldos = []) => {
 };
 
 // "Sicredi ag 0731 cc 68774-1: inicial R$ x (29/10) · final R$ y (03/11)"
-export const textoSaldos = (resumo) => (resumo.saldos || []).filter((s) => s.final !== null && s.final !== undefined).map((s) => `${s.nome}${s.conta ? ` cc ${s.conta}` : ''}: saldo final ${moeda(s.final)} (${fmtData(s.dataFinal)})`);
+// Saldo negativo = limite da conta em uso (ex.: "usando R$ 525,00 do limite de R$ 620,00 · livre R$ 95,00").
+export const textoLimite = (final, limite) => {
+  if (final === null || final === undefined) return '';
+  const l = Number(limite) || 0;
+  if (final >= 0) return l > 0 ? `limite de ${moeda(l)} sem uso` : '';
+  const usado = -final;
+  if (l <= 0) return 'saldo negativo (conta sem limite cadastrado)';
+  return usado > l ? `passou do limite de ${moeda(l)} em ${moeda(usado - l)}` : `usando ${moeda(usado)} do limite de ${moeda(l)} · livre ${moeda(l - usado)}`;
+};
+
+export const textoSaldos = (resumo) => (resumo.saldos || []).filter((s) => s.final !== null && s.final !== undefined).map((s) => `${s.nome}${s.conta ? ` cc ${s.conta}` : ''}: ${s.final < 0 && s.limite > 0 ? `usando limite: ${textoLimite(s.final, s.limite)}` : `saldo final ${moeda(s.final)}`} (${fmtData(s.dataFinal)})`);

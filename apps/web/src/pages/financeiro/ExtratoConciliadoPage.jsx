@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
-import { carregarExtratoConciliado, filtrarPorSituacao, resumir, SITUACOES, moeda, fmtData } from '@/lib/extratoConciliado';
+import { carregarExtratoConciliado, filtrarPorSituacao, resumir, textoLimite, SITUACOES, moeda, fmtData } from '@/lib/extratoConciliado';
 import { exportarExtratoExcel, exportarExtratoPdf } from '@/lib/extratoConciliadoExport';
 
 const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm';
@@ -90,7 +90,7 @@ const ExtratoConciliadoPage = () => {
             <Cartao t="Saídas" v={moeda(resumo.saidas)} cor="text-red-600" sub={`${resumo.semCategoria} sem categoria · ${resumo.naoConciliadas} não conciliados`} />
             {dados.saldos.length === 1 ? (
               <>
-                <Cartao t="Saldo bancário final" v={resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal)} sub={resumo.dataSaldoFinal ? `em ${fmtData(resumo.dataSaldoFinal)}` : ''} />
+                <Cartao t={resumo.saldoFinal !== null && resumo.saldoFinal < 0 && dados.saldos[0].limite > 0 ? 'Limite em uso (saldo bancário final)' : 'Saldo bancário final'} v={resumo.saldoFinal === null ? '—' : moeda(resumo.saldoFinal)} cor={resumo.saldoFinal < 0 ? 'text-red-600' : ''} sub={[resumo.dataSaldoFinal ? `em ${fmtData(resumo.dataSaldoFinal)}` : '', textoLimite(resumo.saldoFinal, dados.saldos[0].limite)].filter(Boolean).join(' · ')} />
               </>
             ) : (
               <Card className="col-span-2"><CardContent className="p-4 text-xs text-muted-foreground">
@@ -106,7 +106,7 @@ const ExtratoConciliadoPage = () => {
                   {dados.saldos.map((b) => (
                     <tr key={b.bancoId} className="border-t">
                       <td className="px-3 py-1.5">{b.nome}{b.agencia ? ` · ag ${b.agencia}` : ''}{b.conta ? ` · cc ${b.conta}` : ''}</td>
-                      <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.final === null ? '—' : <>{moeda(b.final)} <span className="text-muted-foreground">({fmtData(b.dataFinal)})</span></>}</td>
+                      <td className="px-3 py-1.5 text-right whitespace-nowrap">{b.final === null ? '—' : <>{moeda(b.final)} <span className="text-muted-foreground">({fmtData(b.dataFinal)}{b.final < 0 && b.limite > 0 ? ` · ${textoLimite(b.final, b.limite)}` : ''})</span></>}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -16,6 +16,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { montarDRE, calcularPEPeriodo, agregarDashboard, MESES } from '@/lib/dreGerencial';
 import { gerarRelatorioMensalPdf } from '@/lib/relatorioMensalPdf';
 import { gerarRelatorioMensalExcel } from '@/lib/relatorioMensalExcel';
+import { montarResultadoPessoal } from '@/lib/resultadoPessoal';
+import { textoLimite } from '@/lib/extratoConciliado';
 
 const fmt = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const diasNoMes = (ano, m) => new Date(ano, m + 1, 0).getDate();
@@ -36,7 +38,7 @@ function RelatorioMensal() {
 
   useEffect(() => {
     if (!empresaId) { setEmpresa(null); return; }
-    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, email, telefone').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
+    supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, email, telefone, tipo_pessoa').eq('id', empresaId).single().then(({ data }) => setEmpresa(data));
   }, [empresaId]);
 
   // mês inicial: o mês do último lançamento do ano
@@ -45,6 +47,25 @@ function RelatorioMensal() {
     const ultimo = movs.reduce((a, b) => (a > b.data_transacao ? a : b.data_transacao), '');
     setMes((atual) => (atual !== null && movs.some((m) => Number(m.data_transacao.slice(5, 7)) - 1 === atual) ? atual : Number(ultimo.slice(5, 7)) - 1));
   }, [movs]);
+
+  const ehPF = empresa?.tipo_pessoa === 'PF';
+  const pessoal = useMemo(() => (ehPF && ano ? montarResultadoPessoal(movs, { ano, categorias, subcategorias }) : null), [ehPF, movs, ano, categorias, subcategorias]);
+  // saldo bancário no fim do mês e limite da conta (cadastro PF usa o limite, não "saldo")
+  const [bancosPF, setBancosPF] = useState([]);
+  useEffect(() => {
+    if (!ehPF || !empresaId || !ano || mes === null) { setBancosPF([]); return; }
+    let ativo = true;
+    const fim = `${ano}-${String(mes + 1).padStart(2, '0')}-${diasNoMes(ano, mes)}`;
+    (async () => {
+      const { data: bs } = await supabase.from('bancos').select('id, nome, conta, limite').eq('company_id', empresaId);
+      const lista = await Promise.all((bs || []).map(async (b) => {
+        const { data: l } = await supabase.from('extrato_bancario').select('saldo_posterior').eq('banco_id', b.id).lte('data_transacao', fim).not('saldo_posterior', 'is', null).order('data_transacao', { ascending: false }).order('created_at', { ascending: false }).limit(1);
+        return { ...b, saldo: l?.[0] ? Number(l[0].saldo_posterior) : null };
+      }));
+      if (ativo) setBancosPF(lista.filter((b) => b.saldo !== null));
+    })();
+    return () => { ativo = false; };
+  }, [ehPF, empresaId, ano, mes]);
 
   const dre = useMemo(() => (ano ? montarDRE(movs, { ano, categorias, subcategorias }) : null), [movs, ano, categorias, subcategorias]);
   const pe = useMemo(() => (dre ? {
@@ -92,7 +113,7 @@ function RelatorioMensal() {
 
   if (authLoading) return <div className="flex h-full items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
-  const pronto = dre && pe && dash && mes !== null;
+  const pronto = dre && pe && dash && mes !== null && !ehPF;
   const p = dre?.porChave;
 
   return (
@@ -158,6 +179,22 @@ function RelatorioMensal() {
         <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
       ) : movs.length === 0 ? (
         <Card className="py-12 text-center"><CardTitle className="text-lg">Sem lançamentos em {ano}</CardTitle><CardDescription className="mt-2">Importe o extrato em Financeiro &gt; Importar Extrato.</CardDescription></Card>
+      ) : ehPF && pessoal ? (
+        <>
+          <div className="mb-4 flex items-start gap-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 text-sm">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>Este cadastro é de pessoa física, então não tem DRE nem ponto de equilíbrio. Abaixo está o resumo do mês; o detalhe por categoria está em <Link to="/controladoria/resultado-pessoal" className="underline">Resultado Pessoal</Link> e o extrato com a classificação em <Link to="/financeiro/extrato-conciliado" className="underline">Extrato Conciliado</Link>.</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-blue-600">Entradas — {MESES[mes]}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(pessoal.totalEntradas.valores[mes])}</div></CardContent></Card>
+            <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-red-600">Gastos — {MESES[mes]}</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">R$ {fmt(-pessoal.totalGastos.valores[mes])}</div></CardContent></Card>
+            <Card><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-green-600">Saldo do mês</CardTitle></CardHeader><CardContent><div className={`text-2xl font-bold ${pessoal.saldo.valores[mes] < 0 ? 'text-red-600' : ''}`}>R$ {fmt(pessoal.saldo.valores[mes])}</div><div className="text-xs text-muted-foreground">entradas − gastos, sem investimentos e transferências</div></CardContent></Card>
+            {bancosPF.map((b) => (
+              <Card key={b.id}><CardHeader className="pb-1"><CardTitle className="text-sm font-medium text-purple-600">{b.saldo < 0 && Number(b.limite) > 0 ? 'Limite em uso' : 'Saldo no banco'} — {b.nome}</CardTitle></CardHeader><CardContent><div className={`text-2xl font-bold ${b.saldo < 0 ? 'text-red-600' : ''}`}>R$ {fmt(b.saldo)}</div><div className="text-xs text-muted-foreground">{textoLimite(b.saldo, b.limite)}</div></CardContent></Card>
+            ))}
+          </div>
+          {pessoal.pendente.total !== 0 && <p className="text-sm text-amber-700">Há lançamentos ainda sem classificação (R$ {fmt(Math.abs(pessoal.pendente.total))} no ano).</p>}
+        </>
       ) : !pronto ? (
         <div className="flex h-40 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
       ) : (

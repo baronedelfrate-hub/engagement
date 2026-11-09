@@ -32,7 +32,7 @@ const abrevia = (v) => {
 };
 
 // Barras agrupadas por mês, com linha do zero (aceita valores negativos). Devolve a altura ocupada a partir de y.
-const barrasVerticais = (doc, { x, y, w, h, rotulos, series }) => {
+export const barrasVerticais = (doc, { x, y, w, h, rotulos, series }) => {
   const valores = series.flatMap((s) => s.valores);
   const max = Math.max(0, ...valores);
   const min = Math.min(0, ...valores);
@@ -89,7 +89,7 @@ const barrasVerticais = (doc, { x, y, w, h, rotulos, series }) => {
 };
 
 // Barras horizontais com nome à esquerda e valor ao fim da barra. Devolve a altura ocupada.
-const barrasHorizontais = (doc, { x, y, w, itens, cor, corDestaque }) => {
+export const barrasHorizontais = (doc, { x, y, w, itens, cor, corDestaque }) => {
   const max = Math.max(...itens.filter((i) => !i.resto).map((i) => i.valor), 1);
   const rotuloW = 62;
   const valorW = 24;
@@ -113,7 +113,7 @@ const barrasHorizontais = (doc, { x, y, w, itens, cor, corDestaque }) => {
 };
 
 // maiores itens + uma linha "Demais" com o restante
-const topComDemais = (lista, n) => {
+export const topComDemais = (lista, n) => {
   if (lista.length <= n) return lista;
   return [...lista.slice(0, n), { nome: `Demais (${lista.length - n})`, total: lista.slice(n).reduce((s, c) => s + c.total, 0) }];
 };

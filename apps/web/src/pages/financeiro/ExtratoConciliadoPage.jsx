@@ -126,7 +126,7 @@ const ExtratoConciliadoPage = () => {
                 <tr>{['Data', 'Nº doc.', 'Histórico', 'Fornecedor / cliente', 'Título / NF', 'Categoria', 'Centro / obra', 'Observação', 'Valor', 'Saldo', ''].map((h) => <th key={h} className={`px-2 py-2 font-medium ${h === 'Valor' || h === 'Saldo' ? 'text-right' : ''}`}>{h}</th>)}</tr>
               </thead>
               <tbody>
-                {linhas.slice(0, LIMITE_TELA).map((l) => (
+                {[...linhas].reverse().slice(0, LIMITE_TELA).map((l) => (
                   <tr key={l.id} className="border-t align-top">
                     <td className="px-2 py-1.5 whitespace-nowrap">{fmtData(l.data)}</td>
                     <td className="px-2 py-1.5 whitespace-nowrap">{l.documento}</td>
@@ -145,7 +145,7 @@ const ExtratoConciliadoPage = () => {
               </tbody>
             </table>
           </div>
-          {linhas.length > LIMITE_TELA && <p className="text-xs text-muted-foreground mt-2">Mostrando as primeiras {LIMITE_TELA} de {linhas.length} linhas. O Excel e o PDF trazem todas.</p>}
+          {linhas.length > LIMITE_TELA && <p className="text-xs text-muted-foreground mt-2">Mostrando as {LIMITE_TELA} mais recentes de {linhas.length} linhas. O Excel e o PDF trazem todas, em ordem de data.</p>}
         </>
       )}
     </>

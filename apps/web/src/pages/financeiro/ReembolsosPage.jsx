@@ -25,6 +25,7 @@ const ReembolsosPage = () => {
   const { company_id: companyId, loading: authLoading } = useAuthContext();
   const { toast } = useToast();
   const [empresa, setEmpresa] = useState('');
+  const [logoEmpresa, setLogoEmpresa] = useState('');
   const [lista, setLista] = useState([]);
   const [totais, setTotais] = useState({});
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ const ReembolsosPage = () => {
 
   useEffect(() => {
     if (authLoading || !companyId) return;
-    supabase.from('empresas').select('razao_social, nome_fantasia').eq('id', companyId).maybeSingle().then(({ data }) => setEmpresa(data?.nome_fantasia || data?.razao_social || ''));
+    supabase.from('empresas').select('razao_social, nome_fantasia, logo').eq('id', companyId).maybeSingle().then(({ data }) => { setEmpresa(data?.nome_fantasia || data?.razao_social || ''); setLogoEmpresa(data?.logo || ''); });
   }, [authLoading, companyId]);
 
   const carregar = useCallback(async () => {
@@ -114,7 +115,7 @@ const ReembolsosPage = () => {
   const gerar = async (modo, base) => {
     setOcupado(modo);
     try {
-      const args = { empresa, reembolso: base, itens: itensNum, imagens: await imagensDoPdf() };
+      const args = { empresa, logo: logoEmpresa, reembolso: base, itens: itensNum, imagens: await imagensDoPdf() };
       if (modo === 'excel') await gerarReembolsoExcel(args);
       else if (modo === 'previa') setPrevia(await gerarReembolsoPdf(args, { base64: true }));
       else if (modo === 'imprimir') await gerarReembolsoPdf(args, { imprimir: true });

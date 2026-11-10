@@ -43,7 +43,7 @@ const dataLonga = (iso) => {
 };
 
 // Baixa o logo (URL pública) e devolve { dataUrl, formato, w, h }; sem logo ou com falha, devolve null e o recibo sai sem ele.
-const carregarLogo = async (url) => {
+export const carregarLogo = async (url) => {
   if (!url) return null;
   try {
     const r = await fetch(url);

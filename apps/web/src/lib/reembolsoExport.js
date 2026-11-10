@@ -5,6 +5,7 @@ import 'jspdf-autotable';
 import { finalizarPdf } from '@/lib/pdfSaida';
 import { moeda, fmtData } from '@/lib/extratoConciliado';
 import { rotuloTipoPix, limparChavePix } from '@/lib/chavePix';
+import { carregarLogo } from '@/lib/reciboPdf';
 
 const slug = (s) => String(s || 'reembolso').replace(/[^A-Za-z0-9]+/g, '_');
 const nomeArquivo = (r, ext) => `Reembolso_${String(r.numero || '').padStart(3, '0')}_${slug(r.beneficiario)}.${ext}`;
@@ -14,14 +15,22 @@ const lerImagem = (blob) => new Promise((ok, erro) => { const fr = new FileReade
 const dimensoes = (src) => new Promise((ok) => { const im = new Image(); im.onload = () => ok({ w: im.width, h: im.height }); im.onerror = () => ok(null); im.src = src; });
 
 // imagens: { [itemId]: Blob } com os comprovantes que são fotos/imagens (entram no PDF, uma por página).
-export const gerarReembolsoPdf = async ({ empresa, reembolso: r, itens, imagens = {} }, opcoes = {}) => {
+export const gerarReembolsoPdf = async ({ empresa, logo: logoUrl, reembolso: r, itens, imagens = {} }, opcoes = {}) => {
   const doc = new jsPDF('portrait', 'pt', 'a4');
   const W = doc.internal.pageSize.getWidth(); const H = doc.internal.pageSize.getHeight();
-  doc.setFontSize(16); doc.setTextColor(30, 58, 138); doc.text(`Relatório de reembolso nº ${String(r.numero || '').padStart(3, '0')}`, 40, 42);
-  doc.setFontSize(9); doc.setTextColor(90, 90, 90); doc.text(`${empresa || ''} · emitido em ${fmtData(new Date().toISOString())}`, 40, 57);
+  // logo da empresa (se cadastrado) no alto da primeira página; o conteúdo desce para dar espaço
+  const logo = await carregarLogo(logoUrl);
+  let dy = 0;
+  if (logo) {
+    let h = 40; let w = (logo.w / logo.h) * h;
+    if (w > 150) { w = 150; h = (logo.h / logo.w) * w; }
+    try { doc.addImage(logo.dataUrl, logo.formato, 40, 22, w, h); dy = 50; } catch (e) { /* sem logo */ }
+  }
+  doc.setFontSize(16); doc.setTextColor(30, 58, 138); doc.text(`Relatório de reembolso nº ${String(r.numero || '').padStart(3, '0')}`, 40, 42 + dy);
+  doc.setFontSize(9); doc.setTextColor(90, 90, 90); doc.text(`${empresa || ''} · emitido em ${fmtData(new Date().toISOString())}`, 40, 57 + dy);
   const pix = r.chave_pix ? `${rotuloTipoPix(r.tipo_chave_pix) ? `${rotuloTipoPix(r.tipo_chave_pix)}: ` : ''}${limparChavePix(r.tipo_chave_pix, r.chave_pix)}` : '—';
   doc.autoTable({
-    startY: 68, theme: 'grid', styles: { fontSize: 9, cellPadding: 4 }, columnStyles: { 0: { fontStyle: 'bold', cellWidth: 110, fillColor: [238, 242, 255] } },
+    startY: 68 + dy, theme: 'grid', styles: { fontSize: 9, cellPadding: 4 }, columnStyles: { 0: { fontStyle: 'bold', cellWidth: 110, fillColor: [238, 242, 255] } },
     body: [['Beneficiário', r.beneficiario || ''], ['CPF / CNPJ', r.cpf_cnpj || '—'], ['Chave Pix', pix], ['Referência', r.referencia || '—'], ['Aprovador', r.aprovador || '—']]
   });
   doc.autoTable({

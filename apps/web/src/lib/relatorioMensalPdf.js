@@ -246,6 +246,121 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
   });
   proximoY();
 
+  // 2.1) DRE mês a mês (janeiro até o mês do relatório) em página deitada, com variação sobre o mês anterior e destaques
+  {
+    const L = 297; const M2 = 10;
+    const fmt0 = (v) => { const n = Math.round(num(v)); const t = Math.abs(n).toLocaleString('pt-BR'); return n < 0 ? `(${t})` : (n === 0 ? '—' : t); };
+    // variação do tamanho do valor: despesa que cresce aparece como +%, e receita que cai como -%
+    const variacao = (atual, anterior) => {
+      if (mes === 0) return '—';
+      if (Math.abs(anterior) < 0.005) return Math.abs(atual) < 0.005 ? '—' : 'novo';
+      const v = ((Math.abs(atual) - Math.abs(anterior)) / Math.abs(anterior)) * 100;
+      return `${v > 0 ? '+' : ''}${v.toFixed(0).replace('.', ',')}%`;
+    };
+    const ehCusto = (valores) => valores.slice(0, mes + 1).reduce((t, v) => t + v, 0) < 0;
+    const cabMeses = ateMes.map((i) => MESES[i]);
+    const colunas = { 0: { cellWidth: 62, halign: 'left' } };
+    for (let k = 1; k <= ateMes.length + 2; k++) colunas[k] = { halign: 'right' };
+    const base2 = { styles: { fontSize: 7, cellPadding: 1.2 }, headStyles: { fillColor: AZUL, textColor: 255, halign: 'right' }, margin: { left: M2, right: M2 }, columnStyles: colunas };
+
+    doc.addPage('a4', 'landscape');
+    let y2 = 14;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...AZUL);
+    doc.text(`2.1 DRE gerencial mês a mês — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y2);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
+    doc.text('Valores em R$ (arredondados). Variação = mês do relatório contra o mês anterior.', M2, y2 + 5);
+    doc.setTextColor(30, 30, 30);
+    y2 += 9;
+
+    const linhasDre = dre.linhas.filter((l) => l.tipo === 'subtotal' || l.valores.slice(0, mes + 1).some((v) => Math.abs(v) >= 0.005));
+    const corpo2 = []; const est2 = [];
+    for (const l of linhasDre) {
+      const vm = l.valores[mes]; const va = mes > 0 ? l.valores[mes - 1] : 0;
+      corpo2.push([l.rotulo, ...ateMes.map((i) => fmt0(l.valores[i])), fmt0(l.valores.slice(0, mes + 1).reduce((t, v) => t + v, 0)), variacao(vm, va)]);
+      est2.push(l.tipo === 'subtotal' ? 'subtotal' : l.chave === 'nao_classificado' ? 'pendente' : null);
+    }
+    autoTable(doc, {
+      ...base2, startY: y2, head: [['Conta', ...cabMeses, 'Total', `Var. ${MESES[mes]}`]], body: corpo2,
+      didParseCell: (d) => {
+        if (d.section === 'head' && d.column.index === 0) d.cell.styles.halign = 'left';
+        if (d.section !== 'body') return;
+        const e = est2[d.row.index];
+        if (e === 'subtotal') { d.cell.styles.fontStyle = 'bold'; d.cell.styles.fillColor = CINZA; }
+        if (e === 'pendente') d.cell.styles.fillColor = AMBAR;
+        if (d.column.index === ateMes.length + 2) {
+          const sobe = String(d.cell.raw).startsWith('+'); const cai = String(d.cell.raw).startsWith('-');
+          const custo = ehCusto(linhasDre[d.row.index].valores);
+          if (sobe || cai) d.cell.styles.textColor = (sobe !== custo) ? [22, 101, 52] : [185, 28, 28];
+        }
+      }
+    });
+
+    // destaques: maiores variações de um mês para o outro nas linhas que compõem o resultado
+    if (mes > 0) {
+      const cand = dre.linhas.filter((l) => l.tipo !== 'subtotal' && l.tipo !== 'neutro' && l.chave !== 'nao_classificado').map((l) => {
+        const atual = l.valores[mes]; const ant = l.valores[mes - 1];
+        return { rotulo: l.rotulo.replace(/^[\d.]+\s*/, ''), atual: Math.abs(atual), ant: Math.abs(ant), custo: ehCusto(l.valores), delta: Math.abs(atual) - Math.abs(ant) };
+      }).filter((c) => Math.abs(c.delta) >= 100).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 5);
+      if (cand.length) {
+        let yy = doc.lastAutoTable.finalY + 8;
+        if (yy > 175) { doc.addPage('a4', 'landscape'); yy = 16; }
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...AZUL);
+        doc.text(`Destaques de ${MESES[mes]} contra ${MESES[mes - 1]}`, M2, yy);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(30, 30, 30);
+        yy += 5;
+        cand.forEach((c) => {
+          const pctTxt = Math.abs(c.ant) < 0.005 ? 'sem valor no mês anterior' : `${c.delta > 0 ? '+' : ''}${((c.delta / Math.abs(c.ant)) * 100).toFixed(0)}%`;
+          doc.text(`- ${c.rotulo}: de R$ ${fmt(c.ant)} para R$ ${fmt(c.atual)} (${c.delta > 0 ? 'aumento' : 'queda'} de R$ ${fmt(Math.abs(c.delta))}, ${pctTxt})${c.custo ? ' [despesa]' : ''}`, M2 + 2, yy);
+          yy += 5;
+        });
+        y2 = yy;
+      } else { y2 = doc.lastAutoTable.finalY + 6; }
+    } else { y2 = doc.lastAutoTable.finalY + 6; }
+
+    // principais despesas (subcategorias) mês a mês
+    const despesas = [];
+    for (const l of dre.linhas) {
+      if (!/^(custo_|desp_)/.test(l.chave)) continue;
+      for (const d of l.detalhes || []) despesas.push({ rotulo: d.rotulo, valores: d.valores });
+    }
+    const topDesp = despesas.map((d) => ({ ...d, total: d.valores.slice(0, mes + 1).reduce((t, v) => t + v, 0) })).filter((d) => Math.abs(d.total) >= 0.005).sort((a, b) => a.total - b.total).slice(0, 12);
+    doc.addPage('a4', 'landscape');
+    let y3 = 14;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...AZUL);
+    doc.text(`2.2 Principais despesas mês a mês — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y3);
+    doc.setTextColor(30, 30, 30); y3 += 4;
+    if (topDesp.length) {
+      autoTable(doc, {
+        ...base2, startY: y3, head: [['Conta', ...cabMeses, 'Total', `Var. ${MESES[mes]}`]],
+        didParseCell: (d) => {
+          if (d.section === 'head' && d.column.index === 0) d.cell.styles.halign = 'left';
+          if (d.section === 'body' && d.column.index === ateMes.length + 2) {
+            const t = String(d.cell.raw); if (t.startsWith('+')) d.cell.styles.textColor = [185, 28, 28]; else if (t.startsWith('-')) d.cell.styles.textColor = [22, 101, 52];
+          }
+        },
+        body: topDesp.map((d) => [d.rotulo, ...ateMes.map((i) => fmt0(d.valores[i])), fmt0(d.total), variacao(d.valores[mes], mes > 0 ? d.valores[mes - 1] : 0)])
+      });
+      y3 = doc.lastAutoTable.finalY + 8;
+    } else { y3 += 6; }
+    const alturaGraf = 195 - y3 - 14;
+    if (alturaGraf > 40) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+      doc.text(`Receita bruta, despesas e lucro líquido — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y3);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30);
+      barrasVerticais(doc, {
+        x: M2, y: y3 + 12, w: L - M2 * 2, h: Math.min(alturaGraf - 20, 60), rotulos: cabMeses,
+        series: [
+          { nome: 'Receita bruta', cor: AZUL_CLARO, valores: ateMes.map((i) => p.receita_bruta.valores[i]) },
+          { nome: 'Despesas (receita - lucro)', cor: LARANJA, valores: ateMes.map((i) => p.receita_bruta.valores[i] - p.lucro_liquido.valores[i]) },
+          { nome: 'Lucro líquido', cor: VERDE, valores: ateMes.map((i) => p.lucro_liquido.valores[i]) }
+        ]
+      });
+    }
+    // volta à página retrato para o restante do relatório
+    doc.addPage('a4', 'portrait');
+    y = 18;
+  }
+
   // 3) ponto de equilíbrio
   secao('3. Ponto de equilíbrio');
   const peAc = pe.acumulado;
@@ -344,10 +459,11 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
   const emitido = new Date().toLocaleDateString('pt-BR');
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
+    const wPg = doc.internal.pageSize.getWidth(); const hPg = doc.internal.pageSize.getHeight();
     doc.setFontSize(8);
     doc.setTextColor(120);
-    doc.text(`Emitido em ${emitido} · Engagement Soluções`, margem, 290);
-    doc.text(`Página ${i} de ${total}`, largura - margem, 290, { align: 'right' });
+    doc.text(`Emitido em ${emitido} · Engagement Soluções`, margem, hPg - 7);
+    doc.text(`Página ${i} de ${total}`, wPg - margem, hPg - 7, { align: 'right' });
   }
 
   const nomeArquivo = `relatorio-gerencial_${(empresa?.nome_fantasia || empresa?.razao_social || 'empresa').replace(/[^\w]+/g, '-').toLowerCase()}_${ano}-${String(mes + 1).padStart(2, '0')}.pdf`;

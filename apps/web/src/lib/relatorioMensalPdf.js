@@ -248,7 +248,7 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
 
   // 2.1) DRE mês a mês (janeiro até o mês do relatório) em página deitada, com variação sobre o mês anterior e destaques
   {
-    const L = 297; const M2 = 10;
+    const L = 210; const M2 = 10;
     const fmt0 = (v) => { const n = Math.round(num(v)); const t = Math.abs(n).toLocaleString('pt-BR'); return n < 0 ? `(${t})` : (n === 0 ? '—' : t); };
     // variação do tamanho do valor: despesa que cresce aparece como +%, e receita que cai como -%
     const variacao = (atual, anterior) => {
@@ -259,12 +259,12 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
     };
     const ehCusto = (valores) => valores.slice(0, mes + 1).reduce((t, v) => t + v, 0) < 0;
     const cabMeses = ateMes.map((i) => MESES[i]);
-    const colunas = { 0: { cellWidth: 62, halign: 'left' } };
+    const colunas = { 0: { cellWidth: 40, halign: 'left' } };
     for (let k = 1; k <= ateMes.length + 2; k++) colunas[k] = { halign: 'right' };
-    const base2 = { styles: { fontSize: 7, cellPadding: 1.2 }, headStyles: { fillColor: AZUL, textColor: 255, halign: 'right' }, margin: { left: M2, right: M2 }, columnStyles: colunas };
+    const base2 = { styles: { fontSize: 6.3, cellPadding: 1 }, headStyles: { fillColor: AZUL, textColor: 255, halign: 'right' }, margin: { left: M2, right: M2 }, columnStyles: colunas };
 
-    doc.addPage('a4', 'landscape');
-    let y2 = 14;
+    doc.addPage('a4', 'portrait');
+    let y2 = 16;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...AZUL);
     doc.text(`2.1 DRE gerencial mês a mês — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y2);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
@@ -303,7 +303,7 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
       }).filter((c) => Math.abs(c.delta) >= 100).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 5);
       if (cand.length) {
         let yy = doc.lastAutoTable.finalY + 8;
-        if (yy > 175) { doc.addPage('a4', 'landscape'); yy = 16; }
+        if (yy > 250) { doc.addPage('a4', 'portrait'); yy = 16; }
         doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...AZUL);
         doc.text(`Destaques de ${MESES[mes]} contra ${MESES[mes - 1]}`, M2, yy);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(30, 30, 30);
@@ -317,15 +317,16 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
       } else { y2 = doc.lastAutoTable.finalY + 6; }
     } else { y2 = doc.lastAutoTable.finalY + 6; }
 
-    // principais despesas (subcategorias) mês a mês
+    // principais despesas (subcategorias) mês a mês, na mesma página quando couber
+    let y3Ini = 16;
     const despesas = [];
     for (const l of dre.linhas) {
       if (!/^(custo_|desp_)/.test(l.chave)) continue;
       for (const d of l.detalhes || []) despesas.push({ rotulo: d.rotulo, valores: d.valores });
     }
     const topDesp = despesas.map((d) => ({ ...d, total: d.valores.slice(0, mes + 1).reduce((t, v) => t + v, 0) })).filter((d) => Math.abs(d.total) >= 0.005).sort((a, b) => a.total - b.total).slice(0, 12);
-    doc.addPage('a4', 'landscape');
-    let y3 = 14;
+    if (doc.lastAutoTable.finalY + (mes > 0 ? 40 : 10) > 190) { doc.addPage('a4', 'portrait'); y3Ini = 16; } else { y3Ini = Math.max(y2, doc.lastAutoTable.finalY) + 10; }
+    let y3 = y3Ini;
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...AZUL);
     doc.text(`2.2 Principais despesas mês a mês — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y3);
     doc.setTextColor(30, 30, 30); y3 += 4;
@@ -342,13 +343,13 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
       });
       y3 = doc.lastAutoTable.finalY + 8;
     } else { y3 += 6; }
-    const alturaGraf = 195 - y3 - 14;
+    const alturaGraf = 280 - y3 - 14;
     if (alturaGraf > 40) {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(60, 60, 60);
       doc.text(`Receita bruta, despesas e lucro líquido — ${MESES[0]} a ${MESES[mes]}/${ano}`, M2, y3);
       doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30);
       barrasVerticais(doc, {
-        x: M2, y: y3 + 12, w: L - M2 * 2, h: Math.min(alturaGraf - 20, 60), rotulos: cabMeses,
+        x: M2, y: y3 + 12, w: L - M2 * 2, h: Math.min(alturaGraf - 20, 55), rotulos: cabMeses,
         series: [
           { nome: 'Receita bruta', cor: AZUL_CLARO, valores: ateMes.map((i) => p.receita_bruta.valores[i]) },
           { nome: 'Despesas (receita - lucro)', cor: LARANJA, valores: ateMes.map((i) => p.receita_bruta.valores[i] - p.lucro_liquido.valores[i]) },
@@ -356,7 +357,7 @@ export const gerarRelatorioMensalPdf = async (dados, opcoes = {}) => {
         ]
       });
     }
-    // volta à página retrato para o restante do relatório
+    // o restante do relatório começa em página nova
     doc.addPage('a4', 'portrait');
     y = 18;
   }

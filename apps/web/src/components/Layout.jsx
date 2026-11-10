@@ -80,6 +80,7 @@ const navigation = [
           { name: 'Classificar Extrato', href: '/financeiro/classificar-extrato' },
           { name: 'Extrato Conciliado', href: '/financeiro/extrato-conciliado' },
           { name: 'Reembolsos', href: '/financeiro/reembolsos' },
+          { name: 'Recibos', href: '/financeiro/recibos' },
           { name: 'Plano de Contas (relatório)', href: '/financeiro/plano-de-contas' },
           { name: 'Fluxo de Caixa', href: '/financeiro/fluxo-caixa' },
           { name: 'Histórico Conciliações', href: '/financeiro/historico-conciliacoes' },

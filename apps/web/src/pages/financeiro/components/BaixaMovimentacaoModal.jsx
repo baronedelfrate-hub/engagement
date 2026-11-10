@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, CheckCircle2, Upload, X, FileText, Receipt } from 'lucide-react';
 import PreviaPdfDialog from '@/components/PreviaPdfDialog';
 import { gerarReciboPdf } from '@/lib/reciboPdf';
+import { emitirRecibo, pdfDoRecibo } from '@/lib/recibos';
 import SeletorProjeto from '@/components/SeletorProjeto';
 import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 
@@ -164,7 +165,15 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       }
       if (falhouComprovante) toast({ title: 'Baixa registrada, mas o comprovante não subiu', description: 'Anexe o comprovante de novo pela movimentação financeira.', variant: 'destructive' });
       toast({ title: 'Baixa registrada', description: `${isPagar ? 'Pagamento' : 'Recebimento'} de ${brl(totalEfetivo)} lançado e disponível na Conciliação Bancária.${comprovantes.length && !falhouComprovante ? ' Comprovante anexado.' : ''}` });
-      if (emitirReciboAoSalvar) { try { const r = await montarRecibo({ base64: true }); setPreviaRecibo({ base64: r.base64, nome: r.nome }); } catch { /* o recibo pode ser emitido depois */ } }
+      // recibo numerado: fica registrado em Financeiro > Recibos, onde pode ser reimpresso e enviado por WhatsApp
+      if (emitirReciboAoSalvar) {
+        try {
+          const rec = await emitirRecibo({ companyId: titulo.company_id || company_id, baixa: { id: baixaId, data_baixa: form.data_baixa, valor_baixa: totalEfetivo, movimentacao: titulo }, empresa, referente: reciboTexto || titulo.numero_titulo || 'serviços prestados' });
+          const pdf = await pdfDoRecibo(rec);
+          setPreviaRecibo({ base64: pdf.base64, nome: pdf.nome });
+          toast({ title: `Recibo nº ${rec.numero} emitido`, description: 'Ele fica guardado em Financeiro > Recibos.' });
+        } catch (e) { toast({ title: 'Baixa registrada, mas o recibo não foi emitido', description: `${e.message} Emita em Financeiro > Recibos.`, variant: 'destructive' }); }
+      }
       onOpenChange(false);
       if (onSaved) onSaved();
     } catch (err) {
@@ -274,8 +283,8 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
                 <Button type="button" variant="outline" size="sm" onClick={emitirRecibo} disabled={gerandoRecibo}>{gerandoRecibo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Receipt className="h-4 w-4 mr-2" />}Emitir recibo</Button>
               </div>
               <Textarea rows={2} value={reciboTexto} onChange={(e) => setReciboTexto(e.target.value)} placeholder="Referente a… (ex.: duas diárias de serviços prestados)" />
-              <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" checked={emitirReciboAoSalvar} onChange={(e) => setEmitirReciboAoSalvar(e.target.checked)} /> Abrir o recibo ao confirmar a baixa</label>
-              <p className="text-xs text-muted-foreground">O recibo usa o valor ({brl(totalEfetivo)}) e a data da baixa. {isPagar ? `Quem assina é ${titulo?.fornecedor?.nome || 'o fornecedor'}.` : 'Quem assina é a empresa.'} Dá para baixar ou imprimir.</p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" checked={emitirReciboAoSalvar} onChange={(e) => setEmitirReciboAoSalvar(e.target.checked)} /> Emitir o recibo numerado ao confirmar a baixa (fica em Financeiro > Recibos)</label>
+              <p className="text-xs text-muted-foreground">O botão acima mostra só uma prévia, sem número. O recibo numerado, com a lista e a reimpressão, fica em Financeiro > Recibos. Usa o valor ({brl(totalEfetivo)}) e a data da baixa. {isPagar ? `Quem assina é ${titulo?.fornecedor?.nome || 'o fornecedor'}.` : 'Quem assina é a empresa.'} Dá para baixar ou imprimir.</p>
             </div>
 
             <div className="space-y-2">

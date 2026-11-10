@@ -42,18 +42,18 @@ const dataLonga = (iso) => {
   return `${d} de ${meses[m - 1]} de ${a}`;
 };
 
-// dados: { pagador: { nome, documento }, recebedor: { nome, documento }, valor, referente, data (aaaa-mm-dd), local, forma }
+// dados: { numero?, pagador: { nome, documento }, recebedor: { nome, documento }, valor, referente, data (aaaa-mm-dd), local, forma }
 export const gerarReciboPdf = async (dados, opcoes = {}) => {
   const jspdfMod = await import('jspdf');
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
-  const { pagador, recebedor, valor, referente, data, local, forma } = dados;
+  const { numero, pagador, recebedor, valor, referente, data, local, forma } = dados;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const L = doc.internal.pageSize.getWidth(); const m = 20; const larg = L - m * 2;
   let y = 30;
 
   doc.setDrawColor(30, 58, 138); doc.setLineWidth(0.8); doc.rect(m - 6, 18, larg + 12, 130);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor(30, 58, 138);
-  doc.text('RECIBO', m, y);
+  doc.text(numero ? `RECIBO Nº ${numero}` : 'RECIBO', m, y);
   doc.setFontSize(16); doc.setTextColor(30, 30, 30);
   doc.text(brl(valor), L - m, y, { align: 'right' });
   y += 14;
@@ -80,6 +80,6 @@ export const gerarReciboPdf = async (dados, opcoes = {}) => {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(90, 90, 90);
   if (recebedor.documento) doc.text(`CPF/CNPJ ${recebedor.documento}`, L / 2, y + 11, { align: 'center' });
 
-  const nome = `recibo_${String(recebedor.nome).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').toLowerCase()}_${String(data).slice(0, 10)}.pdf`;
+  const nome = `recibo${numero ? `_${String(numero).padStart(4, '0')}` : ''}_${String(recebedor.nome).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').toLowerCase()}_${String(data).slice(0, 10)}.pdf`;
   return finalizarPdf(doc, nome, opcoes);
 };

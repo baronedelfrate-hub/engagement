@@ -1,7 +1,7 @@
 import { corsHeaders } from "./cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
-// Chat do WhatsApp dentro do ERP, sobre a Evolution API (v2), com UMA instância por empresa (tabela whatsapp_instancias).
+// Chat do WhatsApp dentro do ERP, sobre a Evolution API (v2), com uma ou mais linhas (instâncias) por empresa (tabela whatsapp_instancias): a Principal e linhas pessoais (usuario_id).
 //  - Webhook (sem login): a Evolution chama ?i=<instância>&t=<token>; o token é um HMAC da instância com EVOLUTION_API_KEY (não precisa de segredo novo).
 //    Eventos tratados: messages.upsert, send.message, messages.update. Grava conversas e mensagens e baixa as mídias para a pasta whatsapp-midia.
 //  - Ações com login (corpo { acao }): enviar (texto, arquivo ou áudio), sincronizar (conversas e últimas mensagens), midia (baixa uma mídia que ficou pendente),
@@ -23,6 +23,7 @@ const iguais = (a: string, b: string) => { if (a.length !== b.length) return fal
 
 // deno-lint-ignore no-explicit-any
 type Obj = Record<string, any>;
+type Linha = { id: string; instancia: string };
 
 const EXT: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'video/mp4': 'mp4', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'application/pdf': 'pdf' };
 const extDe = (mime: string, nome?: string) => {
@@ -75,8 +76,9 @@ Deno.serve(async (req) => {
   const cab = { apikey: chave, 'Content-Type': 'application/json' };
 
   // ---- conversas e mensagens (compartilhado pelo webhook, pela sincronização e pelo envio) ----
-  const garantirConversa = async (companyId: string, instancia: string, jid: string, nome?: string | null, telefone?: string | null) => {
-    const { data: ex } = await admin.from('whatsapp_conversas').select('id, nome, telefone').eq('company_id', companyId).eq('jid', jid).maybeSingle();
+  const garantirConversa = async (companyId: string, linha: Linha, jid: string, nome?: string | null, telefone?: string | null) => {
+    const instancia = linha.instancia;
+    const { data: ex } = await admin.from('whatsapp_conversas').select('id, nome, telefone').eq('instancia_id', linha.id).eq('jid', jid).maybeSingle();
     const nomeOk = nomeValido(nome);
     if (ex) {
       const mudar: Obj = {};
@@ -94,9 +96,9 @@ Deno.serve(async (req) => {
         if (r.ok && t?.subject) titulo = String(t.subject);
       } catch { /* sem nome do grupo */ }
     }
-    const { data: nova, error } = await admin.from('whatsapp_conversas').insert({ company_id: companyId, jid, nome: titulo, eh_grupo: grupo, telefone: telefone ?? telefoneDe(jid) }).select('id').single();
+    const { data: nova, error } = await admin.from('whatsapp_conversas').insert({ company_id: companyId, instancia_id: linha.id, jid, nome: titulo, eh_grupo: grupo, telefone: telefone ?? telefoneDe(jid) }).select('id').single();
     if (error) { // corrida: outra chamada criou ao mesmo tempo
-      const { data: de } = await admin.from('whatsapp_conversas').select('id').eq('company_id', companyId).eq('jid', jid).single();
+      const { data: de } = await admin.from('whatsapp_conversas').select('id').eq('instancia_id', linha.id).eq('jid', jid).single();
       return de!.id as string;
     }
     return nova.id as string;
@@ -128,7 +130,8 @@ Deno.serve(async (req) => {
   };
 
   // Grava (ou atualiza) uma mensagem recebida/enviada no formato do Evolution.
-  const gravarMensagem = async (companyId: string, instancia: string, d: Obj, opc: { baixar?: boolean } = {}) => {
+  const gravarMensagem = async (companyId: string, linha: Linha, d: Obj, opc: { baixar?: boolean } = {}) => {
+    const instancia = linha.instancia;
     const key = d.key ?? {};
     const jid: string = key.remoteJid ?? d.remoteJid ?? '';
     const messageId: string = key.id ?? d.keyId ?? d.id ?? '';
@@ -139,21 +142,21 @@ Deno.serve(async (req) => {
     const grupo = jid.endsWith('@g.us');
     const nomeConversa = !deMim && !grupo ? (d.pushName ?? null) : null;
     const telefone = grupo ? null : (telefoneDe(jid) ?? telefoneDe(key.remoteJidAlt) ?? telefoneDe(key.senderPn) ?? telefoneDe(d.senderPn) ?? null);
-    const conversaId = await garantirConversa(companyId, instancia, jid, nomeConversa, telefone);
+    const conversaId = await garantirConversa(companyId, linha, jid, nomeConversa, telefone);
     if (!grupo && (nomeConversa || telefone)) await guardarContato(companyId, jid, nomeConversa, telefone);
-    const { data: ja } = await admin.from('whatsapp_mensagens').select('id').eq('company_id', companyId).eq('message_id', messageId).maybeSingle();
+    const { data: ja } = await admin.from('whatsapp_mensagens').select('id').eq('instancia_id', linha.id).eq('message_id', messageId).maybeSingle();
     if (ja) return; // já gravada (por exemplo, enviada pelo ERP)
     const quando = dataDe(d.messageTimestamp);
-    const linha: Obj = {
-      company_id: companyId, conversa_id: conversaId, message_id: messageId, de_mim: deMim, remetente_nome: deMim ? 'Você' : (d.pushName ?? null),
+    const reg: Obj = {
+      company_id: companyId, instancia_id: linha.id, conversa_id: conversaId, message_id: messageId, de_mim: deMim, remetente_nome: deMim ? 'Você' : (d.pushName ?? null),
       tipo: lida.tipo, texto: lida.texto || null, midia_mime: lida.mime ?? null, midia_nome: lida.nome ?? null,
       status: deMim ? (STATUS[String(d.status ?? '').toUpperCase()] ?? 'enviada') : 'recebida', data: quando
     };
     if (opc.baixar !== false && ['imagem', 'video', 'audio', 'documento', 'figurinha'].includes(lida.tipo)) {
       const m = await baixarMidia(companyId, instancia, conversaId, messageId, lida.tipo, lida.mime, lida.nome, key);
-      if (m) Object.assign(linha, m);
+      if (m) Object.assign(reg, m);
     }
-    const { error } = await admin.from('whatsapp_mensagens').insert(linha);
+    const { error } = await admin.from('whatsapp_mensagens').insert(reg);
     if (error) return;
     const { data: conv } = await admin.from('whatsapp_conversas').select('nao_lidas, ultima_data').eq('id', conversaId).single();
     const maisNova = !conv?.ultima_data || new Date(quando) >= new Date(conv.ultima_data);
@@ -171,19 +174,20 @@ Deno.serve(async (req) => {
       if (!chave) return json({ error: 'Segredo ausente.' }, 500);
       const esperado = await tokenDa(instQuery, chave);
       if (!iguais(esperado, url.searchParams.get('t') ?? '')) return json({ error: 'Token inválido.' }, 401);
-      const { data: inst } = await admin.from('whatsapp_instancias').select('company_id').eq('instancia', instQuery).maybeSingle();
+      const { data: inst } = await admin.from('whatsapp_instancias').select('id, company_id').eq('instancia', instQuery).maybeSingle();
       if (!inst) return json({ ok: true, ignorado: 'instância desconhecida' });
+      const linhaWh: Linha = { id: inst.id, instancia: instQuery };
       const corpo: Obj = await req.json().catch(() => ({}));
       const evento = String(corpo.event ?? '').toLowerCase().replace(/_/g, '.');
       const dados = corpo.data;
       const lista: Obj[] = Array.isArray(dados) ? dados : (dados?.messages ? dados.messages : [dados]).filter(Boolean);
       if (evento === 'messages.upsert' || evento === 'send.message') {
-        for (const d of lista) await gravarMensagem(inst.company_id, instQuery, d);
+        for (const d of lista) await gravarMensagem(inst.company_id, linhaWh, d);
       } else if (evento === 'messages.update') {
         for (const d of lista) {
           const id = d?.keyId ?? d?.key?.id ?? d?.messageId;
           const st = STATUS[String(d?.status ?? '').toUpperCase()];
-          if (id && st) await admin.from('whatsapp_mensagens').update({ status: st }).eq('company_id', inst.company_id).eq('message_id', id).eq('de_mim', true);
+          if (id && st) await admin.from('whatsapp_mensagens').update({ status: st }).eq('instancia_id', inst.id).eq('message_id', id).eq('de_mim', true);
         }
       }
       return json({ ok: true });
@@ -201,9 +205,15 @@ Deno.serve(async (req) => {
     const b: Obj = await req.json();
     const empresa: string | null = perfil.role === 'superadmin' && b.empresa_id ? String(b.empresa_id) : (perfil.company_id ?? null);
     if (!empresa) return json({ error: 'Escolha a empresa.' }, 400);
-    const { data: inst } = await admin.from('whatsapp_instancias').select('instancia').eq('company_id', empresa).maybeSingle();
-    if (!inst) return json({ error: 'Esta empresa ainda não conectou um WhatsApp. Conecte em Configurações > WhatsApp.' }, 400);
-    const instancia: string = inst.instancia;
+    // Linhas da empresa que este usuário pode usar: a própria (se tiver uma linha pessoal) ou as sem dono; o superadmin usa qualquer uma.
+    const { data: todas } = await admin.from('whatsapp_instancias').select('id, instancia, usuario_id, reservada').eq('company_id', empresa).order('created_at');
+    const temPropria = (todas ?? []).some((l) => l.usuario_id === caller.id);
+    const visiveis = (todas ?? []).filter((l) => perfil.role === 'superadmin' || l.usuario_id === caller.id || (l.usuario_id == null && l.reservada && perfil.role === 'admin') || (l.usuario_id == null && !l.reservada && !temPropria));
+    const escolhida = b.linha_id ? visiveis.find((l) => l.id === String(b.linha_id)) : (visiveis.find((l) => l.usuario_id === caller.id) ?? visiveis.find((l) => l.usuario_id == null && !l.reservada) ?? visiveis[0]);
+    if (b.linha_id && !escolhida) return json({ error: 'Você não tem acesso a esta linha de WhatsApp.' }, 403);
+    if (!escolhida) return json({ error: 'Esta empresa ainda não conectou um WhatsApp. Conecte em Configurações > WhatsApp.' }, 400);
+    const instancia: string = escolhida.instancia;
+    const linha: Linha = { id: escolhida.id, instancia };
     const inst_enc = encodeURIComponent(instancia);
 
     if (b.acao === 'configurar_webhook') {
@@ -232,7 +242,7 @@ Deno.serve(async (req) => {
       let conversas = 0; let mensagens = 0;
       for (const c of chats) {
         const jid = String(c.remoteJid ?? c.id);
-        const conversaId = await garantirConversa(empresa, instancia, jid, c.pushName ?? c.name ?? c.subject ?? null, telefoneDe(c.lastMessage?.key?.remoteJidAlt));
+        const conversaId = await garantirConversa(empresa, linha, jid, c.pushName ?? c.name ?? c.subject ?? null, telefoneDe(c.lastMessage?.key?.remoteJidAlt));
         conversas++;
         try {
           const rm = await fetch(`${base}/chat/findMessages/${inst_enc}`, { method: 'POST', headers: cab, body: JSON.stringify({ where: { key: { remoteJid: jid } }, page: 1, offset: 30 }) });
@@ -240,7 +250,7 @@ Deno.serve(async (req) => {
           const regs: Obj[] = Array.isArray(tm) ? tm : (tm?.messages?.records ?? tm?.messages ?? tm?.records ?? []);
           for (const d of regs) {
             const antes = await admin.from('whatsapp_mensagens').select('id', { count: 'exact', head: true }).eq('conversa_id', conversaId);
-            await gravarMensagem(empresa, instancia, { ...d, key: d.key ?? { remoteJid: jid, id: d.id, fromMe: d.fromMe } }, { baixar: false });
+            await gravarMensagem(empresa, linha, { ...d, key: d.key ?? { remoteJid: jid, id: d.id, fromMe: d.fromMe } }, { baixar: false });
             const depois = await admin.from('whatsapp_mensagens').select('id', { count: 'exact', head: true }).eq('conversa_id', conversaId);
             if ((depois.count ?? 0) > (antes.count ?? 0)) mensagens++;
           }
@@ -280,7 +290,7 @@ Deno.serve(async (req) => {
       } catch { /* segue com o número informado */ }
       const tel = telefoneDe(jid) ?? num;
       const nome = nomeValido(b.nome);
-      const conversaId = await garantirConversa(empresa, instancia, jid, null, tel);
+      const conversaId = await garantirConversa(empresa, linha, jid, null, tel);
       await guardarContato(empresa, jid, null, tel);
       if (nome) {
         await admin.from('whatsapp_conversas').update({ apelido: nome }).eq('id', conversaId);
@@ -292,7 +302,7 @@ Deno.serve(async (req) => {
     if (b.acao === 'fotos') {
       // Copia a foto de perfil de cada conversa para a pasta privada (a URL do WhatsApp expira). Refaz a cada 7 dias; sem foto, tenta de novo depois de 1 dia.
       const limite = Math.min(Number(b.limite) || 40, 80);
-      const { data: lista } = await admin.from('whatsapp_conversas').select('id, jid, telefone, foto_path, foto_atualizada').eq('company_id', empresa).order('ultima_data', { ascending: false, nullsFirst: false }).limit(300);
+      const { data: lista } = await admin.from('whatsapp_conversas').select('id, jid, telefone, foto_path, foto_atualizada').eq('instancia_id', linha.id).order('ultima_data', { ascending: false, nullsFirst: false }).limit(300);
       const agora = Date.now();
       const alvos = (lista ?? []).filter((c) => {
         const t = c.foto_atualizada ? new Date(c.foto_atualizada).getTime() : 0;
@@ -323,7 +333,7 @@ Deno.serve(async (req) => {
     }
 
     if (b.acao === 'midia') {
-      const { data: msg } = await admin.from('whatsapp_mensagens').select('id, conversa_id, message_id, tipo, midia_mime, midia_nome, de_mim').eq('id', b.mensagem_id).eq('company_id', empresa).maybeSingle();
+      const { data: msg } = await admin.from('whatsapp_mensagens').select('id, conversa_id, message_id, tipo, midia_mime, midia_nome, de_mim').eq('id', b.mensagem_id).eq('instancia_id', linha.id).maybeSingle();
       if (!msg) return json({ error: 'Mensagem não encontrada.' }, 404);
       const { data: conv } = await admin.from('whatsapp_conversas').select('jid').eq('id', msg.conversa_id).single();
       const m = await baixarMidia(empresa, instancia, msg.conversa_id, msg.message_id, msg.tipo, msg.midia_mime, msg.midia_nome, { remoteJid: conv?.jid, id: msg.message_id, fromMe: msg.de_mim });
@@ -337,7 +347,7 @@ Deno.serve(async (req) => {
       if (!/^[0-9]{8,24}@(s\.whatsapp\.net|g\.us|lid)$/.test(jid)) return json({ error: 'Conversa inválida.' }, 400);
       let destino = jid.endsWith('@g.us') ? jid : jid.split('@')[0];
       if (jid.endsWith('@lid')) { // contato identificado por LID: usa o telefone quando se sabe, senão o próprio identificador
-        const { data: cv } = await admin.from('whatsapp_conversas').select('telefone').eq('company_id', empresa).eq('jid', jid).maybeSingle();
+        const { data: cv } = await admin.from('whatsapp_conversas').select('telefone').eq('instancia_id', linha.id).eq('jid', jid).maybeSingle();
         destino = cv?.telefone ? String(cv.telefone) : jid;
       }
       const tipo: string = ['texto', 'arquivo', 'audio'].includes(b.tipo) ? b.tipo : 'texto';
@@ -362,15 +372,15 @@ Deno.serve(async (req) => {
       const t = await r.json().catch(() => ({}));
       if (!r.ok) return json({ error: `Não foi possível enviar: ${JSON.stringify(t?.response?.message ?? t?.message ?? t).slice(0, 250)}` }, 502);
       const messageId: string = t?.key?.id ?? t?.id ?? crypto.randomUUID();
-      const conversaId = await garantirConversa(empresa, instancia, jid, null);
-      const linha: Obj = { company_id: empresa, conversa_id: conversaId, message_id: messageId, de_mim: true, remetente_nome: 'Você', tipo: tipoMsg, texto: texto || null, status: 'enviada', data: new Date().toISOString() };
+      const conversaId = await garantirConversa(empresa, linha, jid, null);
+      const linhaMsg: Obj = { company_id: empresa, instancia_id: linha.id, conversa_id: conversaId, message_id: messageId, de_mim: true, remetente_nome: 'Você', tipo: tipoMsg, texto: texto || null, status: 'enviada', data: new Date().toISOString() };
       if (anexo) {
         const caminho = `${empresa}/${conversaId}/${messageId.replace(/[^A-Za-z0-9_-]/g, '')}.${extDe(anexo.mimetype, anexo.filename)}`;
         const up = await admin.storage.from(BUCKET).upload(caminho, bytesDe(anexo.base64), { contentType: anexo.mimetype.split(';')[0], upsert: true });
-        if (!up.error) Object.assign(linha, { midia_path: caminho, midia_nome: anexo.filename, midia_mime: anexo.mimetype });
+        if (!up.error) Object.assign(linhaMsg, { midia_path: caminho, midia_nome: anexo.filename, midia_mime: anexo.mimetype });
       }
-      await admin.from('whatsapp_mensagens').upsert(linha, { onConflict: 'company_id,message_id', ignoreDuplicates: true });
-      await admin.from('whatsapp_conversas').update({ ultima_mensagem: resumoDe(tipoMsg, texto), ultima_data: linha.data as string }).eq('id', conversaId);
+      await admin.from('whatsapp_mensagens').upsert(linhaMsg, { onConflict: 'instancia_id,message_id', ignoreDuplicates: true });
+      await admin.from('whatsapp_conversas').update({ ultima_mensagem: resumoDe(tipoMsg, texto), ultima_data: linhaMsg.data as string }).eq('id', conversaId);
       return json({ success: true, message_id: messageId });
     }
 

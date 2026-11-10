@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, MessageCircle, PlugZap, QrCode, RefreshCw, Send, Trash2, Unplug, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, MessageCircle, PlugZap, QrCode, RefreshCw, Send, Trash2, Unplug, CheckCircle2, AlertTriangle, Plus } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
-import { configurarRecebimento, sincronizarChat } from '@/lib/whatsappChat';
+import { configurarRecebimento, sincronizarChat, listarLinhas, formatarTelefoneBR } from '@/lib/whatsappChat';
 import { statusWhatsApp, qrCodeWhatsApp, criarInstanciaWhatsApp, desconectarWhatsApp, removerInstanciaWhatsApp, enviarWhatsApp, telefoneValido } from '@/lib/whatsappService';
 
 const ROTULO = { open: 'Conectado', close: 'Desconectado', connecting: 'Conectando…', sem_instancia: 'Sem instância', inexistente: 'Instância não encontrada' };
@@ -33,6 +33,14 @@ const WhatsAppConexao = () => {
   const [telefoneTeste, setTelefoneTeste] = useState('');
   const [enviandoTeste, setEnviandoTeste] = useState(false);
   const ultimoQr = useRef(0);
+  // várias linhas (números) por empresa: a Principal e, por exemplo, a de um colaborador
+  const [linhas, setLinhas] = useState([]);
+  const [linhaId, setLinhaId] = useState(null); // null = Principal
+  const [novaAberta, setNovaAberta] = useState(false);
+  const [novaNome, setNovaNome] = useState('');
+  const [novaTel, setNovaTel] = useState('');
+  const [novaDono, setNovaDono] = useState('reservada'); // 'reservada' (só administradores) ou id de um usuário da empresa
+  const [usuarios, setUsuarios] = useState([]);
   const alvo = superadmin ? empresaId : undefined; // admin comum: a função usa a empresa dele
 
   useEffect(() => {
@@ -44,11 +52,22 @@ const WhatsAppConexao = () => {
   }, [superadmin]);
   useEffect(() => { if (minhaEmpresa && !superadmin) setEmpresaId(minhaEmpresa); }, [minhaEmpresa, superadmin]);
 
+  const carregarLinhas = useCallback(async () => {
+    if (!empresaId) { setLinhas([]); return; }
+    try { setLinhas(await listarLinhas(empresaId)); } catch { setLinhas([]); }
+  }, [empresaId]);
+  useEffect(() => { setLinhaId(null); carregarLinhas(); }, [empresaId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!empresaId || !podeGerir) return;
+    supabase.from('profiles').select('id, nome').eq('company_id', empresaId).order('nome').then(({ data }) => setUsuarios(data || []));
+  }, [empresaId, podeGerir]);
+  const linhaAtual = linhas.find((l) => l.id === linhaId) || null;
+
   const consultar = useCallback(async (silencioso = false) => {
     if (superadmin && !empresaId) return null;
     if (!silencioso) setCarregando(true);
     try {
-      const r = await statusWhatsApp(alvo);
+      const r = await statusWhatsApp(alvo, linhaId);
       setEstado({ estado: r.estado, conectado: r.conectado, instancia: r.instancia });
       if (r.conectado) { setQr(null); setCodigo(null); }
       return r;
@@ -56,22 +75,22 @@ const WhatsAppConexao = () => {
       setEstado({ erro: e.message });
       return null;
     } finally { if (!silencioso) setCarregando(false); }
-  }, [alvo, superadmin, empresaId]);
+  }, [alvo, superadmin, empresaId, linhaId]);
 
   const gerarQr = useCallback(async (manual = false) => {
     if (manual) setGerando(true);
     try {
-      const r = await qrCodeWhatsApp(alvo);
+      const r = await qrCodeWhatsApp(alvo, linhaId);
       ultimoQr.current = Date.now();
       setQr(r.qr || null); setCodigo(r.codigoPareamento || null);
       if (!r.qr && manual) toast({ title: 'A Evolution API não devolveu um QR code', description: 'Se o WhatsApp já estiver conectado, atualize o estado. Caso contrário, tente de novo em alguns segundos.' });
     } catch (e) {
       if (manual) toast({ title: 'Não foi possível gerar o QR code', description: e.message, variant: 'destructive' });
     } finally { if (manual) setGerando(false); }
-  }, [alvo, toast]);
+  }, [alvo, linhaId, toast]);
 
   // trocou de empresa: zera a tela e consulta de novo
-  useEffect(() => { setQr(null); setCodigo(null); setEstado(null); if (!authLoading && podeGerir) consultar(); }, [empresaId, authLoading, podeGerir]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setQr(null); setCodigo(null); setEstado(null); if (!authLoading && podeGerir) consultar(); }, [empresaId, linhaId, authLoading, podeGerir]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Com o QR na tela: confere a conexão a cada 4 s e renova o QR a cada 25 s (ele expira rápido).
   useEffect(() => {
@@ -81,19 +100,19 @@ const WhatsAppConexao = () => {
       if (r?.conectado) {
         toast({ title: 'WhatsApp conectado!', description: 'A empresa já pode enviar mensagens. Ativando o recebimento e trazendo as conversas…' });
         // ao conectar: aponta o recebimento para o ERP e baixa as conversas recentes (falhas aqui não atrapalham a conexão)
-        configurarRecebimento(alvo).then(() => sincronizarChat(alvo)).then((x) => toast({ title: 'Conversas trazidas para o ERP', description: `${x?.conversas || 0} conversas e ${x?.mensagens || 0} mensagens. Veja em WhatsApp, no menu.` }))
+        configurarRecebimento(alvo, linhaId).then(() => sincronizarChat(alvo, linhaId)).then((x) => toast({ title: 'Conversas trazidas para o ERP', description: `${x?.conversas || 0} conversas e ${x?.mensagens || 0} mensagens. Veja em WhatsApp, no menu.` }))
           .catch((e) => toast({ title: 'Conectado, mas o recebimento não foi ativado', description: `${e.message} Abra WhatsApp no menu e clique na engrenagem.`, variant: 'destructive' }));
         return;
       }
       if (Date.now() - ultimoQr.current > 25000) gerarQr(false);
     }, 4000);
     return () => clearInterval(t);
-  }, [qr, consultar, gerarQr, toast]);
+  }, [qr, consultar, gerarQr, toast, linhaId, alvo]);
 
   const criar = async () => {
     setTrabalhando(true);
     try {
-      const r = await criarInstanciaWhatsApp(alvo);
+      const r = await criarInstanciaWhatsApp(alvo, linhaId);
       ultimoQr.current = Date.now();
       setQr(r.qr || null); setCodigo(r.codigoPareamento || null);
       toast({ title: 'Instância criada', description: r.qr ? 'Leia o QR code com o celular.' : 'Clique em "Gerar QR code".' });
@@ -102,11 +121,28 @@ const WhatsAppConexao = () => {
     finally { setTrabalhando(false); }
   };
 
+  const criarLinha = async () => {
+    if (!novaNome.trim()) { toast({ title: 'Dê um nome à linha', description: 'Por exemplo: Luana.', variant: 'destructive' }); return; }
+    if (novaTel && !telefoneValido(novaTel)) { toast({ title: 'Telefone inválido', description: 'Use DDD + número.', variant: 'destructive' }); return; }
+    setTrabalhando(true);
+    try {
+      const reservada = novaDono === 'reservada';
+      const r = await criarInstanciaWhatsApp(alvo, null, { rotulo: novaNome.trim(), telefone: novaTel, usuarioId: reservada ? undefined : novaDono, reservada });
+      await carregarLinhas();
+      setNovaAberta(false); setNovaNome(''); setNovaTel('');
+      ultimoQr.current = Date.now();
+      setLinhaId(r.linha_id || null);
+      setQr(r.qr || null); setCodigo(r.codigoPareamento || null);
+      toast({ title: 'Linha criada', description: r.qr ? 'Peça para a pessoa ler o QR code com o celular do número.' : 'Clique em "Gerar QR code".' });
+    } catch (e) { toast({ title: 'Não foi possível criar a linha', description: e.message, variant: 'destructive' }); }
+    finally { setTrabalhando(false); }
+  };
+
   const desconectar = async () => {
     if (!window.confirm('Desconectar o WhatsApp desta empresa? Os envios param até conectar de novo.')) return;
     setTrabalhando(true);
     try {
-      await desconectarWhatsApp(alvo);
+      await desconectarWhatsApp(alvo, linhaId);
       toast({ title: 'WhatsApp desconectado' });
       setQr(null); setCodigo(null);
       await consultar(true);
@@ -118,8 +154,9 @@ const WhatsAppConexao = () => {
     if (!window.confirm('Remover a instância desta empresa? Será preciso criar outra e ler o QR code de novo.')) return;
     setTrabalhando(true);
     try {
-      await removerInstanciaWhatsApp(alvo);
-      toast({ title: 'Instância removida' });
+      const r = await removerInstanciaWhatsApp(alvo, linhaId);
+      toast({ title: 'Instância removida', description: r?.historico_mantido ? 'As conversas dela continuam guardadas no ERP.' : undefined });
+      await carregarLinhas();
       setQr(null); setCodigo(null);
       await consultar(true);
     } catch (e) { toast({ title: 'Não foi possível remover', description: e.message, variant: 'destructive' }); }
@@ -130,7 +167,7 @@ const WhatsAppConexao = () => {
     if (!telefoneValido(telefoneTeste)) { toast({ title: 'Telefone inválido', description: 'Use DDD + número.', variant: 'destructive' }); return; }
     setEnviandoTeste(true);
     try {
-      await enviarWhatsApp({ tipo: 'outro', empresa_id: alvo, para: telefoneTeste, mensagem: 'Teste de envio do ERP Engagement. Se você recebeu esta mensagem, a conexão do WhatsApp está funcionando. ✅' });
+      await enviarWhatsApp({ tipo: 'outro', empresa_id: alvo, linha_id: linhaId, para: telefoneTeste, mensagem: 'Teste de envio do ERP Engagement. Se você recebeu esta mensagem, a conexão do WhatsApp está funcionando. ✅' });
       toast({ title: 'Mensagem de teste enviada', description: `Para ${telefoneTeste}.` });
     } catch (e) { toast({ title: 'Não foi possível enviar o teste', description: e.message, variant: 'destructive' }); }
     finally { setEnviandoTeste(false); }
@@ -162,11 +199,43 @@ const WhatsAppConexao = () => {
         </div>
       )}
 
+      {(linhas.length > 0 || podeGerir) && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground mr-1">Número:</span>
+          <button type="button" onClick={() => setLinhaId(null)} className={`text-xs px-3 py-1.5 rounded-full border ${linhaId === null ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}>Principal</button>
+          {linhas.filter((l) => l.usuario_id || l.reservada || l.rotulo !== 'Principal').map((l) => (
+            <button key={l.id} type="button" onClick={() => setLinhaId(l.id)} className={`text-xs px-3 py-1.5 rounded-full border ${linhaId === l.id ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}
+              title={l.telefone ? formatarTelefoneBR(l.telefone) : l.instancia}>{l.rotulo}{l.telefone ? ` · ${formatarTelefoneBR(l.telefone)}` : ''}</button>
+          ))}
+          <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setNovaAberta((v) => !v)}><Plus className="h-3.5 w-3.5" />Adicionar número</Button>
+        </div>
+      )}
+      {novaAberta && (
+        <Card className="mb-4 max-w-xl">
+          <CardHeader className="pb-2"><CardTitle className="text-base">Adicionar outro número de WhatsApp</CardTitle><CardDescription>Ele passa a aparecer na tela WhatsApp, com as conversas separadas das do número Principal.</CardDescription></CardHeader>
+          <CardContent className="space-y-3">
+            <div><Label className="text-xs">Nome da linha</Label><Input value={novaNome} onChange={(e) => setNovaNome(e.target.value)} placeholder="Luana" /></div>
+            <div><Label className="text-xs">Telefone (opcional, só para identificar)</Label><Input value={novaTel} onChange={(e) => setNovaTel(e.target.value)} placeholder="(19) 99033-3043" inputMode="tel" /></div>
+            <div>
+              <Label className="text-xs">Quem enxerga esta linha no ERP</Label>
+              <select className="h-9 rounded-md border border-input bg-background px-3 text-sm w-full" value={novaDono} onChange={(e) => setNovaDono(e.target.value)}>
+                <option value="reservada">Só os administradores (a pessoa usa apenas o celular)</option>
+                {usuarios.map((u) => <option key={u.id} value={u.id}>{u.nome} (só ela vê esta linha, e não vê as outras)</option>)}
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={criarLinha} disabled={trabalhando}>{trabalhando ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <QrCode className="h-4 w-4 mr-2" />}Criar e gerar QR code</Button>
+              <Button variant="ghost" onClick={() => setNovaAberta(false)}>Cancelar</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><MessageCircle className="h-5 w-5 text-emerald-600" /> Estado da conexão</CardTitle>
-            <CardDescription>{empresaAtual ? `Empresa: ${empresaAtual.nome_fantasia || empresaAtual.razao_social}. ` : ''}{estado?.instancia ? `Instância: ${estado.instancia}` : 'Instância própria da empresa na Evolution API.'}</CardDescription>
+            <CardDescription>{empresaAtual ? `Empresa: ${empresaAtual.nome_fantasia || empresaAtual.razao_social}. ` : ''}{linhaAtual ? `Número: ${linhaAtual.rotulo}. ` : ''}{estado?.instancia ? `Instância: ${estado.instancia}` : 'Instância própria da empresa na Evolution API.'}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {carregando && !estado ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : estado?.erro ? (

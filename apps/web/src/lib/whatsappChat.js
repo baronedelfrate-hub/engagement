@@ -12,9 +12,17 @@ const chamar = async (body) => {
   return data;
 };
 
-export const listarConversas = async (companyId, limite = 200) => {
-  const { data, error } = await supabase.from('whatsapp_conversas').select('id, jid, nome, apelido, telefone, eh_grupo, ultima_mensagem, ultima_data, nao_lidas, foto_path, foto_atualizada')
-    .eq('company_id', companyId).order('ultima_data', { ascending: false, nullsFirst: false }).limit(limite);
+// Linhas (números) de WhatsApp da empresa que o usuário pode ver. Quem só tem uma não precisa escolher.
+export const listarLinhas = async (companyId) => {
+  const { data, error } = await supabase.from('whatsapp_instancias').select('id, rotulo, usuario_id, reservada, telefone, instancia, created_at').eq('company_id', companyId).order('created_at');
+  if (error) throw new Error(error.message);
+  return data || [];
+};
+
+export const listarConversas = async (companyId, linhaId, limite = 200) => {
+  let q = supabase.from('whatsapp_conversas').select('id, instancia_id, jid, nome, apelido, telefone, eh_grupo, ultima_mensagem, ultima_data, nao_lidas, foto_path, foto_atualizada').eq('company_id', companyId);
+  if (linhaId) q = q.eq('instancia_id', linhaId);
+  const { data, error } = await q.order('ultima_data', { ascending: false, nullsFirst: false }).limit(limite);
   if (error) throw new Error(error.message);
   return data || [];
 };
@@ -38,15 +46,15 @@ export const blobParaBase64 = (blob) => new Promise((resolve, reject) => {
   r.readAsDataURL(blob);
 });
 
-export const enviarTextoChat = (jid, texto, empresaId) => chamar({ acao: 'enviar', tipo: 'texto', jid, texto, empresa_id: empresaId });
-export const enviarArquivoChat = async (jid, arquivo, legenda, empresaId) =>
-  chamar({ acao: 'enviar', tipo: 'arquivo', jid, texto: legenda || '', empresa_id: empresaId, anexo: { base64: await blobParaBase64(arquivo), filename: arquivo.name, mimetype: arquivo.type || 'application/octet-stream' } });
-export const enviarAudioChat = async (jid, blob, empresaId) =>
-  chamar({ acao: 'enviar', tipo: 'audio', jid, empresa_id: empresaId, anexo: { base64: await blobParaBase64(blob), filename: 'audio.webm', mimetype: blob.type || 'audio/webm' } });
-export const sincronizarChat = (empresaId) => chamar({ acao: 'sincronizar', empresa_id: empresaId });
-export const baixarMidiaChat = (mensagemId, empresaId) => chamar({ acao: 'midia', mensagem_id: mensagemId, empresa_id: empresaId });
+export const enviarTextoChat = (jid, texto, empresaId, linhaId) => chamar({ acao: 'enviar', tipo: 'texto', jid, texto, empresa_id: empresaId, linha_id: linhaId });
+export const enviarArquivoChat = async (jid, arquivo, legenda, empresaId, linhaId) =>
+  chamar({ acao: 'enviar', tipo: 'arquivo', jid, texto: legenda || '', empresa_id: empresaId, linha_id: linhaId, anexo: { base64: await blobParaBase64(arquivo), filename: arquivo.name, mimetype: arquivo.type || 'application/octet-stream' } });
+export const enviarAudioChat = async (jid, blob, empresaId, linhaId) =>
+  chamar({ acao: 'enviar', tipo: 'audio', jid, empresa_id: empresaId, linha_id: linhaId, anexo: { base64: await blobParaBase64(blob), filename: 'audio.webm', mimetype: blob.type || 'audio/webm' } });
+export const sincronizarChat = (empresaId, linhaId) => chamar({ acao: 'sincronizar', empresa_id: empresaId, linha_id: linhaId });
+export const baixarMidiaChat = (mensagemId, empresaId, linhaId) => chamar({ acao: 'midia', mensagem_id: mensagemId, empresa_id: empresaId, linha_id: linhaId });
 // Copia as fotos de perfil das conversas (a função pula as que já foram verificadas há pouco) e devolve links temporários para exibi-las.
-export const buscarFotos = (empresaId) => chamar({ acao: 'fotos', empresa_id: empresaId });
+export const buscarFotos = (empresaId, linhaId) => chamar({ acao: 'fotos', empresa_id: empresaId, linha_id: linhaId });
 export const urlsDasFotos = async (paths) => {
   const unicos = [...new Set((paths || []).filter(Boolean))];
   if (!unicos.length) return {};
@@ -55,7 +63,7 @@ export const urlsDasFotos = async (paths) => {
   return Object.fromEntries((data || []).filter((x) => x.signedUrl).map((x) => [x.path, x.signedUrl]));
 };
 
-export const configurarRecebimento = (empresaId) => chamar({ acao: 'configurar_webhook', empresa_id: empresaId });
+export const configurarRecebimento = (empresaId, linhaId) => chamar({ acao: 'configurar_webhook', empresa_id: empresaId, linha_id: linhaId });
 
 export const listarContatos = async (companyId) => {
   const { data, error } = await supabase.from('whatsapp_contatos').select('id, jid, nome_whatsapp, apelido, telefone').eq('company_id', companyId).order('apelido', { nullsFirst: false }).limit(3000);
@@ -63,12 +71,12 @@ export const listarContatos = async (companyId) => {
   return data || [];
 };
 // Baixa a agenda do WhatsApp e já aplica os nomes (e telefones) às conversas que existem.
-export const baixarContatos = async (empresaId) => {
-  const r = await chamar({ acao: 'contatos', empresa_id: empresaId });
+export const baixarContatos = async (empresaId, linhaId) => {
+  const r = await chamar({ acao: 'contatos', empresa_id: empresaId, linha_id: linhaId });
   const { data } = await supabase.rpc('whatsapp_aplicar_contatos', { p_company: empresaId });
   return { ...r, conversasNomeadas: Number(data) || 0 };
 };
-export const iniciarConversa = (telefone, nome, empresaId) => chamar({ acao: 'iniciar_conversa', telefone, nome, empresa_id: empresaId });
+export const iniciarConversa = (telefone, nome, empresaId, linhaId) => chamar({ acao: 'iniciar_conversa', telefone, nome, empresa_id: empresaId, linha_id: linhaId });
 export const definirNome = (conversaId, nome) => supabase.rpc('whatsapp_definir_nome', { p_conversa: conversaId, p_nome: nome });
 
 export const formatarTelefoneBR = (t) => {

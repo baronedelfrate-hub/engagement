@@ -1,7 +1,7 @@
 import { corsHeaders } from "./cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
-// Envia WhatsApp pela Evolution API (v2), com UMA instância por empresa (tabela whatsapp_instancias).
+// Envia WhatsApp pela Evolution API (v2), com uma ou mais linhas por empresa (tabela whatsapp_instancias): a Principal e linhas pessoais de usuários (usuario_id).
 // Segredos (Supabase > Edge Functions > Secrets): EVOLUTION_API_URL (ex.: https://evolution.seudominio.com.br) e EVOLUTION_API_KEY (chave global).
 // Opcionais: EVOLUTION_INSTANCE (instância usada por superadmin sem empresa) e EVOLUTION_API_VERSION ("1" para a API antiga; padrão "2").
 // Ações de gestão (corpo { acao }): status (qualquer perfil que envia), criar | qrcode | desconectar | remover (admin da empresa ou superadmin; o superadmin pode informar empresa_id).
@@ -19,7 +19,7 @@ const normalizarNumero = (bruto: string) => {
   if (!/^55\d{10,11}$/.test(n)) return null;
   return n;
 };
-const slug = (s: string) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20);
+const slug = (s: string) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 20);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -47,10 +47,17 @@ Deno.serve(async (req) => {
 
     // Empresa da instância: a de quem está logado; o superadmin pode escolher outra.
     const alvo: string | null = perfil.role === 'superadmin' && b.empresa_id ? String(b.empresa_id) : (perfil.company_id ?? null);
+    // Linha usada: a pedida (linha_id), se o usuário puder; senão a pessoal dele; senão a Principal (sem dono) da empresa.
+    // deno-lint-ignore no-explicit-any
+    const ref: { linha: Record<string, any> | null } = { linha: null };
     const buscarInstancia = async (): Promise<string | null> => {
       if (alvo) {
-        const { data } = await admin.from('whatsapp_instancias').select('instancia').eq('company_id', alvo).maybeSingle();
-        return data?.instancia ?? null;
+        const { data: todas } = await admin.from('whatsapp_instancias').select('id, instancia, usuario_id, rotulo, reservada').eq('company_id', alvo).order('created_at');
+        const temPropria = (todas ?? []).some((l) => l.usuario_id === caller.id);
+        const visiveis = (todas ?? []).filter((l) => perfil.role === 'superadmin' || l.usuario_id === caller.id || (l.usuario_id == null && l.reservada && perfil.role === 'admin') || (l.usuario_id == null && !l.reservada && !temPropria));
+        const pedida = b.linha_id ? visiveis.find((l) => l.id === String(b.linha_id)) : null;
+        ref.linha = pedida ?? (b.linha_id ? null : (visiveis.find((l) => l.usuario_id === caller.id) ?? visiveis.find((l) => l.usuario_id == null && !l.reservada) ?? null));
+        return ref.linha?.instancia ?? null;
       }
       return perfil.role === 'superadmin' ? (Deno.env.get('EVOLUTION_INSTANCE') || null) : null;
     };
@@ -81,9 +88,15 @@ Deno.serve(async (req) => {
 
       if (acao === 'criar') {
         if (!alvo) return json({ error: 'Escolha a empresa para criar a instância.' }, 400);
+        const rotulo = String(b.rotulo ?? '').trim().slice(0, 40);
+        const donoId: string | null = b.usuario_id ? String(b.usuario_id) : null;
+        // linha nova (outro número da mesma empresa): rótulo informado e que ainda não existe
+        const { data: existentes } = await admin.from('whatsapp_instancias').select('id, rotulo').eq('company_id', alvo);
+        const nova = !b.linha_id && !!rotulo && !(existentes ?? []).some((l) => l.rotulo.toLowerCase() === rotulo.toLowerCase());
+        if (nova) instancia = null;
         if (!instancia) {
           const { data: emp } = await admin.from('empresas').select('nome_fantasia, razao_social').eq('id', alvo).single();
-          instancia = `erp-${slug(emp?.nome_fantasia || emp?.razao_social || 'empresa')}-${alvo.replace(/-/g, '').slice(0, 6)}`;
+          instancia = `erp-${slug(emp?.nome_fantasia || emp?.razao_social || 'empresa')}-${alvo.replace(/-/g, '').slice(0, 6)}${nova ? `-${slug(rotulo) || 'linha'}` : ''}`;
         }
         const r = await fetch(`${base}/instance/create`, { method: 'POST', headers: cab, body: JSON.stringify({ instanceName: instancia, integration: 'WHATSAPP-BAILEYS', qrcode: true }) });
         const t = await r.json().catch(() => ({}));
@@ -95,8 +108,11 @@ Deno.serve(async (req) => {
           const c = await conectar(instancia); // já existia na Evolution: apenas reaproveita e pede o QR
           qr = c.t?.base64 ?? c.t?.qrcode?.base64 ?? null; pareamento = c.t?.pairingCode ?? null;
         }
-        await admin.from('whatsapp_instancias').upsert({ company_id: alvo, instancia, created_by: caller.id }, { onConflict: 'company_id' });
-        return json({ success: true, instancia, qr, codigoPareamento: pareamento });
+        const registro: Record<string, unknown> = { company_id: alvo, instancia, created_by: caller.id };
+        if (nova) Object.assign(registro, { rotulo, usuario_id: donoId, reservada: !donoId && b.reservada === true, telefone: b.telefone ? String(b.telefone).replace(/\D/g, '') : null });
+        const { data: linhaSalva, error: erroLinha } = await admin.from('whatsapp_instancias').upsert(registro, { onConflict: 'instancia' }).select('id').single();
+        if (erroLinha) return json({ error: `A instância foi criada, mas não foi possível registrá-la: ${erroLinha.message}` }, 400);
+        return json({ success: true, instancia, linha_id: linhaSalva?.id ?? null, qr, codigoPareamento: pareamento });
       }
 
       if (!instancia) return json({ error: 'Esta empresa ainda não tem uma instância. Use "Criar instância".' }, 404);
@@ -120,8 +136,13 @@ Deno.serve(async (req) => {
       const r = await fetch(`${base}/instance/delete/${encodeURIComponent(instancia)}`, { method: 'DELETE', headers: cab });
       const t = await r.json().catch(() => ({}));
       if (!r.ok && r.status !== 404) return json({ error: erroDa(t, r) }, 502);
-      if (alvo) await admin.from('whatsapp_instancias').delete().eq('company_id', alvo);
-      return json({ success: true });
+      // Se a linha já tem conversas, mantém o registro (o histórico fica); sem conversas, apaga a linha.
+      let mantida = false;
+      if (ref.linha?.id) {
+        const { count } = await admin.from('whatsapp_conversas').select('id', { count: 'exact', head: true }).eq('instancia_id', ref.linha.id);
+        if ((count ?? 0) > 0) mantida = true; else await admin.from('whatsapp_instancias').delete().eq('id', ref.linha.id);
+      }
+      return json({ success: true, historico_mantido: mantida });
     }
 
     // ---- envio ----

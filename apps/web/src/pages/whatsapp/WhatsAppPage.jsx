@@ -11,7 +11,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { statusWhatsApp } from '@/lib/whatsappService';
 import { avisosDoNavegador, pedirAvisosDoNavegador } from '@/hooks/useWhatsAppNotificacoes';
 import {
-  listarConversas, listarMensagens, marcarLida, urlDaMidia, enviarTextoChat, enviarArquivoChat, enviarAudioChat,
+  listarLinhas, listarConversas, listarMensagens, marcarLida, urlDaMidia, enviarTextoChat, enviarArquivoChat, enviarAudioChat,
   sincronizarChat, baixarMidiaChat, configurarRecebimento, nomeDaConversa, subtituloDaConversa,
   listarContatos, baixarContatos, iniciarConversa, definirNome, formatarTelefoneBR, buscarFotos, urlsDasFotos
 } from '@/lib/whatsappChat';
@@ -29,7 +29,7 @@ const curto = (d) => {
   return x.toDateString() === h.toDateString() ? hora(d) : x.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 };
 
-const Midia = ({ m, empresaId, onBaixada }) => {
+const Midia = ({ m, empresaId, linhaId, onBaixada }) => {
   const [url, setUrl] = useState(null);
   const [erro, setErro] = useState(false);
   const [baixando, setBaixando] = useState(false);
@@ -40,7 +40,7 @@ const Midia = ({ m, empresaId, onBaixada }) => {
   }, [m.midia_path]);
   const buscar = async () => {
     setBaixando(true);
-    try { await baixarMidiaChat(m.id, empresaId); onBaixada?.(); } catch (e) { setErro(true); } finally { setBaixando(false); }
+    try { await baixarMidiaChat(m.id, empresaId, linhaId); onBaixada?.(); } catch (e) { setErro(true); } finally { setBaixando(false); }
   };
   if (!m.midia_path) {
     return <button type="button" onClick={buscar} disabled={baixando} className="text-xs underline text-primary">{baixando ? 'Baixando…' : `Baixar ${m.tipo === 'audio' ? 'o áudio' : m.tipo === 'imagem' ? 'a foto' : m.tipo === 'video' ? 'o vídeo' : 'o arquivo'}`}{erro ? ' (indisponível)' : ''}</button>;
@@ -70,6 +70,8 @@ const WhatsAppPage = () => {
   const { company_id: companyId, role, loading: authLoading } = useAuthContext();
   const podeGerir = role === 'admin' || role === 'superadmin';
   const [conectado, setConectado] = useState(null);
+  const [linhas, setLinhas] = useState([]);
+  const [linhaId, setLinhaId] = useState(null);
   const [conversas, setConversas] = useState([]);
   const [busca, setBusca] = useState('');
   const [ativaId, setAtivaId] = useState(null);
@@ -99,18 +101,29 @@ const WhatsAppPage = () => {
   const ativa = useMemo(() => conversas.find((c) => c.id === ativaId) || null, [conversas, ativaId]);
 
   const carregarConversas = useCallback(async () => {
-    try { setConversas(await listarConversas(companyId)); } catch (e) { toast({ title: 'Erro ao carregar conversas', description: e.message, variant: 'destructive' }); }
-  }, [toast, companyId]);
+    if (!linhaId) return;
+    try { setConversas(await listarConversas(companyId, linhaId)); } catch (e) { toast({ title: 'Erro ao carregar conversas', description: e.message, variant: 'destructive' }); }
+  }, [toast, companyId, linhaId]);
   const carregarMensagens = useCallback(async (id) => {
     if (!id) return setMensagens([]);
     try { setMensagens(await listarMensagens(id)); } catch (e) { toast({ title: 'Erro ao carregar mensagens', description: e.message, variant: 'destructive' }); }
   }, [toast]);
 
+  // linhas (números) que este usuário enxerga: a Principal e, para administradores, as de colaboradores
   useEffect(() => {
     if (authLoading || !companyId) return;
-    statusWhatsApp(companyId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
+    listarLinhas(companyId).then((l) => {
+      setLinhas(l);
+      setLinhaId((atual) => (atual && l.some((x) => x.id === atual) ? atual : (l.find((x) => !x.usuario_id && !x.reservada) || l[0])?.id || null));
+    }).catch(() => setLinhas([]));
+  }, [authLoading, companyId]);
+
+  useEffect(() => {
+    if (authLoading || !companyId || !linhaId) return;
+    setAtivaId(null); setConversas([]); setConectado(null); buscouFotos.current = false;
+    statusWhatsApp(companyId, linhaId).then((s) => setConectado(!!s?.conectado)).catch(() => setConectado(false));
     carregarConversas();
-  }, [authLoading, companyId, carregarConversas]);
+  }, [authLoading, companyId, linhaId, carregarConversas]);
 
   // fotos: links temporários das que já foram copiadas; e uma busca por sessão das que faltam
   useEffect(() => {
@@ -120,7 +133,7 @@ const WhatsAppPage = () => {
   useEffect(() => {
     if (buscouFotos.current || !conectado || !conversas.length || !conversas.some((c) => !c.foto_path)) return;
     buscouFotos.current = true;
-    buscarFotos(companyId).then(() => carregarConversas()).catch(() => { /* fotos são opcionais */ });
+    buscarFotos(companyId, linhaId).then(() => carregarConversas()).catch(() => { /* fotos são opcionais */ });
   }, [conectado, conversas.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // tempo real: mensagem nova ou conversa atualizada
@@ -148,7 +161,7 @@ const WhatsAppPage = () => {
     const t = texto.trim();
     if (!t || !ativa || enviando) return;
     setEnviando(true);
-    try { await enviarTextoChat(ativa.jid, t, companyId); setTexto(''); await apos(); }
+    try { await enviarTextoChat(ativa.jid, t, companyId, linhaId); setTexto(''); await apos(); }
     catch (e) { toast({ title: 'Não foi possível enviar', description: e.message, variant: 'destructive' }); }
     finally { setEnviando(false); }
   };
@@ -158,7 +171,7 @@ const WhatsAppPage = () => {
     try {
       for (const f of arquivos) {
         if (f.size > 15 * 1024 * 1024) { toast({ title: 'Arquivo grande demais', description: `${f.name} passa de 15 MB.`, variant: 'destructive' }); continue; }
-        await enviarArquivoChat(ativa.jid, f, arquivos.length === 1 ? texto.trim() : '', companyId);
+        await enviarArquivoChat(ativa.jid, f, arquivos.length === 1 ? texto.trim() : '', companyId, linhaId);
       }
       setTexto(''); await apos();
     } catch (e) { toast({ title: 'Não foi possível enviar o arquivo', description: e.message, variant: 'destructive' }); }
@@ -186,7 +199,7 @@ const WhatsAppPage = () => {
       const blob = new Blob(pedacosRef.current, { type: g.mimeType || 'audio/webm' });
       if (blob.size < 800) return;
       setEnviando(true);
-      try { await enviarAudioChat(ativa.jid, blob, companyId); await apos(); }
+      try { await enviarAudioChat(ativa.jid, blob, companyId, linhaId); await apos(); }
       catch (e) { toast({ title: 'Não foi possível enviar o áudio', description: e.message, variant: 'destructive' }); }
       finally { setEnviando(false); }
     };
@@ -197,14 +210,14 @@ const WhatsAppPage = () => {
   const sincronizar = async () => {
     setSincronizando(true);
     try {
-      const r = await sincronizarChat(companyId);
+      const r = await sincronizarChat(companyId, linhaId);
       await carregarConversas(); if (ativaId) await carregarMensagens(ativaId);
       toast({ title: 'Conversas sincronizadas', description: `${r.conversas || 0} conversas, ${r.mensagens || 0} mensagens novas.` });
     } catch (e) { toast({ title: 'Não foi possível sincronizar', description: e.message, variant: 'destructive' }); }
     finally { setSincronizando(false); }
   };
   const ativarRecebimento = async () => {
-    try { await configurarRecebimento(companyId); toast({ title: 'Recebimento ativado', description: 'Agora as mensagens novas chegam aqui. Use "Sincronizar" para trazer as conversas recentes.' }); }
+    try { await configurarRecebimento(companyId, linhaId); toast({ title: 'Recebimento ativado', description: 'Agora as mensagens novas chegam aqui. Use "Sincronizar" para trazer as conversas recentes.' }); }
     catch (e) { toast({ title: 'Não foi possível ativar', description: e.message, variant: 'destructive' }); }
   };
 
@@ -222,7 +235,7 @@ const WhatsAppPage = () => {
   const criarConversa = async (tel, nome) => {
     setCriando(true);
     try {
-      const r = await iniciarConversa(tel, nome, companyId);
+      const r = await iniciarConversa(tel, nome, companyId, linhaId);
       await carregarConversas();
       setAtivaId(r.conversa_id); setNovaAberta(false);
     } catch (e) { toast({ title: 'Não foi possível iniciar a conversa', description: e.message, variant: 'destructive' }); }
@@ -230,7 +243,7 @@ const WhatsAppPage = () => {
   };
   const baixarAgenda = async () => {
     setBaixandoContatos(true);
-    try { const r = await baixarContatos(companyId); toast({ title: 'Contatos baixados', description: `${r.contatos || 0} contatos trazidos do WhatsApp e ${r.conversasNomeadas || 0} conversas receberam nome.` }); setContatos(await listarContatos(companyId)); await carregarConversas(); }
+    try { const r = await baixarContatos(companyId, linhaId); toast({ title: 'Contatos baixados', description: `${r.contatos || 0} contatos trazidos do WhatsApp e ${r.conversasNomeadas || 0} conversas receberam nome.` }); setContatos(await listarContatos(companyId)); await carregarConversas(); }
     catch (e) { toast({ title: 'Não foi possível baixar os contatos', description: e.message, variant: 'destructive' }); }
     finally { setBaixandoContatos(false); }
   };
@@ -253,13 +266,22 @@ const WhatsAppPage = () => {
       <Helmet><title>WhatsApp - Engagement ERP</title></Helmet>
       {conectado === false && (
         <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 flex flex-wrap items-center gap-2">
-          O WhatsApp desta empresa não está conectado.
+          {linhas.length > 1 ? `O número "${linhas.find((l) => l.id === linhaId)?.rotulo || ''}" não está conectado.` : 'O WhatsApp desta empresa não está conectado.'}
           <Link to="/configuracoes/whatsapp" className="underline font-medium">Conectar agora</Link>
         </div>
       )}
       <div className="flex h-[calc(100vh-190px)] min-h-[480px] border rounded-lg overflow-hidden bg-background">
         {/* conversas */}
         <aside className={`w-full md:w-80 border-r flex flex-col shrink-0 ${ativa ? 'hidden md:flex' : 'flex'}`}>
+          {linhas.length > 1 && (
+            <div className="p-2 border-b flex flex-wrap gap-1">
+              {linhas.map((l) => (
+                <button key={l.id} type="button" onClick={() => setLinhaId(l.id)}
+                  className={`text-xs px-2.5 py-1 rounded-full border ${l.id === linhaId ? 'bg-emerald-600 text-white border-emerald-600' : 'hover:bg-muted'}`}
+                  title={l.telefone ? formatarTelefoneBR(l.telefone) : l.instancia}>{l.rotulo}</button>
+              ))}
+            </div>
+          )}
           <div className="p-2 border-b flex items-center gap-2">
             <div className="relative flex-1"><Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" /><Input className="pl-8 h-9" placeholder="Buscar conversa" value={busca} onChange={(e) => setBusca(e.target.value)} /></div>
             <Button variant="ghost" size="icon" className="h-9 w-9" title="Sincronizar conversas" onClick={sincronizar} disabled={sincronizando}>{sincronizando ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}</Button>
@@ -310,7 +332,7 @@ const WhatsAppPage = () => {
                       <div className={`flex ${m.de_mim ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[78%] rounded-lg px-2.5 py-1.5 shadow-sm text-sm ${m.de_mim ? 'bg-[#d9fdd3] dark:bg-emerald-900/60' : 'bg-background'}`}>
                           {ativa.eh_grupo && !m.de_mim && m.remetente_nome && <div className="text-[11px] font-semibold text-emerald-700">{m.remetente_nome}</div>}
-                          {['imagem', 'video', 'audio', 'documento', 'figurinha'].includes(m.tipo) && <div className="mb-1"><Midia m={m} empresaId={companyId} onBaixada={apos} /></div>}
+                          {['imagem', 'video', 'audio', 'documento', 'figurinha'].includes(m.tipo) && <div className="mb-1"><Midia m={m} empresaId={companyId} linhaId={linhaId} onBaixada={apos} /></div>}
                           {m.texto && <div className="whitespace-pre-wrap break-words">{m.texto}</div>}
                           <div className="flex items-center justify-end gap-1 text-[10px] text-muted-foreground mt-0.5">{hora(m.data)}{m.de_mim && <Ticks status={m.status} />}</div>
                         </div>

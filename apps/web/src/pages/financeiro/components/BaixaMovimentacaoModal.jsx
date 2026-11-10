@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, CheckCircle2, Upload, X, FileText } from 'lucide-react';
+import { Loader2, CheckCircle2, Upload, X, FileText, Receipt } from 'lucide-react';
+import PreviaPdfDialog from '@/components/PreviaPdfDialog';
+import { gerarReciboPdf } from '@/lib/reciboPdf';
 import SeletorProjeto from '@/components/SeletorProjeto';
 import { nomePadraoAnexo } from '@/lib/nomeAnexo';
 
@@ -30,6 +32,11 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
   const [saldo, setSaldo] = useState(0);
   const [form, setForm] = useState({});
   const [comprovantes, setComprovantes] = useState([]);
+  const [empresa, setEmpresa] = useState(null);
+  const [reciboTexto, setReciboTexto] = useState('');
+  const [emitirReciboAoSalvar, setEmitirReciboAoSalvar] = useState(false);
+  const [previaRecibo, setPreviaRecibo] = useState(null); // { base64, titulo, nome }
+  const [gerandoRecibo, setGerandoRecibo] = useState(false);
 
   useEffect(() => {
     if (!open || !movimentacaoId) return;
@@ -38,7 +45,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       setLoading(true);
       const { data, error } = await supabase
         .from('movimentacao_financeira')
-        .select('*, cliente:clientes(nome), fornecedor:fornecedores(nome), baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)')
+        .select('*, cliente:clientes(nome, cnpj), fornecedor:fornecedores(nome, cnpj, cidade), baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)')
         .eq('id', movimentacaoId)
         .single();
       if (error) {
@@ -49,6 +56,9 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       const emAberto = Math.max(0, num(data.valor_total) - (data.baixas || []).reduce((s, b) => s + valorAbatido(b), 0));
       setTitulo(data);
       setSaldo(emAberto);
+      setEmitirReciboAoSalvar(false);
+      setReciboTexto(String(data.observacoes || data.numero_titulo || '').replace(/\s*Emitir recibo na baixa\.?/i, '').replace(/\s*Pix para a chave.*$/i, '').trim());
+      supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, cidade').eq('id', data.company_id).maybeSingle().then(({ data: e }) => setEmpresa(e || null));
       setForm({
         data_baixa: hoje(),
         valor_titulo: emAberto.toFixed(2),
@@ -71,6 +81,21 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
   const isPagar = titulo?.tipo?.toLowerCase() === 'pagar';
   const totalEfetivo = num(form.valor_titulo) + num(form.juros) - num(form.desconto);
   const subcategoriasDaCategoria = dropdowns.subcategorias.filter((s) => form.categoria_id === 'none' || s.categoria_id === form.categoria_id);
+
+  // Recibo: quem recebeu (fornecedor/cliente) assina; quem pagou é a empresa do título. Usa o valor e a data digitados na baixa.
+  const montarRecibo = async (opcoes = { base64: true }) => {
+    const pagador = isPagar ? { nome: empresa?.razao_social || empresa?.nome_fantasia || '', documento: empresa?.cnpj || '' } : { nome: titulo.cliente?.nome || '', documento: titulo.cliente?.cnpj || '' };
+    const recebedor = isPagar ? { nome: titulo.fornecedor?.nome || '', documento: titulo.fornecedor?.cnpj || '' } : { nome: empresa?.razao_social || empresa?.nome_fantasia || '', documento: empresa?.cnpj || '' };
+    return gerarReciboPdf({ pagador, recebedor, valor: Number(totalEfetivo.toFixed(2)), referente: (reciboTexto || titulo.numero_titulo || 'serviços prestados').replace(/[.\s]+$/, ''), data: form.data_baixa, local: titulo.fornecedor?.cidade || empresa?.cidade || '', forma: 'Pix / transferência bancária' }, opcoes);
+  };
+  const emitirRecibo = async () => {
+    if (!(isPagar ? titulo?.fornecedor?.nome : titulo?.cliente?.nome)) return toast({ title: 'Atenção', description: `O título não tem ${isPagar ? 'fornecedor' : 'cliente'}; cadastre antes de emitir o recibo.`, variant: 'destructive' });
+    if (totalEfetivo <= 0) return toast({ title: 'Atenção', description: 'Informe o valor da baixa para emitir o recibo.', variant: 'destructive' });
+    setGerandoRecibo(true);
+    try { const r = await montarRecibo({ base64: true }); setPreviaRecibo({ base64: r.base64, nome: r.nome }); }
+    catch (e) { toast({ title: 'Não foi possível gerar o recibo', description: e.message, variant: 'destructive' }); }
+    finally { setGerandoRecibo(false); }
+  };
 
   const handleSave = async () => {
     if (!form.data_baixa) return toast({ title: 'Atenção', description: 'Informe a data da baixa.', variant: 'destructive' });
@@ -139,6 +164,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       }
       if (falhouComprovante) toast({ title: 'Baixa registrada, mas o comprovante não subiu', description: 'Anexe o comprovante de novo pela movimentação financeira.', variant: 'destructive' });
       toast({ title: 'Baixa registrada', description: `${isPagar ? 'Pagamento' : 'Recebimento'} de ${brl(totalEfetivo)} lançado e disponível na Conciliação Bancária.${comprovantes.length && !falhouComprovante ? ' Comprovante anexado.' : ''}` });
+      if (emitirReciboAoSalvar) { try { const r = await montarRecibo({ base64: true }); setPreviaRecibo({ base64: r.base64, nome: r.nome }); } catch { /* o recibo pode ser emitido depois */ } }
       onOpenChange(false);
       if (onSaved) onSaved();
     } catch (err) {
@@ -242,6 +268,16 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
               <Textarea rows={2} value={form.observacoes} onChange={setInput('observacoes')} />
             </div>
 
+            <div className="rounded-md border border-border p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="flex items-center gap-1.5"><Receipt className="h-4 w-4" /> Recibo</Label>
+                <Button type="button" variant="outline" size="sm" onClick={emitirRecibo} disabled={gerandoRecibo}>{gerandoRecibo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Receipt className="h-4 w-4 mr-2" />}Emitir recibo</Button>
+              </div>
+              <Textarea rows={2} value={reciboTexto} onChange={(e) => setReciboTexto(e.target.value)} placeholder="Referente a… (ex.: duas diárias de serviços prestados)" />
+              <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" checked={emitirReciboAoSalvar} onChange={(e) => setEmitirReciboAoSalvar(e.target.checked)} /> Abrir o recibo ao confirmar a baixa</label>
+              <p className="text-xs text-muted-foreground">O recibo usa o valor ({brl(totalEfetivo)}) e a data da baixa. {isPagar ? `Quem assina é ${titulo?.fornecedor?.nome || 'o fornecedor'}.` : 'Quem assina é a empresa.'} Dá para baixar ou imprimir.</p>
+            </div>
+
             <div className="space-y-2">
               <Label>Comprovante de pagamento (opcional)</Label>
               <label className="flex items-center gap-2 border-2 border-dashed border-border rounded-md px-3 py-3 text-sm text-muted-foreground cursor-pointer hover:bg-muted/30">
@@ -267,6 +303,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
           </Button>
         </DialogFooter>
       </DialogContent>
+      <PreviaPdfDialog open={!!previaRecibo} onOpenChange={(o) => { if (!o) setPreviaRecibo(null); }} titulo="Recibo" nome={previaRecibo?.nome || 'recibo.pdf'} base64={previaRecibo?.base64} />
     </Dialog>
   );
 };

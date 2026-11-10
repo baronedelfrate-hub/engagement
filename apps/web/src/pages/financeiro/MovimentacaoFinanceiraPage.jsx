@@ -55,6 +55,10 @@ const MovimentacaoFinanceiraPage = () => {
   const [filtroStatus, setFiltroStatus] = useState('Todos');
   const [dateStart, setDateStart] = useState('');
   const [dateEnd, setDateEnd] = useState('');
+  const [cats, setCats] = useState([]);
+  const [subs, setSubs] = useState([]);
+  const [filtroCat, setFiltroCat] = useState('Todas');
+  const [filtroSub, setFiltroSub] = useState('Todas');
 
   useEffect(() => {
     if (authLoading) return; // Aguarda o contexto de autenticação carregar completamente
@@ -68,6 +72,21 @@ const MovimentacaoFinanceiraPage = () => {
       setData([]);
     }
   }, [company_id, authLoading, filtroTipo, filtroStatus, filtroNatureza, dateStart, dateEnd]);
+
+  // categorias e subcategorias da empresa, para mostrar na lista e filtrar
+  useEffect(() => {
+    if (authLoading || !company_id) return;
+    (async () => {
+      const [c, sb] = await Promise.all([
+        supabase.from('categorias').select('id, codigo, nome').eq('company_id', company_id).limit(1000),
+        supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', company_id).limit(3000)
+      ]);
+      setCats((c.data || []).sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || ''), 'pt-BR', { numeric: true }) || a.nome.localeCompare(b.nome)));
+      setSubs((sb.data || []).sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || ''), 'pt-BR', { numeric: true }) || a.nome.localeCompare(b.nome)));
+    })();
+  }, [company_id, authLoading]);
+  const nomeCat = (id) => cats.find((x) => x.id === id)?.nome;
+  const nomeSub = (id) => subs.find((x) => x.id === id)?.nome;
 
   const loadData = async () => {
     if (!company_id) return;
@@ -173,10 +192,10 @@ const MovimentacaoFinanceiraPage = () => {
   const filteredData = data.filter(item => {
     const term = searchTerm.toLowerCase();
     const entidade = (item.tipo?.toLowerCase() === 'receber' ? item.cliente?.nome : item.fornecedor?.nome) || '';
-    return (
-      (item.numero_titulo || '').toLowerCase().includes(term) ||
-      entidade.toLowerCase().includes(term)
-    );
+    const passaBusca = (item.numero_titulo || '').toLowerCase().includes(term) || entidade.toLowerCase().includes(term);
+    const passaCat = filtroCat === 'Todas' || item.categoria_id === filtroCat;
+    const passaSub = filtroSub === 'Todas' || (filtroSub === 'SEM' ? !item.subcategoria_id : item.subcategoria_id === filtroSub);
+    return passaBusca && passaCat && passaSub;
   });
 
   // totais do que está na tela (já com a busca e os filtros); cancelado e provisão substituída não somam
@@ -283,6 +302,23 @@ const MovimentacaoFinanceiraPage = () => {
                 </SelectContent>
               </Select>
 
+              <Select value={filtroCat} onValueChange={(v) => { setFiltroCat(v); setFiltroSub('Todas'); setPagina(1); }}>
+                <SelectTrigger className="w-[150px] h-8 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Categoria" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Todas">Todas as categorias</SelectItem>
+                  {cats.map((c) => <SelectItem key={c.id} value={c.id}>{c.codigo ? `${c.codigo} ` : ''}{c.nome}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
+              <Select value={filtroSub} onValueChange={(v) => { setFiltroSub(v); setPagina(1); }}>
+                <SelectTrigger className="w-[160px] h-8 text-xs bg-background border-border text-foreground"><SelectValue placeholder="Subcategoria" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Todas">Todas as subcategorias</SelectItem>
+                  <SelectItem value="SEM">Sem subcategoria</SelectItem>
+                  {subs.filter((x) => filtroCat === 'Todas' || x.categoria_id === filtroCat).map((x) => <SelectItem key={x.id} value={x.id}>{x.codigo ? `${x.codigo} ` : ''}{x.nome}</SelectItem>)}
+                </SelectContent>
+              </Select>
+
               <div className="flex items-center gap-2">
                 <Input 
                   type="date" 
@@ -334,6 +370,7 @@ const MovimentacaoFinanceiraPage = () => {
                     <th className="px-2 py-1.5 font-medium">Nº Título</th>
                     <th className="px-2 py-1.5 font-medium">Tipo</th>
                     <th className="px-2 py-1.5 font-medium">Cliente/Fornecedor</th>
+                    <th className="px-2 py-1.5 font-medium">Categoria / subcategoria</th>
                     <th className="px-2 py-1.5 font-medium">Vencimento</th>
                     <th className="px-2 py-1.5 font-medium">Valor</th>
                     <th className="px-2 py-1.5 font-medium">Em aberto</th>
@@ -345,14 +382,14 @@ const MovimentacaoFinanceiraPage = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="9" className="px-6 py-12 text-center">
+                      <td colSpan="10" className="px-6 py-12 text-center">
                         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-2" />
                         <p className="text-muted-foreground">Buscando movimentações...</p>
                       </td>
                     </tr>
                   ) : filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-6 py-12 text-center text-muted-foreground">
+                      <td colSpan="10" className="px-6 py-12 text-center text-muted-foreground">
                         Nenhuma movimentação encontrada para os filtros selecionados.
                       </td>
                     </tr>
@@ -379,6 +416,10 @@ const MovimentacaoFinanceiraPage = () => {
                               {row.docs.some((d) => d.tipo_documento === 'comprovante') && <button type="button" className="inline-flex items-center gap-0.5 text-emerald-600 hover:underline" title="Abrir o comprovante de pagamento" onClick={() => abrirComprovante(row)}><Receipt className="h-3 w-3" /> comprovante</button>}
                             </div>
                           )}
+                        </td>
+                        <td className="px-2 py-1 text-xs leading-tight min-w-[150px] max-w-[200px]">
+                          {nomeCat(row.categoria_id) ? <span className="text-foreground">{nomeCat(row.categoria_id)}</span> : <span className="text-muted-foreground">—</span>}
+                          {row.categoria_id && (nomeSub(row.subcategoria_id) ? <div className="text-muted-foreground">{nomeSub(row.subcategoria_id)}</div> : <div className="text-amber-600">sem subcategoria</div>)}
                         </td>
                         <td className="px-2 py-1 text-foreground whitespace-nowrap">
                           {formatDateOnly(row.data_vencimento)}

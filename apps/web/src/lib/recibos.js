@@ -9,7 +9,7 @@ export const dadosDaEmpresa = async (companyId) => ok(await supabase.from('empre
 // Baixas do período com o título, a pessoa (fornecedor ou cliente) e o recibo já emitido, se houver.
 export const listarBaixasComRecibo = async (companyId, { de, ate } = {}) => {
   let q = supabase.from('movimentacao_baixas')
-    .select('id, data_baixa, valor_baixa, valor_juros, valor_desconto, observacoes, movimentacao:movimentacao_financeira(id, tipo, numero_titulo, observacoes, status, fornecedor:fornecedores(nome, cnpj, cidade, telefone), cliente:clientes(nome, cnpj))')
+    .select('id, data_baixa, valor_baixa, valor_juros, valor_desconto, observacoes, movimentacao:movimentacao_financeira(id, tipo, numero_titulo, observacoes, status, fornecedor:fornecedores(nome, cnpj, cidade, telefone), cliente:clientes(nome, cnpj:cnpj_cpf))')
     .eq('company_id', companyId).order('data_baixa', { ascending: false }).limit(1000);
   if (de) q = q.gte('data_baixa', de);
   if (ate) q = q.lte('data_baixa', ate);

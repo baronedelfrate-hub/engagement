@@ -46,7 +46,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       setLoading(true);
       const { data, error } = await supabase
         .from('movimentacao_financeira')
-        .select('*, cliente:clientes(nome, cnpj), fornecedor:fornecedores(nome, cnpj, cidade), baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)')
+        .select('*, cliente:clientes(nome, cnpj:cnpj_cpf), fornecedor:fornecedores(nome, cnpj, cidade), baixas:movimentacao_baixas(valor_baixa, valor_juros, valor_desconto)')
         .eq('id', movimentacaoId)
         .single();
       if (error) {

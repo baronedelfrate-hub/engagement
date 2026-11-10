@@ -92,6 +92,17 @@ const WhatsAppConexao = () => {
   // trocou de empresa: zera a tela e consulta de novo
   useEffect(() => { setQr(null); setCodigo(null); setEstado(null); if (!authLoading && podeGerir) consultar(); }, [empresaId, linhaId, authLoading, podeGerir]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Número criado mas ainda não conectado ("Conectando…" ou desconectado) e sem QR na tela: pede o QR sozinho, algumas vezes, sem precisar clicar.
+  const tentativasQr = useRef(0);
+  useEffect(() => { tentativasQr.current = 0; }, [empresaId, linhaId]);
+  useEffect(() => {
+    const e = estado;
+    if (!e || e.erro || e.conectado || qr || e.estado === 'sem_instancia' || e.estado === 'inexistente') return undefined;
+    if (tentativasQr.current >= 6) return undefined;
+    const t = setTimeout(async () => { tentativasQr.current += 1; await gerarQr(false); await consultar(true); }, tentativasQr.current === 0 ? 800 : 5000);
+    return () => clearTimeout(t);
+  }, [estado, qr, gerarQr, consultar]);
+
   // Com o QR na tela: confere a conexão a cada 4 s e renova o QR a cada 25 s (ele expira rápido).
   useEffect(() => {
     if (!qr) return undefined;
@@ -287,7 +298,7 @@ const WhatsAppConexao = () => {
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Aguardando a leitura… o QR code se renova sozinho.</p>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground text-center">{semInstancia ? 'Crie a instância para gerar o QR code.' : 'Clique em "Gerar QR code" para conectar o número.'}</p>
+              <p className="text-sm text-muted-foreground text-center">{semInstancia ? 'Crie a instância para gerar o QR code.' : (estado?.estado === 'connecting' && tentativasQr.current < 6 ? 'Gerando o QR code… pode levar alguns segundos. Se não aparecer, clique em "Gerar QR code".' : 'Clique em "Gerar QR code" para conectar o número.')}</p>
             )}
           </CardContent>
         </Card>

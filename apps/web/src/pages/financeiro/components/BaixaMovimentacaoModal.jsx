@@ -81,6 +81,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
 
   const isPagar = titulo?.tipo?.toLowerCase() === 'pagar';
   const totalEfetivo = num(form.valor_titulo) + num(form.juros) - num(form.desconto);
+  const portadorExterno = dropdowns.bancos.find((b) => b.id === form.banco_id)?.tipo_conta === 'Portador externo';
   const subcategoriasDaCategoria = dropdowns.subcategorias.filter((s) => form.categoria_id === 'none' || s.categoria_id === form.categoria_id);
 
   // Recibo: quem recebeu (fornecedor/cliente) assina; quem pagou é a empresa do título. Usa o valor e a data digitados na baixa.
@@ -125,6 +126,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
           centro_custo_id: orNull(form.centro_custo_id),
           projeto_id: orNull(form.projeto_id),
           observacoes: form.observacoes || null,
+          ...(portadorExterno ? { status_conciliacao: 'Pago por fora' } : {}),
           created_by: user?.id || null
         })
         .select('id')
@@ -232,10 +234,11 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
                   <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Selecione…</SelectItem>
-                    {dropdowns.bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
+                    {dropdowns.bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.tipo_conta === 'Portador externo' ? `${b.nome} (sem banco)` : b.nome}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
+              {portadorExterno && <p className="col-span-2 -mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">Pago por fora: esta baixa não passa por nenhum banco da empresa. Ela não entra na conciliação nem no extrato.</p>}
               <div className="space-y-2">
                 <Label>Centro de custo</Label>
                 <Select value={form.centro_custo_id} onValueChange={set('centro_custo_id')}>

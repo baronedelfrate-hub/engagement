@@ -31,7 +31,7 @@ export const fetchConciliacaoData = async (filters) => {
     const montarMov = () => {
       let q = supabase.from('movimentacao_baixas').select(`
         id, valor_baixa, data_baixa, banco_id, observacoes, status_conciliacao, data_conciliacao, extrato_bancario_id,
-        banco:bancos(nome),
+        banco:bancos(nome, tipo_conta),
         movimentacao:movimentacao_financeira(tipo, numero_titulo, cliente:clientes(nome), fornecedor:fornecedores(nome))
       `).order('data_baixa').order('id');
       if (bancoId && bancoId !== 'TODOS') q = q.eq('banco_id', bancoId);
@@ -59,7 +59,8 @@ export const fetchConciliacaoData = async (filters) => {
       throw extratoRes.error;
     }
 
-    const normalizedMov = (movRes.data || []).map(item => {
+    // baixas pagas por fora (portador externo, sem banco) não entram na conciliação: não existem no extrato de nenhum banco
+    const normalizedMov = (movRes.data || []).filter(item => item.banco?.tipo_conta !== 'Portador externo').map(item => {
       const isPagar = item.movimentacao?.tipo?.toLowerCase() === 'pagar';
       const valor = parseFloat(item.valor_baixa || 0);
       return {

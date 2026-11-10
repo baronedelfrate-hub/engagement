@@ -212,7 +212,7 @@ const ClassificarExtratoPage = () => {
           <SelectTrigger className="w-48 bg-background"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="TODOS">Todos os bancos</SelectItem>
-            {dropdowns.bancos.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
+            {dropdowns.bancos.filter((b) => b.tipo_conta !== 'Portador externo').map((b) => <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>

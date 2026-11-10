@@ -39,7 +39,7 @@ const ConciliacaoBancariaFilters = ({ filters, setFilters, onApply, onClear, dro
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TODOS">Todos os Bancos</SelectItem>
-                  {dropdowns.bancos?.map(b => (
+                  {dropdowns.bancos?.filter(b => b.tipo_conta !== 'Portador externo').map(b => (
                     <SelectItem key={b.id} value={b.id}>{b.nome}</SelectItem>
                   ))}
                 </SelectContent>

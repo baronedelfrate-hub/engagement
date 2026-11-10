@@ -134,7 +134,7 @@ const ImportarExtratoPage = () => {
                 <Select value={bancoId} onValueChange={setBancoId}>
                   <SelectTrigger className="w-full bg-background border-border text-foreground"><SelectValue placeholder="Selecione o banco" /></SelectTrigger>
                   <SelectContent>
-                    {dropdowns.bancos?.map((b) => <SelectItem key={b.id} value={b.id}>{b.nome} {b.conta ? `(Conta: ${b.conta})` : ''}</SelectItem>)}
+                    {dropdowns.bancos?.filter((b) => b.tipo_conta !== 'Portador externo').map((b) => <SelectItem key={b.id} value={b.id}>{b.nome} {b.conta ? `(Conta: ${b.conta})` : ''}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 {!bancoId && <p className="text-xs text-amber-600">Selecione o banco antes de escolher o arquivo.</p>}

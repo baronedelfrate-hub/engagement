@@ -25,7 +25,7 @@ export const SITUACOES = [
 
 export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } = {}) => {
   const [bancos, categorias, subs, centros, projetos] = await Promise.all([
-    supabase.from('bancos').select('id, nome, agencia, conta, saldo, data_saldo_inicial, limite').eq('company_id', companyId).order('nome').then(ok),
+    supabase.from('bancos').select('id, nome, agencia, conta, saldo, data_saldo_inicial, limite, tipo_conta').eq('company_id', companyId).neq('tipo_conta', 'Portador externo').order('nome').then(ok),
     supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId).limit(1000).then(ok),
     supabase.from('subcategorias').select('id, nome').eq('company_id', companyId).limit(2000).then(ok),
     supabase.from('centros_custo').select('id, codigo, nome').eq('company_id', companyId).limit(500).then(ok),

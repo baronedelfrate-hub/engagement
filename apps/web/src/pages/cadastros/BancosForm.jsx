@@ -266,6 +266,7 @@ const BancosForm = () => {
                     <SelectItem value="Poupanca">Conta Poupança</SelectItem>
                     <SelectItem value="Investimento">Conta Investimento</SelectItem>
                     <SelectItem value="Caixa">Caixa Físico</SelectItem>
+                    <SelectItem value="Portador externo">Portador externo (pago por fora, sem banco)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

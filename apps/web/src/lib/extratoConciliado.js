@@ -91,6 +91,7 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
       titulo: ts.map((t) => t.numero_titulo).filter(Boolean).join(' + '),
       parcela: ts.length === 1 && ts[0].total_parcelas > 1 ? `${ts[0].parcela_atual}/${ts[0].total_parcelas}` : '',
       notaFiscal: e.nota_fiscal || '',
+      grupoDre: c?.grupo_dre || '',
       codigoCategoria: c?.codigo || '',
       categoria: c?.nome || '',
       subcategoria: sub.get(e.subcategoria_id)?.nome || '',
@@ -115,7 +116,18 @@ export const carregarExtratoConciliado = async (companyId, { bancoId, de, ate } 
     const p0 = ls[0]; const u0 = ls[ls.length - 1];
     return { ...base, inicial: arred(p0.saldo - p0.valor), final: u0.saldo, dataInicial: de || b.data_saldo_inicial, dataFinal: u0.data };
   });
-  return { banco, bancos, linhas, saldos };
+  // pagamentos feitos por fora (portador externo, sem banco): não estão no extrato de nenhum banco, mas são saída real da empresa
+  const externos = ok(await supabase.from('bancos').select('id, nome').eq('company_id', companyId).eq('tipo_conta', 'Portador externo'));
+  let foraDoBanco = { total: 0, qtd: 0, itens: [] };
+  if (externos.length) {
+    let q = supabase.from('movimentacao_baixas').select('data_baixa, valor_baixa, movimentacao:movimentacao_financeira(tipo, numero_titulo, fornecedor:fornecedores(nome), cliente:clientes(nome))').in('banco_id', externos.map((x) => x.id)).order('data_baixa');
+    if (de) q = q.gte('data_baixa', de);
+    if (ate) q = q.lte('data_baixa', ate);
+    const bx = ok(await q);
+    const itens = bx.filter((b) => String(b.movimentacao?.tipo || '').toLowerCase() !== 'receber').map((b) => ({ data: b.data_baixa, valor: arred(b.valor_baixa), titulo: b.movimentacao?.numero_titulo || '', pessoa: b.movimentacao?.fornecedor?.nome || '' }));
+    foraDoBanco = { total: arred(itens.reduce((s, i) => s + i.valor, 0)), qtd: itens.length, itens };
+  }
+  return { banco, bancos, linhas, saldos, foraDoBanco };
 };
 
 export const filtrarPorSituacao = (linhas, situacao) => {
@@ -149,9 +161,13 @@ export const resumir = (linhas, saldos = []) => {
     r.entradas = arred(r.entradas + l.entrada); r.saidas = arred(r.saidas + l.saida); r.qtd += 1;
     porCentro.set(k, r);
   });
+  // entradas que não são receita: aporte de sócio, transferência entre contas e captação de empréstimo
+  const ehAporte = (l) => l.entrada > 0 && ['socios', 'transferencias', 'emprestimos'].includes(l.grupoDre);
+  const aportes = arred(linhas.filter(ehAporte).reduce((s, l) => s + l.entrada, 0));
   const unico = saldos.length === 1 ? saldos[0] : null;
   return {
     entradas, saidas, resultado: arred(entradas - saidas), qtd: linhas.length,
+    aportes, entradasOperacionais: arred(entradas - aportes), resultadoSemAportes: arred(entradas - aportes - saidas),
     semCategoria: linhas.filter((l) => !l.classificado).length,
     naoConciliadas: linhas.filter((l) => !l.conciliado).length,
     saldos,

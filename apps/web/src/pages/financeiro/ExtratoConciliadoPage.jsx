@@ -98,6 +98,14 @@ const ExtratoConciliadoPage = () => {
               </CardContent></Card>
             )}
           </div>
+          {(resumo.aportes > 0 || dados.foraDoBanco?.total > 0) && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              <Cartao t="Aportes e transferências recebidas" v={moeda(resumo.aportes)} sub="aporte de sócio, empréstimo e transferência: dinheiro que entrou, mas não é receita" />
+              <Cartao t="Resultado sem aportes" v={moeda(resumo.resultadoSemAportes)} cor={resumo.resultadoSemAportes < 0 ? 'text-red-600' : 'text-emerald-600'} sub={`entradas operacionais ${moeda(resumo.entradasOperacionais)} − saídas ${moeda(resumo.saidas)}`} />
+              {dados.foraDoBanco?.total > 0 && <Cartao t="Pago por fora (sem banco)" v={moeda(dados.foraDoBanco.total)} cor="text-red-600" sub={`${dados.foraDoBanco.qtd} pagamento(s) que não passaram pelo banco`} />}
+              {dados.foraDoBanco?.total > 0 && <Cartao t="Saída real do período" v={moeda(resumo.saidas + dados.foraDoBanco.total)} cor="text-red-600" sub="saídas do banco + pagos por fora" />}
+            </div>
+          )}
           {dados.saldos.length > 1 && (
             <div className="border rounded-md mb-3 overflow-x-auto">
               <table className="w-full text-xs">

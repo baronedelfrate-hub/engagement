@@ -3,6 +3,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { buscarTudo } from '@/services/extratoAsaasService';
 import { montarDRE, calcularPEPeriodo, MESES } from '@/lib/dreGerencial';
 import { montarResultadoPessoal } from '@/lib/resultadoPessoal';
+import { buscarPagosPorFora } from '@/lib/pagosPorFora';
 
 // Último dia do mês de uma data AAAA-MM-DD (30 dias em novembro, 28/29 em fevereiro...); '-31' fixo dava erro de data inválida.
 const ultimoDiaDoMes = (iso) => { const [a, m] = iso.slice(0, 7).split('-').map(Number); return `${iso.slice(0, 7)}-${String(new Date(a, m, 0).getDate()).padStart(2, '0')}`; };
@@ -85,13 +86,15 @@ export const saldoDeCaixa = async (companyId) => (await posicaoDeCaixa(companyId
 export const resumoExecutivo = async (companyId, hoje = hojeISO()) => {
   const ano = Number(hoje.slice(0, 4));
   const mes = Number(hoje.slice(5, 7)) - 1;
-  const [cats, subs, movs, caixa, emp] = await Promise.all([
+  const [cats, subs, movsBanco, caixa, emp, fora] = await Promise.all([
     supabase.from('categorias').select('id, codigo, nome, grupo_dre').eq('company_id', companyId),
     supabase.from('subcategorias').select('id, codigo, nome, categoria_id').eq('company_id', companyId),
     buscarTudo(() => supabase.from('extrato_bancario').select('id, data_transacao, valor, categoria_id, subcategoria_id, cliente_nome, banco_id').eq('company_id', companyId).gte('data_transacao', `${ano}-01-01`).lte('data_transacao', `${ano}-12-31`).order('data_transacao').order('id')),
     posicaoDeCaixa(companyId).catch(() => ({ caixa: null, limite: null })),
-    supabase.from('empresas').select('tipo_pessoa').eq('id', companyId).maybeSingle()
+    supabase.from('empresas').select('tipo_pessoa').eq('id', companyId).maybeSingle(),
+    buscarPagosPorFora(companyId, { de: `${ano}-01-01`, ate: `${ano}-12-31` }).catch(() => [])
   ]);
+  const movs = [...movsBanco, ...fora]; // pagamentos por fora (sem banco) também contam no resultado
   const temDados = movs.length > 0;
   const { caixa: saldoCaixa, limite: limiteContas } = caixa;
   if (emp?.data?.tipo_pessoa === 'PF') {

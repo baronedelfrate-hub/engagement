@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { buscarTudo } from '@/services/extratoAsaasService';
+import { buscarPagosPorFora } from '@/lib/pagosPorFora';
 
 // Dados das telas gerenciais (DRE, Ponto de Equilíbrio, Dashboard): extrato bancário classificado de uma empresa/ano.
 export const useDadosGerenciais = () => {
@@ -88,6 +89,11 @@ export const useDadosGerenciais = () => {
       else if (centroCustoId !== 'TODOS') q = q.eq('centro_custo_id', centroCustoId);
       return q;
     })
+      // pagamentos feitos por fora (sem banco) entram no resultado; com um banco específico selecionado ficam de fora
+      .then(async (dados) => {
+        const fora = bancoId === 'TODOS' ? await buscarPagosPorFora(empresaId, { de: `${ano}-01-01`, ate: `${ano}-12-31`, projetoId, centroCustoId }).catch(() => []) : [];
+        return fora.length ? [...dados, ...fora].sort((a, b) => String(a.data_transacao).localeCompare(String(b.data_transacao))) : dados;
+      })
       .then((dados) => { if (ativo) setMovs(dados); })
       .catch((e) => { if (ativo) setError(e.message || 'Falha ao carregar o extrato.'); })
       .finally(() => { if (ativo) setLoading(false); });

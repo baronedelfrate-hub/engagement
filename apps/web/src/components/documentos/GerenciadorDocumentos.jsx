@@ -184,7 +184,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
         <div><Label>Observações</Label><Input value={form.observacoes} onChange={(e) => set('observacoes', e.target.value)} /></div>
         <div className="md:col-span-3">
           <Label>Arquivo (PDF ou imagem, até {MAX_MB} MB)</Label>
-          <Input type="file" accept="application/pdf,image/*" key={form.arquivo ? 'com' : 'sem'} onChange={(e) => set('arquivo', e.target.files?.[0] || null)} />
+          <Input type="file" accept={pessoal ? 'application/pdf,image/*' : 'application/pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt'} key={form.arquivo ? 'com' : 'sem'} onChange={(e) => set('arquivo', e.target.files?.[0] || null)} />
         </div>
         <div className="flex items-end"><Button className="gap-1 w-full" disabled={enviando} onClick={enviar}>{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Guardar documento</Button></div>
       </CardContent></Card>
@@ -274,7 +274,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
             gerar: async () => {
               const { data, error } = await supabase.storage.from(bucket).download(envio.storage_path);
               if (error) throw error;
-              return { nome: envio.nome_arquivo, base64: await paraBase64(data), mimetype: envio.mime || (/\.pdf$/i.test(envio.nome_arquivo) ? 'application/pdf' : 'image/jpeg') };
+              return { nome: envio.nome_arquivo, base64: await paraBase64(data), mimetype: envio.mime || (/\.pdf$/i.test(envio.nome_arquivo) ? 'application/pdf' : /\.docx$/i.test(envio.nome_arquivo) ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : /\.xlsx$/i.test(envio.nome_arquivo) ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'image/jpeg') };
             }
           }]}
           onEnviado={(para) => registrar(envio, 'enviar', para).then(() => pessoal && carregar())}

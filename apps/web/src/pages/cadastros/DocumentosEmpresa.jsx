@@ -9,7 +9,10 @@ export const TIPOS_EMPRESA = [
   { id: 'contrato_social', rotulo: 'Contrato social' }, { id: 'alteracao_contratual', rotulo: 'Alteração contratual' },
   { id: 'cartao_cnpj', rotulo: 'Cartão CNPJ' }, { id: 'cnd_federal', rotulo: 'CND Federal' }, { id: 'cnd_estadual', rotulo: 'CND Estadual' },
   { id: 'cnd_municipal', rotulo: 'CND Municipal' }, { id: 'cnd_trabalhista', rotulo: 'CND Trabalhista' }, { id: 'crf_fgts', rotulo: 'Certificado de Regularidade do FGTS' },
-  { id: 'alvara', rotulo: 'Alvará' }, { id: 'outro', rotulo: 'Outro' }
+  { id: 'alvara', rotulo: 'Alvará' },
+  { id: 'manual', rotulo: 'Manual' }, { id: 'procedimento', rotulo: 'Procedimento' }, { id: 'pop', rotulo: 'POP (procedimento operacional padrão)' },
+  { id: 'instrucao_trabalho', rotulo: 'Instrução de trabalho (IT)' }, { id: 'politica', rotulo: 'Política / norma interna' }, { id: 'fluxograma', rotulo: 'Fluxograma / organograma' },
+  { id: 'outro', rotulo: 'Outro' }
 ];
 
 const DocumentosEmpresa = () => {
@@ -20,7 +23,7 @@ const DocumentosEmpresa = () => {
     <>
       <Helmet><title>Documentos da Empresa - Engagement ERP</title></Helmet>
       <PageHeader title="Documentos da Empresa" icon={FolderOpen}
-        description="Contrato social, CNDs e outros documentos da empresa, em pasta privada. Informe a validade para o sistema avisar quando estiver vencendo." />
+        description="Contrato social, CNDs, manuais, procedimentos e POPs da empresa, em pasta privada. Informe a validade (ou a data de revisão) para o sistema avisar quando estiver vencendo." />
       <GerenciadorDocumentos modo="empresa" tabela="empresa_documentos" bucket="empresa-docs" tipos={TIPOS_EMPRESA} companyId={companyId} />
     </>
   );

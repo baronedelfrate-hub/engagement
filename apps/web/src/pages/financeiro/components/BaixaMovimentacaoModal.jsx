@@ -59,7 +59,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
       setSaldo(emAberto);
       setEmitirReciboAoSalvar(false);
       setReciboTexto(String(data.observacoes || data.numero_titulo || '').replace(/\s*Emitir recibo na baixa\.?/i, '').replace(/\s*Pix para a chave.*$/i, '').trim());
-      supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, cidade').eq('id', data.company_id).maybeSingle().then(({ data: e }) => setEmpresa(e || null));
+      supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, cidade, logo').eq('id', data.company_id).maybeSingle().then(({ data: e }) => setEmpresa(e || null));
       setForm({
         data_baixa: hoje(),
         valor_titulo: emAberto.toFixed(2),
@@ -87,7 +87,7 @@ const BaixaMovimentacaoModal = ({ open, onOpenChange, movimentacaoId, onSaved })
   const montarRecibo = async (opcoes = { base64: true }) => {
     const pagador = isPagar ? { nome: empresa?.razao_social || empresa?.nome_fantasia || '', documento: empresa?.cnpj || '' } : { nome: titulo.cliente?.nome || '', documento: titulo.cliente?.cnpj || '' };
     const recebedor = isPagar ? { nome: titulo.fornecedor?.nome || '', documento: titulo.fornecedor?.cnpj || '' } : { nome: empresa?.razao_social || empresa?.nome_fantasia || '', documento: empresa?.cnpj || '' };
-    return gerarReciboPdf({ pagador, recebedor, valor: Number(totalEfetivo.toFixed(2)), referente: (reciboTexto || titulo.numero_titulo || 'serviços prestados').replace(/[.\s]+$/, ''), data: form.data_baixa, local: titulo.fornecedor?.cidade || empresa?.cidade || '', forma: 'Pix / transferência bancária' }, opcoes);
+    return gerarReciboPdf({ logo: empresa?.logo || null, pagador, recebedor, valor: Number(totalEfetivo.toFixed(2)), referente: (reciboTexto || titulo.numero_titulo || 'serviços prestados').replace(/[.\s]+$/, ''), data: form.data_baixa, local: titulo.fornecedor?.cidade || empresa?.cidade || '', forma: 'Pix / transferência bancária' }, opcoes);
   };
   const emitirRecibo = async () => {
     if (!(isPagar ? titulo?.fornecedor?.nome : titulo?.cliente?.nome)) return toast({ title: 'Atenção', description: `O título não tem ${isPagar ? 'fornecedor' : 'cliente'}; cadastre antes de emitir o recibo.`, variant: 'destructive' });

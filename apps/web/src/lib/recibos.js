@@ -4,7 +4,7 @@ import { gerarReciboPdf } from '@/lib/reciboPdf';
 
 const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
 
-export const dadosDaEmpresa = async (companyId) => ok(await supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, cidade').eq('id', companyId).maybeSingle());
+export const dadosDaEmpresa = async (companyId) => ok(await supabase.from('empresas').select('razao_social, nome_fantasia, cnpj, cidade, logo').eq('id', companyId).maybeSingle());
 
 // Baixas do período com o título, a pessoa (fornecedor ou cliente) e o recibo já emitido, se houver.
 export const listarBaixasComRecibo = async (companyId, { de, ate } = {}) => {
@@ -45,7 +45,8 @@ export const emitirRecibo = async ({ companyId, baixa, empresa, referente, forma
   return ok(await supabase.from('recibos').insert(linha).select('*').single());
 };
 
-export const pdfDoRecibo = (r, opcoes = { base64: true }) => gerarReciboPdf({
+export const pdfDoRecibo = async (r, opcoes = { base64: true }) => gerarReciboPdf({
+  logo: (await supabase.from('empresas').select('logo').eq('id', r.company_id).maybeSingle()).data?.logo || null,
   numero: r.numero, pagador: { nome: r.pagador_nome, documento: r.pagador_documento }, recebedor: { nome: r.recebedor_nome, documento: r.recebedor_documento },
   valor: r.valor, referente: r.referente, data: r.data, local: r.local, forma: r.forma
 }, opcoes);

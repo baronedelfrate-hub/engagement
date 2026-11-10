@@ -42,16 +42,38 @@ const dataLonga = (iso) => {
   return `${d} de ${meses[m - 1]} de ${a}`;
 };
 
-// dados: { numero?, pagador: { nome, documento }, recebedor: { nome, documento }, valor, referente, data (aaaa-mm-dd), local, forma }
+// Baixa o logo (URL pública) e devolve { dataUrl, formato, w, h }; sem logo ou com falha, devolve null e o recibo sai sem ele.
+const carregarLogo = async (url) => {
+  if (!url) return null;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const blob = await r.blob();
+    const dataUrl = await new Promise((res, rej) => { const f = new FileReader(); f.onload = () => res(f.result); f.onerror = rej; f.readAsDataURL(blob); });
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+    return { dataUrl, formato: /png/i.test(blob.type) || /^data:image\/png/i.test(dataUrl) ? 'PNG' : 'JPEG', w: img.naturalWidth || img.width, h: img.naturalHeight || img.height };
+  } catch { return null; }
+};
+
+// dados: { numero?, logo? (URL), pagador: { nome, documento }, recebedor: { nome, documento }, valor, referente, data (aaaa-mm-dd), local, forma }
 export const gerarReciboPdf = async (dados, opcoes = {}) => {
   const jspdfMod = await import('jspdf');
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
-  const { numero, pagador, recebedor, valor, referente, data, local, forma } = dados;
+  const { logo: logoUrl, numero, pagador, recebedor, valor, referente, data, local, forma } = dados;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const L = doc.internal.pageSize.getWidth(); const m = 20; const larg = L - m * 2;
-  let y = 30;
+  const logo = await carregarLogo(logoUrl);
+  const desloc = logo ? 22 : 0;
+  let y = 30 + desloc;
 
-  doc.setDrawColor(30, 58, 138); doc.setLineWidth(0.8); doc.rect(m - 6, 18, larg + 12, 130);
+  doc.setDrawColor(30, 58, 138); doc.setLineWidth(0.8); doc.rect(m - 6, 18, larg + 12, 130 + desloc);
+  if (logo) {
+    const altMax = 18; const largMax = 60;
+    let h = altMax; let w = (logo.w / logo.h) * h;
+    if (w > largMax) { w = largMax; h = (logo.h / logo.w) * w; }
+    try { doc.addImage(logo.dataUrl, logo.formato, m, 23, w, h); } catch { /* sem logo */ }
+  }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor(30, 58, 138);
   doc.text(numero ? `RECIBO Nº ${numero}` : 'RECIBO', m, y);
   doc.setFontSize(16); doc.setTextColor(30, 30, 30);
@@ -72,7 +94,7 @@ export const gerarReciboPdf = async (dados, opcoes = {}) => {
   y += 16;
   doc.text(`${local ? `${local}, ` : ''}${dataLonga(data)}.`, m, y);
 
-  y = 122;
+  y = 122 + desloc;
   doc.setLineWidth(0.3); doc.setDrawColor(60, 60, 60);
   doc.line(m + 20, y, L - m - 20, y);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(11);

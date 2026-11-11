@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Download, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Download, FileText, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,6 +10,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { montarDRE, MESES } from '@/lib/dreGerencial';
+import { gerarDreGerencialPdf } from '@/lib/dreGerencialPdf';
+import { buscarNomeEmpresa, rotulosFiltros } from '@/lib/nomeEmpresa';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (v) => (v === 0 ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const cor = (v) => (v < 0 ? 'text-red-600 dark:text-red-400' : '');
@@ -18,6 +21,8 @@ function DRE() {
   const dados = useDadosGerenciais();
   const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, loading, error } = dados;
   const [abertas, setAbertas] = useState(new Set());
+  const { toast } = useToast();
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   // retiradas de sócios (9.2) como remuneração dentro das despesas: lembra a escolha neste navegador
   const [retiradasComoDespesa, setRetiradasComoDespesa] = useState(() => { try { return localStorage.getItem('dre_retiradas_despesa') === '1'; } catch { return false; } });
   const alternarRetiradas = (v) => { setRetiradasComoDespesa(v); try { localStorage.setItem('dre_retiradas_despesa', v ? '1' : '0'); } catch { /* sem armazenamento */ } };
@@ -28,6 +33,19 @@ function DRE() {
   );
 
   const alternar = (chave) => setAbertas((s) => { const n = new Set(s); n.has(chave) ? n.delete(chave) : n.add(chave); return n; });
+
+  const exportPDF = async () => {
+    if (!dre) return;
+    setGerandoPdf(true);
+    try {
+      const empresaNome = await buscarNomeEmpresa(empresaId, dados.empresas?.find((e) => e.id === empresaId)?.razao_social || '');
+      await gerarDreGerencialPdf({ empresaNome, ano, dre, retiradasComoDespesa, filtros: rotulosFiltros(dados) });
+    } catch (e) {
+      toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' });
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
 
   const exportCSV = () => {
     if (!dre) return;
@@ -61,7 +79,12 @@ function DRE() {
       <PageHeader
         title="DRE Gerencial"
         description="Demonstração do resultado no regime de caixa, a partir do extrato bancário classificado."
-        action={<Button onClick={exportCSV} disabled={!dre || loading || semMovimento} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>}
+        action={(
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportPDF} disabled={!dre || loading || semMovimento || gerandoPdf} className="gap-2">{gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Exportar PDF</Button>
+            <Button onClick={exportCSV} disabled={!dre || loading || semMovimento} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>
+          </div>
+        )}
       />
 
       <FiltrosGerenciais dados={dados}>

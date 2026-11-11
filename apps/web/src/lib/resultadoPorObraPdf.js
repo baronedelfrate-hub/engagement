@@ -20,7 +20,7 @@ export const gerarResultadoPorObraPdf = async (dados, opcoes = {}) => {
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
   const autoTableMod = await import('jspdf-autotable');
   const autoTable = autoTableMod.default?.default || autoTableMod.default || autoTableMod.autoTable;
-  const { empresaNome = '', ano, filtros = {}, visao, matriz, resumoLinhas = [], total } = dados;
+  const { empresaNome = '', ano, filtros = {}, visao, matriz, resumoLinhas = [], total, titulo, filtrosTexto, arquivo } = dados;
 
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
   const largura = doc.internal.pageSize.getWidth();
@@ -29,10 +29,10 @@ export const gerarResultadoPorObraPdf = async (dados, opcoes = {}) => {
 
   doc.setFillColor(...AZUL); doc.rect(0, 0, largura, 24, 'F');
   doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(15);
-  doc.text(dre ? 'DRE por Obra' : 'Resultado por Obra', margem, 10.5);
+  doc.text(titulo || (dre ? 'DRE por Obra' : 'Resultado por Obra'), margem, 10.5);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
   doc.text(empresaNome, margem, 16.5);
-  doc.text(`Ano ${ano}  ·  Regime de caixa (extrato bancário classificado)  ·  Banco: ${filtros.banco || 'Todos'}  ·  Obra: ${filtros.projeto || 'Todas'}`, margem, 21);
+  doc.text(filtrosTexto || `Ano ${ano}  ·  Regime de caixa (extrato bancário classificado)  ·  Banco: ${filtros.banco || 'Todos'}  ·  Obra: ${filtros.projeto || 'Todas'}`, margem, 21);
   doc.setTextColor(30, 30, 30);
 
   const base = { styles: { fontSize: 8, cellPadding: 1.6, lineColor: [226, 232, 240], lineWidth: 0.1 }, headStyles: { fillColor: AZUL, textColor: 255, halign: 'center' }, margin: { left: margem, right: margem, bottom: 14 } };
@@ -106,5 +106,5 @@ export const gerarResultadoPorObraPdf = async (dados, opcoes = {}) => {
     doc.text(`Página ${i} de ${total2}`, largura - margem, alturaPg - 6, { align: 'right' });
   }
   const slug = (empresaNome || 'empresa').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').toLowerCase();
-  return finalizarPdf(doc, `${dre ? 'dre-por-obra' : 'resultado-por-obra'}_${slug}_${ano}.pdf`, opcoes);
+  return finalizarPdf(doc, `${arquivo || (dre ? 'dre-por-obra' : 'resultado-por-obra')}_${slug}_${ano}.pdf`, opcoes);
 };

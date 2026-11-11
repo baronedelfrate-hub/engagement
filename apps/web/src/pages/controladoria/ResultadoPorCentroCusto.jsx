@@ -1,13 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Download, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Download, FileText, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { montarDRE } from '@/lib/dreGerencial';
+import { gerarResultadoPorObraPdf } from '@/lib/resultadoPorObraPdf';
+import { buscarNomeEmpresa, rotulosFiltros } from '@/lib/nomeEmpresa';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (v) => (v === 0 ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const cor = (v) => (v < 0 ? 'text-red-600 dark:text-red-400' : '');
@@ -17,6 +20,8 @@ function ResultadoPorCentroCusto() {
   const dados = useDadosGerenciais();
   const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, centros, centroCustoId, loading, error } = dados;
   const [abertas, setAbertas] = useState(new Set());
+  const { toast } = useToast();
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const alternar = (chave) => setAbertas((s) => { const n = new Set(s); n.has(chave) ? n.delete(chave) : n.add(chave); return n; });
 
   const matriz = useMemo(() => {
@@ -44,6 +49,23 @@ function ResultadoPorCentroCusto() {
   const valorLinha = (col, chave) => col.dre.porChave[chave]?.total || 0;
   const valorDetalhe = (col, chave, id) => col.dre.linhas.find((l) => l.chave === chave)?.detalhes.find((d) => d.id === id)?.total || 0;
 
+  const exportPDF = async () => {
+    if (!matriz) return;
+    setGerandoPdf(true);
+    try {
+      const f = rotulosFiltros(dados);
+      await gerarResultadoPorObraPdf({
+        empresaNome: await buscarNomeEmpresa(empresaId, dados.empresas?.find((e) => e.id === empresaId)?.razao_social || ''),
+        ano, visao: 'dre', matriz, titulo: 'DRE por Centro de Custo', arquivo: 'dre-por-centro-custo',
+        filtrosTexto: `Ano ${ano}  ·  Regime de caixa (extrato bancário classificado)  ·  Banco: ${f.banco}  ·  Obra: ${f.projeto}  ·  Centro de custo: ${f.centro}`
+      });
+    } catch (e) {
+      toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' });
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
+
   const exportCSV = () => {
     if (!matriz) return;
     const linhasCsv = [['Conta', ...matriz.cols.map((c) => c.nome)]];
@@ -69,7 +91,12 @@ function ResultadoPorCentroCusto() {
       <PageHeader
         title="Resultado por Centro de Custo"
         description="DRE gerencial com uma coluna por centro de custo (operação), no regime de caixa, a partir do extrato bancário classificado."
-        action={<Button onClick={exportCSV} disabled={loading || semMovimento || !matriz} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>}
+        action={(
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportPDF} disabled={loading || semMovimento || !matriz || gerandoPdf} className="gap-2">{gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Exportar PDF</Button>
+            <Button onClick={exportCSV} disabled={loading || semMovimento || !matriz} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>
+          </div>
+        )}
       />
 
       <FiltrosGerenciais dados={dados} />

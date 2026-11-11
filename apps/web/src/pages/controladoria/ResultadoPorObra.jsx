@@ -1,13 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
-import { Download, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
+import { Download, FileText, Loader2, AlertCircle, Building2, ChevronRight, ChevronDown } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { montarDRE } from '@/lib/dreGerencial';
+import { gerarResultadoPorObraPdf } from '@/lib/resultadoPorObraPdf';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/customSupabaseClient';
 
 const fmt = (v) => (v === 0 ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const cor = (v) => (v < 0 ? 'text-red-600 dark:text-red-400' : '');
@@ -35,7 +38,9 @@ const COLUNAS = [
 
 function ResultadoPorObra() {
   const dados = useDadosGerenciais();
-  const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, projetos, projetoId, loading, error } = dados;
+  const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, projetos, projetoId, bancos, bancoId, empresas, loading, error } = dados;
+  const { toast } = useToast();
+  const [gerandoPdf, setGerandoPdf] = useState(false);
 
   const linhas = useMemo(() => {
     if (!ano) return [];
@@ -113,6 +118,21 @@ function ResultadoPorObra() {
     link.click();
   };
 
+  const exportPDF = async () => {
+    setGerandoPdf(true);
+    try {
+      const { data: emp } = await supabase.from('empresas').select('razao_social, nome_fantasia').eq('id', empresaId).maybeSingle();
+      const empresaNome = emp?.razao_social || emp?.nome_fantasia || empresas?.find((e) => e.id === empresaId)?.razao_social || '';
+      const nomeBanco = bancoId === 'TODOS' ? 'Todos' : (bancos?.find((b) => b.id === bancoId)?.nome || '');
+      const proj = projetoId === 'TODOS' ? 'Todas' : projetoId === 'SEM' ? 'Sem projeto' : (projetos.find((p) => p.id === projetoId)?.nome || '');
+      await gerarResultadoPorObraPdf({ empresaNome, ano, filtros: { banco: nomeBanco, projeto: proj }, visao, matriz, resumoLinhas: linhas, total });
+    } catch (e) {
+      toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' });
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
+
   if (authLoading) return <div className="flex h-full items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   const semMovimento = movs.length === 0;
@@ -123,7 +143,12 @@ function ResultadoPorObra() {
       <PageHeader
         title="Resultado por Obra"
         description="DRE resumida de cada obra/projeto no regime de caixa, a partir do extrato bancário classificado."
-        action={<Button onClick={visao === 'dre' ? exportDRE : exportCSV} disabled={loading || semMovimento} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>}
+        action={(
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportPDF} disabled={loading || semMovimento || gerandoPdf} className="gap-2">{gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Exportar PDF</Button>
+            <Button onClick={visao === 'dre' ? exportDRE : exportCSV} disabled={loading || semMovimento} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>
+          </div>
+        )}
       />
 
       <FiltrosGerenciais dados={dados} />

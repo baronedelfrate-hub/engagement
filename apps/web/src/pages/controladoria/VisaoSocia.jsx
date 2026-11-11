@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet';
-import { Download, Loader2, AlertCircle, Users } from 'lucide-react';
+import { Download, FileText, Loader2, AlertCircle, Users } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { montarVisaoSocia } from '@/lib/visaoSocia';
 import { MESES } from '@/lib/dreGerencial';
+import { gerarVisaoSociaPdf } from '@/lib/visaoSociaPdf';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (v) => (v === 0 ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const cor = (v) => (v < 0 ? 'text-red-600 dark:text-red-400' : '');
@@ -32,6 +34,8 @@ function VisaoSocia() {
   const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { toast } = useToast();
+  const [gerandoPdf, setGerandoPdf] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -63,6 +67,12 @@ function VisaoSocia() {
 
   const v = useMemo(() => (dados ? montarVisaoSocia(dados) : null), [dados]);
 
+  const exportPDF = async () => {
+    if (!v) return;
+    setGerandoPdf(true);
+    try { await gerarVisaoSociaPdf({ ano, v }); } catch (e) { toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' }); } finally { setGerandoPdf(false); }
+  };
+
   const exportCSV = () => {
     if (!v) return;
     const out = [['Conta', ...MESES.map((m) => `${m}/${String(ano).slice(2)}`), 'Total']];
@@ -88,7 +98,12 @@ function VisaoSocia() {
         title="Visão da Sócia"
         description="A pessoa física e as empresas dela juntas: o que as empresas pagaram à sócia (pró-labore, distribuição, retiradas) e o que entrou e saiu no PF."
         icon={Users}
-        action={<Button onClick={exportCSV} disabled={!v || loading} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>}
+        action={(
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportPDF} disabled={!v || loading || gerandoPdf} className="gap-2">{gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Exportar PDF</Button>
+            <Button onClick={exportCSV} disabled={!v || loading} className="gap-2"><Download className="h-4 w-4" /> Exportar CSV</Button>
+          </div>
+        )}
       />
 
       <div className="flex flex-wrap items-center gap-3 mb-6">

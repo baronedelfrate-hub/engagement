@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
-import { Loader2, AlertCircle, Building2, RotateCcw } from 'lucide-react';
+import { FileText, Loader2, AlertCircle, Building2, RotateCcw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,6 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { montarDRE, calcularPEPeriodo, MESES } from '@/lib/dreGerencial';
+import { gerarPontoEquilibrioPdf } from '@/lib/pontoEquilibrioPdf';
+import { buscarNomeEmpresa, rotulosFiltros } from '@/lib/nomeEmpresa';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (v) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const brl = (v) => `R$ ${fmt(v)}`;
@@ -88,6 +91,8 @@ function PontoEquilibrio() {
   const dados = useDadosGerenciais();
   const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, loading, error } = dados;
   const [mes, setMes] = useState(null);
+  const { toast } = useToast();
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const [sim, setSim] = useState({ receita: 0, fixos: 0, variavelPct: 0 });
   // retiradas de sócios como custo fixo: lembra a escolha neste navegador
   const [incluirSocios, setIncluirSocios] = useState(() => { try { return localStorage.getItem('pe_incluir_socios') === '1'; } catch { return false; } });
@@ -121,12 +126,29 @@ function PontoEquilibrio() {
 
   const grafico = mesesComDado.map((m) => ({ mes: MESES[m.i], 'Receita bruta': m.receita, 'Ponto de equilíbrio': m.peImpossivel ? 0 : m.pe }));
 
+  const exportPDF = async () => {
+    if (!dre || !doMes || !acumulado) return;
+    setGerandoPdf(true);
+    try {
+      const empresaNome = await buscarNomeEmpresa(empresaId, dados.empresas?.find((e) => e.id === empresaId)?.razao_social || '');
+      await gerarPontoEquilibrioPdf({ empresaNome, ano, mes, doMes, acumulado, meses: mesesComDado, incluirSocios, naoClassificado: dre.porChave.nao_classificado.total, filtros: rotulosFiltros(dados) });
+    } catch (e) {
+      toast({ title: 'Não foi possível gerar o PDF', description: e.message, variant: 'destructive' });
+    } finally {
+      setGerandoPdf(false);
+    }
+  };
+
   if (authLoading) return <div className="flex h-full items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
     <>
       <Helmet><title>Ponto de Equilíbrio - Engagement ERP</title></Helmet>
-      <PageHeader title="Ponto de Equilíbrio" description="Quanto a empresa precisa faturar para cobrir os custos, e quanto sobrou ou faltou, mês a mês e no acumulado do ano." />
+      <PageHeader
+        title="Ponto de Equilíbrio"
+        description="Quanto a empresa precisa faturar para cobrir os custos, e quanto sobrou ou faltou, mês a mês e no acumulado do ano."
+        action={<Button variant="outline" onClick={exportPDF} disabled={loading || !dre || !doMes || gerandoPdf} className="gap-2">{gerandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Exportar PDF</Button>}
+      />
 
       <FiltrosGerenciais dados={dados}>
         <Select value={mes === null ? '' : String(mes)} onValueChange={(v) => setMes(Number(v))} disabled={!mesesComDado.length}>

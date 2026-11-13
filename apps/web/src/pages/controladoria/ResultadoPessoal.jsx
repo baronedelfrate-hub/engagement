@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import FiltrosGerenciais from '@/components/controladoria/FiltrosGerenciais';
 import { useDadosGerenciais } from '@/hooks/useDadosGerenciais';
 import { supabase } from '@/lib/customSupabaseClient';
-import { montarResultadoPessoal } from '@/lib/resultadoPessoal';
+import { montarResultadoPessoal, gastosPorCentro } from '@/lib/resultadoPessoal';
 import { MESES } from '@/lib/dreGerencial';
 
 const fmt = (v) => (v === 0 ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
@@ -23,7 +23,7 @@ const cor = (v) => (v < 0 ? 'text-red-600 dark:text-red-400' : '');
 
 function ResultadoPessoal() {
   const dados = useDadosGerenciais();
-  const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, loading, error } = dados;
+  const { authLoading, empresaId, isSuperAdmin, ano, movs, categorias, subcategorias, centros, loading, error } = dados;
   const [abertas, setAbertas] = useState(new Set());
   const [tipo, setTipo] = useState(null);
   const { toast } = useToast();
@@ -56,10 +56,12 @@ function ResultadoPessoal() {
 
   const r = useMemo(() => (ano ? montarResultadoPessoal(movs, { ano, categorias, subcategorias }) : null), [movs, ano, categorias, subcategorias]);
 
+  const porCentro = useMemo(() => (ano && mes !== null ? gastosPorCentro(movs, { ano, mes, categorias, centros: centros || [] }) : null), [movs, ano, mes, categorias, centros]);
+
   const gerar = async (imprimir = false) => {
     setGerando(true);
     try {
-      const nome = await gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos }, imprimir ? { imprimir: true } : {});
+      const nome = await gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos, porCentro }, imprimir ? { imprimir: true } : {});
       toast({ title: imprimir ? 'Impressão preparada' : 'Relatório gerado', description: imprimir ? 'Escolha a impressora na janela que abriu.' : `Arquivo ${nome} baixado.` });
     } catch (e) {
       toast({ title: 'Erro ao gerar o PDF', description: e.message || 'Tente novamente.', variant: 'destructive' });
@@ -164,7 +166,7 @@ function ResultadoPessoal() {
             tipo="resultado_pessoal" refTipo="resultado_pessoal" refId={empresaId}
             paraInicial={empresa?.telefone || ''}
             mensagemInicial={mensagemResumo}
-            anexos={[{ rotulo: 'Resultado pessoal em PDF', gerar: () => gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos }, { base64: true }) }]}
+            anexos={[{ rotulo: 'Resultado pessoal em PDF', gerar: () => gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos, porCentro }, { base64: true }) }]}
           />
           <EnviarEmailDialog
             open={emailAberto} onOpenChange={setEmailAberto}
@@ -178,7 +180,7 @@ function ResultadoPessoal() {
               { rotulo: 'Gastos', valor: `R$ ${fmtBR(-r.totalGastos.valores[mes])}` },
               { rotulo: 'Saldo do mês', valor: `R$ ${fmtBR(r.saldo.valores[mes])}` }
             ]}
-            anexos={[{ rotulo: 'Resultado pessoal em PDF', gerar: () => gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos }, { base64: true }) }]}
+            anexos={[{ rotulo: 'Resultado pessoal em PDF', gerar: () => gerarResultadoPessoalPdf({ empresa, ano, mes, r, bancos, porCentro }, { base64: true }) }]}
           />
         </>
       )}
@@ -209,8 +211,16 @@ function ResultadoPessoal() {
                   <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Entradas — {MESES[mes]}</div><div className="text-lg font-bold text-emerald-600">{brl(r.totalEntradas.valores[mes])}</div></CardContent></Card>
                   <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Gastos — {MESES[mes]}</div><div className="text-lg font-bold text-red-600">{brl(-r.totalGastos.valores[mes])}</div></CardContent></Card>
                   <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Saldo do mês</div><div className={`text-lg font-bold ${cor(r.saldo.valores[mes])}`}>{brl(r.saldo.valores[mes])}</div></CardContent></Card>
-                  {bancos.slice(0, 1).map((b) => (
-                    <Card key={b.id}><CardContent className="p-4"><div className="text-xs text-muted-foreground">{b.saldo < 0 && b.limite > 0 ? 'Limite em uso' : 'Saldo no banco'} — fim de {MESES[mes]}</div><div className={`text-lg font-bold ${cor(b.saldo)}`}>{brl(b.saldo)}</div><div className="text-[11px] text-muted-foreground">{textoLimite(b.saldo, b.limite)}</div></CardContent></Card>
+                </div>
+                <h3 className="text-sm font-semibold mb-2">Saldo em cada conta — fim de {MESES[mes]}</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  {bancos.map((b) => (
+                    <Card key={b.id}><CardContent className="p-4">
+                      <div className="text-xs text-muted-foreground">{b.nome}{b.conta ? ` · ${b.conta}` : ''}</div>
+                      <div className={`text-lg font-bold ${cor(b.saldo)}`}>{brl(b.saldo)}</div>
+                      <div className="text-[11px] text-muted-foreground">{b.saldo < 0 && b.limite > 0 ? textoLimite(b.saldo, b.limite) : (b.limite > 0 ? `Limite ${brl(b.limite)} · disponível ${brl(b.saldo + b.limite)}` : 'Saldo disponível')}</div>
+                      {b.semMovimento && <div className="text-[11px] text-amber-700 dark:text-amber-400 mt-0.5">Sem movimento no mês{b.origem === 'cadastro' ? ' · saldo cadastrado' : ''}</div>}
+                    </CardContent></Card>
                   ))}
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -228,6 +238,36 @@ function ResultadoPessoal() {
                         <Line type="monotone" dataKey="Saldo acumulado" stroke="#6366f1" strokeWidth={2} dot /></LineChart>
                     </ResponsiveContainer></div></CardContent>
                   </Card>
+                  {porCentro && porCentro.linhas.length > 0 && (
+                    <Card className="lg:col-span-2">
+                      <CardHeader className="pb-2"><CardTitle className="text-base">Gastos por centro de custo — {MESES[mes]}/{ano}</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm text-right">
+                            <thead><tr className="bg-muted border-b border-border">
+                              <th className="px-3 py-2 text-left">Categoria</th>
+                              {porCentro.colunas.map((c) => <th key={c.chave} className="px-3 py-2">{c.nome}</th>)}
+                              <th className="px-3 py-2 font-bold">Total</th>
+                            </tr></thead>
+                            <tbody>
+                              {porCentro.linhas.map((l) => (
+                                <tr key={l.rotulo} className="border-b border-border">
+                                  <td className="px-3 py-2 text-left">{l.rotulo}</td>
+                                  {porCentro.colunas.map((c) => <td key={c.chave} className="px-3 py-2">{fmt(l.porCentro[c.chave] || 0)}</td>)}
+                                  <td className="px-3 py-2 font-bold">{fmt(l.total)}</td>
+                                </tr>
+                              ))}
+                              <tr className="bg-muted font-bold border-t-2 border-border">
+                                <td className="px-3 py-2 text-left">TOTAL</td>
+                                {porCentro.colunas.map((c) => <td key={c.chave} className="px-3 py-2">{fmt(porCentro.totais[c.chave])}</td>)}
+                                <td className="px-3 py-2">{fmt(porCentro.total)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                   <Card className="lg:col-span-2">
                     <CardHeader className="pb-2"><CardTitle className="text-base">Para onde foi o dinheiro — {MESES[mes]}/{ano}</CardTitle></CardHeader>
                     <CardContent>{dadosCat.length ? <div style={{ height: Math.max(180, dadosCat.length * 34) }}><ResponsiveContainer width="100%" height="100%">

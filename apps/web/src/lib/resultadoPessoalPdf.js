@@ -17,7 +17,7 @@ export const gerarResultadoPessoalPdf = async (dados, opcoes = {}) => {
   const jsPDF = jspdfMod.jsPDF || jspdfMod.default?.jsPDF || jspdfMod.default;
   const autoTableMod = await import('jspdf-autotable');
   const autoTable = autoTableMod.default?.default || autoTableMod.default || autoTableMod.autoTable;
-  const { empresa, ano, mes, r, bancos = [] } = dados;
+  const { empresa, ano, mes, r, bancos = [], porCentro = null } = dados;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const largura = doc.internal.pageSize.getWidth();
   const margem = 14;
@@ -71,7 +71,7 @@ export const gerarResultadoPessoalPdf = async (dados, opcoes = {}) => {
     autoTable(doc, {
       ...base, startY: y,
       head: [['Conta', `Saldo em fim de ${tituloMes}`, 'Situação do limite']],
-      body: bancos.map((b) => [`${b.nome}${b.conta ? ` · cc ${b.conta}` : ''}`, fmt(b.saldo), b.saldo < 0 && b.limite > 0 ? `Limite em uso: ${textoLimite(b.saldo, b.limite).replace(/^usando /, '')}` : (textoLimite(b.saldo, b.limite) || '—')]),
+      body: bancos.map((b) => [`${b.nome}${b.conta ? ` · cc ${b.conta}` : ''}`, fmt(b.saldo), [b.saldo < 0 && b.limite > 0 ? `Limite em uso: ${textoLimite(b.saldo, b.limite).replace(/^usando /, '')}` : (textoLimite(b.saldo, b.limite) || (b.limite > 0 ? `Limite ${fmt(b.limite)} · disponível ${fmt(b.saldo + b.limite)}` : 'Saldo disponível')), b.semMovimento ? `Sem movimento no mês${b.origem === 'cadastro' ? ' (saldo cadastrado)' : ''}` : ''].filter(Boolean).join(' · ')]),
       columnStyles: { 1: { halign: 'right' } }
     });
     proximoY();
@@ -107,10 +107,25 @@ export const gerarResultadoPessoalPdf = async (dados, opcoes = {}) => {
   });
   proximoY();
 
+  if (porCentro && porCentro.linhas.length) {
+    garantir(30);
+    secao(`4. Gastos por centro de custo — ${tituloMes}`);
+    const nc = porCentro.colunas.length;
+    autoTable(doc, {
+      ...base, startY: y,
+      head: [['Categoria', ...porCentro.colunas.map((c) => c.nome), 'Total']],
+      body: [...porCentro.linhas.map((l) => [l.rotulo, ...porCentro.colunas.map((c) => fmt(l.porCentro[c.chave] || 0)), fmt(l.total)]), ['TOTAL', ...porCentro.colunas.map((c) => fmt(porCentro.totais[c.chave])), fmt(porCentro.total)]],
+      columnStyles: Object.fromEntries(Array.from({ length: nc + 1 }, (_, i) => [i + 1, { halign: 'right' }])),
+      styles: { fontSize: nc > 3 ? 7.5 : 8.5, cellPadding: 1.6 },
+      didParseCell: (d) => { if (d.section === 'body' && d.row.raw?.[0] === 'TOTAL') { d.cell.styles.fontStyle = 'bold'; d.cell.styles.fillColor = CINZA; } }
+    });
+    proximoY();
+  }
+
   const entradas = r.entradas.map((l) => ({ nome: l.rotulo, total: l.valores[mes] })).filter((c) => c.total !== 0).sort((a, b) => b.total - a.total);
   if (entradas.length) {
     garantir(30);
-    secao(`4. Entradas — ${tituloMes}`);
+    secao(`${porCentro && porCentro.linhas.length ? 5 : 4}. Entradas — ${tituloMes}`);
     autoTable(doc, { ...base, startY: y, head: [['Categoria', 'Valor']], body: [...entradas.map((c) => [c.nome, fmt(c.total)]), ['TOTAL', fmt(entradas.reduce((s, c) => s + c.total, 0))]], columnStyles: { 1: { halign: 'right' } }, didParseCell: (d) => { if (d.section === 'body' && d.row.raw?.[0] === 'TOTAL') d.cell.styles.fontStyle = 'bold'; } });
     proximoY();
   }

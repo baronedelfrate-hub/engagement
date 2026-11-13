@@ -52,3 +52,30 @@ export const montarResultadoPessoal = (movs, { ano, categorias, subcategorias })
   const caixa = { valores: saldo.valores.map((v, i) => arred(v + totalFora.valores[i] + pendente.valores[i])), total: arred(saldo.total + totalFora.total + pendente.total) };
   return { ano, entradas, gastos, fora, pendente, totalEntradas, totalGastos, saldo, totalFora, caixa };
 };
+
+// Gastos de um mês abertos por centro de custo (colunas) e categoria (linhas). Valores positivos.
+// movs: [{ data_transacao, valor, categoria_id, centro_custo_id }]; centros: [{ id, codigo, nome }]
+export const gastosPorCentro = (movs, { ano, mes, categorias, centros }) => {
+  const gasto = new Map(categorias.filter((c) => c.grupo_dre === 'pf_gasto').map((c) => [c.id, c]));
+  const nomes = new Map(centros.map((c) => [c.id, c.nome]));
+  const usados = new Set();
+  const linhas = new Map();
+  for (const m of movs) {
+    if (!m.data_transacao || Number(m.data_transacao.slice(0, 4)) !== ano || Number(m.data_transacao.slice(5, 7)) - 1 !== mes) continue;
+    const cat = gasto.get(m.categoria_id);
+    if (!cat) continue;
+    const valor = -(Number(m.valor) || 0);
+    const chave = m.centro_custo_id || 'SEM';
+    usados.add(chave);
+    if (!linhas.has(cat.id)) linhas.set(cat.id, { rotulo: cat.nome, porCentro: {}, total: 0 });
+    const l = linhas.get(cat.id);
+    l.porCentro[chave] = arred((l.porCentro[chave] || 0) + valor);
+    l.total = arred(l.total + valor);
+  }
+  const colunas = [...centros.filter((c) => usados.has(c.id)).map((c) => ({ chave: c.id, nome: `${c.codigo ? `${c.codigo} - ` : ''}${c.nome}` })),
+    ...[...usados].filter((k) => k !== 'SEM' && !nomes.has(k)).map((k) => ({ chave: k, nome: 'Centro removido' })),
+    ...(usados.has('SEM') ? [{ chave: 'SEM', nome: 'Sem centro de custo' }] : [])];
+  const lista = [...linhas.values()].sort((a, b) => b.total - a.total);
+  const totais = Object.fromEntries(colunas.map((c) => [c.chave, arred(lista.reduce((s, l) => s + (l.porCentro[c.chave] || 0), 0))]));
+  return { colunas, linhas: lista, totais, total: arred(lista.reduce((s, l) => s + l.total, 0)) };
+};

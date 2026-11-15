@@ -114,6 +114,15 @@ export default function NfseServicosDetailView() {
     }
   };
 
+  // Abre o arquivo que a Focus devolveu (XML/PDF) em nova aba.
+  const abrirArquivo = (url, nome) => {
+    if (!url || !/^https?:\/\//.test(url)) {
+      toast({ title: `${nome} indisponível`, description: 'Esta nota não tem o arquivo salvo. Notas emitidas pela Focus trazem o XML e o PDF depois de autorizadas.', variant: 'destructive' });
+      return;
+    }
+    window.open(url, '_blank', 'noopener');
+  };
+
   const handleCancelConfirm = async () => {
     setActionLoading('cancel');
     try {
@@ -353,11 +362,11 @@ export default function NfseServicosDetailView() {
             <CardContent className="p-4 space-y-2">
               {nota.protocolo_emissao ? (
                 <>
-                  <Button variant="outline" className="w-full justify-between" onClick={() => toast({ title: 'Download', description: 'Baixando XML...' })}>
+                  <Button variant="outline" className="w-full justify-between" onClick={() => abrirArquivo(nota.xml_file_path, 'XML')}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-orange-500" /> Download XML</span>
                     <Download className="w-4 h-4 text-muted-foreground" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-between" onClick={() => toast({ title: 'Download', description: 'Baixando PDF...' })}>
+                  <Button variant="outline" className="w-full justify-between" onClick={() => abrirArquivo(nota.pdf_file_path, 'PDF')}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-red-500" /> Imprimir NFS-e</span>
                     <Printer className="w-4 h-4 text-muted-foreground" />
                   </Button>

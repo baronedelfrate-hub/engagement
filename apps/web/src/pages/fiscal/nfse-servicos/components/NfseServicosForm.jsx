@@ -101,22 +101,28 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
       const qtd = parseFloat(formData.quantidade) || 0;
       const vSrv = parseFloat(formData.valor_servico) || 0;
       const aliq = parseFloat(formData.aliquota) || 0;
-      const ret = RET.reduce((t, k) => t + (parseFloat(formData[k]) || 0), 0);
-
       const totalServico = qtd * vSrv;
       const vImp = (totalServico * aliq) / 100;
+      // retenção com % informado é calculada sobre o valor do serviço; sem %, vale o valor digitado
+      const calc = {};
+      for (const k of RET) {
+        const pct = parseFloat(formData[k.replace('ret_', 'pct_')]) || 0;
+        calc[k] = pct > 0 ? Number(((totalServico * pct) / 100).toFixed(2)) : (parseFloat(formData[k]) || 0);
+      }
+      const ret = RET.reduce((t, k) => t + calc[k], 0);
       const vLiq = totalServico - vImp - ret;
 
       setFormData(prev => ({
         ...prev,
         valor_imposto: vImp,
+        ...calc,
         retencoes: Number(ret.toFixed(2)),
         valor_liquido: vLiq
       }));
     } catch (err) {
       console.error('[NfseServicosForm ERRO] Falha ao calcular totais:', err);
     }
-  }, [formData.quantidade, formData.valor_servico, formData.aliquota, formData.ret_pis, formData.ret_cofins, formData.ret_csll, formData.ret_irrf, formData.ret_inss, setFormData]);
+  }, [formData.quantidade, formData.valor_servico, formData.aliquota, formData.ret_pis, formData.ret_cofins, formData.ret_csll, formData.ret_irrf, formData.ret_inss, formData.pct_pis, formData.pct_cofins, formData.pct_csll, formData.pct_irrf, formData.pct_inss, setFormData]);
 
   const handleChange = (k, v) => setFormData(prev => ({ ...prev, [k]: v }));
   const handleVincChange = (k, v) => setVinculacoes(prev => ({ ...prev, [k]: v === 'none' ? null : v }));
@@ -374,13 +380,25 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               <Label>Valor do Imposto</Label>
               <Input value={formatCurrency(formData.valor_imposto)} readOnly className="bg-muted text-foreground" />
             </div>
-            <div className="col-span-full grid grid-cols-2 md:grid-cols-5 gap-3">
-              {[['ret_pis', 'PIS retido (R$)'], ['ret_cofins', 'COFINS retido (R$)'], ['ret_csll', 'CSLL retida (R$)'], ['ret_irrf', 'IRRF retido (R$)'], ['ret_inss', 'INSS retido (R$)']].map(([k, rot]) => (
-                <div className="space-y-1" key={k}>
-                  <Label>{rot}</Label>
-                  <Input type="number" min="0" step="0.01" value={formData[k] ?? 0} onChange={e => handleChange(k, e.target.value)} className="text-foreground text-red-600 font-medium bg-background" />
-                </div>
-              ))}
+            <div className="col-span-full space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Retenções na fonte (informe o % e o valor é calculado)</Label>
+                <Button type="button" variant="outline" size="sm" onClick={() => setFormData(prev => ({ ...prev, pct_irrf: 1.5, pct_pis: 0.65, pct_cofins: 3, pct_csll: 1 }))}>Aplicar padrão (IRRF 1,5% + PIS/COFINS/CSLL 4,65%)</Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                {[['pis', 'PIS'], ['cofins', 'COFINS'], ['csll', 'CSLL'], ['irrf', 'IRRF'], ['inss', 'INSS']].map(([k, rot]) => {
+                  const pct = parseFloat(formData[`pct_${k}`]) || 0;
+                  return (
+                    <div className="space-y-1 rounded border border-border p-2" key={k}>
+                      <Label>{rot}</Label>
+                      <div className="flex gap-2">
+                        <Input type="number" min="0" step="0.01" placeholder="%" value={formData[`pct_${k}`] ?? 0} onChange={e => handleChange(`pct_${k}`, e.target.value)} className="w-20 text-foreground bg-background" />
+                        <Input type="number" min="0" step="0.01" placeholder="R$" value={formData[`ret_${k}`] ?? 0} readOnly={pct > 0} onChange={e => handleChange(`ret_${k}`, e.target.value)} className={`text-red-600 font-medium ${pct > 0 ? 'bg-muted' : 'bg-background'}`} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <div className="space-y-1">
               <Label>Total de retenções (R$)</Label>

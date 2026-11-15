@@ -4,6 +4,8 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { focusNfe } from '@/services/focusNfeService';
+import { montarPayloadNfsen, refDaNota } from '@/lib/focusNfsenPayload';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
@@ -63,6 +65,32 @@ export default function NfseServicosDetailView() {
 
     setActionLoading('emitir');
     try {
+      const cfgFocus = (await focusNfe.getConfig().catch(() => null))?.config;
+      const focusPronta = cfgFocus && (cfgFocus.ambiente === 'producao' ? cfgFocus.token_producao_configurado : cfgFocus.token_homologacao_configurado);
+      if (focusPronta) {
+        const payload = await montarPayloadNfsen(nota, cfgFocus);
+        const ref = refDaNota(nota);
+        await focusNfe.emitir('nfsen', payload, { ref, nota_origem_id: nota.id });
+        await nfseServicosService.updateNfseServico(id, { status: 'Aguardando emissão', protocolo_emissao: ref }, null, null);
+        let r = null;
+        for (let i = 0; i < 6; i++) {
+          await new Promise((ok) => setTimeout(ok, 3000));
+          r = await focusNfe.consultar('nfsen', ref).catch((e) => ({ status: 'erro_consulta', mensagem: e.message }));
+          if (!['processando_autorizacao', 'erro_consulta'].includes(r.status)) break;
+        }
+        const amb = cfgFocus.ambiente === 'producao' ? '' : ' (HOMOLOGAÇÃO — sem validade fiscal)';
+        if (r?.status === 'autorizado') {
+          await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf }, null, null);
+          toast({ title: 'NFS-e autorizada' + amb, description: r.numero ? `Número ${r.numero}` : undefined });
+        } else if (r?.status && r.status.startsWith('erro_autorizacao')) {
+          await nfseServicosService.updateNfseServico(id, { status: 'Rejeitada' }, null, null);
+          throw new Error(r.mensagem || 'A prefeitura/Receita rejeitou a nota.');
+        } else {
+          toast({ title: 'Nota em processamento', description: 'Ainda não retornou. Abra a nota de novo em instantes para atualizar.' });
+        }
+        loadData();
+        return;
+      }
       const xml = generateXmlForSubmission(nota);
       const response = await submitToExternalIntegrator(xml);
       
@@ -89,6 +117,9 @@ export default function NfseServicosDetailView() {
   const handleCancelConfirm = async () => {
     setActionLoading('cancel');
     try {
+      if (nota.protocolo_emissao && String(nota.protocolo_emissao).startsWith('nfse')) {
+        await focusNfe.cancelar('nfsen', nota.protocolo_emissao, 'Cancelamento solicitado pelo prestador no sistema');
+      }
       await nfseServicosService.cancelNfseServico(id, null);
       toast({ title: 'Sucesso', description: 'NFS-e cancelada.' });
       setShowCancel(false);

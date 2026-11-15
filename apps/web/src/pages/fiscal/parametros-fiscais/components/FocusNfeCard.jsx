@@ -12,10 +12,10 @@ import { focusNfe } from '@/services/focusNfeService';
 export default function FocusNfeCard() {
   const { toast } = useToast();
   const [cfg, setCfg] = useState(null);
-  const [f, setF] = useState({ ambiente: 'homologacao', cnpj: '', tipo_nfse: 'nacional', token_homologacao: '', token_producao: '' });
+  const [f, setF] = useState({ ambiente: 'homologacao', cnpj: '', tipo_nfse: 'nacional', codigo_opcao_simples: 1, regime_especial: 0, token_homologacao: '', token_producao: '' });
   const [busy, setBusy] = useState(false);
 
-  const aplicar = (c) => { setCfg(c); setF((p) => ({ ...p, ambiente: c.ambiente, cnpj: c.cnpj || '', tipo_nfse: c.tipo_nfse, token_homologacao: '', token_producao: '' })); };
+  const aplicar = (c) => { setCfg(c); setF((p) => ({ ...p, ambiente: c.ambiente, cnpj: c.cnpj || '', tipo_nfse: c.tipo_nfse, codigo_opcao_simples: c.codigo_opcao_simples, regime_especial: c.regime_especial, token_homologacao: '', token_producao: '' })); };
   useEffect(() => { focusNfe.getConfig().then((r) => aplicar(r.config)).catch((e) => toast({ title: 'Focus NFe', description: e.message, variant: 'destructive' })); }, []); // eslint-disable-line
 
   const salvar = async () => {
@@ -75,6 +75,26 @@ export default function FocusNfeCard() {
             <SelectContent>
               <SelectItem value="nacional">NFS-e Nacional</SelectItem>
               <SelectItem value="municipal">NFS-e municipal</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Situação no Simples Nacional</Label>
+          <Select value={String(f.codigo_opcao_simples)} onValueChange={(v) => set('codigo_opcao_simples', Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Não optante</SelectItem>
+              <SelectItem value="2">Optante - MEI</SelectItem>
+              <SelectItem value="3">Optante - ME/EPP</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label>Regime especial de tributação</Label>
+          <Select value={String(f.regime_especial)} onValueChange={(v) => set('regime_especial', Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {[['0', 'Nenhum'], ['1', 'Ato cooperado'], ['2', 'Estimativa'], ['3', 'Microempresa municipal'], ['4', 'Notário ou registrador'], ['5', 'Profissional autônomo'], ['6', 'Sociedade de profissionais'], ['9', 'Outros']].map(([v, n]) => <SelectItem key={v} value={v}>{n}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

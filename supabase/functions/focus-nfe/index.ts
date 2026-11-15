@@ -28,10 +28,10 @@ Deno.serve(async (req) => {
 
     const { data: cfg } = await admin.from('focus_nfe_config').select('*').eq('company_id', empresa).maybeSingle();
     const resumo = (c: Record<string, unknown> | null) => c ? {
-      ambiente: c.ambiente, cnpj: c.cnpj, tipo_nfse: c.tipo_nfse,
+      ambiente: c.ambiente, cnpj: c.cnpj, tipo_nfse: c.tipo_nfse, codigo_opcao_simples: c.codigo_opcao_simples, regime_especial: c.regime_especial,
       token_homologacao_configurado: !!c.token_homologacao, token_producao_configurado: !!c.token_producao,
       ultima_sincronizacao: c.ultima_sincronizacao, status_conexao: c.status_conexao,
-    } : { ambiente: 'homologacao', cnpj: null, tipo_nfse: 'nacional', token_homologacao_configurado: false, token_producao_configurado: false, ultima_sincronizacao: null, status_conexao: null };
+    } : { ambiente: 'homologacao', cnpj: null, tipo_nfse: 'nacional', codigo_opcao_simples: 1, regime_especial: 0, token_homologacao_configurado: false, token_producao_configurado: false, ultima_sincronizacao: null, status_conexao: null };
 
     if (b.acao === 'config_get') return json({ success: true, config: resumo(cfg) });
 
@@ -40,6 +40,8 @@ Deno.serve(async (req) => {
       const reg: Record<string, unknown> = { company_id: empresa, updated_at: new Date().toISOString() };
       if (['homologacao', 'producao'].includes(b.ambiente)) reg.ambiente = b.ambiente;
       if (['nacional', 'municipal'].includes(b.tipo_nfse)) reg.tipo_nfse = b.tipo_nfse;
+      if ([1, 2, 3].includes(Number(b.codigo_opcao_simples))) reg.codigo_opcao_simples = Number(b.codigo_opcao_simples);
+      if (b.regime_especial !== undefined && [0, 1, 2, 3, 4, 5, 6, 9].includes(Number(b.regime_especial))) reg.regime_especial = Number(b.regime_especial);
       if (b.cnpj !== undefined) reg.cnpj = SO_NUM(b.cnpj) || null;
       // token em branco = manter o atual; "__limpar__" = apagar
       for (const k of ['token_homologacao', 'token_producao']) {

@@ -68,7 +68,8 @@ export const montarPayloadNfsen = async (nota, cfg) => {
   if ((cfg?.codigo_opcao_simples || 1) === 1) {
     p.valor_total_tributos_federais = 0; p.valor_total_tributos_estaduais = 0; p.valor_total_tributos_municipais = 0;
   }
-  if (Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
+  // Município aderente ao Sistema Nacional NFS-e (ex.: Indaiatuba): a alíquota vem parametrizada e a Receita recusa se enviarmos.
+  if (cfg?.enviar_aliquota && Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
   if (doc.length === 14) p.cnpj_tomador = doc; else p.cpf_tomador = doc;
   if (cli?.nome) p.razao_social_tomador = cli.nome.slice(0, 150);
   if (ibgeTomador) p.codigo_municipio_tomador = ibgeTomador;

@@ -64,6 +64,10 @@ export const montarPayloadNfsen = async (nota, cfg) => {
     tributacao_iss: 1,
     tipo_retencao_iss: 1,
   };
+  // Não optante do Simples: a Receita não aceita o indicador nem o % do Simples; informa-se o total aproximado dos tributos (valores).
+  if ((cfg?.codigo_opcao_simples || 1) === 1) {
+    p.valor_total_tributos_federais = 0; p.valor_total_tributos_estaduais = 0; p.valor_total_tributos_municipais = 0;
+  }
   if (Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
   if (doc.length === 14) p.cnpj_tomador = doc; else p.cpf_tomador = doc;
   if (cli?.nome) p.razao_social_tomador = cli.nome.slice(0, 150);

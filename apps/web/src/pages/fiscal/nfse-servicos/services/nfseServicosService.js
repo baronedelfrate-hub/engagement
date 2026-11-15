@@ -4,6 +4,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 // Campos de id (uuid) vazios viram null; senão o banco recusa com "invalid input syntax for type uuid".
 const limparUuids = (d) => {
   const o = { ...d };
+  for (const k of ['clientes', 'empresas', 'servicos', 'condicoes_pagamento', 'nfse_servicos_vinculacoes']) delete o[k]; // relações carregadas na leitura não são colunas
   for (const k of ['empresa_id', 'cliente_id', 'servico_id', 'municipio_id', 'condicao_pagamento_id']) if (k in o && o[k] === '') o[k] = null;
   return o;
 };

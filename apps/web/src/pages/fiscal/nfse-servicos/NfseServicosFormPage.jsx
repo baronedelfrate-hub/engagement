@@ -15,7 +15,7 @@ const INITIAL_STATE = {
   empresa_id: '', cliente_id: '', municipio_id: '', servico_id: '',
   numero: '', serie: '1', rps: '', data_emissao: new Date().toISOString().split('T')[0],
   codigo_servico: '', descricao_servico: '', quantidade: 1, valor_servico: 0,
-  aliquota: 0, valor_imposto: 0, retencoes: 0, valor_liquido: 0,
+  aliquota: 0, valor_imposto: 0, retencoes: 0, ret_pis: 0, ret_cofins: 0, ret_csll: 0, ret_irrf: 0, ret_inss: 0, valor_liquido: 0,
   condicao_pagamento_id: '', observacoes: '', status: 'Em digitação',
   municipio_incidencia_iss_nome: '',
   municipio_incidencia_iss_uf: '',

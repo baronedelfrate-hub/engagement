@@ -289,10 +289,18 @@ export default function NfseServicosDetailView() {
                   <span className="text-muted-foreground">Valor ISS</span>
                   <span className="font-medium text-red-600">- {formatCurrency(nota.valor_imposto)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Outras Retenções</span>
-                  <span className="font-medium text-red-600">- {formatCurrency(nota.retencoes)}</span>
-                </div>
+                {[['ret_pis', 'PIS retido'], ['ret_cofins', 'COFINS retido'], ['ret_csll', 'CSLL retida'], ['ret_irrf', 'IRRF retido'], ['ret_inss', 'INSS retido']].filter(([k]) => Number(nota[k]) > 0).map(([k, rot]) => (
+                  <div className="flex justify-between text-sm" key={k}>
+                    <span className="text-muted-foreground">{rot}</span>
+                    <span className="font-medium text-red-600">- {formatCurrency(nota[k])}</span>
+                  </div>
+                ))}
+                {!['ret_pis', 'ret_cofins', 'ret_csll', 'ret_irrf', 'ret_inss'].some((k) => Number(nota[k]) > 0) && Number(nota.retencoes) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Outras Retenções</span>
+                    <span className="font-medium text-red-600">- {formatCurrency(nota.retencoes)}</span>
+                  </div>
+                )}
                 <div className="pt-3 border-t border-border flex justify-between items-center">
                   <span className="font-semibold text-foreground">Valor Líquido NFS-e</span>
                   <span className="text-xl font-bold text-emerald-600">{formatCurrency(nota.valor_liquido)}</span>

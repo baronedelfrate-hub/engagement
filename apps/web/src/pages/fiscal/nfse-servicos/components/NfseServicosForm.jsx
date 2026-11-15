@@ -13,6 +13,8 @@ import { useFiscalMunicipios } from '@/hooks/useFiscalMunicipios';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/lib/customSupabaseClient';
 
+const RET = ['ret_pis', 'ret_cofins', 'ret_csll', 'ret_irrf', 'ret_inss'];
+
 export default function NfseServicosForm({ formData, setFormData, vinculacoes, setVinculacoes, dropdowns }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,7 +101,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
       const qtd = parseFloat(formData.quantidade) || 0;
       const vSrv = parseFloat(formData.valor_servico) || 0;
       const aliq = parseFloat(formData.aliquota) || 0;
-      const ret = parseFloat(formData.retencoes) || 0;
+      const ret = RET.reduce((t, k) => t + (parseFloat(formData[k]) || 0), 0);
 
       const totalServico = qtd * vSrv;
       const vImp = (totalServico * aliq) / 100;
@@ -108,12 +110,13 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
       setFormData(prev => ({
         ...prev,
         valor_imposto: vImp,
+        retencoes: Number(ret.toFixed(2)),
         valor_liquido: vLiq
       }));
     } catch (err) {
       console.error('[NfseServicosForm ERRO] Falha ao calcular totais:', err);
     }
-  }, [formData.quantidade, formData.valor_servico, formData.aliquota, formData.retencoes, setFormData]);
+  }, [formData.quantidade, formData.valor_servico, formData.aliquota, formData.ret_pis, formData.ret_cofins, formData.ret_csll, formData.ret_irrf, formData.ret_inss, setFormData]);
 
   const handleChange = (k, v) => setFormData(prev => ({ ...prev, [k]: v }));
   const handleVincChange = (k, v) => setVinculacoes(prev => ({ ...prev, [k]: v === 'none' ? null : v }));
@@ -371,9 +374,17 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
               <Label>Valor do Imposto</Label>
               <Input value={formatCurrency(formData.valor_imposto)} readOnly className="bg-muted text-foreground" />
             </div>
+            <div className="col-span-full grid grid-cols-2 md:grid-cols-5 gap-3">
+              {[['ret_pis', 'PIS retido (R$)'], ['ret_cofins', 'COFINS retido (R$)'], ['ret_csll', 'CSLL retida (R$)'], ['ret_irrf', 'IRRF retido (R$)'], ['ret_inss', 'INSS retido (R$)']].map(([k, rot]) => (
+                <div className="space-y-1" key={k}>
+                  <Label>{rot}</Label>
+                  <Input type="number" min="0" step="0.01" value={formData[k] ?? 0} onChange={e => handleChange(k, e.target.value)} className="text-foreground text-red-600 font-medium bg-background" />
+                </div>
+              ))}
+            </div>
             <div className="space-y-1">
-              <Label>Retenções (R$)</Label>
-              <Input type="number" min="0" step="0.01" value={formData.retencoes} onChange={e => handleChange('retencoes', e.target.value)} className="text-foreground text-red-600 font-medium bg-background" />
+              <Label>Total de retenções (R$)</Label>
+              <Input value={formatCurrency(formData.retencoes)} readOnly className="bg-muted text-foreground" />
             </div>
             <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900 flex flex-col justify-center items-end">
               <Label className="text-xs text-emerald-700 dark:text-emerald-400">Valor Líquido da Nota</Label>

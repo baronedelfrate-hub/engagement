@@ -14,6 +14,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { entradaNFService } from '../services/entradaNFService';
 import { formatCurrency, formatDate, getStatusColor } from '../utils/entradaNFUtils';
 import SubstituirProvisaoModal from './components/SubstituirProvisaoModal';
+import { ConfirmActionDialog } from '../nfse-servicos/components/NfseActionModals';
+import { listarAdiantamentosDisponiveis, vincularAdiantamentos } from '@/lib/adiantamentos';
 
 export default function EntradaNFDetail() {
   const { id } = useParams();
@@ -28,6 +30,9 @@ export default function EntradaNFDetail() {
   // Action states
   const [actionLoading, setActionLoading] = useState(null);
   const [showSubstituirModal, setShowSubstituirModal] = useState(false);
+  const [showGerarCP, setShowGerarCP] = useState(false);
+  const [adiantPagar, setAdiantPagar] = useState([]);
+  const [selAdiant, setSelAdiant] = useState({});
 
   useEffect(() => {
     loadData();
@@ -73,12 +78,33 @@ export default function EntradaNFDetail() {
   };
 
   // --- ACTIONS ---
+  // abre a janela de confirmação já com os adiantamentos pagos a este fornecedor
+  const abrirGerarCP = async () => {
+    setSelAdiant({}); setAdiantPagar([]); setShowGerarCP(true);
+    try {
+      const lista = await listarAdiantamentosDisponiveis({ tipo: 'pagar', companyId: nota.empresa_id, fornecedorId: nota.fornecedor_id });
+      setAdiantPagar(lista);
+      const ex = lista.find((a) => Math.abs(a.pago - Number(nota.valor_total)) < 0.01);
+      if (ex) setSelAdiant({ [ex.id]: true });
+    } catch { setAdiantPagar([]); }
+  };
+
   const handleGerarCP = async () => {
-    if (!confirm(`Gerar Conta a Pagar de ${formatCurrency(nota.valor_total)} para ${nota.fornecedores?.nome}?`)) return;
     setActionLoading('gerar_cp');
     try {
-      await entradaNFService.createContasPagarFromNota(nota);
-      toast({ title: 'Sucesso', description: 'Conta a Pagar gerada com sucesso.' });
+      const cp = await entradaNFService.createContasPagarFromNota(nota);
+      const escolhidos = adiantPagar.filter((a) => selAdiant[a.id]);
+      let extra = '';
+      if (escolhidos.length) {
+        try {
+          const r = await vincularAdiantamentos(cp.id, escolhidos);
+          extra = ` ${escolhidos.length} adiantamento(s) vinculado(s); situação: ${r.status === 'pago' ? 'paga' : 'paga parcialmente'}.`;
+        } catch (e) {
+          toast({ title: 'Conta gerada, mas o adiantamento não foi vinculado', description: e.message, variant: 'destructive' });
+        }
+      }
+      toast({ title: 'Sucesso', description: `Conta a Pagar gerada com sucesso.${extra}` });
+      setShowGerarCP(false);
       loadData();
     } catch (e) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
@@ -145,7 +171,7 @@ export default function EntradaNFDetail() {
             {!nota.integrado_financeiro && (
               <>
                 <Button
-                  onClick={handleGerarCP}
+                  onClick={abrirGerarCP}
                   disabled={actionLoading}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
                 >
@@ -306,6 +332,30 @@ export default function EntradaNFDetail() {
           </Card>
         </div>
       </div>
+
+      <ConfirmActionDialog
+        isOpen={showGerarCP}
+        onClose={() => setShowGerarCP(false)}
+        onConfirm={handleGerarCP}
+        title="Gerar Contas a Pagar"
+        description={`Gerar Conta a Pagar de ${formatCurrency(nota.valor_total)} para ${nota.fornecedores?.nome}?`}
+        loading={actionLoading === 'gerar_cp'}
+      >
+        {adiantPagar.length > 0 && (
+          <div className="space-y-2 mt-2">
+            <p className="text-sm font-medium text-foreground">Há adiantamentos já pagos a este fornecedor. Vincular a esta nota?</p>
+            <div className="border rounded-md divide-y">
+              {adiantPagar.map((a) => (
+                <label key={a.id} className="flex items-center gap-3 p-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={!!selAdiant[a.id]} onChange={(e) => setSelAdiant((s) => ({ ...s, [a.id]: e.target.checked }))} />
+                  <span className="flex-1">{a.observacoes || a.numero_titulo} <span className="text-muted-foreground">· pago em {a.baixas?.[0]?.data_baixa ? formatDate(a.baixas[0].data_baixa) : '-'}</span></span>
+                  <b>{formatCurrency(a.pago)}</b>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+      </ConfirmActionDialog>
 
       <SubstituirProvisaoModal
         isOpen={showSubstituirModal}

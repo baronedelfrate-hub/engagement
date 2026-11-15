@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2, CalendarClock, Replace, Undo2, Paperclip, Receipt } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash, Loader2, AlertCircle, Search, Eye, CheckCircle2, CalendarClock, Replace, Undo2, Paperclip, Receipt, Coins } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import MovimentacaoDetailModal from './components/MovimentacaoDetailModal';
 import BaixaMovimentacaoModal from './components/BaixaMovimentacaoModal';
 import ProvisaoDialog from './components/ProvisaoDialog';
+import AdiantamentoDialog from './components/AdiantamentoDialog';
 import SubstituirProvisaoDialog from './components/SubstituirProvisaoDialog';
 import { formatDateOnly } from '@/lib/dateUtils';
 import ChavePix from '@/components/financeiro/ChavePix';
@@ -47,6 +48,7 @@ const MovimentacaoFinanceiraPage = () => {
   const [baixaId, setBaixaId] = useState(null);
   const [pagina, setPagina] = useState(1);
   const [provisaoAberta, setProvisaoAberta] = useState(false);
+  const [adiantAberto, setAdiantAberto] = useState(false);
   const [substituirRow, setSubstituirRow] = useState(null);
   const [filtroNatureza, setFiltroNatureza] = useState('Todos'); // Todos | real | provisao
 
@@ -110,6 +112,8 @@ const MovimentacaoFinanceiraPage = () => {
             company_id,
             provisao,
             provisao_id,
+            adiantamento,
+            vinculado_a,
             codigo_barras,
             cliente_id,
             fornecedor_id,
@@ -229,6 +233,9 @@ const MovimentacaoFinanceiraPage = () => {
         description="Gestão unificada de contas a pagar e receber."
         action={
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => setAdiantAberto(true)} disabled={!company_id}>
+              <Coins className="mr-2 h-4 w-4" /> Novo Adiantamento
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setProvisaoAberta(true)} disabled={!company_id}>
               <CalendarClock className="mr-2 h-4 w-4" /> Nova Provisão
             </Button>
@@ -398,6 +405,7 @@ const MovimentacaoFinanceiraPage = () => {
                       <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors align-middle">
                         <td className="px-2 py-1 font-mono text-[10.5px] leading-tight text-foreground min-w-[210px] max-w-[260px]">
                           {row.numero_titulo}
+                          {row.adiantamento && <Badge variant="outline" className="ml-2 border-purple-500/40 text-purple-600 bg-purple-500/10 font-sans">Adiantamento</Badge>}
                           {row.provisao && <Badge variant="outline" className="ml-2 border-amber-500/40 text-amber-600 bg-amber-500/10 font-sans">Provisão</Badge>}
                           {!row.provisao && row.provisao_id && <Badge variant="outline" className="ml-2 border-blue-500/40 text-blue-600 bg-blue-500/10 font-sans">Substitui provisão</Badge>}
                         </td>
@@ -502,6 +510,7 @@ const MovimentacaoFinanceiraPage = () => {
       />
 
       <ProvisaoDialog open={provisaoAberta} onOpenChange={setProvisaoAberta} onSaved={loadData} />
+      <AdiantamentoDialog open={adiantAberto} onOpenChange={setAdiantAberto} onSaved={loadData} />
 
       <SubstituirProvisaoDialog
         open={!!substituirRow}

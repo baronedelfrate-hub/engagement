@@ -222,7 +222,7 @@ export const nfseServicosService = {
     const dtEmissao = new Date(nfseData.data_emissao);
     const dtVencimento = new Date(dtEmissao.setDate(dtEmissao.getDate() + 30)).toISOString().split('T')[0];
 
-    const { error: crError } = await supabase
+    const { data: crData, error: crError } = await supabase
       .from('movimentacao_financeira')
       .insert(montarTituloReceber({
         companyId: nfseData.empresa_id,
@@ -233,10 +233,13 @@ export const nfseServicosService = {
         vencimento: dtVencimento,
         observacoes: `Gerado automaticamente da NFS-e ${nfseData.numero || 'S/N'}`,
         createdBy: user?.id
-      }));
+      }))
+      .select()
+      .single();
     if (crError) throw crError;
 
     await supabase.from('nfse_servicos').update({ integrado_financeiro: true }).eq('id', nfseData.id);
+    return crData;
   },
 
   sendToAccounting: async (nfseData, user) => {

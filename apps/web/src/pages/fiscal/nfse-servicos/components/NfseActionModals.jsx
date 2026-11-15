@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
-export function ConfirmActionDialog({ isOpen, onClose, onConfirm, title, description, loading }) {
+export function ConfirmActionDialog({ isOpen, onClose, onConfirm, title, description, loading, children }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -11,6 +11,7 @@ export function ConfirmActionDialog({ isOpen, onClose, onConfirm, title, descrip
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="text-muted-foreground">{description}</DialogDescription>
         </DialogHeader>
+        {children}
         <DialogFooter className="mt-6">
           <Button variant="outline" onClick={onClose} disabled={loading}>Cancelar</Button>
           <Button onClick={onConfirm} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white">

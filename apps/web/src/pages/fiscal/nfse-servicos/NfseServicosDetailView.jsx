@@ -4,6 +4,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { listarAdiantamentosDisponiveis, vincularAdiantamentos } from '@/lib/adiantamentos';
 import { focusNfe } from '@/services/focusNfeService';
 import { montarPayloadNfsen, refDaNota } from '@/lib/focusNfsenPayload';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,8 @@ export default function NfseServicosDetailView() {
   // Modals state
   const [showCancel, setShowCancel] = useState(false);
   const [showCR, setShowCR] = useState(false);
+  const [adiantReceber, setAdiantReceber] = useState([]);
+  const [selAdiant, setSelAdiant] = useState({});
   const [showAcc, setShowAcc] = useState(false);
 
   useEffect(() => {
@@ -143,8 +146,18 @@ export default function NfseServicosDetailView() {
   const handleGenerateCR = async () => {
     setActionLoading('cr');
     try {
-      await nfseServicosService.generateContasReceber(nota, null);
-      toast({ title: 'Sucesso', description: 'Contas a Receber gerado com sucesso.' });
+      const cr = await nfseServicosService.generateContasReceber(nota, null);
+      const escolhidos = adiantReceber.filter((a) => selAdiant[a.id]);
+      let extra = '';
+      if (escolhidos.length && cr?.id) {
+        try {
+          const r = await vincularAdiantamentos(cr.id, escolhidos);
+          extra = ` ${escolhidos.length} adiantamento(s) vinculado(s); situação: ${r.status === 'pago' ? 'recebida' : 'recebida parcialmente'}.`;
+        } catch (e) {
+          toast({ title: 'Conta gerada, mas o adiantamento não foi vinculado', description: e.message, variant: 'destructive' });
+        }
+      }
+      toast({ title: 'Sucesso', description: `Contas a Receber gerado com sucesso.${extra}` });
       setShowCR(false);
       loadData();
     } catch (e) {
@@ -167,6 +180,14 @@ export default function NfseServicosDetailView() {
       setActionLoading(null);
     }
   };
+
+  useEffect(() => {
+    if (!showCR || !nota) return;
+    setSelAdiant({}); setAdiantReceber([]);
+    listarAdiantamentosDisponiveis({ tipo: 'receber', companyId: nota.empresa_id, clienteId: nota.cliente_id })
+      .then((lista) => { setAdiantReceber(lista); const v = Number(nota.valor_liquido || nota.valor_servico) || 0; const ex = lista.find((a) => Math.abs(a.pago - v) < 0.01); if (ex) setSelAdiant({ [ex.id]: true }); })
+      .catch(() => setAdiantReceber([]));
+  }, [showCR]); // eslint-disable-line
 
   if (loading) return <div className="p-8 flex justify-center text-blue-600"><Loader2 className="w-8 h-8 animate-spin" /></div>;
   if (!nota) return null;
@@ -431,7 +452,22 @@ export default function NfseServicosDetailView() {
         title="Gerar Financeiro"
         description={`Deseja gerar uma Conta a Receber no valor líquido de ${formatCurrency(nota.valor_liquido)}?`}
         loading={actionLoading === 'cr'}
-      />
+      >
+        {adiantReceber.length > 0 && (
+          <div className="space-y-2 mt-2">
+            <p className="text-sm font-medium text-foreground">Este cliente tem adiantamentos recebidos. Vincular a esta nota?</p>
+            <div className="border rounded-md divide-y">
+              {adiantReceber.map((a) => (
+                <label key={a.id} className="flex items-center gap-3 p-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={!!selAdiant[a.id]} onChange={(e) => setSelAdiant((s) => ({ ...s, [a.id]: e.target.checked }))} />
+                  <span className="flex-1">{a.observacoes || a.numero_titulo} <span className="text-muted-foreground">· recebido em {a.baixas?.[0]?.data_baixa ? String(a.baixas[0].data_baixa).slice(0, 10).split('-').reverse().join('/') : '-'}</span></span>
+                  <b>{formatCurrency(a.pago)}</b>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+      </ConfirmActionDialog>
 
       <ConfirmActionDialog
         isOpen={showAcc}

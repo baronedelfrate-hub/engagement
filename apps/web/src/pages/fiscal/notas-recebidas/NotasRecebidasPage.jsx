@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Loader2, RefreshCw, Download, FileDown, ClipboardCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { entradaNFService } from '../services/entradaNFService';
+import LancarEntradaDialog from './LancarEntradaDialog';
 
 const brl = (v) => (v == null ? '-' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
 const data = (d) => (d ? new Date(d).toLocaleDateString('pt-BR') : '-');
@@ -31,7 +31,7 @@ export default function NotasRecebidasPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [lancadas, setLancadas] = useState({}); // chave -> id da nota de entrada
-  const [lancando, setLancando] = useState(null);
+  const [lancar, setLancar] = useState(null);
   const [notas, setNotas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
@@ -89,48 +89,6 @@ export default function NotasRecebidasPage() {
       toast({ title: 'Erro na manifestação', description: e.message, variant: 'destructive' });
     }
     setEnviando(false);
-  };
-
-  const lancarEntrada = async (n) => {
-    setLancando(n.id);
-    try {
-      const so = (v) => String(v || '').replace(/\D/g, '');
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: perfil } = await supabase.from('profiles').select('company_id').eq('id', user.id).single();
-      const empresaId = perfil?.company_id;
-      if (!empresaId) throw new Error('Empresa não identificada.');
-      const { data: jaTem } = await supabase.from('notas_entrada').select('id').eq('empresa_id', empresaId).eq('chave_acesso', n.chave).maybeSingle();
-      if (jaTem) { toast({ title: 'Nota já lançada' }); navigate(`/fiscal/entrada-nf/${jaTem.id}`); return; }
-
-      // Fornecedor: procura pelo CNPJ; se não existir, cadastra
-      const cnpj = so(n.cnpj_emitente);
-      let fornecedorId = null;
-      if (cnpj) {
-        const { data: forn } = await supabase.from('fornecedores').select('id, cnpj').eq('company_id', empresaId).limit(5000);
-        fornecedorId = (forn || []).find((f) => so(f.cnpj) === cnpj)?.id || null;
-      }
-      if (!fornecedorId) {
-        const { data: novo, error: eF } = await supabase.from('fornecedores')
-          .insert({ company_id: empresaId, nome: n.nome_emitente || `Fornecedor ${cnpj}`, cnpj: cnpj || null, ativo: true }).select('id').single();
-        if (eF) throw new Error(`Não foi possível cadastrar o fornecedor: ${eF.message}`);
-        fornecedorId = novo.id;
-      }
-      const hoje = new Date().toISOString().slice(0, 10);
-      const nota = await entradaNFService.saveNota({
-        empresa_id: empresaId, fornecedor_id: fornecedorId,
-        tipo_documento: n.tipo === 'nfe' ? 'NF-e' : 'NFS-e',
-        numero: String(n.numero || n.chave.slice(-9)), serie: n.serie || null, chave_acesso: n.chave,
-        cnpj_fornecedor: cnpj || null,
-        data_emissao: n.data_emissao ? String(n.data_emissao).slice(0, 10) : hoje, data_entrada: hoje,
-        valor_total: Number(n.valor_total) || 0, valor_impostos: 0, valor_liquido: Number(n.valor_total) || 0,
-        status: 'Pendente', observacoes: 'Importada da Focus NFe (notas recebidas).',
-      }, false);
-      toast({ title: 'Nota lançada como entrada', description: 'Confira categoria, vencimento e pagamento na nota.' });
-      navigate(`/fiscal/entrada-nf/${nota.id}`);
-    } catch (e) {
-      toast({ title: 'Erro ao lançar entrada', description: e.message, variant: 'destructive' });
-    }
-    setLancando(null);
   };
 
   const baixar = async (n, formato) => {
@@ -206,7 +164,7 @@ export default function NotasRecebidasPage() {
                       )}
                       {lancadas[n.chave]
                         ? <Button size="sm" variant="outline" className="mr-2 text-emerald-700" onClick={() => navigate(`/fiscal/entrada-nf/${lancadas[n.chave]}`)}><ClipboardCheck className="w-3.5 h-3.5 mr-1" /> Lançada</Button>
-                        : <Button size="sm" className="mr-2 bg-blue-600 hover:bg-blue-700 text-white" disabled={lancando === n.id} onClick={() => lancarEntrada(n)}>{lancando === n.id ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <ClipboardCheck className="w-3.5 h-3.5 mr-1" />} Lançar entrada</Button>}
+                        : <Button size="sm" className="mr-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setLancar(n)}><ClipboardCheck className="w-3.5 h-3.5 mr-1" /> Lançar entrada</Button>}
                       <Button size="sm" variant="outline" className="mr-1" onClick={() => baixar(n, 'xml')}><FileDown className="w-3.5 h-3.5 mr-1" /> XML</Button>
                       <Button size="sm" variant="outline" onClick={() => baixar(n, 'json')}><Download className="w-3.5 h-3.5 mr-1" /> JSON</Button>
                     </td>
@@ -217,6 +175,8 @@ export default function NotasRecebidasPage() {
           )}
         </CardContent>
       </Card>
+
+      <LancarEntradaDialog nota={lancar} onClose={() => setLancar(null)} onDone={(id) => { setLancar(null); navigate(`/fiscal/entrada-nf/${id}`); }} />
 
       <Dialog open={!!manif} onOpenChange={(o) => { if (!o) setManif(null); }}>
         <DialogContent>

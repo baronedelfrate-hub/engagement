@@ -330,7 +330,7 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             </div>
             <div className="space-y-1">
               <Label>Código LC 116/03</Label>
-              <Input value={formData.codigo_servico} readOnly className="bg-muted text-foreground" />
+              <Input value={formData.codigo_servico || ''} onChange={e => handleChange('codigo_servico', e.target.value)} placeholder="Ex.: 17.01 (preenche sozinho se o serviço tiver o código)" className="text-foreground bg-background" />
             </div>
             <div className="col-span-full space-y-1">
               <Label>Descrição Completa do Serviço</Label>

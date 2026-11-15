@@ -124,6 +124,7 @@ import NfeDetailView from '@/pages/fiscal/nfe-produtos/NfeDetailView';
 import NfseServicosPage from '@/pages/fiscal/nfse-servicos/NfseServicosPage';
 import NfseServicosFormPage from '@/pages/fiscal/nfse-servicos/NfseServicosFormPage';
 import NfseServicosDetailView from '@/pages/fiscal/nfse-servicos/NfseServicosDetailView';
+import NotasRecebidasPage from '@/pages/fiscal/notas-recebidas/NotasRecebidasPage';
 import ManifestacaoNFPage from '@/pages/fiscal/manifestacao-nf/ManifestacaoNFPage';
 import ManifestacaoNFDetail from '@/pages/fiscal/manifestacao-nf/ManifestacaoNFDetail';
 import EntradaNFList from '@/pages/fiscal/entrada-nf/EntradaNFList';
@@ -459,6 +460,7 @@ const AnimatedRoutes = () => {
           <Route path="/fiscal/nfse-servicos/novo" element={<ProtectedLayout><PageTransition><NfseServicosFormPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/nfse-servicos/:id" element={<ProtectedLayout><PageTransition><NfseServicosDetailView /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/nfse-servicos/:id/editar" element={<ProtectedLayout><PageTransition><NfseServicosFormPage /></PageTransition></ProtectedLayout>} />
+          <Route path="/fiscal/notas-recebidas" element={<ProtectedLayout><PageTransition><NotasRecebidasPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/manifestacao-nf" element={<ProtectedLayout><PageTransition><ManifestacaoNFPage /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/manifestacao-nf/:id" element={<ProtectedLayout><PageTransition><ManifestacaoNFDetail /></PageTransition></ProtectedLayout>} />
           <Route path="/fiscal/entrada-nf" element={<ProtectedLayout><PageTransition><EntradaNFList /></PageTransition></ProtectedLayout>} />

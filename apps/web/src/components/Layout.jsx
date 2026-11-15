@@ -99,6 +99,7 @@ const navigation = [
           { name: 'NF-e (Produtos)', href: '/fiscal/nfe-produtos' },
           { name: 'NFS-e (Serviços)', href: '/fiscal/nfse-servicos' },
           { name: 'Entrada de NF', href: '/fiscal/entrada-nf' },
+          { name: 'Notas Recebidas (Focus)', href: '/fiscal/notas-recebidas' },
           { name: 'Manifestação de NF', href: '/fiscal/manifestacao-nf' },
           { name: 'Apuração de Impostos', href: '/fiscal/apuracao-impostos' },
           { name: 'Parâmetros Fiscais', href: '/fiscal/parametros-fiscais' },

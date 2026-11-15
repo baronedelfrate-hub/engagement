@@ -1,6 +1,13 @@
 import { montarTituloReceber } from '@/lib/titulosPagar';
 import { supabase } from '@/lib/customSupabaseClient';
 
+// Campos de id (uuid) vazios viram null; senão o banco recusa com "invalid input syntax for type uuid".
+const limparUuids = (d) => {
+  const o = { ...d };
+  for (const k of ['empresa_id', 'cliente_id', 'servico_id', 'municipio_id', 'condicao_pagamento_id']) if (k in o && o[k] === '') o[k] = null;
+  return o;
+};
+
 export const nfseServicosService = {
   fetchNfseServicos: async (filters = {}) => {
     let query = supabase
@@ -95,7 +102,7 @@ export const nfseServicosService = {
 
     const { data: nfse, error } = await supabase
       .from('nfse_servicos')
-      .insert({ ...data, created_by: user?.id })
+      .insert({ ...limparUuids(data), created_by: user?.id })
       .select()
       .single();
 
@@ -140,7 +147,7 @@ export const nfseServicosService = {
 
     const { error } = await supabase
       .from('nfse_servicos')
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...limparUuids(data), updated_at: new Date().toISOString() })
       .eq('id', id);
 
     if (error) throw error;

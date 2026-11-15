@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import FocusNfeCard from './FocusNfeCard';
 import { Save, Server, Activity, ShieldCheck, Upload } from 'lucide-react';
 
 export default function ParametrosIntegradoresSection({ data, onChange, onSave, onTestConnection, loading }) {
@@ -24,7 +25,8 @@ export default function ParametrosIntegradoresSection({ data, onChange, onSave, 
 
   return (
     <div className="space-y-6">
-      
+      <FocusNfeCard />
+
       <Card className="shadow-sm border-border">
         <CardHeader className="bg-muted/50 border-b border-border flex flex-row items-center justify-between">
           <div>

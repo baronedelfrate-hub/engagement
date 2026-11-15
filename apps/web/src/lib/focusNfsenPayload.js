@@ -47,7 +47,8 @@ export const montarPayloadNfsen = async (nota, cfg) => {
   const ibgeTomador = await ibgeDaCidade(cli?.cidade, cli?.estado);
   const agora = new Date(); const dia = (nota.data_emissao || agora.toISOString()).slice(0, 10);
   const p = {
-    data_emissao: agora.toISOString().replace(/\.\d+Z$/, '-00:00').replace('Z', ''),
+    // horário de Brasília (-03:00), 2 min no passado: a DPS não pode ter data posterior ao processamento
+    data_emissao: new Date(agora.getTime() - 3 * 3600 * 1000 - 120 * 1000).toISOString().slice(0, 19) + '-03:00',
     serie_dps: soNum(nota.serie) || '1',
     numero_dps: numero,
     data_competencia: dia,

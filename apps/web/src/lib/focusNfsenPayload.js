@@ -61,15 +61,21 @@ export const montarPayloadNfsen = async (nota, cfg) => {
     codigo_tributacao_nacional_iss: trib,
     descricao_servico: String(nota.descricao_servico).slice(0, 1000),
     valor_servico: Number(Number(nota.valor_servico).toFixed(2)),
-    tributacao_iss: 1,
-    tipo_retencao_iss: 1,
+    tributacao_iss: Number(nota.tributacao_iss) || 1,
+    tipo_retencao_iss: nota.iss_retido ? 2 : 1,
   };
+  if (nota.codigo_tributacao_municipal) p.codigo_tributacao_municipal_iss = String(nota.codigo_tributacao_municipal);
+  if (soNum(nota.codigo_nbs).length === 9) p.codigo_nbs = soNum(nota.codigo_nbs);
+  // Reforma Tributária (IBS/CBS): os percentuais são calculados pela Receita; só informamos a classificação
+  if (nota.ibs_cbs_cst) p.ibs_cbs_situacao_tributaria = String(nota.ibs_cbs_cst);
+  if (nota.ibs_cbs_class_trib) p.ibs_cbs_classificacao_tributaria = String(nota.ibs_cbs_class_trib);
+  if (nota.codigo_indicador_operacao) p.codigo_indicador_operacao = soNum(nota.codigo_indicador_operacao);
   // Não optante do Simples: a Receita não aceita o indicador nem o % do Simples; informa-se o total aproximado dos tributos (valores).
   if ((cfg?.codigo_opcao_simples || 1) === 1) {
     p.valor_total_tributos_federais = 0; p.valor_total_tributos_estaduais = 0; p.valor_total_tributos_municipais = 0;
   }
   // Município aderente ao Sistema Nacional NFS-e (ex.: Indaiatuba): a alíquota vem parametrizada e a Receita recusa se enviarmos.
-  if (cfg?.enviar_aliquota && Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
+  if (nota.enviar_aliquota_iss && Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
   if (doc.length === 14) p.cnpj_tomador = doc; else p.cpf_tomador = doc;
   if (cli?.nome) p.razao_social_tomador = cli.nome.slice(0, 150);
   if (ibgeTomador) p.codigo_municipio_tomador = ibgeTomador;

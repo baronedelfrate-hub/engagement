@@ -124,6 +124,8 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
     }
   }, [formData.quantidade, formData.valor_servico, formData.aliquota, formData.ret_pis, formData.ret_cofins, formData.ret_csll, formData.ret_irrf, formData.ret_inss, formData.pct_pis, formData.pct_cofins, formData.pct_csll, formData.pct_irrf, formData.pct_inss, setFormData]);
 
+  useEffect(() => { if (formData.empresa_id && !formData.id) aplicarPadroes(formData.empresa_id); }, [formData.empresa_id]); // eslint-disable-line
+
   const handleChange = (k, v) => setFormData(prev => ({ ...prev, [k]: v }));
   const handleVincChange = (k, v) => setVinculacoes(prev => ({ ...prev, [k]: v === 'none' ? null : v }));
 
@@ -138,8 +140,40 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
     }
   };
 
+  // Preenche só o que estiver vazio com o padrão da empresa (Parâmetros Fiscais / card da Focus NFe)
+  const aplicarPadroes = async (empresaId) => {
+    if (!empresaId) return;
+    const { data: p } = await supabase.from('parametros_nfse').select('*').eq('empresa_id', empresaId).maybeSingle();
+    if (!p) return;
+    let mun = null;
+    if (!formData.municipio_id && p.municipio_prestacao_id) {
+      const { data: m } = await supabase.from('fiscal_municipios_ibge').select('*').eq('id', p.municipio_prestacao_id).maybeSingle();
+      mun = m;
+    }
+    setFormData(prev => {
+      const vazio = (v) => v === undefined || v === null || v === '' || v === 0;
+      const n = { ...prev };
+      if (vazio(prev.codigo_servico) && p.codigo_tributacao_nacional) n.codigo_servico = p.codigo_tributacao_nacional;
+      if (vazio(prev.codigo_tributacao_municipal) && p.codigo_tributacao_municipal) n.codigo_tributacao_municipal = p.codigo_tributacao_municipal;
+      if (vazio(prev.codigo_nbs) && p.codigo_nbs) n.codigo_nbs = p.codigo_nbs;
+      if (vazio(prev.ibs_cbs_cst) && p.ibs_cbs_cst) n.ibs_cbs_cst = p.ibs_cbs_cst;
+      if (vazio(prev.ibs_cbs_class_trib) && p.ibs_cbs_class_trib) n.ibs_cbs_class_trib = p.ibs_cbs_class_trib;
+      if (vazio(prev.codigo_indicador_operacao) && p.codigo_indicador_operacao) n.codigo_indicador_operacao = p.codigo_indicador_operacao;
+      if (p.tributacao_iss) n.tributacao_iss = prev.tributacao_iss || p.tributacao_iss;
+      if (p.iss_retido != null && !prev.id) n.iss_retido = !!p.iss_retido;
+      if (vazio(prev.aliquota) && p.aliquota_iss_padrao) n.aliquota = Number(p.aliquota_iss_padrao);
+      if (vazio(prev.pct_irrf) && p.retencao_irrf_padrao) n.pct_irrf = Number(p.retencao_irrf_padrao);
+      if (vazio(prev.pct_pis) && p.retencao_pis_padrao) n.pct_pis = Number(p.retencao_pis_padrao);
+      if (vazio(prev.pct_cofins) && p.retencao_cofins_padrao) n.pct_cofins = Number(p.retencao_cofins_padrao);
+      if (vazio(prev.pct_csll) && p.retencao_csll_padrao) n.pct_csll = Number(p.retencao_csll_padrao);
+      if (mun) { n.municipio_id = mun.id; n.municipio_incidencia_iss_codigo_ibge = mun.codigo_ibge; n.municipio_incidencia_iss_nome = mun.nome_municipio; n.municipio_incidencia_iss_uf = mun.uf; }
+      return n;
+    });
+  };
+
   const handleEmpresaSelect = async (id) => {
     handleChange('empresa_id', id);
+    await aplicarPadroes(id);
     if (!formData.numero) {
       const nextNum = await nfseServicosService.getNextNfseNumber(id);
       handleChange('numero', nextNum);
@@ -407,6 +441,76 @@ export default function NfseServicosForm({ formData, setFormData, vinculacoes, s
             <div className="space-y-1 bg-emerald-50 p-2 rounded border border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900 flex flex-col justify-center items-end">
               <Label className="text-xs text-emerald-700 dark:text-emerald-400">Valor Líquido da Nota</Label>
               <span className="text-lg font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(formData.valor_liquido)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* SEÇÃO 4B - NFS-e NACIONAL / REFORMA TRIBUTÁRIA */}
+        <Card className="shadow-sm border-border lg:col-span-2">
+          <CardHeader className="py-3 border-b border-border bg-muted/50">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <FileText className="w-4 h-4 text-emerald-600" /> NFS-e Nacional: tributação e Reforma Tributária (IBS/CBS)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <Label>Código de tributação nacional</Label>
+              <Input value={formData.codigo_servico || ''} onChange={e => handleChange('codigo_servico', e.target.value)} placeholder="17.10.01" className="text-foreground bg-background" />
+            </div>
+            <div className="space-y-1">
+              <Label>Código de tributação municipal</Label>
+              <Input value={formData.codigo_tributacao_municipal || ''} onChange={e => handleChange('codigo_tributacao_municipal', e.target.value)} className="text-foreground bg-background" />
+            </div>
+            <div className="space-y-1">
+              <Label>NBS</Label>
+              <Input value={formData.codigo_nbs || ''} onChange={e => handleChange('codigo_nbs', e.target.value)} placeholder="1.1806.63.00" className="text-foreground bg-background" />
+            </div>
+            <div className="space-y-1">
+              <Label>Tipo de tributação do ISS</Label>
+              <Select value={String(formData.tributacao_iss || 1)} onValueChange={v => handleChange('tributacao_iss', Number(v))}>
+                <SelectTrigger className="text-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Operação tributável</SelectItem>
+                  <SelectItem value="2">Imunidade</SelectItem>
+                  <SelectItem value="3">Exportação de serviço</SelectItem>
+                  <SelectItem value="4">Não incidência</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>ISS retido pelo tomador?</Label>
+              <Select value={formData.iss_retido ? 'sim' : 'nao'} onValueChange={v => handleChange('iss_retido', v === 'sim')}>
+                <SelectTrigger className="text-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nao">Não retido</SelectItem>
+                  <SelectItem value="sim">Retido pelo tomador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Enviar a alíquota do ISS na nota?</Label>
+              <Select value={formData.enviar_aliquota_iss ? 'sim' : 'nao'} onValueChange={v => handleChange('enviar_aliquota_iss', v === 'sim')}>
+                <SelectTrigger className="text-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nao">Não (usar a alíquota do município)</SelectItem>
+                  <SelectItem value="sim">Sim, enviar a alíquota da tela</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>CST IBS/CBS</Label>
+              <Input value={formData.ibs_cbs_cst || ''} onChange={e => handleChange('ibs_cbs_cst', e.target.value)} placeholder="000" className="text-foreground bg-background" />
+            </div>
+            <div className="space-y-1">
+              <Label>cClassTrib (classificação IBS/CBS)</Label>
+              <Input value={formData.ibs_cbs_class_trib || ''} onChange={e => handleChange('ibs_cbs_class_trib', e.target.value)} placeholder="000001" className="text-foreground bg-background" />
+            </div>
+            <div className="space-y-1">
+              <Label>Indicador da operação (cIndOp)</Label>
+              <Input value={formData.codigo_indicador_operacao || ''} onChange={e => handleChange('codigo_indicador_operacao', e.target.value)} placeholder="040101" className="text-foreground bg-background" />
+            </div>
+            <div className="col-span-full text-xs text-muted-foreground">
+              Os valores de IBS (estadual e municipal) e CBS são calculados pela própria Receita e aparecem na nota emitida; em 2026 são só informativos. O município e o código IBGE de incidência são os do campo "Município de Incidência do ISS", na seção 2.
             </div>
           </CardContent>
         </Card>

@@ -19,7 +19,9 @@ const INITIAL_STATE = {
   condicao_pagamento_id: '', observacoes: '', status: 'Em digitação',
   municipio_incidencia_iss_nome: '',
   municipio_incidencia_iss_uf: '',
-  municipio_incidencia_iss_codigo_ibge: ''
+  municipio_incidencia_iss_codigo_ibge: '',
+  codigo_tributacao_municipal: '', codigo_nbs: '', tributacao_iss: 1, iss_retido: false,
+  ibs_cbs_cst: '', ibs_cbs_class_trib: '', codigo_indicador_operacao: '', enviar_aliquota_iss: false
 };
 
 const INITIAL_VINCULACOES = {

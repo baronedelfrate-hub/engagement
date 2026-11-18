@@ -67,6 +67,10 @@ export const montarPayloadNfsen = async (nota, cfg) => {
   if (nota.codigo_tributacao_municipal) p.codigo_tributacao_municipal_iss = String(nota.codigo_tributacao_municipal);
   if (soNum(nota.codigo_nbs).length === 9) p.codigo_nbs = soNum(nota.codigo_nbs);
   // Reforma Tributária (IBS/CBS): os percentuais são calculados pela Receita; só informamos a classificação
+  if (nota.ibs_cbs_cst || nota.ibs_cbs_class_trib || nota.codigo_indicador_operacao) {
+    // campos obrigatórios do grupo IBS/CBS: NFS-e regular, não é consumo pessoal, destinatário = o próprio tomador
+    p.finalidade_emissao = 0; p.consumidor_final = 0; p.indicador_destinatario = 0;
+  }
   if (nota.ibs_cbs_cst) p.ibs_cbs_situacao_tributaria = String(nota.ibs_cbs_cst);
   if (nota.ibs_cbs_class_trib) p.ibs_cbs_classificacao_tributaria = String(nota.ibs_cbs_class_trib);
   if (nota.codigo_indicador_operacao) p.codigo_indicador_operacao = soNum(nota.codigo_indicador_operacao);

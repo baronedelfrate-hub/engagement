@@ -62,14 +62,16 @@ export default function NotasRecebidasPage() {
 
   const sincronizar = async () => {
     setSincronizando(true);
-    try {
-      const a = await focusNfe.sincronizar('nfe');
-      const b = await focusNfe.sincronizar('nfsen');
-      toast({ title: 'Sincronização concluída', description: `${a.novas} NF-e e ${b.novas} NFS-e Nacional atualizadas.` });
-      await carregar();
-    } catch (e) {
-      toast({ title: 'Erro ao sincronizar', description: e.message, variant: 'destructive' });
+    // cada tipo é buscado separado: se um não estiver habilitado na Focus, o outro continua funcionando
+    const resultados = [];
+    for (const [tipoBusca, rotulo] of [['nfe', 'NF-e'], ['nfsen', 'NFS-e Nacional']]) {
+      try { const r = await focusNfe.sincronizar(tipoBusca); resultados.push({ rotulo, ok: true, novas: r.novas }); }
+      catch (e) { resultados.push({ rotulo, ok: false, erro: e.message }); }
     }
+    const ok = resultados.filter((r) => r.ok); const falhas = resultados.filter((r) => !r.ok);
+    if (ok.length) toast({ title: 'Sincronização concluída', description: ok.map((r) => `${r.novas} ${r.rotulo}`).join(' e ') + ' atualizadas.' });
+    falhas.forEach((r) => toast({ title: `${r.rotulo}: não foi possível buscar`, description: /habilitad/i.test(r.erro) ? `${r.erro} (peça à Focus para habilitar o recebimento de ${r.rotulo} para o CNPJ da empresa.)` : r.erro, variant: 'destructive' }));
+    await carregar();
     setSincronizando(false);
   };
 

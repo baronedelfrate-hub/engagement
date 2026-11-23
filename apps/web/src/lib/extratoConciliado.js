@@ -137,6 +137,15 @@ export const filtrarPorSituacao = (linhas, situacao) => {
   return linhas;
 };
 
+// Filtro por obra: o texto da obra é o mesmo que aparece na coluna "Centro / obra" ("PKC - PÁTIO PAULISTA").
+export const SEM_OBRA = '__SEM_OBRA__';
+export const listarObras = (linhas) => [...new Set(linhas.map((l) => l.obra).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+export const filtrarPorObra = (linhas, obra) => {
+  if (!obra || obra === 'TODAS') return linhas;
+  if (obra === SEM_OBRA) return linhas.filter((l) => !l.obra);
+  return linhas.filter((l) => l.obra === obra);
+};
+
 export const resumir = (linhas, saldos = []) => {
   const entradas = arred(linhas.reduce((s, l) => s + l.entrada, 0));
   const saidas = arred(linhas.reduce((s, l) => s + l.saida, 0));

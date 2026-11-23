@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
-import { carregarExtratoConciliado, filtrarPorSituacao, resumir, textoLimite, SITUACOES, moeda, fmtData } from '@/lib/extratoConciliado';
+import { carregarExtratoConciliado, filtrarPorSituacao, filtrarPorObra, listarObras, SEM_OBRA, resumir, textoLimite, SITUACOES, moeda, fmtData } from '@/lib/extratoConciliado';
 import { exportarExtratoExcel, exportarExtratoPdf } from '@/lib/extratoConciliadoExport';
 
 const sel = 'h-9 rounded-md border border-input bg-background px-3 text-sm';
@@ -25,6 +25,7 @@ const ExtratoConciliadoPage = () => {
   const [de, setDe] = useState('');
   const [ate, setAte] = useState('');
   const [situacao, setSituacao] = useState('TODAS');
+  const [obra, setObra] = useState('TODAS');
   const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,13 +43,16 @@ const ExtratoConciliadoPage = () => {
   }, [companyId, bancoId, de, ate, toast]);
   useEffect(() => { if (!authLoading) carregar(); }, [authLoading, carregar]);
 
-  const linhas = useMemo(() => (dados ? filtrarPorSituacao(dados.linhas, situacao) : []), [dados, situacao]);
+  const obras = useMemo(() => (dados ? listarObras(dados.linhas) : []), [dados]);
+  useEffect(() => { if (obra !== 'TODAS' && obra !== SEM_OBRA && dados && !obras.includes(obra)) setObra('TODAS'); }, [dados, obras, obra]);
+  const linhas = useMemo(() => (dados ? filtrarPorObra(filtrarPorSituacao(dados.linhas, situacao), obra) : []), [dados, situacao, obra]);
   const resumo = useMemo(() => (dados ? resumir(linhas, dados.saldos) : null), [dados, linhas]);
   const filtros = useMemo(() => {
     const b = dados?.banco ? `${dados.banco.nome} ag ${dados.banco.agencia || '-'} cc ${dados.banco.conta || '-'}` : 'Todos os bancos';
     const p = de || ate ? `${de ? fmtData(de) : 'início'} a ${ate ? fmtData(ate) : 'hoje'}` : 'todo o período';
-    return `${b} · ${p} · ${SITUACOES.find((s) => s.id === situacao)?.rotulo}`;
-  }, [dados, de, ate, situacao]);
+    const o = obra === 'TODAS' ? '' : ` · Obra: ${obra === SEM_OBRA ? 'sem obra' : obra}`;
+    return `${b} · ${p} · ${SITUACOES.find((s) => s.id === situacao)?.rotulo}${o}`;
+  }, [dados, de, ate, situacao, obra]);
 
   const baixar = async (tipo) => {
     try {
@@ -80,6 +84,12 @@ const ExtratoConciliadoPage = () => {
         <div><Label className="text-xs">Mostrar</Label>
           <select className={`${sel} w-48 block`} value={situacao} onChange={(e) => setSituacao(e.target.value)}>
             {SITUACOES.map((s) => <option key={s.id} value={s.id}>{s.rotulo}</option>)}
+          </select></div>
+        <div><Label className="text-xs">Obra</Label>
+          <select className={`${sel} w-64 block`} value={obra} onChange={(e) => setObra(e.target.value)}>
+            <option value="TODAS">Todas as obras</option>
+            {obras.map((o) => <option key={o} value={o}>{o}</option>)}
+            <option value={SEM_OBRA}>Sem obra</option>
           </select></div>
       </div>
 

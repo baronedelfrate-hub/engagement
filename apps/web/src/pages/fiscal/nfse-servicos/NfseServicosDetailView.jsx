@@ -126,6 +126,26 @@ export default function NfseServicosDetailView() {
     window.open(url, '_blank', 'noopener');
   };
 
+  // Baixa o XML como arquivo (o navegador abriria o XML na tela). Busca pelo servidor e salva com o número da nota.
+  const baixarXml = async () => {
+    const url = nota.xml_file_path;
+    if (!url || !/^https?:\/\//.test(url)) { abrirArquivo(url, 'XML'); return; }
+    setActionLoading('xml');
+    try {
+      const r = await focusNfe.arquivo(url);
+      const blob = new Blob([r.conteudo], { type: 'application/xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `NFS-e ${nota.numero || id}.xml`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch (e) {
+      toast({ title: 'Não foi possível baixar o XML', description: e.message, variant: 'destructive' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleCancelConfirm = async () => {
     setActionLoading('cancel');
     try {
@@ -383,7 +403,7 @@ export default function NfseServicosDetailView() {
             <CardContent className="p-4 space-y-2">
               {nota.protocolo_emissao ? (
                 <>
-                  <Button variant="outline" className="w-full justify-between" onClick={() => abrirArquivo(nota.xml_file_path, 'XML')}>
+                  <Button variant="outline" className="w-full justify-between" onClick={baixarXml} disabled={actionLoading === 'xml'}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-orange-500" /> Download XML</span>
                     <Download className="w-4 h-4 text-muted-foreground" />
                   </Button>

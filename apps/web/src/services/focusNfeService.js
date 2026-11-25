@@ -22,4 +22,5 @@ export const focusNfe = {
   sincronizar: (tipo) => chamar({ acao: 'sincronizar', tipo }),
   manifestar: (chave, tipo, justificativa) => chamar({ acao: 'manifestar', chave, tipo, justificativa }),
   baixar: (tipo, chave, formato) => chamar({ acao: 'baixar', tipo, chave, formato }),
+  arquivo: (url) => chamar({ acao: 'arquivo', url }),
 };

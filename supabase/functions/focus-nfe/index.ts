@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 // Integração Focus NFe por empresa: cada empresa guarda o próprio token de homologação e de produção (tabela focus_nfe_config,
 // sem acesso pelo navegador) e escolhe o ambiente em uso. Corpo: { acao, empresa_id? (só superadmin), ... }
-// Ações: config_get | config_save | testar | emitir | consultar | cancelar | sincronizar | manifestar | baixar
+// Ações: config_get | config_save | testar | emitir | consultar | cancelar | sincronizar | manifestar | baixar | arquivo
 const json = (corpo: unknown, status = 200) =>
   new Response(JSON.stringify(corpo), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 const URLS: Record<string, string> = { homologacao: 'https://homologacao.focusnfe.com.br', producao: 'https://api.focusnfe.com.br' };
@@ -149,6 +149,17 @@ Deno.serve(async (req) => {
     if (b.acao === 'baixar') {
       const chave = SO_NUM(b.chave); const rota = b.tipo === 'nfsen' ? 'nfsens_recebidas' : 'nfes_recebidas';
       const r = await fetch(`${base}/v2/${rota}/${chave}.${b.formato === 'json' ? 'json' : 'xml'}`, { headers: { Authorization: auth } });
+      return json({ success: r.ok, conteudo: await r.text() }, r.ok ? 200 : 400);
+    }
+
+    // Baixa o XML de uma nota emitida (url_xml devolvida pela Focus) para o navegador salvar como arquivo, em vez de abrir em outra aba.
+    if (b.acao === 'arquivo') {
+      let alvo = String(b.url ?? '');
+      if (alvo.startsWith('/')) alvo = `${base}${alvo}`;
+      let host = ''; try { host = new URL(alvo).hostname; } catch { return json({ error: 'Endereço do arquivo inválido.' }, 400); }
+      const daFocus = /(^|\.)focusnfe\.com\.br$/.test(host);
+      if (!daFocus && !/^focusnfe[a-z0-9.-]*\.amazonaws\.com$/.test(host) && !/^[a-z0-9-]*focusnfe[a-z0-9.-]*\.s3[a-z0-9.-]*\.amazonaws\.com$/.test(host)) return json({ error: 'Endereço do arquivo não permitido.' }, 400);
+      const r = await fetch(alvo, { headers: daFocus ? { Authorization: auth } : {} });
       return json({ success: r.ok, conteudo: await r.text() }, r.ok ? 200 : 400);
     }
 

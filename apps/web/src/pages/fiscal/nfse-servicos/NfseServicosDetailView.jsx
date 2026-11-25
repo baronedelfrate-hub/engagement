@@ -126,21 +126,26 @@ export default function NfseServicosDetailView() {
     window.open(url, '_blank', 'noopener');
   };
 
-  // Baixa o XML como arquivo (o navegador abriria o XML na tela). Busca pelo servidor e salva com o número da nota.
-  const baixarXml = async () => {
-    const url = nota.xml_file_path;
-    if (!url || !/^https?:\/\//.test(url)) { abrirArquivo(url, 'XML'); return; }
-    setActionLoading('xml');
+  // Baixa XML ou PDF como arquivo, com o nome "2026.11.25 - NFS-e 17 - NOME DO CLIENTE.xml" (o navegador abriria o XML na tela).
+  const nomeArquivoNota = (ext) => {
+    const data = String(nota.data_emissao || new Date().toISOString()).slice(0, 10).replace(/-/g, '.');
+    const cliente = String(nota.clientes?.nome || 'SEM CLIENTE').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+    return `${data} - NFS-e ${nota.numero || 'S-N'} - ${cliente}.${ext}`;
+  };
+  const baixarArquivo = async (url, ext, nome) => {
+    if (!url || !/^https?:\/\//.test(url)) { abrirArquivo(url, nome); return; }
+    setActionLoading(ext);
     try {
       const r = await focusNfe.arquivo(url);
-      const blob = new Blob([r.conteudo], { type: 'application/xml' });
+      const bin = atob(r.base64); const bytes = new Uint8Array(bin.length);
+      for (let k = 0; k < bin.length; k += 1) bytes[k] = bin.charCodeAt(k);
+      const blob = new Blob([bytes], { type: ext === 'pdf' ? 'application/pdf' : 'application/xml' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `NFS-e ${nota.numero || id}.xml`;
+      a.href = URL.createObjectURL(blob); a.download = nomeArquivoNota(ext);
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     } catch (e) {
-      toast({ title: 'Não foi possível baixar o XML', description: e.message, variant: 'destructive' });
+      toast({ title: `Não foi possível baixar o ${nome}`, description: e.message, variant: 'destructive' });
     } finally {
       setActionLoading(null);
     }
@@ -403,11 +408,11 @@ export default function NfseServicosDetailView() {
             <CardContent className="p-4 space-y-2">
               {nota.protocolo_emissao ? (
                 <>
-                  <Button variant="outline" className="w-full justify-between" onClick={baixarXml} disabled={actionLoading === 'xml'}>
+                  <Button variant="outline" className="w-full justify-between" onClick={() => baixarArquivo(nota.xml_file_path, 'xml', 'XML')} disabled={actionLoading === 'xml'}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-orange-500" /> Download XML</span>
                     <Download className="w-4 h-4 text-muted-foreground" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-between" onClick={() => abrirArquivo(nota.pdf_file_path, 'PDF')}>
+                  <Button variant="outline" className="w-full justify-between" onClick={() => baixarArquivo(nota.pdf_file_path, 'pdf', 'PDF')} disabled={actionLoading === 'pdf'}>
                     <span className="flex items-center"><FileText className="w-4 h-4 mr-2 text-red-500" /> Imprimir NFS-e</span>
                     <Printer className="w-4 h-4 text-muted-foreground" />
                   </Button>

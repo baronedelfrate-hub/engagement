@@ -160,7 +160,11 @@ Deno.serve(async (req) => {
       const daFocus = /(^|\.)focusnfe\.com\.br$/.test(host);
       if (!daFocus && !/^focusnfe[a-z0-9.-]*\.amazonaws\.com$/.test(host) && !/^[a-z0-9-]*focusnfe[a-z0-9.-]*\.s3[a-z0-9.-]*\.amazonaws\.com$/.test(host)) return json({ error: 'Endereço do arquivo não permitido.' }, 400);
       const r = await fetch(alvo, { headers: daFocus ? { Authorization: auth } : {} });
-      return json({ success: r.ok, conteudo: await r.text() }, r.ok ? 200 : 400);
+      if (!r.ok) return json({ success: false, error: `A Focus NFe respondeu ${r.status}` }, 400);
+      // em base64 para servir tanto o XML quanto o PDF
+      const bytes = new Uint8Array(await r.arrayBuffer()); let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return json({ success: true, base64: btoa(bin), tipo: r.headers.get('content-type') ?? 'application/octet-stream' });
     }
 
     return json({ error: 'Ação inválida.' }, 400);

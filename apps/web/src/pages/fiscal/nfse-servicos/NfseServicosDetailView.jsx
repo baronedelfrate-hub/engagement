@@ -83,7 +83,7 @@ export default function NfseServicosDetailView() {
         }
         const amb = cfgFocus.ambiente === 'producao' ? '' : ' (HOMOLOGAÇÃO — sem validade fiscal)';
         if (r?.status === 'autorizado') {
-          await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf }, null, null);
+          await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf, ...(r.data_emissao ? { data_emissao: String(r.data_emissao).slice(0, 10) } : {}) }, null, null);
           toast({ title: 'NFS-e autorizada' + amb, description: r.numero ? `Número ${r.numero}` : undefined });
         } else if (r?.status && r.status.startsWith('erro_autorizacao')) {
           await nfseServicosService.updateNfseServico(id, { status: 'Rejeitada' }, null, null);
@@ -224,7 +224,7 @@ export default function NfseServicosDetailView() {
       const ref = nota.protocolo_emissao || refDaNota(nota);
       const r = await focusNfe.consultar('nfsen', ref);
       if (r?.status === 'autorizado') {
-        await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf }, null, null);
+        await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf, ...(r.data_emissao ? { data_emissao: String(r.data_emissao).slice(0, 10) } : {}) }, null, null);
         toast({ title: 'NFS-e autorizada', description: r.numero ? `Número ${r.numero}` : undefined });
       } else if (r?.status && String(r.status).startsWith('erro_autorizacao')) {
         await nfseServicosService.updateNfseServico(id, { status: 'Rejeitada' }, null, null);

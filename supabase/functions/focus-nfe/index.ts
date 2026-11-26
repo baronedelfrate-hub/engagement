@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       const err = d.mensagem_sefaz ?? d.erros?.[0]?.mensagem ?? (x.r.ok ? null : msgErro(x)); atual.mensagem = err;
       if (atual.status === undefined) delete atual.status;
       await admin.from('focus_nfe_emissoes').update(atual).eq('company_id', empresa).eq('ref', ref);
-      return x.r.ok ? json({ success: true, ref, status: atual.status, resposta: d }) : json({ error: msgErro(x), resposta: d }, 400);
+      return x.r.ok ? json({ success: true, ref, status: atual.status, numero: atual.numero ?? null, chave: atual.chave ?? null, url_xml: atual.url_xml ?? null, url_pdf: atual.url_pdf ?? null, data_emissao: d.data_emissao ?? null, mensagem: atual.mensagem ?? null, resposta: d }) : json({ error: msgErro(x), resposta: d }, 400);
     }
 
     if (b.acao === 'sincronizar') {

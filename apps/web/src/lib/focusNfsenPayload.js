@@ -78,6 +78,23 @@ export const montarPayloadNfsen = async (nota, cfg) => {
   if ((cfg?.codigo_opcao_simples || 1) === 1) {
     p.valor_total_tributos_federais = 0; p.valor_total_tributos_estaduais = 0; p.valor_total_tributos_municipais = 0;
   }
+  // Retenções federais (padrão da Receita pós-reforma): IRRF em vRetIRRF; PIS+COFINS+CSLL retidos somados em vRetCSLL;
+  // PIS e COFINS "apuração própria" (base = valor do serviço) ficam em valor_pis/valor_cofins e servem de base para CBS/IBS.
+  const arred = (n) => Number(Number(n || 0).toFixed(2));
+  const rPis = arred(nota.ret_pis), rCof = arred(nota.ret_cofins), rCsl = arred(nota.ret_csll), rIr = arred(nota.ret_irrf), rInss = arred(nota.ret_inss);
+  if (rIr > 0) p.valor_irrf = rIr;
+  if (rInss > 0) p.valor_cp = rInss;
+  if (rPis + rCof + rCsl > 0) {
+    p.valor_csll = arred(rPis + rCof + rCsl);
+    const k = `${rPis > 0 ? 'P' : ''}${rCof > 0 ? 'C' : ''}${rCsl > 0 ? 'S' : ''}`;
+    // 0 nenhum · 1 PIS/COFINS · 3 PIS/COFINS/CSLL · 4 PIS/COFINS (CSLL não) · 5 só PIS · 6 só COFINS · 7 COFINS/CSLL · 8 só CSLL · 9 PIS/CSLL
+    p.tipo_retencao_pis_cofins = { PCS: 3, PC: 4, P: 5, C: 6, CS: 7, S: 8, PS: 9 }[k] ?? 0;
+    const pPis = Number(nota.pct_pis) || 0.65, pCof = Number(nota.pct_cofins) || 3;
+    p.situacao_tributaria_pis_cofins = '01';
+    p.base_calculo_pis_cofins = p.valor_servico;
+    p.aliquota_pis = pPis; p.aliquota_cofins = pCof;
+    p.valor_pis = arred(p.valor_servico * pPis / 100); p.valor_cofins = arred(p.valor_servico * pCof / 100);
+  }
   // Município aderente ao Sistema Nacional NFS-e (ex.: Indaiatuba): a alíquota vem parametrizada e a Receita recusa se enviarmos.
   if (nota.enviar_aliquota_iss && Number(nota.aliquota) > 0) p.percentual_aliquota_relativa_municipio = Number(nota.aliquota);
   if (doc.length === 14) p.cnpj_tomador = doc; else p.cpf_tomador = doc;

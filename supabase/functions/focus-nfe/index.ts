@@ -126,7 +126,8 @@ Deno.serve(async (req) => {
           manifestacao: n.manifestacao_destinatario ?? n.tipo_ultimo_evento ?? null,
           versao: Number(n.versao) || null, dados: n, updated_at: new Date().toISOString(),
         })).filter((l) => l.chave);
-        if (linhas.length) await admin.from('focus_nfe_recebidas').upsert(linhas, { onConflict: 'company_id,chave' });
+        if (!linhas.length) console.log('focus-nfe sincronizar: itens sem chave reconhecida', tipo, JSON.stringify(lista[0]).slice(0, 1800));
+        if (linhas.length) { const { error: eUp } = await admin.from('focus_nfe_recebidas').upsert(linhas, { onConflict: 'company_id,chave' }); if (eUp) return json({ error: `Falha ao gravar as notas: ${eUp.message}`, novas }, 400); }
         novas += linhas.length;
         const maior = Math.max(...lista.map((n) => Number(n.versao) || 0), Number(x.maxVersao) || 0);
         if (maior <= versao) break;

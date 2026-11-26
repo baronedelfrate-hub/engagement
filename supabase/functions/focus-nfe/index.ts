@@ -153,6 +153,14 @@ Deno.serve(async (req) => {
 
     if (b.acao === 'baixar') {
       const chave = SO_NUM(b.chave); const rota = b.tipo === 'nfsen' ? 'nfsens_recebidas' : 'nfes_recebidas';
+      if (b.formato === 'pdf') {
+        // DANFe/DANFSe da nota recebida: a Focus responde 302 para o arquivo; o fetch segue o redirecionamento
+        const r = await fetch(`${base}/v2/${rota}/${chave}.pdf`, { headers: { Authorization: auth }, redirect: 'follow' });
+        if (!r.ok) return json({ success: false, error: `A Focus NFe não devolveu o PDF (${r.status}).` }, 400);
+        const bytes = new Uint8Array(await r.arrayBuffer()); let bin = '';
+        for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+        return json({ success: true, base64: btoa(bin), tipo: r.headers.get('content-type') ?? 'application/pdf' });
+      }
       const r = await fetch(`${base}/v2/${rota}/${chave}.${b.formato === 'json' ? 'json' : 'xml'}`, { headers: { Authorization: auth } });
       return json({ success: r.ok, conteudo: await r.text() }, r.ok ? 200 : 400);
     }

@@ -93,6 +93,23 @@ export default function NotasRecebidasPage() {
     setEnviando(false);
   };
 
+  // abre o PDF (DANFE / DANFSe) da nota numa nova aba, para conferir antes de lançar a entrada
+  const verPdf = async (n) => {
+    const aba = window.open('', '_blank');
+    try {
+      const r = await focusNfe.baixar(n.tipo, n.chave, 'pdf');
+      if (!r?.base64) throw new Error(r?.error || 'A Focus não devolveu o PDF.');
+      const bin = atob(r.base64); const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      if (aba) aba.location.href = url; else window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) {
+      if (aba) aba.close();
+      toast({ title: 'Não foi possível abrir o PDF', description: e.message, variant: 'destructive' });
+    }
+  };
+
   const baixar = async (n, formato) => {
     try {
       const r = await focusNfe.baixar(n.tipo, n.chave, formato);
@@ -167,6 +184,7 @@ export default function NotasRecebidasPage() {
                       {lancadas[n.chave]
                         ? <Button size="sm" variant="outline" className="mr-2 text-emerald-700" onClick={() => navigate(`/fiscal/entrada-nf/${lancadas[n.chave]}`)}><ClipboardCheck className="w-3.5 h-3.5 mr-1" /> Lançada</Button>
                         : <Button size="sm" className="mr-2 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setLancar(n)}><ClipboardCheck className="w-3.5 h-3.5 mr-1" /> Lançar entrada</Button>}
+                      <Button size="sm" variant="outline" className="mr-1" onClick={() => verPdf(n)}><FileDown className="w-3.5 h-3.5 mr-1" /> PDF</Button>
                       <Button size="sm" variant="outline" className="mr-1" onClick={() => baixar(n, 'xml')}><FileDown className="w-3.5 h-3.5 mr-1" /> XML</Button>
                       <Button size="sm" variant="outline" onClick={() => baixar(n, 'json')}><Download className="w-3.5 h-3.5 mr-1" /> JSON</Button>
                     </td>

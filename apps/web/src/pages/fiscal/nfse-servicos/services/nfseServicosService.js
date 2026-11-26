@@ -219,8 +219,16 @@ export const nfseServicosService = {
   generateContasReceber: async (nfseData, user) => {
     if (nfseData.integrado_financeiro) throw new Error('Financeiro já integrado para esta NFS-e.');
 
+    // Prazo pela condição de pagamento da nota: "À vista" vence na emissão; com dias informados usa o primeiro prazo; sem informação, 30 dias.
+    let prazo = 30;
+    if (nfseData.condicao_pagamento_id) {
+      const { data: cond } = await supabase.from('condicoes_pagamento').select('nome, dias').eq('id', nfseData.condicao_pagamento_id).maybeSingle();
+      const nome = String(cond?.nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const diasNum = parseInt(String(cond?.dias ?? '').match(/\d+/)?.[0], 10);
+      if (nome.includes('vista')) prazo = 0; else if (Number.isFinite(diasNum)) prazo = diasNum;
+    }
     const dtEmissao = new Date(nfseData.data_emissao);
-    const dtVencimento = new Date(dtEmissao.setDate(dtEmissao.getDate() + 30)).toISOString().split('T')[0];
+    const dtVencimento = new Date(dtEmissao.setDate(dtEmissao.getDate() + prazo)).toISOString().split('T')[0];
 
     const { data: crData, error: crError } = await supabase
       .from('movimentacao_financeira')

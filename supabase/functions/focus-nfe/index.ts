@@ -126,6 +126,10 @@ Deno.serve(async (req) => {
           manifestacao: n.manifestacao_destinatario ?? n.tipo_ultimo_evento ?? null,
           versao: Number(n.versao) || null, dados: n, updated_at: new Date().toISOString(),
         })).filter((l) => l.chave);
+        // a Focus devolve a mesma nota mais de uma vez (um item por evento): fica a de maior versão, senão o upsert falha
+        const unicas = new Map<string, (typeof linhas)[number]>();
+        for (const l of linhas) { const o = unicas.get(l.chave); if (!o || (Number(l.versao) || 0) >= (Number(o.versao) || 0)) unicas.set(l.chave, l); }
+        linhas.length = 0; linhas.push(...unicas.values());
         if (!linhas.length) console.log('focus-nfe sincronizar: itens sem chave reconhecida', tipo, JSON.stringify(lista[0]).slice(0, 1800));
         if (linhas.length) { const { error: eUp } = await admin.from('focus_nfe_recebidas').upsert(linhas, { onConflict: 'company_id,chave' }); if (eUp) return json({ error: `Falha ao gravar as notas: ${eUp.message}`, novas }, 400); }
         novas += linhas.length;

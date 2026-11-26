@@ -217,6 +217,27 @@ export default function NfseServicosDetailView() {
   if (loading) return <div className="p-8 flex justify-center text-blue-600"><Loader2 className="w-8 h-8 animate-spin" /></div>;
   if (!nota) return null;
 
+  // Consulta na Focus o resultado de uma nota já transmitida (a emissão só espera ~18 s) e grava número, XML e PDF.
+  const handleConsultarStatus = async () => {
+    setActionLoading('consultar');
+    try {
+      const ref = nota.protocolo_emissao || refDaNota(nota);
+      const r = await focusNfe.consultar('nfsen', ref);
+      if (r?.status === 'autorizado') {
+        await nfseServicosService.updateNfseServico(id, { status: 'Emitida', numero: r.numero || nota.numero, xml_file_path: r.url_xml, pdf_file_path: r.url_pdf }, null, null);
+        toast({ title: 'NFS-e autorizada', description: r.numero ? `Número ${r.numero}` : undefined });
+      } else if (r?.status && String(r.status).startsWith('erro_autorizacao')) {
+        await nfseServicosService.updateNfseServico(id, { status: 'Rejeitada' }, null, null);
+        toast({ title: 'Nota rejeitada', description: r.mensagem || 'A prefeitura/Receita rejeitou a nota.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Ainda em processamento', description: `Status na Focus: ${r?.status || 'sem retorno'}.` });
+      }
+      loadData();
+    } catch (e) {
+      toast({ title: 'Erro ao consultar', description: e.message, variant: 'destructive' });
+    } finally { setActionLoading(null); }
+  };
+
   const canEdit = nota.status === 'Em digitação' || nota.status === 'Rejeitada';
   const canEmitir = nota.status === 'Em digitação' || nota.status === 'Rejeitada' || nota.status === 'Aguardando emissão';
   const canCancel = nota.status === 'Emitida';
@@ -266,6 +287,13 @@ export default function NfseServicosDetailView() {
               </Button>
             )}
             
+            {nota.status === 'Aguardando emissão' && nota.protocolo_emissao && (
+              <Button variant="outline" onClick={handleConsultarStatus} disabled={actionLoading}>
+                {actionLoading === 'consultar' ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <History className="w-4 h-4 mr-2" />}
+                Consultar status na Focus
+              </Button>
+            )}
+
             {canIntegrate && !nota.integrado_financeiro && (
                <Button variant="outline" onClick={() => setShowCR(true)} disabled={actionLoading} className="text-purple-600 border-purple-200 hover:bg-purple-50 dark:text-purple-400 dark:border-purple-800 dark:hover:bg-purple-950/30">
                  <DollarSign className="w-4 h-4 mr-2" /> Gerar C. Receber

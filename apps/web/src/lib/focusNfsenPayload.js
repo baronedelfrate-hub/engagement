@@ -64,6 +64,12 @@ export const montarPayloadNfsen = async (nota, cfg) => {
     tributacao_iss: Number(nota.tributacao_iss) || 1,
     tipo_retencao_iss: nota.iss_retido ? 2 : 1,
   };
+  // Substituição: esta nota substitui outra (a antiga é cancelada pela Receita junto com a autorização da nova)
+  if (soNum(nota.chave_nfse_substituida).length === 50) {
+    p.chave_nfse_substituida = soNum(nota.chave_nfse_substituida);
+    p.codigo_justificativa_substituicao = '99';
+    p.motivo_substituicao = String(nota.motivo_substituicao || 'Correção da retenção de tributos na fonte').slice(0, 255);
+  }
   if (nota.codigo_tributacao_municipal) p.codigo_tributacao_municipal_iss = String(nota.codigo_tributacao_municipal);
   if (soNum(nota.codigo_nbs).length === 9) p.codigo_nbs = soNum(nota.codigo_nbs);
   // Reforma Tributária (IBS/CBS): os percentuais são calculados pela Receita; só informamos a classificação

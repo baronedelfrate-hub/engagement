@@ -17,11 +17,11 @@ const fmtData = (d) => (d ? String(d).slice(0, 10).split('-').reverse().join('/'
 const fmtDataHora = (d) => (d ? new Date(d).toLocaleString('pt-BR') : '');
 const paraBase64 = (blob) => new Promise((ok, erro) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(',')[1]); fr.onerror = erro; fr.readAsDataURL(blob); });
 
-const situacaoValidade = (v) => {
+const situacaoValidade = (v, limite = 30) => {
   if (!v) return null;
   const dias = Math.ceil((new Date(`${String(v).slice(0, 10)}T00:00:00`) - new Date(new Date().toDateString())) / 86400000);
   if (dias < 0) return { texto: `Vencido em ${fmtData(v)}`, cls: 'bg-red-100 text-red-700 border-red-200' };
-  if (dias <= 30) return { texto: `Vence em ${dias} dia(s) · ${fmtData(v)}`, cls: 'bg-amber-100 text-amber-700 border-amber-200' };
+  if (dias <= limite) return { texto: `Vence em ${dias} dia(s) · ${fmtData(v)}`, cls: 'bg-amber-100 text-amber-700 border-amber-200' };
   return { texto: `Válido até ${fmtData(v)}`, cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
 };
 
@@ -46,6 +46,8 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
   const [form, setForm] = useState({ tipo: tipos[0].id, titular: '', titulo: '', validade: '', observacoes: '', arquivo: null });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const rotulo = (id) => tipos.find((t) => t.id === id)?.rotulo || id;
+  // tipos como certificado digital guardam só o vencimento (sem anexar o arquivo, que tem chave privada)
+  const semArquivo = !pessoal && !!tipos.find((t) => t.id === form.tipo)?.semArquivo;
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -128,6 +130,18 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
     : Promise.resolve());
 
   const enviar = async () => {
+    if (semArquivo && !form.arquivo) {
+      if (!form.titulo.trim()) { toast({ title: 'Informe a descrição', description: 'Ex.: e-CNPJ da M&A ou e-CPF da Andrea.', variant: 'destructive' }); return; }
+      if (!form.validade) { toast({ title: 'Informe a validade', variant: 'destructive' }); return; }
+      setEnviando(true);
+      const ins = await supabase.from(tabela).insert({ tipo: form.tipo, validade: form.validade, observacoes: form.observacoes.trim() || null, storage_path: null, nome_arquivo: form.titulo.trim(), company_id: companyId, titulo: form.titulo.trim() });
+      setEnviando(false);
+      if (ins.error) { toast({ title: 'Não foi possível guardar', description: ins.error.message, variant: 'destructive' }); return; }
+      setForm((f) => ({ ...f, titulo: '', validade: '', observacoes: '', arquivo: null }));
+      toast({ title: 'Vencimento registrado' });
+      await carregar();
+      return;
+    }
     if (!form.arquivo) { toast({ title: 'Escolha o arquivo', variant: 'destructive' }); return; }
     if (pessoal && !form.titular.trim()) { toast({ title: 'Informe de quem é o documento', variant: 'destructive' }); return; }
     if (form.arquivo.size > MAX_MB * 1024 * 1024) { toast({ title: `O arquivo passa de ${MAX_MB} MB`, variant: 'destructive' }); return; }
@@ -157,8 +171,8 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
   };
 
   const excluir = async (d) => {
-    if (!window.confirm(`Excluir "${d.nome_arquivo}"? Isso apaga o arquivo e não dá para desfazer.`)) return;
-    const r = await supabase.storage.from(bucket).remove([d.storage_path]);
+    if (!window.confirm(d.storage_path ? `Excluir "${d.nome_arquivo}"? Isso apaga o arquivo e não dá para desfazer.` : `Excluir "${d.nome_arquivo}"? Não dá para desfazer.`)) return;
+    const r = d.storage_path ? await supabase.storage.from(bucket).remove([d.storage_path]) : { error: null };
     if (r.error) { toast({ title: 'Não foi possível excluir o arquivo', description: r.error.message, variant: 'destructive' }); return; }
     await registrar(d, 'excluir');
     const { error } = await supabase.from(tabela).delete().eq('id', d.id);
@@ -183,7 +197,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
         <div><Label>Validade</Label><Input type="date" value={form.validade} onChange={(e) => set('validade', e.target.value)} /></div>
         <div><Label>Observações</Label><Input value={form.observacoes} onChange={(e) => set('observacoes', e.target.value)} /></div>
         <div className="md:col-span-3">
-          <Label>Arquivo (PDF ou imagem, até {MAX_MB} MB)</Label>
+          <Label>{semArquivo ? 'Arquivo (opcional: para certificado, guarde só o vencimento e não anexe o .pfx nem a senha)' : `Arquivo (PDF ou imagem, até ${MAX_MB} MB)`}</Label>
           <Input type="file" accept={pessoal ? 'application/pdf,image/*' : 'application/pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt'} key={form.arquivo ? 'com' : 'sem'} onChange={(e) => set('arquivo', e.target.files?.[0] || null)} />
         </div>
         <div className="flex items-end"><Button className="gap-1 w-full" disabled={enviando} onClick={enviar}>{enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />} Guardar documento</Button></div>
@@ -212,7 +226,7 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
               <div className="text-sm font-semibold mb-1.5">{nome} <span className="font-normal text-muted-foreground">({lista.length})</span></div>
               <div className="space-y-1.5">
                 {lista.map((d) => {
-                  const v = situacaoValidade(d.validade);
+                  const v = situacaoValidade(d.validade, d.tipo === 'certificado_digital' ? 60 : 30);
                   return (
                     <Card key={d.id}><CardContent className="p-2.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 min-w-0">
@@ -224,9 +238,9 @@ const GerenciadorDocumentos = ({ modo, tabela, bucket, tipos, companyId, titular
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         {v && <span className={`text-[11px] px-1.5 py-0.5 rounded border whitespace-nowrap ${v.cls}`}>{v.texto}</span>}
-                        <Button variant="ghost" size="icon" className="h-8 w-8" title="Abrir (link temporário)" onClick={() => abrir(d)}><ExternalLink className="h-4 w-4" /></Button>
+                        {d.storage_path && <Button variant="ghost" size="icon" className="h-8 w-8" title="Abrir (link temporário)" onClick={() => abrir(d)}><ExternalLink className="h-4 w-4" /></Button>}
                         {podeMover && <Button variant="ghost" size="icon" className="h-8 w-8" title="Mover para outra empresa" onClick={() => setMoverDoc(d)}><ArrowRightLeft className="h-4 w-4" /></Button>}
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" title="Enviar por WhatsApp" onClick={() => setEnvio(d)}><MessageCircle className="h-4 w-4" /></Button>
+                        {d.storage_path && <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" title="Enviar por WhatsApp" onClick={() => setEnvio(d)}><MessageCircle className="h-4 w-4" /></Button>}
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Excluir" onClick={() => excluir(d)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </CardContent></Card>

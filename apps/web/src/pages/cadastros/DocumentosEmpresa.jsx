@@ -10,6 +10,7 @@ export const TIPOS_EMPRESA = [
   { id: 'cartao_cnpj', rotulo: 'Cartão CNPJ' }, { id: 'cnd_federal', rotulo: 'CND Federal' }, { id: 'cnd_estadual', rotulo: 'CND Estadual' },
   { id: 'cnd_municipal', rotulo: 'CND Municipal' }, { id: 'cnd_trabalhista', rotulo: 'CND Trabalhista' }, { id: 'crf_fgts', rotulo: 'Certificado de Regularidade do FGTS' },
   { id: 'alvara', rotulo: 'Alvará' },
+  { id: 'certificado_digital', rotulo: 'Certificado digital (e-CNPJ / e-CPF)', semArquivo: true },
   { id: 'manual', rotulo: 'Manual' }, { id: 'procedimento', rotulo: 'Procedimento' }, { id: 'pop', rotulo: 'POP (procedimento operacional padrão)' },
   { id: 'instrucao_trabalho', rotulo: 'Instrução de trabalho (IT)' }, { id: 'politica', rotulo: 'Política / norma interna' }, { id: 'fluxograma', rotulo: 'Fluxograma / organograma' },
   { id: 'outro', rotulo: 'Outro' }

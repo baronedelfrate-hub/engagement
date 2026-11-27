@@ -7,8 +7,12 @@ import { moeda, fmtData } from '@/lib/extratoConciliado';
 import { rotuloTipoPix, limparChavePix } from '@/lib/chavePix';
 import { carregarLogo } from '@/lib/reciboPdf';
 
-const slug = (s) => String(s || 'reembolso').replace(/[^A-Za-z0-9]+/g, '_');
-const nomeArquivo = (r, ext) => `Reembolso_${String(r.numero || '').padStart(3, '0')}_${slug(r.beneficiario)}.${ext}`;
+// Padrão de nome dos arquivos: "AAAA.MM.DD - FIN - REEMBOLSO 001 - BENEFICIARIO.pdf" (data de emissão, sem acento, em maiúsculas)
+const limpar = (s) => String(s || 'SEM NOME').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+const nomeArquivo = (r, ext) => {
+  const d = new Date(); const p2 = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())} - FIN - REEMBOLSO ${String(r.numero || '').padStart(3, '0')} - ${limpar(r.beneficiario)}.${ext}`;
+};
 export const totalItens = (itens) => itens.reduce((s, i) => s + (Number(i.valor) || 0), 0);
 
 const lerImagem = (blob) => new Promise((ok, erro) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = erro; fr.readAsDataURL(blob); });
